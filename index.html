@@ -131,6 +131,29 @@ const url="https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powe
 const quantidade=document.getElementById("quantidade")
 const container=document.getElementById("nomes")
 const total=document.getElementById("total")
+const botao = document.querySelector("button")
+
+// LÓGICA NOVA: VERIFICA SE VOLTOU DO MERCADO PAGO COM SUCESSO
+window.onload = function() {
+    const parametros = new URLSearchParams(window.location.search);
+    const status = parametros.get("collection_status");
+
+    if (status === "approved") {
+        // Esconde a caixinha branca principal
+        document.querySelector(".container").style.display = "none";
+
+        // Cria a mensagem de sucesso
+        const divMensagem = document.createElement("div");
+        divMensagem.innerHTML = "Obrigado<br>nos encontramos na festa!";
+        divMensagem.style.color = "white";
+        divMensagem.style.fontWeight = "bold";
+        divMensagem.style.fontSize = "32px";
+        divMensagem.style.textAlign = "center";
+        
+        // Adiciona a mensagem na tela
+        document.body.appendChild(divMensagem);
+    }
+}
 
 quantidade.addEventListener("change",atualizarCampos)
 
@@ -207,13 +230,17 @@ lista.push(nome)
 
 }
 
-// ATUALIZAÇÃO AQUI: adicionamos a quantidade
 const dados={
 comprador:comprador,
 telefone:telefone,
 ingressos:lista,
 quantidade: nomes.length 
 }
+
+// Muda o botão para evitar cliques duplos
+botao.innerText = "Aguarde...";
+botao.disabled = true;
+botao.style.background = "#888";
 
 try{
 
@@ -231,11 +258,19 @@ if(resultado.link){
 window.location.href=resultado.link
 }else{
 alert("Reserva enviada")
+// Volta o botão ao normal em caso de erro
+botao.innerText = "Gerar PIX";
+botao.disabled = false;
+botao.style.background = "#2e7d32";
 }
 
 }catch(e){
 
 alert("Erro ao gerar pagamento")
+// Volta o botão ao normal em caso de erro
+botao.innerText = "Gerar PIX";
+botao.disabled = false;
+botao.style.background = "#2e7d32";
 
 }
 
