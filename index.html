@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,17 +50,17 @@ clip-path: polygon(
 
 .container{
 background:white;
-padding:35px;
+padding:20px;
 border-radius:15px;
 width:100%;
-max-width:500px;
+max-width:420px;
 box-shadow:0 10px 30px rgba(0,0,0,0.2);
 text-align:center;
 margin-top:60px;
 }
 
 h1{
-margin-bottom:25px;
+margin-bottom:20px;
 }
 
 /* campos */
@@ -72,15 +73,11 @@ display:block;
 
 input,select{
 width:100%;
-max-width:400px;
 padding:12px;
 margin-top:6px;
 border-radius:8px;
 border:1px solid #ccc;
 font-size:16px;
-display:block;
-margin-left:auto;
-margin-right:auto;
 box-sizing:border-box;
 }
 
@@ -102,7 +99,6 @@ color:#e65100;
 button{
 margin-top:25px;
 width:100%;
-max-width:400px;
 padding:14px;
 border:none;
 border-radius:10px;
@@ -111,9 +107,6 @@ background:#2e7d32;
 color:white;
 cursor:pointer;
 transition:0.3s;
-display:block;
-margin-left:auto;
-margin-right:auto;
 }
 
 button:hover{
@@ -168,13 +161,13 @@ Ingresso: R$5 cada
 
 <script>
 
-const url = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com/powerautomate/automations/direct/workflows/9ea7436d9de2427c963539c85af82e62/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=3WPtT7ezmvxEFgLBN37FvBJV92ac3tcMh0txYhzB0sg"
+const url="https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com/powerautomate/automations/direct/workflows/9ea7436d9de2427c963539c85af82e62/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=3WPtT7ezmvxEFgLBN37FvBJV92ac3tcMh0txYhzB0sg"
 
-const quantidade = document.getElementById("quantidade")
-const container = document.getElementById("nomes")
-const total = document.getElementById("total")
+const quantidade=document.getElementById("quantidade")
+const container=document.getElementById("nomes")
+const total=document.getElementById("total")
 
-quantidade.addEventListener("change", atualizarCampos)
+quantidade.addEventListener("change",atualizarCampos)
 
 /* criar campos */
 
@@ -182,11 +175,11 @@ function atualizarCampos(){
 
 container.innerHTML=""
 
-let qtd = parseInt(quantidade.value)
+let qtd=parseInt(quantidade.value)
 
 for(let i=1;i<=qtd;i++){
 
-let campo = document.createElement("input")
+let campo=document.createElement("input")
 campo.placeholder="Nome do ingresso "+i
 campo.className="ingresso"
 
@@ -224,24 +217,43 @@ this.value=v
 
 async function enviar(){
 
-let comprador=document.getElementById("comprador").value
-let telefone=document.getElementById("telefone").value
+let comprador=document.getElementById("comprador").value.trim()
+let telefone=document.getElementById("telefone").value.trim()
 
 let nomes=document.querySelectorAll(".ingresso")
 
+/* validações */
+
+if(comprador===""){
+alert("Digite o nome do comprador")
+return
+}
+
+if(telefone===""){
+alert("Digite o telefone")
+return
+}
+
 let lista=[]
 
-nomes.forEach(n=>{
-lista.push(n.value)
-})
+for(let i=0;i<nomes.length;i++){
+
+let nome=nomes[i].value.trim()
+
+if(nome===""){
+alert("Preencha o nome do ingresso "+(i+1))
+return
+}
+
+lista.push(nome)
+
+}
 
 const dados={
 comprador:comprador,
 telefone:telefone,
 ingressos:lista
 }
-
-console.log(dados)
 
 try{
 
@@ -255,10 +267,14 @@ body:JSON.stringify(dados)
 
 alert("Reserva enviada com sucesso!")
 
+document.getElementById("comprador").value=""
+document.getElementById("telefone").value=""
+quantidade.value="1"
+atualizarCampos()
+
 }catch(e){
 
-console.error(e)
-alert("Erro ao enviar")
+alert("Erro ao enviar reserva")
 
 }
 
@@ -267,4 +283,5 @@ alert("Erro ao enviar")
 </script>
 
 </body>
+
 </html>
