@@ -1,4 +1,4 @@
-const url = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/5af1cd77a1894caeadabb7f08a98906b/triggers/manual/paths/invoke?api-version=1"
+const url = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/9ea7436d9de2427c963539c85af82e62/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=3WPtT7ezmvxEFgLBN37FvBJV92ac3tcMh0txYhzB0sg"
 
 const quantidade = document.getElementById("quantidade")
 const container = document.getElementById("nomesIngressos")
