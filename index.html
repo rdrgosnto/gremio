@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Ingressos Festa Junina</title>
+<title>Compra de Ingressos</title>
 
 <style>
 
@@ -20,34 +20,6 @@ align-items:center;
 min-height:100vh;
 }
 
-/* bandeirinhas */
-
-.bandeiras{
-position:absolute;
-top:0;
-left:0;
-width:100%;
-height:60px;
-background-image: repeating-linear-gradient(
-45deg,
-#ffeb3b 0px,
-#ffeb3b 20px,
-#4caf50 20px,
-#4caf50 40px,
-#2196f3 40px,
-#2196f3 60px,
-#f44336 60px,
-#f44336 80px
-);
-clip-path: polygon(
-0 0,100% 0,100% 70%,95% 100%,90% 70%,85% 100%,80% 70%,75% 100%,70% 70%,
-65% 100%,60% 70%,55% 100%,50% 70%,45% 100%,40% 70%,35% 100%,30% 70%,
-25% 100%,20% 70%,15% 100%,10% 70%,5% 100%,0 70%
-);
-}
-
-/* card */
-
 .container{
 background:white;
 padding:20px;
@@ -56,25 +28,24 @@ width:100%;
 max-width:420px;
 box-shadow:0 10px 30px rgba(0,0,0,0.2);
 text-align:center;
-margin-top:60px;
 }
 
 h1{
 margin-bottom:20px;
 }
 
-/* campos */
-
 label{
 font-weight:bold;
 margin-top:15px;
 display:block;
+text-align:left;
+margin-bottom:3px;
 }
 
 input,select{
 width:100%;
 padding:12px;
-margin-top:6px;
+margin-top:4px;
 border-radius:8px;
 border:1px solid #ccc;
 font-size:16px;
@@ -85,16 +56,12 @@ box-sizing:border-box;
 margin-top:10px;
 }
 
-/* total */
-
 #total{
 margin-top:20px;
 font-size:22px;
 font-weight:bold;
 color:#e65100;
 }
-
-/* botão */
 
 button{
 margin-top:25px;
@@ -126,14 +93,12 @@ color:#777;
 
 <body>
 
-<div class="bandeiras"></div>
-
 <div class="container">
 
-<h1>🎉 Festa Junina</h1>
+<h1>Ingressos da Festa</h1>
 
 <label>Nome do comprador</label>
-<input id="comprador" placeholder="Seu nome">
+<input id="comprador" placeholder="Digite seu nome">
 
 <label>Telefone</label>
 <input id="telefone" placeholder="(xx) xxxxx-xxxx">
@@ -151,25 +116,23 @@ color:#777;
 
 <div id="total">Total: R$5</div>
 
-<button onclick="enviar()">Reservar ingressos</button>
+<button onclick="gerarPix()">Gerar PIX</button>
 
 <div class="footer">
-Ingresso: R$5 cada
+Valor do ingresso: R$5
 </div>
 
 </div>
 
 <script>
 
-const url="https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com/powerautomate/automations/direct/workflows/9ea7436d9de2427c963539c85af82e62/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=3WPtT7ezmvxEFgLBN37FvBJV92ac3tcMh0txYhzB0sg"
+const url="COLE_AQUI_SUA_URL_DO_POWER_AUTOMATE"
 
 const quantidade=document.getElementById("quantidade")
 const container=document.getElementById("nomes")
 const total=document.getElementById("total")
 
 quantidade.addEventListener("change",atualizarCampos)
-
-/* criar campos */
 
 function atualizarCampos(){
 
@@ -213,16 +176,11 @@ this.value=v
 
 })
 
-/* enviar */
-
-async function enviar(){
+async function gerarPix(){
 
 let comprador=document.getElementById("comprador").value.trim()
 let telefone=document.getElementById("telefone").value.trim()
-
 let nomes=document.querySelectorAll(".ingresso")
-
-/* validações */
 
 if(comprador===""){
 alert("Digite o nome do comprador")
@@ -257,7 +215,7 @@ ingressos:lista
 
 try{
 
-await fetch(url,{
+const resposta=await fetch(url,{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -265,16 +223,17 @@ headers:{
 body:JSON.stringify(dados)
 })
 
-alert("Reserva enviada com sucesso!")
+const resultado=await resposta.json()
 
-document.getElementById("comprador").value=""
-document.getElementById("telefone").value=""
-quantidade.value="1"
-atualizarCampos()
+if(resultado.link){
+window.location.href=resultado.link
+}else{
+alert("Reserva enviada")
+}
 
 }catch(e){
 
-alert("Erro ao enviar reserva")
+alert("Erro ao gerar pagamento")
 
 }
 
@@ -283,5 +242,4 @@ alert("Erro ao enviar reserva")
 </script>
 
 </body>
-
 </html>
