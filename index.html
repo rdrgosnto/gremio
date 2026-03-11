@@ -19,50 +19,90 @@ align-items:center;
 min-height:100vh;
 }
 
+/* bandeirinhas */
+
+.bandeiras{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:60px;
+background-image: repeating-linear-gradient(
+45deg,
+#ffeb3b 0px,
+#ffeb3b 20px,
+#4caf50 20px,
+#4caf50 40px,
+#2196f3 40px,
+#2196f3 60px,
+#f44336 60px,
+#f44336 80px
+);
+clip-path: polygon(
+0 0,100% 0,100% 70%,95% 100%,90% 70%,85% 100%,80% 70%,75% 100%,70% 70%,
+65% 100%,60% 70%,55% 100%,50% 70%,45% 100%,40% 70%,35% 100%,30% 70%,
+25% 100%,20% 70%,15% 100%,10% 70%,5% 100%,0 70%
+);
+}
+
+/* card */
+
 .container{
 background:white;
-padding:30px;
+padding:35px;
 border-radius:15px;
 width:100%;
 max-width:500px;
 box-shadow:0 10px 30px rgba(0,0,0,0.2);
+text-align:center;
+margin-top:60px;
 }
 
 h1{
-text-align:center;
-margin-bottom:20px;
+margin-bottom:25px;
 }
+
+/* campos */
 
 label{
 font-weight:bold;
-margin-top:10px;
+margin-top:15px;
 display:block;
 }
 
 input,select{
 width:100%;
+max-width:400px;
 padding:12px;
-margin-top:5px;
+margin-top:6px;
 border-radius:8px;
 border:1px solid #ccc;
 font-size:16px;
+display:block;
+margin-left:auto;
+margin-right:auto;
+box-sizing:border-box;
 }
 
 .ingresso{
 margin-top:10px;
 }
 
+/* total */
+
 #total{
-margin-top:15px;
-font-size:20px;
+margin-top:20px;
+font-size:22px;
 font-weight:bold;
-text-align:center;
 color:#e65100;
 }
 
+/* botão */
+
 button{
-margin-top:20px;
+margin-top:25px;
 width:100%;
+max-width:400px;
 padding:14px;
 border:none;
 border-radius:10px;
@@ -70,17 +110,21 @@ font-size:18px;
 background:#2e7d32;
 color:white;
 cursor:pointer;
-transition:0.2s;
+transition:0.3s;
+display:block;
+margin-left:auto;
+margin-right:auto;
 }
 
 button:hover{
 background:#1b5e20;
+transform:scale(1.05);
+box-shadow:0 5px 15px rgba(0,0,0,0.3);
 }
 
 .footer{
-margin-top:10px;
+margin-top:15px;
 font-size:12px;
-text-align:center;
 color:#777;
 }
 
@@ -88,6 +132,8 @@ color:#777;
 </head>
 
 <body>
+
+<div class="bandeiras"></div>
 
 <div class="container">
 
@@ -130,6 +176,8 @@ const total = document.getElementById("total")
 
 quantidade.addEventListener("change", atualizarCampos)
 
+/* criar campos */
+
 function atualizarCampos(){
 
 container.innerHTML=""
@@ -139,19 +187,40 @@ let qtd = parseInt(quantidade.value)
 for(let i=1;i<=qtd;i++){
 
 let campo = document.createElement("input")
-campo.placeholder = "Nome do ingresso "+i
-campo.className = "ingresso"
+campo.placeholder="Nome do ingresso "+i
+campo.className="ingresso"
 
 container.appendChild(campo)
 
 }
 
-let valor = qtd*5
-total.innerHTML = "Total: R$"+valor
+let valor=qtd*5
+total.innerHTML="Total: R$"+valor
 
 }
 
 atualizarCampos()
+
+/* mascara telefone */
+
+const telefone=document.getElementById("telefone")
+
+telefone.addEventListener("input",function(){
+
+let v=this.value.replace(/\D/g,"")
+
+if(v.length>11)v=v.slice(0,11)
+
+if(v.length>6)
+v=v.replace(/(\d{2})(\d{5})(\d{0,4})/,"($1) $2-$3")
+else if(v.length>2)
+v=v.replace(/(\d{2})(\d{0,5})/,"($1) $2")
+
+this.value=v
+
+})
+
+/* enviar */
 
 async function enviar(){
 
