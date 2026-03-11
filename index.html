@@ -1,28 +1,28 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ingressos Festa Junina</title>
+
 <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
 
-<header>
+<div class="container">
+
 <h1>🎉 Festa Junina</h1>
-<p>Compre seus ingressos</p>
-</header>
 
-<main>
+<p>Compra de ingressos</p>
 
-<div class="card">
-
-<label>Nome</label>
-<input type="text" id="nome" placeholder="Seu nome">
+<label>Nome do comprador</label>
+<input id="comprador" placeholder="Digite seu nome">
 
 <label>Telefone</label>
-<input type="tel" id="telefone" placeholder="(00) 00000-0000">
+<input id="telefone" placeholder="(00) 00000-0000">
 
 <label>Quantidade de ingressos</label>
 <select id="quantidade">
@@ -33,26 +33,18 @@
 <option value="5">5 ingressos</option>
 </select>
 
+<div id="nomesIngressos"></div>
+
 <div class="total">
 Total: <span id="valor">R$5,00</span>
 </div>
 
-<button id="comprar">Comprar com PIX</button>
+<button onclick="enviar()">Reservar ingressos</button>
 
 </div>
-
-<div id="resultado" class="resultado oculto">
-<h2>Pagamento</h2>
-<p>Aqui aparecerá o link ou QR Code do PIX.</p>
-</div>
-
-</main>
-
-<footer>
-<p>Organização da Festa Junina</p>
-</footer>
 
 <script src="script.js"></script>
 
 </body>
+
 </html>
