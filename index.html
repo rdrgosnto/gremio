@@ -9,30 +9,79 @@
 <style>
 
 body{
-font-family:Arial;
-background:#f4f4f4;
+font-family: Arial, sans-serif;
+background: linear-gradient(135deg,#ff9800,#ff5722);
+margin:0;
 padding:20px;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
 }
 
 .container{
-max-width:500px;
-margin:auto;
 background:white;
-padding:20px;
-border-radius:10px;
+padding:30px;
+border-radius:15px;
+width:100%;
+max-width:500px;
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
 }
 
-input,select,button{
+h1{
+text-align:center;
+margin-bottom:20px;
+}
+
+label{
+font-weight:bold;
+margin-top:10px;
+display:block;
+}
+
+input,select{
 width:100%;
-padding:10px;
+padding:12px;
+margin-top:5px;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:16px;
+}
+
+.ingresso{
 margin-top:10px;
 }
 
+#total{
+margin-top:15px;
+font-size:20px;
+font-weight:bold;
+text-align:center;
+color:#e65100;
+}
+
 button{
+margin-top:20px;
+width:100%;
+padding:14px;
+border:none;
+border-radius:10px;
+font-size:18px;
 background:#2e7d32;
 color:white;
-border:none;
 cursor:pointer;
+transition:0.2s;
+}
+
+button:hover{
+background:#1b5e20;
+}
+
+.footer{
+margin-top:10px;
+font-size:12px;
+text-align:center;
+color:#777;
 }
 
 </style>
@@ -42,26 +91,32 @@ cursor:pointer;
 
 <div class="container">
 
-<h2>Compra de Ingressos</h2>
+<h1>🎉 Festa Junina</h1>
 
 <label>Nome do comprador</label>
-<input id="comprador">
+<input id="comprador" placeholder="Seu nome">
 
 <label>Telefone</label>
-<input id="telefone">
+<input id="telefone" placeholder="(xx) xxxxx-xxxx">
 
 <label>Quantidade de ingressos</label>
 <select id="quantidade">
-<option value="1">1</option>
-<option value="2">2</option>
-<option value="3">3</option>
-<option value="4">4</option>
-<option value="5">5</option>
+<option value="1">1 ingresso</option>
+<option value="2">2 ingressos</option>
+<option value="3">3 ingressos</option>
+<option value="4">4 ingressos</option>
+<option value="5">5 ingressos</option>
 </select>
 
 <div id="nomes"></div>
 
-<button onclick="enviar()">Enviar</button>
+<div id="total">Total: R$5</div>
+
+<button onclick="enviar()">Reservar ingressos</button>
+
+<div class="footer">
+Ingresso: R$5 cada
+</div>
 
 </div>
 
@@ -71,28 +126,32 @@ const url = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.po
 
 const quantidade = document.getElementById("quantidade")
 const container = document.getElementById("nomes")
+const total = document.getElementById("total")
 
-quantidade.addEventListener("change", criarCampos)
+quantidade.addEventListener("change", atualizarCampos)
 
-function criarCampos(){
+function atualizarCampos(){
 
 container.innerHTML=""
 
-let qtd = quantidade.value
+let qtd = parseInt(quantidade.value)
 
 for(let i=1;i<=qtd;i++){
 
 let campo = document.createElement("input")
-campo.placeholder="Nome do ingresso "+i
-campo.className="ingresso"
+campo.placeholder = "Nome do ingresso "+i
+campo.className = "ingresso"
 
 container.appendChild(campo)
 
 }
 
+let valor = qtd*5
+total.innerHTML = "Total: R$"+valor
+
 }
 
-criarCampos()
+atualizarCampos()
 
 async function enviar(){
 
@@ -125,7 +184,7 @@ headers:{
 body:JSON.stringify(dados)
 })
 
-alert("Dados enviados")
+alert("Reserva enviada com sucesso!")
 
 }catch(e){
 
