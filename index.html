@@ -1,50 +1,142 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Ingressos Festa Junina</title>
 
-<link rel="stylesheet" href="style.css">
+<style>
 
+body{
+font-family:Arial;
+background:#f4f4f4;
+padding:20px;
+}
+
+.container{
+max-width:500px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
+}
+
+input,select,button{
+width:100%;
+padding:10px;
+margin-top:10px;
+}
+
+button{
+background:#2e7d32;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-<h1>🎉 Festa Junina</h1>
-
-<p>Compra de ingressos</p>
+<h2>Compra de Ingressos</h2>
 
 <label>Nome do comprador</label>
-<input id="comprador" placeholder="Digite seu nome">
+<input id="comprador">
 
 <label>Telefone</label>
-<input id="telefone" placeholder="(00) 00000-0000">
+<input id="telefone">
 
 <label>Quantidade de ingressos</label>
 <select id="quantidade">
-<option value="1">1 ingresso</option>
-<option value="2">2 ingressos</option>
-<option value="3">3 ingressos</option>
-<option value="4">4 ingressos</option>
-<option value="5">5 ingressos</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
 </select>
 
-<div id="nomesIngressos"></div>
+<div id="nomes"></div>
 
-<div class="total">
-Total: <span id="valor">R$5,00</span>
-</div>
-
-<button onclick="enviar()">Reservar ingressos</button>
+<button onclick="enviar()">Enviar</button>
 
 </div>
 
-<script src="script.js"></script>
+<script>
+
+const url = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com/powerautomate/automations/direct/workflows/9ea7436d9de2427c963539c85af82e62/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=3WPtT7ezmvxEFgLBN37FvBJV92ac3tcMh0txYhzB0sg"
+
+const quantidade = document.getElementById("quantidade")
+const container = document.getElementById("nomes")
+
+quantidade.addEventListener("change", criarCampos)
+
+function criarCampos(){
+
+container.innerHTML=""
+
+let qtd = quantidade.value
+
+for(let i=1;i<=qtd;i++){
+
+let campo = document.createElement("input")
+campo.placeholder="Nome do ingresso "+i
+campo.className="ingresso"
+
+container.appendChild(campo)
+
+}
+
+}
+
+criarCampos()
+
+async function enviar(){
+
+let comprador=document.getElementById("comprador").value
+let telefone=document.getElementById("telefone").value
+
+let nomes=document.querySelectorAll(".ingresso")
+
+let lista=[]
+
+nomes.forEach(n=>{
+lista.push(n.value)
+})
+
+const dados={
+comprador:comprador,
+telefone:telefone,
+ingressos:lista
+}
+
+console.log(dados)
+
+try{
+
+await fetch(url,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(dados)
+})
+
+alert("Dados enviados")
+
+}catch(e){
+
+console.error(e)
+alert("Erro ao enviar")
+
+}
+
+}
+
+</script>
 
 </body>
-
 </html>
