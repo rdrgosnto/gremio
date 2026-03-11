@@ -1,92 +1,65 @@
 body{
-font-family: Arial, sans-serif;
+font-family:Arial, Helvetica, sans-serif;
+background:#f4f4f4;
 margin:0;
-background:#f7f7f7;
+padding:0;
 }
 
-header{
-text-align:center;
-background:#c0392b;
-color:white;
-padding:20px;
-}
-
-main{
-display:flex;
-flex-direction:column;
-align-items:center;
-padding:20px;
-}
-
-.card{
+.container{
+max-width:400px;
+margin:auto;
 background:white;
 padding:25px;
+margin-top:40px;
 border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.1);
-width:100%;
-max-width:400px;
-display:flex;
-flex-direction:column;
-gap:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+h1{
+text-align:center;
+}
+
+label{
+margin-top:10px;
+display:block;
 }
 
 input,select{
+width:100%;
 padding:10px;
-font-size:16px;
+margin-top:5px;
 border-radius:5px;
 border:1px solid #ccc;
+font-size:16px;
 }
 
 button{
-margin-top:10px;
+width:100%;
 padding:12px;
-font-size:16px;
+margin-top:20px;
 background:#27ae60;
 color:white;
 border:none;
-border-radius:6px;
+border-radius:5px;
+font-size:16px;
 cursor:pointer;
 }
 
 button:hover{
-background:#219150;
+background:#1e874b;
 }
 
 .total{
-margin-top:10px;
+margin-top:15px;
 font-size:18px;
 font-weight:bold;
-}
-
-.resultado{
-margin-top:20px;
-background:white;
-padding:20px;
-border-radius:10px;
-width:100%;
-max-width:400px;
 text-align:center;
 }
 
-.oculto{
-display:none;
-}
+@media (max-width:600px){
 
-footer{
-margin-top:40px;
-text-align:center;
-padding:10px;
-color:#666;
-}
-
-@media (min-width:768px){
-
-main{
-padding:40px;
-}
-
-.card{
-max-width:500px;
+.container{
+margin:10px;
 }
 
 }
