@@ -2,326 +2,337 @@
 <html lang="pt-BR">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grêmio | Ingressos Festa Junina</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-<title>Grêmio | Ingressos Festa Junina</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #4a3b32;
+            background-color: #e65100;
+            background-image:
+                linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15)),
+                linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15));
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+        .container {
+            background-color: #fffdf7;
+            padding: 40px 30px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            box-sizing: border-box;
+            border: 3px dashed #d84315;
+            position: relative;
+        }
 
-<style>
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-3deg);
+            width: 60px;
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
 
-body{
-font-family: 'Poppins', sans-serif;
-margin:0;
-padding:20px;
-display:flex;
-justify-content:center;
-align-items:center;
-min-height:100vh;
-color: #4a3b32; /* Marrom escuro rústico */
+        h1 {
+            margin-top: 10px;
+            margin-bottom: 25px;
+            font-family: 'Amatic SC', cursive;
+            font-size: 52px;
+            font-weight: 700;
+            color: #bf360c;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0px #ffcc80;
+        }
 
-/* FUNDO XADREZ DE FESTA JUNINA FEITO EM CSS */
-background-color: #e65100;
-background-image: 
-  linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15)), 
-  linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15));
-background-size: 40px 40px;
-background-position: 0 0, 20px 20px;
-}
+        label {
+            font-weight: 600;
+            margin-top: 20px;
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #5d4037;
+        }
 
-.container{
-background-color: #fffdf7; /* Fundo off-white (lembra papel manteiga/palha) */
-padding: 40px 30px;
-border-radius: 12px;
-width:100%;
-max-width: 420px;
-box-shadow: 0 15px 35px rgba(0,0,0,0.4); /* Sombra mais forte para destacar do fundo xadrez */
-text-align:center;
-box-sizing: border-box;
-/* Borda imitando costura */
-border: 3px dashed #d84315; 
-position: relative;
-}
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 2px dashed #bcaaa4;
+            font-size: 15px;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            color: #3e2723;
+            background-color: transparent;
+            transition: all 0.3s ease;
+        }
 
-/* Detalhe de fita prendendo o card (Truque visual) */
-.container::before {
-content: "";
-position: absolute;
-top: -15px;
-left: 50%;
-transform: translateX(-50%);
-width: 60px;
-height: 30px;
-background-color: rgba(255, 255, 255, 0.4);
-box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-transform: translateX(-50%) rotate(-3deg);
-}
+        input:focus, select:focus {
+            outline: none;
+            border-color: #d84315;
+            border-style: solid;
+            background-color: #fff;
+        }
 
-h1{
-margin-top: 10px;
-margin-bottom: 25px;
-font-family: 'Amatic SC', cursive; /* Fonte temática para o título */
-font-size: 52px;
-font-weight: 700;
-color: #bf360c; /* Laranja queimado/barro */
-letter-spacing: 2px;
-text-shadow: 2px 2px 0px #ffcc80; /* Sombrinha para dar volume */
-}
+        .ingresso { margin-top: 12px; }
 
-label{
-font-weight: 600;
-margin-top: 20px;
-display:block;
-text-align:left;
-margin-bottom: 5px;
-font-size: 14px;
-color: #5d4037;
-}
+        #total {
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #ffcc80;
+            border: 2px dashed #e65100;
+            font-size: 24px;
+            font-weight: 700;
+            color: #bf360c;
+        }
 
-input, select{
-width:100%;
-padding: 12px 16px;
-margin-top: 0;
-border-radius: 8px;
-/* Borda tracejada imitando costura grossa */
-border: 2px dashed #bcaaa4;
-font-size: 15px;
-box-sizing:border-box;
-font-family: 'Poppins', sans-serif;
-color: #3e2723;
-background-color: transparent;
-transition: all 0.3s ease;
-}
+        button {
+            margin-top: 30px;
+            width: 100%;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background-color: #2e7d32;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px dashed #a5d6a7;
+            box-shadow: 0 6px 0 #1b5e20;
+        }
 
-input:focus, select:focus{
-outline: none;
-border-color: #d84315; /* Costura fica laranja ao clicar */
-border-style: solid; /* Fica sólida ao digitar */
-background-color: #fff;
-box-shadow: 0 0 0 3px rgba(216, 67, 21, 0.1);
-}
+        button:hover { background-color: #388e3c; transform: translateY(2px); box-shadow: 0 4px 0 #1b5e20; }
+        button:active { transform: translateY(6px); box-shadow: none; }
 
-input::placeholder{
-color: #a1887f;
-}
+        .footer { margin-top: 25px; font-size: 13px; font-weight: 600; color: #8d6e63; }
 
-.ingresso{
-margin-top: 12px;
-}
-
-#total{
-margin-top: 30px;
-padding: 15px;
-border-radius: 8px;
-background-color: #ffcc80; 
-border: 2px dashed #e65100;
-font-size: 24px;
-font-weight: 700;
-color: #bf360c;
-}
-
-button{
-margin-top: 30px;
-width:100%;
-padding: 16px;
-border-radius: 8px;
-font-size: 18px;
-font-weight: 700;
-text-transform: uppercase;
-letter-spacing: 1px;
-background-color: #2e7d32; /* Verde bandeira/folha */
-color:white;
-cursor:pointer;
-transition: all 0.3s ease;
-/* Borda pontilhada branca imitando costura no botão */
-border: 2px dashed #a5d6a7;
-box-shadow: 0 6px 0 #1b5e20; /* Efeito 3D de botão antigo */
-}
-
-button:hover{
-background-color: #388e3c;
-transform: translateY(2px);
-box-shadow: 0 4px 0 #1b5e20; /* Afunda um pouco ao passar o mouse */
-}
-
-button:active{
-transform: translateY(6px);
-box-shadow: none; /* Afunda totalmente ao clicar */
-}
-
-.footer{
-margin-top: 25px;
-font-size: 13px;
-font-weight: 600;
-color: #8d6e63;
-}
-
-/* ESTILO DA MENSAGEM DE SUCESSO PARA COMBINAR COM O TEMA */
-.mensagem-sucesso {
-color: white;
-font-family: 'Amatic SC', cursive;
-font-size: 60px;
-font-weight: bold;
-text-align: center;
-text-shadow: 3px 3px 5px rgba(0,0,0,0.5);
-line-height: 1.2;
-}
-
-</style>
+        .mensagem-sucesso {
+            color: white;
+            font-family: 'Amatic SC', cursive;
+            font-size: 60px;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+            line-height: 1.2;
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="container" id="caixa-principal">
+    <div class="container" id="caixa-principal">
+        <h1>Festa Junina</h1>
 
-<h1>Festa Junina</h1>
+        <label>Nome do comprador</label>
+        <input id="comprador" placeholder="Digite seu nome completo">
 
-<label>Nome do comprador</label>
-<input id="comprador" placeholder="Digite seu nome completo">
+        <label>Telefone</label>
+        <input id="telefone" placeholder="(xx) xxxxx-xxxx">
 
-<label>Telefone</label>
-<input id="telefone" placeholder="(xx) xxxxx-xxxx">
+        <label>Quantidade de ingressos</label>
+        <select id="quantidade">
+            <option value="1">1 ingresso</option>
+            <option value="2">2 ingressos</option>
+            <option value="3">3 ingressos</option>
+            <option value="4">4 ingressos</option>
+            <option value="5">5 ingressos</option>
+        </select>
 
-<label>Quantidade de ingressos</label>
-<select id="quantidade">
-<option value="1">1 ingresso</option>
-<option value="2">2 ingressos</option>
-<option value="3">3 ingressos</option>
-<option value="4">4 ingressos</option>
-<option value="5">5 ingressos</option>
-</select>
+        <div id="nomes"></div>
 
-<div id="nomes"></div>
+        <div id="total">Total R$</div>
 
-<div id="total">Total: R$5</div>
+        <button id="btn-gerar" onclick="fluxoBotao()">Consultar Valor</button>
 
-<button id="btn-gerar" onclick="gerarPix()">Comprar Ingresso</button>
+        <div class="footer" id="info-lote">
+            Preencha os dados para verificar o lote atual.
+        </div>
+    </div>
 
-<div class="footer">
-Valor unitário: R$5
-</div>
+    <script>
+        const url = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/9ea7436d9de2427c963539c85af82e62/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=3WPtT7ezmvxEFgLBN37FvBJV92ac3tcMh0txYhzB0sg"
 
-</div>
+        const quantidadeSelect = document.getElementById("quantidade");
+        const containerNomes = document.getElementById("nomes");
+        const totalDiv = document.getElementById("total");
+        const botao = document.getElementById("btn-gerar");
+        const caixaPrincipal = document.getElementById("caixa-principal");
+        const infoLote = document.getElementById("info-lote");
 
-<script>
+        let etapaCompra = 1; // 1 = Consultar, 2 = Comprar
+        let precoConfirmado = 0;
 
-const url="https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/9ea7436d9de2427c963539c85af82e62/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=3WPtT7ezmvxEFgLBN37FvBJV92ac3tcMh0txYhzB0sg"
+        window.onload = function() {
+            const parametros = new URLSearchParams(window.location.search);
+            const status = parametros.get("collection_status");
 
-const quantidade=document.getElementById("quantidade")
-const containerNomes=document.getElementById("nomes")
-const total=document.getElementById("total")
-const botao = document.getElementById("btn-gerar")
-const caixaPrincipal = document.getElementById("caixa-principal")
+            if (status === "approved") {
+                caixaPrincipal.style.display = "none";
+                const divMensagem = document.createElement("div");
+                divMensagem.className = "mensagem-sucesso";
+                divMensagem.innerHTML = "Êta trem bão!<br>Pagamento Aprovado!<br><span style='font-size: 35px; font-family: Poppins, sans-serif;'>Nos encontramos na festa!</span>";
+                document.body.appendChild(divMensagem);
+            }
+            atualizarCampos();
+        }
 
-window.onload = function() {
-    const parametros = new URLSearchParams(window.location.search);
-    const status = parametros.get("collection_status");
+        quantidadeSelect.addEventListener("change", () => {
+            resetarBotao();
+            atualizarCampos();
+        });
 
-    if (status === "approved") {
-        caixaPrincipal.style.display = "none";
+        function atualizarCampos() {
+            containerNomes.innerHTML = "";
+            let qtd = parseInt(quantidadeSelect.value);
+            for (let i = 1; i <= qtd; i++) {
+                let campo = document.createElement("input");
+                campo.placeholder = "Nome do ingresso " + i;
+                campo.className = "ingresso";
+                containerNomes.appendChild(campo);
+            }
+        }
 
-        const divMensagem = document.createElement("div");
-        divMensagem.className = "mensagem-sucesso";
-        divMensagem.innerHTML = "Êta trem bão!<br>Pagamento Aprovado!<br><span style='font-size: 35px; font-family: Poppins, sans-serif;'>Nos encontramos na festa!</span>";
-        
-        document.body.appendChild(divMensagem);
-    }
-}
+        function resetarBotao() {
+            etapaCompra = 1;
+            botao.innerText = "Consultar Valor";
+            botao.style.background = "#2e7d32";
+            botao.style.boxShadow = "0 6px 0 #1b5e20";
+            totalDiv.innerHTML = "Total R$";
+            infoLote.innerText = "Preencha os dados e clique em 'Consultar Valor'";
+            botao.disabled = false;
+        }
 
-quantidade.addEventListener("change",atualizarCampos)
+        async function fluxoBotao() {
+            if (etapaCompra === 1) {
+                await consultarPreco();
+            } else {
+                await gerarPix();
+            }
+        }
 
-function atualizarCampos(){
-containerNomes.innerHTML=""
-let qtd=parseInt(quantidade.value)
+        async function consultarPreco() {
+            let comprador = document.getElementById("comprador").value.trim();
+            let tel = document.getElementById("telefone").value.trim();
 
-for(let i=1;i<=qtd;i++){
-let campo=document.createElement("input")
-campo.placeholder="Nome do ingresso "+i
-campo.className="ingresso"
-containerNomes.appendChild(campo)
-}
+            if (comprador === "" || tel === "") {
+                alert("Preencha seu nome e telefone!");
+                return;
+            }
 
-let valor=qtd*5
-total.innerHTML="Total: R$"+valor
-}
+            botao.innerText = "Verificando...";
+            botao.disabled = true;
 
-atualizarCampos()
+            try {
+                const resposta = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        acao: "consultar",
+                        quantidade: parseInt(quantidadeSelect.value)
+                    })
+                });
 
-const telefone=document.getElementById("telefone")
+                const resultado = await resposta.json();
 
-telefone.addEventListener("input",function(){
-let v=this.value.replace(/\D/g,"")
-if(v.length>11)v=v.slice(0,11)
-if(v.length>6) v=v.replace(/(\d{2})(\d{5})(\d{0,4})/,"($1) $2-$3")
-else if(v.length>2) v=v.replace(/(\d{2})(\d{0,5})/,"($1) $2")
-this.value=v
-})
+                if (resultado.precoUnitario) {
+                    precoConfirmado = resultado.precoUnitario;
+                    let totalFinal = precoConfirmado * parseInt(quantidadeSelect.value);
+                    
+                    totalDiv.innerHTML = "Total: R$" + totalFinal;
+                    infoLote.innerText = "Lote confirmado: R$" + precoConfirmado + " por ingresso.";
+                    
+                    etapaCompra = 2;
+                    botao.innerText = "Confirmar e Pagar";
+                    botao.style.background = "#d84315";
+                    botao.style.boxShadow = "0 6px 0 #bf360c";
+                    botao.disabled = false;
+                } else {
+                    throw new Error();
+                }
+            } catch (e) {
+                alert("Erro ao consultar lote. Tente novamente.");
+                resetarBotao();
+            }
+        }
 
-async function gerarPix(){
-let comprador=document.getElementById("comprador").value.trim()
-let tel=document.getElementById("telefone").value.trim()
-let ingressos=document.querySelectorAll(".ingresso")
+        async function gerarPix() {
+            let comprador = document.getElementById("comprador").value.trim();
+            let tel = document.getElementById("telefone").value.trim();
+            let ingressos = document.querySelectorAll(".ingresso");
+            let lista = [];
 
-if(comprador===""){ alert("Digite o nome do comprador"); return }
-if(tel===""){ alert("Digite o telefone"); return }
+            for (let i = 0; i < ingressos.length; i++) {
+                let nome = ingressos[i].value.trim();
+                if (nome === "") { alert("Preencha o nome do ingresso " + (i + 1)); return; }
+                lista.push(nome);
+            }
 
-let lista=[]
+            botao.innerText = "Gerando Pagamento...";
+            botao.disabled = true;
 
-for(let i=0;i<ingressos.length;i++){
-let nome=ingressos[i].value.trim()
-if(nome===""){ alert("Preencha o nome do ingresso "+(i+1)); return }
-lista.push(nome)
-}
+            const dados = {
+                acao: "comprar",
+                comprador: comprador,
+                telefone: tel,
+                ingressos: lista,
+                quantidade: lista.length
+            };
 
-const dados={
-comprador:comprador,
-telefone:tel,
-ingressos:lista,
-quantidade: ingressos.length 
-}
+            try {
+                const resposta = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dados)
+                });
 
-botao.innerText = "Aguarde...";
-botao.disabled = true;
-botao.style.background = "#888";
-botao.style.borderColor = "#666";
-botao.style.boxShadow = "none";
-botao.style.transform = "translateY(6px)";
+                const resultado = await resposta.json();
 
-try{
-const resposta=await fetch(url,{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify(dados)
-})
+                if (resultado.link) {
+                    window.location.href = resultado.link;
+                } else {
+                    alert("Erro ao gerar pagamento. Tente novamente.");
+                    restaurarParaCompra();
+                }
+            } catch (e) {
+                alert("Erro ao processar compra.");
+                restaurarParaCompra();
+            }
+        }
 
-const resultado=await resposta.json()
+        function restaurarParaCompra() {
+            botao.innerText = "Confirmar e Pagar";
+            botao.disabled = false;
+        }
 
-if(resultado.link){
-window.location.href=resultado.link
-}else{
-alert("Houve um erro ao gerar o pagamento. Tente novamente.")
-restaurarBotao();
-}
-
-}catch(e){
-alert("Erro ao gerar pagamento")
-restaurarBotao();
-}
-}
-
-function restaurarBotao() {
-    botao.innerText = "Comprar Ingresso";
-    botao.disabled = false;
-    botao.style.background = "#2e7d32";
-    botao.style.borderColor = "#a5d6a7";
-    botao.style.transform = "translateY(0)";
-    botao.style.boxShadow = "0 6px 0 #1b5e20";
-}
-
-</script>
-
+        document.getElementById("telefone").addEventListener("input", function() {
+            let v = this.value.replace(/\D/g, "");
+            if (v.length > 11) v = v.slice(0, 11);
+            if (v.length > 6) v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
+            else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
+            this.value = v;
+        });
+    </script>
 </body>
 </html>
