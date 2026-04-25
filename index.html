@@ -220,7 +220,7 @@
             botao.style.background = "#2e7d32";
             botao.style.boxShadow = "0 6px 0 #1b5e20";
             totalDiv.innerHTML = "Total R$";
-            infoLote.innerText = "preencha os dados e clique em "consultar valor";
+            infoLote.innerText = "Preencha os dados e clique em 'Consultar Valor'";
             botao.disabled = false;
         }
 
@@ -263,7 +263,6 @@
                     totalDiv.innerHTML = "Total: R$" + totalFinal;
                     infoLote.innerText = "Lote confirmado: R$" + precoConfirmado + " por ingresso.";
                     
-                    // Muda para o estágio de compra
                     etapaCompra = 2;
                     botao.innerText = "Confirmar e Pagar";
                     botao.style.background = "#d84315";
@@ -327,7 +326,6 @@
             botao.disabled = false;
         }
 
-        // Máscara de Telefone
         document.getElementById("telefone").addEventListener("input", function() {
             let v = this.value.replace(/\D/g, "");
             if (v.length > 11) v = v.slice(0, 11);
@@ -335,7 +333,6 @@
             else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
             this.value = v;
         });
-
     </script>
 </body>
 </html>
