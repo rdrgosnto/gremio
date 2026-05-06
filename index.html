@@ -2,84 +2,112 @@
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grêmio | Ingressos Festa Junina</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grêmio | Ingressos Festa Junina</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #e65100;
-        }
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #4a3b32;
+    background-color: #e65100;
 
-        .container {
-            background-color: #fffdf7;
-            padding: 40px 30px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            border: 3px dashed #d84315;
-        }
+    /* 🔥 XADREZ ORIGINAL */
+    background-image:
+        linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.15) 75%),
+        linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.15) 75%);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
+}
 
-        h1 {
-            font-family: 'Amatic SC', cursive;
-            font-size: 52px;
-            color: #bf360c;
-            text-align: center;
-        }
+.container {
+    background-color: #fffdf7;
+    padding: 30px 25px; /* 🔥 reduzido proporcional */
+    border-radius: 12px;
+    width: 100%;
+    max-width: 360px; /* 🔥 menor */
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    text-align: center;
+    box-sizing: border-box;
+    border: 3px dashed #d84315;
+    position: relative;
+}
 
-        label {
-            font-weight: 600;
-            margin-top: 20px;
-            display: block;
-        }
+.container::before {
+    content: "";
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    width: 60px;
+    height: 30px;
+    background-color: rgba(255,255,255,0.4);
+}
 
-        input, select {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 8px;
-            border: 2px dashed #bcaaa4;
-            box-sizing: border-box;
-        }
+h1 {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-family: 'Amatic SC', cursive;
+    font-size: 44px; /* 🔥 levemente menor */
+    color: #bf360c;
+}
 
-        .ingresso { margin-top: 12px; }
+label {
+    font-weight: 600;
+    margin-top: 15px;
+    display: block;
+    text-align: left;
+}
 
-        img {
-            display: block;
-            margin: 30px auto 10px;
-            max-width: 250px;
-            width: 100%;
-        }
+input, select {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 2px dashed #bcaaa4;
+    font-size: 14px;
+    box-sizing: border-box;
+}
 
-        .valor {
-            text-align: center;
-            font-weight: bold;
-            color: #bf360c;
-        }
+.ingresso { margin-top: 10px; }
 
-        button {
-            margin-top: 30px;
-            width: 100%;
-            padding: 16px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 700;
-            background-color: #2e7d32;
-            color: white;
-            cursor: pointer;
-            border: 2px dashed #a5d6a7;
-            box-shadow: 0 6px 0 #1b5e20;
-        }
-    </style>
+.qr {
+    margin-top: 25px;
+}
+
+.qr img {
+    width: 100%;
+    max-width: 200px;
+}
+
+.valor {
+    font-weight: bold;
+    color: #bf360c;
+    margin-top: 10px;
+}
+
+button {
+    margin-top: 25px;
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    background-color: #2e7d32;
+    color: white;
+    cursor: pointer;
+    border: 2px dashed #a5d6a7;
+    box-shadow: 0 6px 0 #1b5e20;
+}
+</style>
 </head>
 
 <body>
@@ -104,104 +132,102 @@
     <div id="nomes"></div>
 
     <!-- QR CODE -->
-    <img src="qr.png">
-    <div class="valor">Valor: R$ 5,00</div>
+    <div class="qr">
+        <img src="qr.png">
+        <div class="valor">Valor: R$ 5,00</div>
+    </div>
 
-    <!-- INPUT FILE -->
+    <!-- FILE -->
     <input type="file" id="comprovante" accept="image/*,application/pdf" style="display:none">
 
-    <!-- BOTÃO -->
     <button id="btn-enviar">Enviar Comprovante</button>
 </div>
 
 <script>
-    const inputFile = document.getElementById("comprovante");
-    const botao = document.getElementById("btn-enviar");
+const inputFile = document.getElementById("comprovante");
+const botao = document.getElementById("btn-enviar");
 
-    // cria campo ingresso
-    function atualizarCampos() {
-        const container = document.getElementById("nomes");
-        container.innerHTML = "";
+// campo ingresso
+function atualizarCampos() {
+    const container = document.getElementById("nomes");
+    container.innerHTML = "";
 
-        let campo = document.createElement("input");
-        campo.placeholder = "Nome do ingresso";
-        campo.className = "ingresso";
-        container.appendChild(campo);
+    let campo = document.createElement("input");
+    campo.placeholder = "Nome do ingresso";
+    campo.className = "ingresso";
+    container.appendChild(campo);
+}
+atualizarCampos();
+
+// clique botão
+botao.addEventListener("click", function () {
+    if (botao.innerText === "Enviar Comprovante") {
+        inputFile.click();
     }
+});
 
-    atualizarCampos();
+// selecionou arquivo
+inputFile.addEventListener("change", function () {
+    if (this.files.length > 0) {
+        botao.innerText = "Enviar";
+    }
+});
 
-    // clique inicial
-    botao.addEventListener("click", function () {
-        if (botao.innerText === "Enviar Comprovante") {
-            inputFile.click();
-        }
-    });
+// envio
+botao.addEventListener("click", async function () {
 
-    // selecionou arquivo
-    inputFile.addEventListener("change", function () {
-        if (this.files.length > 0) {
-            botao.innerText = "Enviar";
-        }
-    });
+    if (botao.innerText !== "Enviar") return;
 
-    // envio
-    botao.addEventListener("click", async function () {
+    const file = inputFile.files[0];
+    if (!file) return;
 
-        if (botao.innerText !== "Enviar") return;
+    const reader = new FileReader();
 
-        const file = inputFile.files[0];
-        if (!file) return;
+    reader.onload = async function () {
+        const base64 = reader.result.split(",")[1];
 
-        const reader = new FileReader();
-
-        reader.onload = async function () {
-            const base64 = reader.result.split(",")[1];
-
-            const dados = {
-                nome: document.getElementById("comprador").value,
-                telefone: document.getElementById("telefone").value,
-                cpf: document.getElementById("cpf").value,
-                ingresso: document.querySelector(".ingresso").value,
-                arquivo: base64,
-                nomeArquivo: file.name
-            };
-
-            await fetch("COLE_AQUI_SUA_URL_DO_POWER_AUTOMATE", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(dados)
-            });
-
-            botao.innerText = "Enviado";
-            botao.disabled = true;
+        const dados = {
+            nome: document.getElementById("comprador").value,
+            telefone: document.getElementById("telefone").value,
+            cpf: document.getElementById("cpf").value,
+            ingresso: document.querySelector(".ingresso").value,
+            arquivo: base64,
+            nomeArquivo: file.name
         };
 
-        reader.readAsDataURL(file);
-    });
+        await fetch("COLE_AQUI_SUA_URL_DO_POWER_AUTOMATE", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dados)
+        });
 
-    // máscara telefone
-    document.getElementById("telefone").addEventListener("input", function() {
-        let v = this.value.replace(/\D/g, "");
-        if (v.length > 11) v = v.slice(0, 11);
-        if (v.length > 6)
-            v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
-        else if (v.length > 2)
-            v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
-        this.value = v;
-    });
+        botao.innerText = "Enviado";
+        botao.disabled = true;
+    };
 
-    // máscara CPF
-    document.getElementById("cpf").addEventListener("input", function() {
-        let v = this.value.replace(/\D/g, "");
-        if (v.length > 11) v = v.slice(0, 11);
-        v = v.replace(/(\d{3})(\d)/, "$1.$2");
-        v = v.replace(/(\d{3})(\d)/, "$1.$2");
-        v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-        this.value = v;
-    });
+    reader.readAsDataURL(file);
+});
+
+// máscara telefone
+document.getElementById("telefone").addEventListener("input", function() {
+    let v = this.value.replace(/\D/g, "");
+    if (v.length > 11) v = v.slice(0, 11);
+    if (v.length > 6)
+        v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
+    else if (v.length > 2)
+        v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
+    this.value = v;
+});
+
+// máscara CPF
+document.getElementById("cpf").addEventListener("input", function() {
+    let v = this.value.replace(/\D/g, "");
+    if (v.length > 11) v = v.slice(0, 11);
+    v = v.replace(/(\d{3})(\d)/, "$1.$2");
+    v = v.replace(/(\d{3})(\d)/, "$1.$2");
+    v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    this.value = v;
+});
 </script>
 
 </body>
