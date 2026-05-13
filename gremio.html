@@ -17,19 +17,23 @@
         .qr-container img { width: 100%; max-width: 180px; }
         .valor { font-weight: bold; color: #bf360c; margin-top: 10px; font-size: 1.2em; }
         .pix-box { margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
-        .btn-principal { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; background-color: #2e7d32; color: white; cursor: pointer; border: none; box-shadow: 0 6px 0 #1b5e20; }
+        .btn-principal { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; background-color: #2e7d32; color: white; cursor: pointer; border: none; box-shadow: 0 6px 0 #1b5e20; transition: 0.2s; }
+        .btn-principal:active { box-shadow: 0 2px 0 #1b5e20; transform: translateY(4px); }
+        .btn-validar { background-color: #1565c0; box-shadow: 0 6px 0 #0d47a1; margin-top: 15px; }
+        .btn-validar:active { box-shadow: 0 2px 0 #0d47a1; }
         .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font-size: 12px; background-color: #616161; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .status-pagamento { margin-top: 10px; font-size: 13px; color: #e65100; font-weight: bold; }
+        .status-msg { margin-top: 15px; font-size: 14px; font-weight: bold; color: #bf360c; }
         button:disabled { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; cursor: not-allowed; }
     </style>
 </head>
 <body>
-    <div class="container" id="form-container">
+    <div class="container">
         <h1>Festa Junina</h1>
         
-        <div id="inputs-compra">
+        <!-- SEÇÃO DE INPUTS -->
+        <div id="sessao-formulario">
             <label>Nome do Comprador</label>
-            <input id="comprador" placeholder="Nome completo">
+            <input id="comprador" placeholder="NOME COMPLETO">
             
             <label>Telefone</label>
             <input id="telefone" placeholder="(00) 00000-0000">
@@ -43,65 +47,69 @@
 
             <div id="campos-extras"></div>
             
-            <button id="btn-gerar" class="btn-principal">Gerar Ingressos</button>
+            <button id="btn-gerar" class="btn-principal">Gerar QR Code Pix</button>
         </div>
 
-        <div class="qr-container" id="qr-area">
-            <div id="loader">Gerando QR Code...</div>
+        <!-- SEÇÃO DO QR CODE E VALIDAÇÃO -->
+        <div class="qr-container" id="sessao-qr">
+            <div id="carregando-qr">Gerando pagamento...</div>
             <img src="" id="img-qr" alt="QR Code Pix" style="display:none;">
-            <div class="valor" id="total-valor">Total: R$ 0,00</div>
+            <div class="valor" id="exibir-total">Total: R$ 0,00</div>
             
             <div class="pix-box">
-                <input id="pix-codigo" value="" readonly style="font-size: 9px; width: 100%; text-align: center; border: 1px solid #ccc;">
+                <input id="pix-codigo" value="" readonly style="font-size: 9px; width: 100%; text-align: center; border: 1px solid #ccc; background: #fff;">
                 <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()">Copiar Código Pix</button>
             </div>
-            <div class="status-pagamento" id="status-txt">Aguardando pagamento...</div>
+
+            <button id="btn-validar" class="btn-principal btn-validar">Já fiz o pagamento!</button>
+            <div id="status-verificacao" class="status-msg"></div>
         </div>
     </div>
 
     <script>
+        // URLs do Power Automate
         const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/8e1865f65f124dbdbca02b2638e70207/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=eNJyrOF_gmIW421bF4eCsTACCPO5pZ68q3o8OcZIO8s";
-        
-        const selectQtde = document.getElementById("quantidade");
-        const camposExtras = document.getElementById("campos-extras");
-        const btnGerar = document.getElementById("btn-gerar");
+        const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1aec54bf6bbd497d95265677ea67e618/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ZaGwdJwCHl1ObU7im9Vrl688AtQ--_apOGeSJ6VT6_k";
+
         let idPagamentoAtual = null;
 
-        // Gerar campos extras
-        selectQtde.addEventListener("change", function() {
-            const qtde = parseInt(this.value);
+        // Lógica de campos extras
+        const selectQtde = document.getElementById("quantidade");
+        const camposExtras = document.getElementById("campos-extras");
+
+        selectQtde.addEventListener("change", () => {
+            const qtde = parseInt(selectQtde.value);
             camposExtras.innerHTML = "";
             for(let i = 1; i <= qtde; i++) {
                 const div = document.createElement("div");
                 div.className = "ingresso-extra";
-                div.innerHTML = `<label>Nome do Ingresso ${i}</label><input class="nome-ing" placeholder="Nome completo"><label>CPF do Ingresso ${i}</label><input class="cpf-ing" placeholder="000.000.000-00">`;
+                div.innerHTML = `<label>Nome do Ingresso ${i}</label><input class="nome-ing" placeholder="NOME NO INGRESSO"><label>CPF ${i}</label><input class="cpf-ing" placeholder="000.000.000-00">`;
                 camposExtras.appendChild(div);
             }
             aplicarMascaras();
         });
         selectQtde.dispatchEvent(new Event('change'));
 
-        btnGerar.addEventListener("click", gerarCobranca);
-
-        async function gerarCobranca() {
+        // FUNÇÃO 1: GERAR O PIX
+        document.getElementById("btn-gerar").addEventListener("click", async () => {
+            const btn = document.getElementById("btn-gerar");
             const comprador = document.getElementById("comprador").value;
-            const telefone = document.getElementById("telefone").value;
             const nomes = Array.from(document.querySelectorAll(".nome-ing")).map(i => i.value);
             const cpfs = Array.from(document.querySelectorAll(".cpf-ing")).map(i => i.value);
 
-            if (!comprador || nomes.some(n => n === "")) {
-                alert("Preencha todos os campos.");
+            if (!comprador || nomes.some(n => n.trim() === "")) {
+                alert("Por favor, preencha todos os campos.");
                 return;
             }
 
-            btnGerar.disabled = true;
-            btnGerar.innerText = "Processando...";
+            btn.disabled = true;
+            btn.innerText = "Processando...";
 
             const payload = {
-                "COMPRADOR": comprador,
-                "TELEFONE": telefone,
+                "COMPRADOR": comprador.toUpperCase(),
+                "TELEFONE": document.getElementById("telefone").value,
                 "QUANTIDADE": selectQtde.value,
-                "INGRESSOS": nomes.map((n, i) => ({ "NOME_INGRESSO": n, "CPF_INGRESSO": cpfs[i] }))
+                "INGRESSOS": nomes.map((n, index) => ({ "NOME_INGRESSO": n.toUpperCase(), "CPF_INGRESSO": cpfs[index] }))
             };
 
             try {
@@ -113,43 +121,60 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    exibirQRCode(data);
+                    idPagamentoAtual = data.pagamento_id;
+                    
+                    document.getElementById("sessao-formulario").style.display = "none";
+                    document.getElementById("sessao-qr").style.display = "block";
+                    document.getElementById("carregando-qr").style.display = "none";
+                    
+                    const imgQr = document.getElementById("img-qr");
+                    imgQr.src = `data:image/png;base64,${data.pix_qr_code_base64}`;
+                    imgQr.style.display = "inline-block";
+                    
+                    document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
+                    document.getElementById("exibir-total").innerText = `Total: R$ ${selectQtde.value * 5},00`;
                 } else {
                     alert("Erro ao gerar Pix. Tente novamente.");
-                    btnGerar.disabled = false;
+                    btn.disabled = false;
+                    btn.innerText = "Gerar QR Code Pix";
                 }
             } catch (e) {
                 alert("Erro de conexão.");
-                btnGerar.disabled = false;
+                btn.disabled = false;
             }
-        }
+        });
 
-        function exibirQRCode(data) {
-            document.getElementById("inputs-compra").style.display = "none";
-            document.getElementById("qr-area").style.display = "block";
-            document.getElementById("loader").style.display = "none";
+        // FUNÇÃO 2: VALIDAR O PAGAMENTO
+        document.getElementById("btn-validar").addEventListener("click", async () => {
+            const btn = document.getElementById("btn-validar");
+            const msg = document.getElementById("status-verificacao");
             
-            const imgQr = document.getElementById("img-qr");
-            imgQr.src = `data:image/png;base64,${data.pix_qr_code_base64}`;
-            imgQr.style.display = "inline-block";
-            
-            document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
-            document.getElementById("total-valor").innerText = `Total: R$ ${selectQtde.value * 5},00`;
-            
-            idPagamentoAtual = data.pagamento_id;
-            iniciarVerificacao();
-        }
+            btn.disabled = true;
+            btn.innerText = "Verificando no banco...";
+            msg.innerText = "";
 
-        function iniciarVerificacao() {
-            const intervalo = setInterval(async () => {
-                // Aqui você criará um pequeno fluxo de consulta no Power Automate futuramente
-                // Por enquanto, simulamos a espera da atualização da planilha
-                console.log("Verificando status do pagamento ID: " + idPagamentoAtual);
-                
-                // Nota: O próximo passo será criar o Webhook que avisa o Power Automate
-                // e este script fará um fetch para validar o status no Excel.
-            }, 5000);
-        }
+            try {
+                const response = await fetch(URL_VALIDAR_PAGAMENTO, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ "id": String(idPagamentoAtual) })
+                });
+
+                const resultado = await response.text();
+
+                if (resultado.includes("Sucesso")) {
+                    document.getElementById("sessao-qr").innerHTML = `<h2 style="color: #2e7d32;">✅ PAGAMENTO APROVADO!</h2><p>Seus ingressos foram registrados. Você já pode fechar esta página.</p>`;
+                } else {
+                    msg.innerText = "Pagamento ainda não identificado. Se você já pagou, aguarde 30 segundos e tente novamente.";
+                    btn.disabled = false;
+                    btn.innerText = "Já fiz o pagamento!";
+                }
+            } catch (e) {
+                msg.innerText = "Erro ao conectar com o validador.";
+                btn.disabled = false;
+                btn.innerText = "Já fiz o pagamento!";
+            }
+        });
 
         function copiarPix() {
             const pix = document.getElementById("pix-codigo");
@@ -169,7 +194,17 @@
                     e.target.value = v;
                 });
             });
+            document.getElementById("telefone").addEventListener("input", e => {
+                let v = e.target.value.replace(/\D/g, "").slice(0, 11);
+                if (v.length > 6) v = v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+                else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
+                e.target.value = v;
+            });
         }
+        
+        document.getElementById("comprador").addEventListener("input", e => {
+            e.target.value = e.target.value.toUpperCase();
+        });
     </script>
 </body>
 </html>
