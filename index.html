@@ -151,13 +151,15 @@
         const divValor = document.querySelector(".valor");
         const campos = ["comprador", "cpf", "telefone"];
 
-        // Atualiza o valor total na tela conforme a quantidade
+        // URL do seu fluxo do Power Automate
+        const URL_POWER_AUTOMATE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a4a0f1e7180342b89edfbd2c4539ac1e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=c__Lfqm_KuACPiz0hChwH4AAeN-AVZeJC4oBL4Pfdyg";
+
+        // Atualiza valor conforme seleção
         selectQtde.addEventListener("change", function() {
             const total = this.value * 5;
             divValor.innerText = `Valor: R$ ${total},00`;
         });
 
-        // Lógica do botão
         botao.addEventListener("click", function () {
             if (botao.innerText === "Selecionar Comprovante") {
                 inputFile.click();
@@ -166,7 +168,6 @@
             }
         });
 
-        // Quando selecionar o arquivo
         inputFile.addEventListener("change", function () {
             if (this.files.length > 0) {
                 botao.innerText = "Enviar";
@@ -179,8 +180,7 @@
             const file = inputFile.files[0];
             
             if (!file) {
-                alert("Por favor, selecione o comprovante antes de enviar.");
-                botao.innerText = "Selecionar Comprovante";
+                alert("Por favor, selecione o comprovante.");
                 return;
             }
 
@@ -198,18 +198,18 @@
             reader.onload = async function () {
                 const base64 = reader.result.split(",")[1];
 
+                // Objeto ajustado para MAIÚSCULAS conforme sua planilha e JSON do Power Automate
                 const dados = {
-                    nome: document.getElementById("comprador").value,
-                    cpf: document.getElementById("cpf").value,
-                    telefone: document.getElementById("telefone").value,
-                    quantidade: selectQtde.value,
-                    arquivo: base64,
-                    nomeArquivo: file.name
+                    "COMPRADOR": document.getElementById("comprador").value,
+                    "CPF": document.getElementById("cpf").value,
+                    "TELEFONE": document.getElementById("telefone").value,
+                    "QUANTIDADE": selectQtde.value,
+                    "ARQUIVO_BASE64": base64,
+                    "NOME_ARQUIVO": file.name
                 };
 
                 try {
-                    // SUA URL DO POWER AUTOMATE INSERIDA ABAIXO:
-                    const response = await fetch("https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a4a0f1e7180342b89edfbd2c4539ac1e/triggers/manual/paths/invoke?api-version=1", {
+                    const response = await fetch(URL_POWER_AUTOMATE, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(dados)
@@ -219,10 +219,11 @@
                         alert("Comprovante enviado com sucesso!");
                         limparFormulario();
                     } else {
-                        alert("Erro ao enviar. Tente novamente.");
+                        alert("Erro no servidor. Verifique o Power Automate.");
                         resetBotao();
                     }
                 } catch (error) {
+                    console.error("Erro:", error);
                     alert("Erro de conexão.");
                     resetBotao();
                 }
@@ -238,14 +239,9 @@
             inputFile.value = "";
             selectQtde.value = "1";
             divValor.innerText = "Valor: R$ 5,00";
-            
             botao.innerText = "Enviado!";
-            botao.style.backgroundColor = "#2e7d32";
             botao.disabled = true;
-
-            setTimeout(() => {
-                resetBotao();
-            }, 3000);
+            setTimeout(resetBotao, 3000);
         }
 
         function resetBotao() {
@@ -255,27 +251,19 @@
             botao.style.boxShadow = "0 6px 0 #1b5e20";
         }
 
-        // Máscara Telefone
+        // Máscaras
         document.getElementById("telefone").addEventListener("input", function (e) {
-            let v = e.target.value.replace(/\D/g, "");
-            if (v.length > 11) v = v.slice(0, 11);
-            if (v.length > 6)
-                v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
-            else if (v.length > 2)
-                v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
+            let v = e.target.value.replace(/\D/g, "").slice(0, 11);
+            if (v.length > 6) v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
+            else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
             e.target.value = v;
         });
 
-        // Máscara CPF
         document.getElementById("cpf").addEventListener("input", function (e) {
-            let v = e.target.value.replace(/\D/g, "");
-            if (v.length > 11) v = v.slice(0, 11);
-            v = v.replace(/(\d{3})(\d)/, "$1.$2");
-            v = v.replace(/(\d{3})(\d)/, "$1.$2");
-            v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+            let v = e.target.value.replace(/\D/g, "").slice(0, 11);
+            v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
             e.target.value = v;
         });
     </script>
-
 </body>
 </html>
