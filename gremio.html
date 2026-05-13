@@ -1,338 +1,175 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grêmio | Ingressos Festa Junina</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: #4a3b32;
-            background-color: #e65100;
-            background-image:
-                linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15)),
-                linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15));
-            background-size: 40px 40px;
-            background-position: 0 0, 20px 20px;
-        }
-
-        .container {
-            background-color: #fffdf7;
-            padding: 40px 30px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-            text-align: center;
-            box-sizing: border-box;
-            border: 3px dashed #d84315;
-            position: relative;
-        }
-
-        .container::before {
-            content: "";
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%) rotate(-3deg);
-            width: 60px;
-            height: 30px;
-            background-color: rgba(255, 255, 255, 0.4);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            margin-top: 10px;
-            margin-bottom: 25px;
-            font-family: 'Amatic SC', cursive;
-            font-size: 52px;
-            font-weight: 700;
-            color: #bf360c;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 0px #ffcc80;
-        }
-
-        label {
-            font-weight: 600;
-            margin-top: 20px;
-            display: block;
-            text-align: left;
-            margin-bottom: 5px;
-            font-size: 14px;
-            color: #5d4037;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 8px;
-            border: 2px dashed #bcaaa4;
-            font-size: 15px;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-            color: #3e2723;
-            background-color: transparent;
-            transition: all 0.3s ease;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #d84315;
-            border-style: solid;
-            background-color: #fff;
-        }
-
-        .ingresso { margin-top: 12px; }
-
-        #total {
-            margin-top: 30px;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #ffcc80;
-            border: 2px dashed #e65100;
-            font-size: 24px;
-            font-weight: 700;
-            color: #bf360c;
-        }
-
-        button {
-            margin-top: 30px;
-            width: 100%;
-            padding: 16px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background-color: #2e7d32;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px dashed #a5d6a7;
-            box-shadow: 0 6px 0 #1b5e20;
-        }
-
-        button:hover { background-color: #388e3c; transform: translateY(2px); box-shadow: 0 4px 0 #1b5e20; }
-        button:active { transform: translateY(6px); box-shadow: none; }
-
-        .footer { margin-top: 25px; font-size: 13px; font-weight: 600; color: #8d6e63; }
-
-        .mensagem-sucesso {
-            color: white;
-            font-family: 'Amatic SC', cursive;
-            font-size: 60px;
-            font-weight: bold;
-            text-align: center;
-            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
-            line-height: 1.2;
-        }
+        body { font-family: 'Poppins', sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #4a3b32; background-color: #e65100; background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%), linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%); background-size: 40px 40px; background-position: 0 0, 20px 20px; }
+        .container { background-color: #fffdf7; padding: 30px 25px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); text-align: center; box-sizing: border-box; border: 3px dashed #d84315; }
+        h1 { margin-top: 10px; font-family: 'Amatic SC', cursive; font-size: 44px; color: #bf360c; }
+        label { font-weight: 600; margin-top: 15px; display: block; text-align: left; font-size: 14px; }
+        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 2px dashed #bcaaa4; font-size: 14px; box-sizing: border-box; }
+        .ingresso-extra { background: #fdf2e9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #ebba95; }
+        .qr-container { display: none; margin-top: 25px; padding: 15px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
+        .qr-container img { width: 100%; max-width: 180px; }
+        .valor { font-weight: bold; color: #bf360c; margin-top: 10px; font-size: 1.2em; }
+        .pix-box { margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
+        .btn-principal { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; background-color: #2e7d32; color: white; cursor: pointer; border: none; box-shadow: 0 6px 0 #1b5e20; }
+        .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font-size: 12px; background-color: #616161; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .status-pagamento { margin-top: 10px; font-size: 13px; color: #e65100; font-weight: bold; }
+        button:disabled { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; cursor: not-allowed; }
     </style>
 </head>
-
 <body>
-
-    <div class="container" id="caixa-principal">
+    <div class="container" id="form-container">
         <h1>Festa Junina</h1>
+        
+        <div id="inputs-compra">
+            <label>Nome do Comprador</label>
+            <input id="comprador" placeholder="Nome completo">
+            
+            <label>Telefone</label>
+            <input id="telefone" placeholder="(00) 00000-0000">
 
-        <label>Nome do comprador</label>
-        <input id="comprador" placeholder="Digite seu nome completo">
+            <label>Quantidade de ingressos</label>
+            <select id="quantidade">
+                <option value="1">1 ingresso (R$ 5,00)</option>
+                <option value="2">2 ingressos (R$ 10,00)</option>
+                <option value="3">3 ingressos (R$ 15,00)</option>
+            </select>
 
-        <label>Telefone</label>
-        <input id="telefone" placeholder="(xx) xxxxx-xxxx">
+            <div id="campos-extras"></div>
+            
+            <button id="btn-gerar" class="btn-principal">Gerar Ingressos</button>
+        </div>
 
-        <label>Quantidade de ingressos</label>
-        <select id="quantidade">
-            <option value="1">1 ingresso</option>
-            <option value="2">2 ingressos</option>
-            <option value="3">3 ingressos</option>
-            <option value="4">4 ingressos</option>
-            <option value="5">5 ingressos</option>
-        </select>
-
-        <div id="nomes"></div>
-
-        <div id="total">Total R$</div>
-
-        <button id="btn-gerar" onclick="fluxoBotao()">Consultar Valor</button>
-
-        <div class="footer" id="info-lote">
-            Preencha os dados para verificar o lote atual.
+        <div class="qr-container" id="qr-area">
+            <div id="loader">Gerando QR Code...</div>
+            <img src="" id="img-qr" alt="QR Code Pix" style="display:none;">
+            <div class="valor" id="total-valor">Total: R$ 0,00</div>
+            
+            <div class="pix-box">
+                <input id="pix-codigo" value="" readonly style="font-size: 9px; width: 100%; text-align: center; border: 1px solid #ccc;">
+                <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()">Copiar Código Pix</button>
+            </div>
+            <div class="status-pagamento" id="status-txt">Aguardando pagamento...</div>
         </div>
     </div>
 
     <script>
-        const url = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/9ea7436d9de2427c963539c85af82e62/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=3WPtT7ezmvxEFgLBN37FvBJV92ac3tcMh0txYhzB0sg"
+        const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/8e1865f65f124dbdbca02b2638e70207/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=eNJyrOF_gmIW421bF4eCsTACCPO5pZ68q3o8OcZIO8s";
+        
+        const selectQtde = document.getElementById("quantidade");
+        const camposExtras = document.getElementById("campos-extras");
+        const btnGerar = document.getElementById("btn-gerar");
+        let idPagamentoAtual = null;
 
-        const quantidadeSelect = document.getElementById("quantidade");
-        const containerNomes = document.getElementById("nomes");
-        const totalDiv = document.getElementById("total");
-        const botao = document.getElementById("btn-gerar");
-        const caixaPrincipal = document.getElementById("caixa-principal");
-        const infoLote = document.getElementById("info-lote");
-
-        let etapaCompra = 1; // 1 = Consultar, 2 = Comprar
-        let precoConfirmado = 0;
-
-        window.onload = function() {
-            const parametros = new URLSearchParams(window.location.search);
-            const status = parametros.get("collection_status");
-
-            if (status === "approved") {
-                caixaPrincipal.style.display = "none";
-                const divMensagem = document.createElement("div");
-                divMensagem.className = "mensagem-sucesso";
-                divMensagem.innerHTML = "Êta trem bão!<br>Pagamento Aprovado!<br><span style='font-size: 35px; font-family: Poppins, sans-serif;'>Nos encontramos na festa!</span>";
-                document.body.appendChild(divMensagem);
+        // Gerar campos extras
+        selectQtde.addEventListener("change", function() {
+            const qtde = parseInt(this.value);
+            camposExtras.innerHTML = "";
+            for(let i = 1; i <= qtde; i++) {
+                const div = document.createElement("div");
+                div.className = "ingresso-extra";
+                div.innerHTML = `<label>Nome do Ingresso ${i}</label><input class="nome-ing" placeholder="Nome completo"><label>CPF do Ingresso ${i}</label><input class="cpf-ing" placeholder="000.000.000-00">`;
+                camposExtras.appendChild(div);
             }
-            atualizarCampos();
-        }
-
-        quantidadeSelect.addEventListener("change", () => {
-            resetarBotao();
-            atualizarCampos();
+            aplicarMascaras();
         });
+        selectQtde.dispatchEvent(new Event('change'));
 
-        function atualizarCampos() {
-            containerNomes.innerHTML = "";
-            let qtd = parseInt(quantidadeSelect.value);
-            for (let i = 1; i <= qtd; i++) {
-                let campo = document.createElement("input");
-                campo.placeholder = "Nome do ingresso " + i;
-                campo.className = "ingresso";
-                containerNomes.appendChild(campo);
-            }
-        }
+        btnGerar.addEventListener("click", gerarCobranca);
 
-        function resetarBotao() {
-            etapaCompra = 1;
-            botao.innerText = "Consultar Valor";
-            botao.style.background = "#2e7d32";
-            botao.style.boxShadow = "0 6px 0 #1b5e20";
-            totalDiv.innerHTML = "Total R$";
-            infoLote.innerText = "Preencha os dados e clique em 'Consultar Valor'";
-            botao.disabled = false;
-        }
+        async function gerarCobranca() {
+            const comprador = document.getElementById("comprador").value;
+            const telefone = document.getElementById("telefone").value;
+            const nomes = Array.from(document.querySelectorAll(".nome-ing")).map(i => i.value);
+            const cpfs = Array.from(document.querySelectorAll(".cpf-ing")).map(i => i.value);
 
-        async function fluxoBotao() {
-            if (etapaCompra === 1) {
-                await consultarPreco();
-            } else {
-                await gerarPix();
-            }
-        }
-
-        async function consultarPreco() {
-            let comprador = document.getElementById("comprador").value.trim();
-            let tel = document.getElementById("telefone").value.trim();
-
-            if (comprador === "" || tel === "") {
-                alert("Preencha seu nome e telefone!");
+            if (!comprador || nomes.some(n => n === "")) {
+                alert("Preencha todos os campos.");
                 return;
             }
 
-            botao.innerText = "Verificando...";
-            botao.disabled = true;
+            btnGerar.disabled = true;
+            btnGerar.innerText = "Processando...";
 
-            try {
-                const resposta = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        acao: "consultar",
-                        quantidade: parseInt(quantidadeSelect.value)
-                    })
-                });
-
-                const resultado = await resposta.json();
-
-                if (resultado.precoUnitario) {
-                    precoConfirmado = resultado.precoUnitario;
-                    let totalFinal = precoConfirmado * parseInt(quantidadeSelect.value);
-                    
-                    totalDiv.innerHTML = "Total: R$" + totalFinal;
-                    infoLote.innerText = "Lote confirmado: R$" + precoConfirmado + " por ingresso.";
-                    
-                    etapaCompra = 2;
-                    botao.innerText = "Confirmar e Pagar";
-                    botao.style.background = "#d84315";
-                    botao.style.boxShadow = "0 6px 0 #bf360c";
-                    botao.disabled = false;
-                } else {
-                    throw new Error();
-                }
-            } catch (e) {
-                alert("Erro ao consultar lote. Tente novamente.");
-                resetarBotao();
-            }
-        }
-
-        async function gerarPix() {
-            let comprador = document.getElementById("comprador").value.trim();
-            let tel = document.getElementById("telefone").value.trim();
-            let ingressos = document.querySelectorAll(".ingresso");
-            let lista = [];
-
-            for (let i = 0; i < ingressos.length; i++) {
-                let nome = ingressos[i].value.trim();
-                if (nome === "") { alert("Preencha o nome do ingresso " + (i + 1)); return; }
-                lista.push(nome);
-            }
-
-            botao.innerText = "Gerando Pagamento...";
-            botao.disabled = true;
-
-            const dados = {
-                acao: "comprar",
-                comprador: comprador,
-                telefone: tel,
-                ingressos: lista,
-                quantidade: lista.length
+            const payload = {
+                "COMPRADOR": comprador,
+                "TELEFONE": telefone,
+                "QUANTIDADE": selectQtde.value,
+                "INGRESSOS": nomes.map((n, i) => ({ "NOME_INGRESSO": n, "CPF_INGRESSO": cpfs[i] }))
             };
 
             try {
-                const resposta = await fetch(url, {
+                const response = await fetch(URL_GERAR_PIX, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(dados)
+                    body: JSON.stringify(payload)
                 });
 
-                const resultado = await resposta.json();
-
-                if (resultado.link) {
-                    window.location.href = resultado.link;
+                if (response.ok) {
+                    const data = await response.json();
+                    exibirQRCode(data);
                 } else {
-                    alert("Erro ao gerar pagamento. Tente novamente.");
-                    restaurarParaCompra();
+                    alert("Erro ao gerar Pix. Tente novamente.");
+                    btnGerar.disabled = false;
                 }
             } catch (e) {
-                alert("Erro ao processar compra.");
-                restaurarParaCompra();
+                alert("Erro de conexão.");
+                btnGerar.disabled = false;
             }
         }
 
-        function restaurarParaCompra() {
-            botao.innerText = "Confirmar e Pagar";
-            botao.disabled = false;
+        function exibirQRCode(data) {
+            document.getElementById("inputs-compra").style.display = "none";
+            document.getElementById("qr-area").style.display = "block";
+            document.getElementById("loader").style.display = "none";
+            
+            const imgQr = document.getElementById("img-qr");
+            imgQr.src = `data:image/png;base64,${data.pix_qr_code_base64}`;
+            imgQr.style.display = "inline-block";
+            
+            document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
+            document.getElementById("total-valor").innerText = `Total: R$ ${selectQtde.value * 5},00`;
+            
+            idPagamentoAtual = data.pagamento_id;
+            iniciarVerificacao();
         }
 
-        document.getElementById("telefone").addEventListener("input", function() {
-            let v = this.value.replace(/\D/g, "");
-            if (v.length > 11) v = v.slice(0, 11);
-            if (v.length > 6) v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
-            else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
-            this.value = v;
-        });
+        function iniciarVerificacao() {
+            const intervalo = setInterval(async () => {
+                // Aqui você criará um pequeno fluxo de consulta no Power Automate futuramente
+                // Por enquanto, simulamos a espera da atualização da planilha
+                console.log("Verificando status do pagamento ID: " + idPagamentoAtual);
+                
+                // Nota: O próximo passo será criar o Webhook que avisa o Power Automate
+                // e este script fará um fetch para validar o status no Excel.
+            }, 5000);
+        }
+
+        function copiarPix() {
+            const pix = document.getElementById("pix-codigo");
+            pix.select();
+            navigator.clipboard.writeText(pix.value);
+            document.getElementById("btn-copiar").innerText = "✓ Copiado!";
+            setTimeout(() => { document.getElementById("btn-copiar").innerText = "Copiar Código Pix"; }, 2000);
+        }
+
+        function aplicarMascaras() {
+            document.querySelectorAll(".cpf-ing").forEach(el => {
+                el.addEventListener("input", e => {
+                    let v = e.target.value.replace(/\D/g, "").slice(0, 11);
+                    if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+                    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
+                    else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
+                    e.target.value = v;
+                });
+            });
+        }
     </script>
 </body>
 </html>
