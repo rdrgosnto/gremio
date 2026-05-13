@@ -141,7 +141,7 @@
             }));
 
             if (listaIngressos.some(ing => ing.CPF_INGRESSO.length < 14)) {
-                alert("Por favor, preencha todos os CPFs corretamente para verificar descontos.");
+                alert("Por favor, preencha todos os CPFs corretamente.");
                 return;
             }
 
@@ -166,23 +166,27 @@
                     const data = await response.json();
                     
                     idPagamentoAtual = data.pagamento_id; 
+                    
+                    // Configura os dados antes de exibir a sessão
+                    document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
+                    document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
+                    
+                    // Lendo da sua variável que você configurou no fluxo chamada "variavel"
+                    const valorTotal = data.variavel; 
+                    document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(valorTotal).toFixed(2).replace('.', ',')}`;
+
+                    // Troca de tela
                     document.getElementById("sessao-formulario").style.display = "none";
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
-                    document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
                     document.getElementById("img-qr").style.display = "inline-block";
-                    document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
-                    
-                    // O Power Automate agora devolve o valor já calculado (5 ou cheio) no campo 'valor_calculado'
-                    const valorFormatado = data.valor_calculado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                    document.getElementById("exibir-total").innerText = `Total: ${valorFormatado}`;
                 } else {
                     alert("Erro ao processar consulta de CPFs.");
                     btn.disabled = false;
                     btn.innerText = "Gerar QR Code";
                 }
             } catch (e) {
-                alert("Erro de conexão.");
+                alert("Erro de conexão com o servidor.");
                 btn.disabled = false;
                 btn.innerText = "Gerar QR Code";
             }
