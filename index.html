@@ -7,172 +7,239 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Poppins', sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #4a3b32; background-color: #e65100; background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%), linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%); background-size: 40px 40px; background-position: 0 0, 20px 20px; }
-        .container { background-color: #fffdf7; padding: 30px 25px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); text-align: center; box-sizing: border-box; border: 3px dashed #d84315; }
-        h1 { margin-top: 10px; font-family: 'Amatic SC', cursive; font-size: 44px; color: #bf360c; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            margin: 0; 
+            padding: 60px 20px 20px 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            color: #4a3b32; 
+            background-color: #e65100; 
+            background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%), linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%); 
+            background-size: 40px 40px; 
+            background-position: 0 0, 20px 20px; 
+            position: relative;
+        }
+
+        /* Varal de Bandeirinhas Realista */
+        .varal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60'%3E%3Cpath d='M0 10 Q 50 25 100 10 Q 150 25 200 10' stroke='%235D4037' fill='none' stroke-width='1'/%3E%3Cpath d='M10 13 L10 45 L22 35 L34 45 L34 16 Z' fill='%23FFD54F'/%3E%3Cpath d='M45 18 L45 50 L57 40 L69 50 L69 20 Z' fill='%23F44336'/%3E%3Cpath d='M80 16 L80 48 L92 38 L104 48 L104 15 Z' fill='%234CAF50'/%3E%3Cpath d='M115 16 L115 48 L127 38 L139 48 L139 18 Z' fill='%232196F3'/%3E%3Cpath d='M150 20 L150 52 L162 42 L174 52 L174 21 Z' fill='%23FF9800'/%3E%3Cpath d='M185 15 L185 45 L197 35 L209 45 L209 12 Z' fill='%239C27B0'/%3E%3C/svg%3E");
+            background-repeat: repeat-x;
+            background-size: 400px 80px;
+            z-index: 10;
+        }
+
+        .container { 
+            background-color: #fffdf7; 
+            padding: 30px 25px; 
+            border-radius: 12px; 
+            width: 100%; 
+            max-width: 400px; 
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); 
+            text-align: center; 
+            box-sizing: border-box; 
+            border: 3px dashed #d84315; 
+            position: relative;
+            z-index: 5;
+        }
+
+        h1 { margin-top: 10px; font-family: 'Amatic SC', cursive; font-size: 48px; color: #bf360c; }
         label { font-weight: 600; margin-top: 15px; display: block; text-align: left; font-size: 14px; }
-        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 2px dashed #bcaaa4; font-size: 14px; box-sizing: border-box; }
+        
+        input, select { 
+            width: 100%; 
+            padding: 10px; 
+            border-radius: 8px; 
+            border: 2px dashed #bcaaa4; 
+            font-size: 14px; 
+            box-sizing: border-box; 
+            text-transform: none;
+        }
+
         .ingresso-extra { background: #fdf2e9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #ebba95; }
-        .qr { margin-top: 25px; padding: 15px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
-        .qr img { width: 100%; max-width: 180px; }
+        .qr-container { display: none; margin-top: 25px; padding: 15px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
+        .qr-container img { width: 100%; max-width: 180px; }
         .valor { font-weight: bold; color: #bf360c; margin-top: 10px; font-size: 1.2em; }
+        
         .pix-box { margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
-        .btn-enviar { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; background-color: #2e7d32; color: white; cursor: pointer; border: 2px dashed #a5d6a7; box-shadow: 0 6px 0 #1b5e20; border: none; }
+        
+        .btn-principal { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; background-color: #2e7d32; color: white; cursor: pointer; border: none; box-shadow: 0 6px 0 #1b5e20; transition: 0.2s; }
+        .btn-principal:active { box-shadow: 0 2px 0 #1b5e20; transform: translateY(4px); }
+        .btn-validar { background-color: #1565c0; box-shadow: 0 6px 0 #0d47a1; margin-top: 15px; }
         .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font-size: 12px; background-color: #616161; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:disabled { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; }
+        
+        .status-msg { margin-top: 15px; font-size: 15px; font-weight: bold; color: #bf360c; }
+        
+        /* Estilos da Tela de Sucesso */
+        .msg-sucesso { font-family: 'Amatic SC', cursive; color: #2e7d32; line-height: 1.1; }
+        .msg-sucesso h2 { font-size: 45px; margin: 10px 0; }
+        .msg-sucesso p { font-size: 32px; margin: 5px 0; }
+        
+        .icon-grande { font-size: 80px; display: block; margin-bottom: 10px; }
+        
+        button:disabled { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; cursor: not-allowed; }
     </style>
 </head>
 <body>
+    <div class="varal"></div>
     <div class="container">
         <h1>Festa Junina</h1>
         
-        <label>Nome do Comprador</label>
-        <input id="comprador" placeholder="Nome completo">
-        
-        <label>Telefone</label>
-        <input id="telefone" placeholder="(00) 00000-0000">
+        <div id="sessao-formulario">
+            <label>Nome do Comprador</label>
+            <input id="comprador" placeholder="Escreva seu nome aqui...">
+            
+            <label>Telefone</label>
+            <input id="telefone" placeholder="(00) 00000-0000">
 
-        <label>Quantidade de ingressos</label>
-        <select id="quantidade">
-            <option value="1">1 ingresso (R$ 5,00)</option>
-            <option value="2">2 ingressos (R$ 10,00)</option>
-            <option value="3">3 ingressos (R$ 15,00)</option>
-        </select>
+            <label>Quantidade de ingressos</label>
+            <select id="quantidade">
+                <option value="1">1 ingresso (R$ 5,00)</option>
+                <option value="2">2 ingressos (R$ 10,00)</option>
+                <option value="3">3 ingressos (R$ 15,00)</option>
+            </select>
 
-        <div id="campos-extras"></div>
-
-        <div class="qr">
-            <img src="qr.png" alt="QR Code">
-            <div class="valor">Total: R$ 5,00</div>
-            <div class="pix-box">
-                <input id="pix-codigo" value="00020126580014BR.GOV.BCB.PIX0136701fcb2e-76c2-4b0c-9395-5041c19409365204000053039865802BR5923Raul Militao dos Santos6009SAO PAULO62140510wvlD1Qh7ri63046AC7" readonly style="font-size: 9px; width: 100%; text-align: center; border: 1px solid #ccc;">
-                <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()">Copiar Código Pix</button>
-            </div>
+            <div id="campos-extras"></div>
+            <button id="btn-gerar" class="btn-principal">Gerar QR Code</button>
         </div>
 
-        <input type="file" id="comprovante" accept="image/*,application/pdf" style="display:none">
-        <button id="btn-enviar" class="btn-enviar">Selecionar Comprovante</button>
+        <div class="qr-container" id="sessao-qr">
+            <div id="carregando-qr">Preparando seu pagamento...</div>
+            <img src="" id="img-qr" alt="QR Code Pix" style="display:none;">
+            <div class="valor" id="exibir-total">Total: R$ 0,00</div>
+            
+            <div class="pix-box">
+                <input id="pix-codigo" readonly style="font-size: 9px; width: 100%; text-align: center; border: 1px solid #ccc; background: #fff;">
+                <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()">Copiar Código Pix</button>
+            </div>
+
+            <button id="btn-validar" class="btn-principal btn-validar">Verificar Pagamento</button>
+            <div id="status-verificacao" class="status-msg"></div>
+        </div>
     </div>
 
     <script>
-        const URL_POWER_AUTOMATE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b35cfb9f015c4a64964d93c2e771c9f2/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=pkWxSzK2QqH0MAZjtDzhf8ERM_5CsgCT1TXtbEOKSLk";
-        
+        const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/8e1865f65f124dbdbca02b2638e70207/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=eNJyrOF_gmIW421bF4eCsTACCPO5pZ68q3o8OcZIO8s";
+        const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
+
+        let idPagamentoAtual = null;
+
         const selectQtde = document.getElementById("quantidade");
         const camposExtras = document.getElementById("campos-extras");
-        const divValor = document.querySelector(".valor");
-        const botao = document.getElementById("btn-enviar");
-        const inputFile = document.getElementById("comprovante");
 
-        selectQtde.addEventListener("change", function() {
-            const qtde = parseInt(this.value);
-            divValor.innerText = `Total: R$ ${qtde * 5},00`;
+        selectQtde.addEventListener("change", () => {
+            const qtde = parseInt(selectQtde.value);
             camposExtras.innerHTML = "";
-            
             for(let i = 1; i <= qtde; i++) {
                 const div = document.createElement("div");
                 div.className = "ingresso-extra";
-                div.innerHTML = `
-                    <label>Nome do Ingresso ${i}</label>
-                    <input class="nome-ing" placeholder="Nome no ingresso ${i}">
-                    <label>CPF do Ingresso ${i}</label>
-                    <input class="cpf-ing" placeholder="000.000.000-00">
-                `;
+                div.innerHTML = `<label>Nome no Ingresso ${i}</label><input class="nome-ing" placeholder="Nome do convidado"><label>CPF ${i}</label><input class="cpf-ing" placeholder="000.000.000-00">`;
                 camposExtras.appendChild(div);
-                aplicarMascaras();
+            }
+            aplicarMascaras();
+        });
+        selectQtde.dispatchEvent(new Event('change'));
+
+        document.getElementById("btn-gerar").addEventListener("click", async () => {
+            const btn = document.getElementById("btn-gerar");
+            const comprador = document.getElementById("comprador").value;
+            
+            if (!comprador) { alert("Por favor, preencha o nome do comprador."); return; }
+
+            btn.disabled = true;
+            btn.innerText = "Processando...";
+
+            const payload = {
+                "COMPRADOR": comprador,
+                "TELEFONE": document.getElementById("telefone").value,
+                "QUANTIDADE": selectQtde.value,
+                "INGRESSOS": Array.from(document.querySelectorAll(".nome-ing")).map((n, i) => ({
+                    "NOME_INGRESSO": n.value,
+                    "CPF_INGRESSO": document.querySelectorAll(".cpf-ing")[i].value
+                }))
+            };
+
+            try {
+                const response = await fetch(URL_GERAR_PIX, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    idPagamentoAtual = data.pagamento_id; 
+                    document.getElementById("sessao-formulario").style.display = "none";
+                    document.getElementById("sessao-qr").style.display = "block";
+                    document.getElementById("carregando-qr").style.display = "none";
+                    document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
+                    document.getElementById("img-qr").style.display = "inline-block";
+                    document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
+                    document.getElementById("exibir-total").innerText = `Total: R$ ${selectQtde.value * 5},00`;
+                } else {
+                    alert("Erro ao gerar Pix.");
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                alert("Erro de conexão.");
+                btn.disabled = false;
             }
         });
-        
-        selectQtde.dispatchEvent(new Event('change'));
+
+        document.getElementById("btn-validar").addEventListener("click", async () => {
+            const btn = document.getElementById("btn-validar");
+            const msg = document.getElementById("status-verificacao");
+            
+            if (!idPagamentoAtual) return;
+
+            btn.disabled = true;
+            btn.innerText = "Verificando...";
+
+            try {
+                const response = await fetch(URL_VALIDAR_PAGAMENTO, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ "id": String(idPagamentoAtual) })
+                });
+
+                const resultado = await response.text();
+
+                if (resultado.includes("Sucesso")) {
+                    document.getElementById("sessao-qr").innerHTML = `
+                        <div class="msg-sucesso">
+                            <span class="icon-grande">✅</span>
+                            <h2>PAGAMENTO CONFIRMADO!</h2>
+                            <p>ETA TREM BÃO!</p>
+                            <p>NOS ENCONTRAMOS NA FESTA!</p>
+                        </div>
+                    `;
+                } else {
+                    msg.innerHTML = `
+                        <span class="icon-grande" style="font-size: 50px;">❌</span>
+                        Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!
+                    `;
+                    btn.disabled = false;
+                    btn.innerText = "Verificar Pagamento";
+                }
+            } catch (e) {
+                msg.innerText = "Erro ao conectar. Tente de novo!";
+                btn.disabled = false;
+            }
+        });
 
         function copiarPix() {
             const pix = document.getElementById("pix-codigo");
             pix.select();
-            pix.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(pix.value);
             document.getElementById("btn-copiar").innerText = "✓ Copiado!";
             setTimeout(() => { document.getElementById("btn-copiar").innerText = "Copiar Código Pix"; }, 2000);
-        }
-
-        botao.addEventListener("click", () => {
-            if (botao.innerText === "Selecionar Comprovante") {
-                inputFile.click();
-            } else {
-                enviarDados();
-            }
-        });
-
-        inputFile.addEventListener("change", function() {
-            if (this.files.length > 0) {
-                botao.innerText = "Enviar";
-                botao.style.backgroundColor = "#1565c0";
-            }
-        });
-
-        async function enviarDados() {
-            const file = inputFile.files[0];
-            const nomes = Array.from(document.querySelectorAll(".nome-ing")).map(i => i.value);
-            const cpfs = Array.from(document.querySelectorAll(".cpf-ing")).map(i => i.value);
-            const comprador = document.getElementById("comprador").value;
-            const telefone = document.getElementById("telefone").value;
-
-            if (!file || nomes.some(n => n.trim() === "") || comprador.trim() === "") {
-                alert("Por favor, preencha todos os nomes e anexe o comprovante.");
-                return;
-            }
-
-            botao.innerText = "Enviando...";
-            botao.disabled = true;
-
-            const reader = new FileReader();
-            reader.onload = async function() {
-                const base64 = reader.result.split(",")[1];
-                
-                const listaIngressos = nomes.map((nome, index) => ({
-                    "NOME_INGRESSO": nome,
-                    "CPF_INGRESSO": cpfs[index]
-                }));
-
-                const payload = {
-                    "COMPRADOR": comprador,
-                    "TELEFONE": telefone,
-                    "ARQUIVO_BASE64": base64,
-                    "NOME_ARQUIVO": file.name,
-                    "INGRESSOS": listaIngressos
-                };
-
-                try {
-                    const response = await fetch(URL_POWER_AUTOMATE, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    if (response.ok) { 
-                        alert("Enviado com sucesso!"); 
-                        location.reload(); 
-                    } else { 
-                        const errorData = await response.text();
-                        console.error("Erro no Power Automate:", errorData);
-                        alert("Erro no servidor. Verifique o Power Automate."); 
-                        resetBotao(); 
-                    }
-                } catch (e) { 
-                    console.error("Erro de conexão:", e);
-                    alert("Erro de conexão. Verifique se a URL está correta."); 
-                    resetBotao(); 
-                }
-            };
-            reader.onerror = function() {
-                alert("Erro ao ler o arquivo.");
-                resetBotao();
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function resetBotao() { 
-            botao.innerText = "Selecionar Comprovante"; 
-            botao.disabled = false; 
-            botao.style.backgroundColor = "#2e7d32"; 
         }
 
         function aplicarMascaras() {
@@ -185,18 +252,7 @@
                     e.target.value = v;
                 });
             });
-            
-            document.getElementById("telefone").addEventListener("input", e => {
-                let v = e.target.value.replace(/\D/g, "").slice(0, 11);
-                if (v.length > 6) v = v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-                else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
-                e.target.value = v;
-            });
         }
-        
-        document.getElementById("comprador").addEventListener("input", e => {
-            e.target.value = e.target.value.toUpperCase();
-        });
     </script>
 </body>
 </html>
