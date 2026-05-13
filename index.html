@@ -69,6 +69,7 @@
             padding: 15px;
             border: 1px solid #eee;
             border-radius: 10px;
+            background-color: #fff;
         }
 
         .qr img {
@@ -83,7 +84,16 @@
             font-size: 1.2em;
         }
 
-        button {
+        /* Estilo específico para o Pix Copia e Cola */
+        .pix-box {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .btn-enviar {
             margin-top: 25px;
             width: 100%;
             padding: 14px;
@@ -98,14 +108,28 @@
             transition: all 0.2s;
         }
 
-        button:active {
+        .btn-enviar:active {
             box-shadow: 0 2px 0 #1b5e20;
             transform: translateY(4px);
         }
 
+        .btn-copiar {
+            margin-top: 8px;
+            width: 100%;
+            padding: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            background-color: #616161;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
         button:disabled {
-            background-color: #9e9e9e;
-            box-shadow: 0 6px 0 #616161;
+            background-color: #9e9e9e !important;
+            box-shadow: 0 6px 0 #616161 !important;
             cursor: not-allowed;
         }
     </style>
@@ -137,11 +161,18 @@
         <div class="qr">
             <img src="qr.png" alt="QR Code para Pagamento">
             <div class="valor">Valor: R$ 5,00</div>
+            
+            <div class="pix-box">
+                <label style="font-size: 11px; text-align: center; margin-top: 0;">Pix Copia e Cola:</label>
+                <input id="pix-codigo" value="00020126580014BR.GOV.BCB.PIX0136701fcb2e-76c2-4b0c-9395-5041c19409365204000053039865802BR5923Raul Militao dos Santos6009SAO PAULO62140510wvlD1Qh7ri63046AC7" readonly 
+                       style="font-size: 10px; background: #eee; border: 1px solid #ccc; text-align: center;">
+                <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()">Copiar Código Pix</button>
+            </div>
         </div>
 
         <input type="file" id="comprovante" accept="image/*,application/pdf" style="display:none">
 
-        <button id="btn-enviar">Selecionar Comprovante</button>
+        <button id="btn-enviar" class="btn-enviar">Selecionar Comprovante</button>
     </div>
 
     <script>
@@ -151,7 +182,6 @@
         const divValor = document.querySelector(".valor");
         const campos = ["comprador", "cpf", "telefone"];
 
-        // URL do seu fluxo do Power Automate
         const URL_POWER_AUTOMATE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a4a0f1e7180342b89edfbd2c4539ac1e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=c__Lfqm_KuACPiz0hChwH4AAeN-AVZeJC4oBL4Pfdyg";
 
         // Atualiza valor conforme seleção
@@ -160,6 +190,25 @@
             divValor.innerText = `Valor: R$ ${total},00`;
         });
 
+        // Função para Copiar Pix
+        function copiarPix() {
+            const textoPix = document.getElementById("pix-codigo");
+            const btnCopiar = document.getElementById("btn-copiar");
+
+            textoPix.select();
+            textoPix.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(textoPix.value).then(() => {
+                const originalText = btnCopiar.innerText;
+                btnCopiar.innerText = "✓ Copiado!";
+                btnCopiar.style.backgroundColor = "#2e7d32";
+                setTimeout(() => {
+                    btnCopiar.innerText = originalText;
+                    btnCopiar.style.backgroundColor = "#616161";
+                }, 2000);
+            });
+        }
+
+        // Lógica do botão de envio
         botao.addEventListener("click", function () {
             if (botao.innerText === "Selecionar Comprovante") {
                 inputFile.click();
@@ -178,16 +227,11 @@
 
         async function enviarDados() {
             const file = inputFile.files[0];
-            
-            if (!file) {
-                alert("Por favor, selecione o comprovante.");
-                return;
-            }
+            if (!file) { alert("Selecione o comprovante."); return; }
 
             for (let id of campos) {
                 if (document.getElementById(id).value.trim() === "") {
-                    alert("Por favor, preencha todos os campos.");
-                    return;
+                    alert("Preencha todos os campos."); return;
                 }
             }
 
@@ -198,7 +242,6 @@
             reader.onload = async function () {
                 const base64 = reader.result.split(",")[1];
 
-                // Objeto ajustado para MAIÚSCULAS conforme sua planilha e JSON do Power Automate
                 const dados = {
                     "COMPRADOR": document.getElementById("comprador").value,
                     "CPF": document.getElementById("cpf").value,
@@ -223,12 +266,10 @@
                         resetBotao();
                     }
                 } catch (error) {
-                    console.error("Erro:", error);
                     alert("Erro de conexão.");
                     resetBotao();
                 }
             };
-
             reader.readAsDataURL(file);
         }
 
@@ -240,7 +281,6 @@
             selectQtde.value = "1";
             divValor.innerText = "Valor: R$ 5,00";
             botao.innerText = "Enviado!";
-            botao.disabled = true;
             setTimeout(resetBotao, 3000);
         }
 
@@ -251,7 +291,7 @@
             botao.style.boxShadow = "0 6px 0 #1b5e20";
         }
 
-        // Máscaras
+        // Máscaras de input
         document.getElementById("telefone").addEventListener("input", function (e) {
             let v = e.target.value.replace(/\D/g, "").slice(0, 11);
             if (v.length > 6) v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
