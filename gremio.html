@@ -10,30 +10,29 @@
         body { 
             font-family: 'Poppins', sans-serif; 
             margin: 0; 
-            padding: 40px 20px 20px 20px; 
+            padding: 60px 20px 20px 20px; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             min-height: 100vh; 
             color: #4a3b32; 
             background-color: #e65100; 
-            background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%), linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%); 
+            background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%), linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%); 
             background-size: 40px 40px; 
             background-position: 0 0, 20px 20px; 
             position: relative;
-            overflow-x: hidden;
         }
 
-        /* Bandeirinhas */
-        .bandeirinhas {
+        /* Varal de Bandeirinhas Realista */
+        .varal {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 50px;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20" preserveAspectRatio="none"><path d="M0 0 v20 l10 -10 l10 10 v-20 M20 0 v20 l10 -10 l10 10 v-20 M40 0 v20 l10 -10 l10 10 v-20 M60 0 v20 l10 -10 l10 10 v-20 M80 0 v20 l10 -10 l10 10 v-20" fill="%23ffd54f"/><path d="M10 0 v20 l10 -10 l10 10 v-20 M30 0 v20 l10 -10 l10 10 v-20 M50 0 v20 l10 -10 l10 10 v-20 M70 0 v20 l10 -10 l10 10 v-20 M90 0 v20 l10 -10 l10 10 v-20" fill="%234db6ac"/></svg>');
-            background-size: 200px 50px;
+            height: 80px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60'%3E%3Cpath d='M0 10 Q 50 25 100 10 Q 150 25 200 10' stroke='%235D4037' fill='none' stroke-width='1'/%3E%3Cpath d='M10 13 L10 45 L22 35 L34 45 L34 16 Z' fill='%23FFD54F'/%3E%3Cpath d='M45 18 L45 50 L57 40 L69 50 L69 20 Z' fill='%23F44336'/%3E%3Cpath d='M80 16 L80 48 L92 38 L104 48 L104 15 Z' fill='%234CAF50'/%3E%3Cpath d='M115 16 L115 48 L127 38 L139 48 L139 18 Z' fill='%232196F3'/%3E%3Cpath d='M150 20 L150 52 L162 42 L174 52 L174 21 Z' fill='%23FF9800'/%3E%3Cpath d='M185 15 L185 45 L197 35 L209 45 L209 12 Z' fill='%239C27B0'/%3E%3C/svg%3E");
             background-repeat: repeat-x;
+            background-size: 400px 80px;
             z-index: 10;
         }
 
@@ -51,7 +50,7 @@
             z-index: 5;
         }
 
-        h1 { margin-top: 10px; font-family: 'Amatic SC', cursive; font-size: 44px; color: #bf360c; }
+        h1 { margin-top: 10px; font-family: 'Amatic SC', cursive; font-size: 48px; color: #bf360c; }
         label { font-weight: 600; margin-top: 15px; display: block; text-align: left; font-size: 14px; }
         
         input, select { 
@@ -61,7 +60,7 @@
             border: 2px dashed #bcaaa4; 
             font-size: 14px; 
             box-sizing: border-box; 
-            text-transform: none; /* Garante que não fique tudo maiúsculo */
+            text-transform: none;
         }
 
         .ingresso-extra { background: #fdf2e9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #ebba95; }
@@ -76,17 +75,20 @@
         .btn-validar { background-color: #1565c0; box-shadow: 0 6px 0 #0d47a1; margin-top: 15px; }
         .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font-size: 12px; background-color: #616161; color: white; border: none; border-radius: 5px; cursor: pointer; }
         
-        .status-msg { margin-top: 15px; font-size: 15px; font-weight: bold; color: #bf360c; line-height: 1.4; }
+        .status-msg { margin-top: 15px; font-size: 15px; font-weight: bold; color: #bf360c; }
+        
+        /* Estilos da Tela de Sucesso */
+        .msg-sucesso { font-family: 'Amatic SC', cursive; color: #2e7d32; line-height: 1.1; }
+        .msg-sucesso h2 { font-size: 45px; margin: 10px 0; }
+        .msg-sucesso p { font-size: 32px; margin: 5px 0; }
+        
+        .icon-grande { font-size: 80px; display: block; margin-bottom: 10px; }
+        
         button:disabled { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; cursor: not-allowed; }
-
-        /* Ícones Grandes */
-        .icon-status { font-size: 60px; display: block; margin-bottom: 10px; }
-        .success-text { color: #2e7d32; font-family: 'Amatic SC', cursive; font-size: 38px; }
-        .sub-text { font-size: 18px; font-weight: 600; display: block; }
     </style>
 </head>
 <body>
-    <div class="bandeirinhas"></div>
+    <div class="varal"></div>
     <div class="container">
         <h1>Festa Junina</h1>
         
@@ -149,7 +151,7 @@
             const btn = document.getElementById("btn-gerar");
             const comprador = document.getElementById("comprador").value;
             
-            if (!comprador) { alert("Por favor, diga quem é o comprador."); return; }
+            if (!comprador) { alert("Por favor, preencha o nome do comprador."); return; }
 
             btn.disabled = true;
             btn.innerText = "Processando...";
@@ -174,7 +176,6 @@
                 if (response.ok) {
                     const data = await response.json();
                     idPagamentoAtual = data.pagamento_id; 
-                    
                     document.getElementById("sessao-formulario").style.display = "none";
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
@@ -183,11 +184,11 @@
                     document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
                     document.getElementById("exibir-total").innerText = `Total: R$ ${selectQtde.value * 5},00`;
                 } else {
-                    alert("Ops! Tivemos um problema ao gerar o Pix.");
+                    alert("Erro ao gerar Pix.");
                     btn.disabled = false;
                 }
             } catch (e) {
-                alert("Erro de conexão. Verifique sua internet.");
+                alert("Erro de conexão.");
                 btn.disabled = false;
             }
         });
@@ -212,14 +213,17 @@
 
                 if (resultado.includes("Sucesso")) {
                     document.getElementById("sessao-qr").innerHTML = `
-                        <span class="icon-status">✅</span>
-                        <h2 class="success-text">ETA TREM BÃO!</h2>
-                        <span class="sub-text">NOS ENCONTRAMOS NA FESTA!</span>
+                        <div class="msg-sucesso">
+                            <span class="icon-grande">✅</span>
+                            <h2>PAGAMENTO CONFIRMADO!</h2>
+                            <p>ETA TREM BÃO!</p>
+                            <p>NOS ENCONTRAMOS NA FESTA!</p>
+                        </div>
                     `;
                 } else {
                     msg.innerHTML = `
-                        <span class="icon-status" style="font-size: 40px;">❌</span>
-                        Ainda não detectamos o pagamento.<br>Tente novamente em alguns instantes!
+                        <span class="icon-grande" style="font-size: 50px;">❌</span>
+                        Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!
                     `;
                     btn.disabled = false;
                     btn.innerText = "Verificar Pagamento";
