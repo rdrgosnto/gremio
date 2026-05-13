@@ -128,6 +128,10 @@
         <label>Quantidade de ingressos</label>
         <select id="quantidade">
             <option value="1">1 ingresso</option>
+            <option value="2">2 ingressos</option>
+            <option value="3">3 ingressos</option>
+            <option value="4">4 ingressos</option>
+            <option value="5">5 ingressos</option>
         </select>
 
         <div class="qr">
@@ -143,7 +147,15 @@
     <script>
         const inputFile = document.getElementById("comprovante");
         const botao = document.getElementById("btn-enviar");
+        const selectQtde = document.getElementById("quantidade");
+        const divValor = document.querySelector(".valor");
         const campos = ["comprador", "cpf", "telefone"];
+
+        // Atualiza o valor total na tela conforme a quantidade
+        selectQtde.addEventListener("change", function() {
+            const total = this.value * 5;
+            divValor.innerText = `Valor: R$ ${total},00`;
+        });
 
         // Lógica do botão
         botao.addEventListener("click", function () {
@@ -158,7 +170,7 @@
         inputFile.addEventListener("change", function () {
             if (this.files.length > 0) {
                 botao.innerText = "Enviar";
-                botao.style.backgroundColor = "#1565c0"; // Muda cor para indicar pronto
+                botao.style.backgroundColor = "#1565c0"; 
                 botao.style.boxShadow = "0 6px 0 #0d47a1";
             }
         });
@@ -166,14 +178,12 @@
         async function enviarDados() {
             const file = inputFile.files[0];
             
-            // Validação de segurança: Não deixa enviar sem arquivo
             if (!file) {
                 alert("Por favor, selecione o comprovante antes de enviar.");
                 botao.innerText = "Selecionar Comprovante";
                 return;
             }
 
-            // Validação básica de preenchimento
             for (let id of campos) {
                 if (document.getElementById(id).value.trim() === "") {
                     alert("Por favor, preencha todos os campos.");
@@ -192,13 +202,14 @@
                     nome: document.getElementById("comprador").value,
                     cpf: document.getElementById("cpf").value,
                     telefone: document.getElementById("telefone").value,
-                    quantidade: "1",
+                    quantidade: selectQtde.value,
                     arquivo: base64,
                     nomeArquivo: file.name
                 };
 
                 try {
-                    const response = await fetch("COLE_AQUI_SUA_URL_DO_POWER_AUTOMATE", {
+                    // SUA URL DO POWER AUTOMATE INSERIDA ABAIXO:
+                    const response = await fetch("https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a4a0f1e7180342b89edfbd2c4539ac1e/triggers/manual/paths/invoke?api-version=1", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(dados)
@@ -224,13 +235,14 @@
             document.getElementById("comprador").value = "";
             document.getElementById("cpf").value = "";
             document.getElementById("telefone").value = "";
-            inputFile.value = ""; // Limpa o arquivo
+            inputFile.value = "";
+            selectQtde.value = "1";
+            divValor.innerText = "Valor: R$ 5,00";
             
             botao.innerText = "Enviado!";
             botao.style.backgroundColor = "#2e7d32";
             botao.disabled = true;
 
-            // Após 3 segundos, volta o botão ao estado inicial para uma nova compra
             setTimeout(() => {
                 resetBotao();
             }, 3000);
