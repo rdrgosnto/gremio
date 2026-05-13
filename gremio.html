@@ -20,7 +20,6 @@
         .btn-principal { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; background-color: #2e7d32; color: white; cursor: pointer; border: none; box-shadow: 0 6px 0 #1b5e20; transition: 0.2s; }
         .btn-principal:active { box-shadow: 0 2px 0 #1b5e20; transform: translateY(4px); }
         .btn-validar { background-color: #1565c0; box-shadow: 0 6px 0 #0d47a1; margin-top: 15px; }
-        .btn-validar:active { box-shadow: 0 2px 0 #0d47a1; }
         .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font-size: 12px; background-color: #616161; color: white; border: none; border-radius: 5px; cursor: pointer; }
         .status-msg { margin-top: 15px; font-size: 14px; font-weight: bold; color: #bf360c; }
         button:disabled { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; cursor: not-allowed; }
@@ -30,7 +29,6 @@
     <div class="container">
         <h1>Festa Junina</h1>
         
-        <!-- SEÇÃO DE INPUTS -->
         <div id="sessao-formulario">
             <label>Nome do Comprador</label>
             <input id="comprador" placeholder="NOME COMPLETO">
@@ -46,18 +44,16 @@
             </select>
 
             <div id="campos-extras"></div>
-            
             <button id="btn-gerar" class="btn-principal">Gerar QR Code Pix</button>
         </div>
 
-        <!-- SEÇÃO DO QR CODE E VALIDAÇÃO -->
         <div class="qr-container" id="sessao-qr">
             <div id="carregando-qr">Gerando pagamento...</div>
             <img src="" id="img-qr" alt="QR Code Pix" style="display:none;">
             <div class="valor" id="exibir-total">Total: R$ 0,00</div>
             
             <div class="pix-box">
-                <input id="pix-codigo" value="" readonly style="font-size: 9px; width: 100%; text-align: center; border: 1px solid #ccc; background: #fff;">
+                <input id="pix-codigo" readonly style="font-size: 9px; width: 100%; text-align: center; border: 1px solid #ccc; background: #fff;">
                 <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()">Copiar Código Pix</button>
             </div>
 
@@ -67,9 +63,9 @@
     </div>
 
     <script>
-        // URLs do Power Automate
+        // URLs DO SEU POWER AUTOMATE
         const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/8e1865f65f124dbdbca02b2638e70207/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=eNJyrOF_gmIW421bF4eCsTACCPO5pZ68q3o8OcZIO8s";
-        const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1aec54bf6bbd497d95265677ea67e618/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ZaGwdJwCHl1ObU7im9Vrl688AtQ--_apOGeSJ6VT6_k";
+        const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
 
         let idPagamentoAtual = null;
 
@@ -83,7 +79,7 @@
             for(let i = 1; i <= qtde; i++) {
                 const div = document.createElement("div");
                 div.className = "ingresso-extra";
-                div.innerHTML = `<label>Nome do Ingresso ${i}</label><input class="nome-ing" placeholder="NOME NO INGRESSO"><label>CPF ${i}</label><input class="cpf-ing" placeholder="000.000.000-00">`;
+                div.innerHTML = `<label>Nome do Ingresso ${i}</label><input class="nome-ing" placeholder="NOME"><label>CPF ${i}</label><input class="cpf-ing" placeholder="000.000.000-00">`;
                 camposExtras.appendChild(div);
             }
             aplicarMascaras();
@@ -94,13 +90,8 @@
         document.getElementById("btn-gerar").addEventListener("click", async () => {
             const btn = document.getElementById("btn-gerar");
             const comprador = document.getElementById("comprador").value;
-            const nomes = Array.from(document.querySelectorAll(".nome-ing")).map(i => i.value);
-            const cpfs = Array.from(document.querySelectorAll(".cpf-ing")).map(i => i.value);
-
-            if (!comprador || nomes.some(n => n.trim() === "")) {
-                alert("Por favor, preencha todos os campos.");
-                return;
-            }
+            
+            if (!comprador) { alert("Preencha o nome do comprador."); return; }
 
             btn.disabled = true;
             btn.innerText = "Processando...";
@@ -109,7 +100,10 @@
                 "COMPRADOR": comprador.toUpperCase(),
                 "TELEFONE": document.getElementById("telefone").value,
                 "QUANTIDADE": selectQtde.value,
-                "INGRESSOS": nomes.map((n, index) => ({ "NOME_INGRESSO": n.toUpperCase(), "CPF_INGRESSO": cpfs[index] }))
+                "INGRESSOS": Array.from(document.querySelectorAll(".nome-ing")).map((n, i) => ({
+                    "NOME_INGRESSO": n.value.toUpperCase(),
+                    "CPF_INGRESSO": document.querySelectorAll(".cpf-ing")[i].value
+                }))
             };
 
             try {
@@ -121,22 +115,18 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    idPagamentoAtual = data.pagamento_id;
+                    idPagamentoAtual = data.pagamento_id; // Armazena o ID para validar depois
                     
                     document.getElementById("sessao-formulario").style.display = "none";
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
-                    
-                    const imgQr = document.getElementById("img-qr");
-                    imgQr.src = `data:image/png;base64,${data.pix_qr_code_base64}`;
-                    imgQr.style.display = "inline-block";
-                    
+                    document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
+                    document.getElementById("img-qr").style.display = "inline-block";
                     document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
                     document.getElementById("exibir-total").innerText = `Total: R$ ${selectQtde.value * 5},00`;
                 } else {
-                    alert("Erro ao gerar Pix. Tente novamente.");
+                    alert("Erro ao gerar Pix.");
                     btn.disabled = false;
-                    btn.innerText = "Gerar QR Code Pix";
                 }
             } catch (e) {
                 alert("Erro de conexão.");
@@ -144,14 +134,15 @@
             }
         });
 
-        // FUNÇÃO 2: VALIDAR O PAGAMENTO
+        // FUNÇÃO 2: VALIDAR O PAGAMENTO (Chama o seu Fluxo 2)
         document.getElementById("btn-validar").addEventListener("click", async () => {
             const btn = document.getElementById("btn-validar");
             const msg = document.getElementById("status-verificacao");
             
+            if (!idPagamentoAtual) { alert("ID do pagamento não encontrado."); return; }
+
             btn.disabled = true;
-            btn.innerText = "Verificando no banco...";
-            msg.innerText = "";
+            btn.innerText = "Verificando...";
 
             try {
                 const response = await fetch(URL_VALIDAR_PAGAMENTO, {
@@ -163,16 +154,15 @@
                 const resultado = await response.text();
 
                 if (resultado.includes("Sucesso")) {
-                    document.getElementById("sessao-qr").innerHTML = `<h2 style="color: #2e7d32;">✅ PAGAMENTO APROVADO!</h2><p>Seus ingressos foram registrados. Você já pode fechar esta página.</p>`;
+                    document.getElementById("sessao-qr").innerHTML = `<h2 style="color: #2e7d32;">✅ PAGAMENTO APROVADO!</h2><p>Seu ingresso foi confirmado na planilha.</p>`;
                 } else {
-                    msg.innerText = "Pagamento ainda não identificado. Se você já pagou, aguarde 30 segundos e tente novamente.";
+                    msg.innerText = "Pagamento ainda não detectado. Tente novamente em instantes.";
                     btn.disabled = false;
                     btn.innerText = "Já fiz o pagamento!";
                 }
             } catch (e) {
-                msg.innerText = "Erro ao conectar com o validador.";
+                msg.innerText = "Erro ao conectar com o servidor.";
                 btn.disabled = false;
-                btn.innerText = "Já fiz o pagamento!";
             }
         });
 
@@ -194,17 +184,7 @@
                     e.target.value = v;
                 });
             });
-            document.getElementById("telefone").addEventListener("input", e => {
-                let v = e.target.value.replace(/\D/g, "").slice(0, 11);
-                if (v.length > 6) v = v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-                else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
-                e.target.value = v;
-            });
         }
-        
-        document.getElementById("comprador").addEventListener("input", e => {
-            e.target.value = e.target.value.toUpperCase();
-        });
     </script>
 </body>
 </html>
