@@ -1,309 +1,165 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grêmio | Ingressos Festa Junina</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: #4a3b32;
-            background-color: #e65100;
-            background-image:
-                linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%),
-                linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%);
-            background-size: 40px 40px;
-            background-position: 0 0, 20px 20px;
-        }
-
-        .container {
-            background-color: #fffdf7;
-            padding: 30px 25px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 360px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-            text-align: center;
-            box-sizing: border-box;
-            border: 3px dashed #d84315;
-            position: relative;
-        }
-
-        h1 {
-            margin-top: 10px;
-            margin-bottom: 20px;
-            font-family: 'Amatic SC', cursive;
-            font-size: 44px;
-            color: #bf360c;
-        }
-
-        label {
-            font-weight: 600;
-            margin-top: 15px;
-            display: block;
-            text-align: left;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: 8px;
-            border: 2px dashed #bcaaa4;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-
-        .qr {
-            margin-top: 25px;
-            padding: 15px;
-            border: 1px solid #eee;
-            border-radius: 10px;
-            background-color: #fff;
-        }
-
-        .qr img {
-            width: 100%;
-            max-width: 200px;
-        }
-
-        .valor {
-            font-weight: bold;
-            color: #bf360c;
-            margin-top: 10px;
-            font-size: 1.2em;
-        }
-
-        /* Estilo específico para o Pix Copia e Cola */
-        .pix-box {
-            margin-top: 15px;
-            padding: 10px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-
-        .btn-enviar {
-            margin-top: 25px;
-            width: 100%;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            background-color: #2e7d32;
-            color: white;
-            cursor: pointer;
-            border: 2px dashed #a5d6a7;
-            box-shadow: 0 6px 0 #1b5e20;
-            transition: all 0.2s;
-        }
-
-        .btn-enviar:active {
-            box-shadow: 0 2px 0 #1b5e20;
-            transform: translateY(4px);
-        }
-
-        .btn-copiar {
-            margin-top: 8px;
-            width: 100%;
-            padding: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            background-color: #616161;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        button:disabled {
-            background-color: #9e9e9e !important;
-            box-shadow: 0 6px 0 #616161 !important;
-            cursor: not-allowed;
-        }
+        body { font-family: 'Poppins', sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #4a3b32; background-color: #e65100; background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%), linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.15) 75%); background-size: 40px 40px; background-position: 0 0, 20px 20px; }
+        .container { background-color: #fffdf7; padding: 30px 25px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); text-align: center; box-sizing: border-box; border: 3px dashed #d84315; }
+        h1 { margin-top: 10px; font-family: 'Amatic SC', cursive; font-size: 44px; color: #bf360c; }
+        label { font-weight: 600; margin-top: 15px; display: block; text-align: left; font-size: 14px; }
+        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 2px dashed #bcaaa4; font-size: 14px; box-sizing: border-box; }
+        .ingresso-extra { background: #fdf2e9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #ebba95; }
+        .qr { margin-top: 25px; padding: 15px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
+        .qr img { width: 100%; max-width: 180px; }
+        .valor { font-weight: bold; color: #bf360c; margin-top: 10px; font-size: 1.2em; }
+        .pix-box { margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
+        .btn-enviar { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; background-color: #2e7d32; color: white; cursor: pointer; border: 2px dashed #a5d6a7; box-shadow: 0 6px 0 #1b5e20; }
+        .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font-size: 12px; background-color: #616161; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:disabled { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; }
     </style>
 </head>
-
 <body>
-
     <div class="container">
         <h1>Festa Junina</h1>
-
-        <label>Nome do comprador</label>
+        
+        <label>Seu Nome (Comprador)</label>
         <input id="comprador" placeholder="Nome completo">
-
-        <label>CPF</label>
-        <input id="cpf" placeholder="000.000.000-00">
-
-        <label>Telefone</label>
+        
+        <label>Seu Telefone</label>
         <input id="telefone" placeholder="(00) 00000-0000">
 
         <label>Quantidade de ingressos</label>
         <select id="quantidade">
-            <option value="1">1 ingresso</option>
-            <option value="2">2 ingressos</option>
-            <option value="3">3 ingressos</option>
-            <option value="4">4 ingressos</option>
-            <option value="5">5 ingressos</option>
+            <option value="1">1 ingresso (R$ 5,00)</option>
+            <option value="2">2 ingressos (R$ 10,00)</option>
+            <option value="3">3 ingressos (R$ 15,00)</option>
         </select>
 
+        <div id="campos-extras"></div>
+
         <div class="qr">
-            <img src="qr.png" alt="QR Code para Pagamento">
-            <div class="valor">Valor: R$ 5,00</div>
-            
+            <img src="qr.png" alt="QR Code">
+            <div class="valor">Total: R$ 5,00</div>
             <div class="pix-box">
-                <label style="font-size: 11px; text-align: center; margin-top: 0;">Pix Copia e Cola:</label>
-                <input id="pix-codigo" value="00020126580014BR.GOV.BCB.PIX0136701fcb2e-76c2-4b0c-9395-5041c19409365204000053039865802BR5923Raul Militao dos Santos6009SAO PAULO62140510wvlD1Qh7ri63046AC7" readonly 
-                       style="font-size: 10px; background: #eee; border: 1px solid #ccc; text-align: center;">
+                <input id="pix-codigo" value="00020126580014BR.GOV.BCB.PIX0136701fcb2e-76c2-4b0c-9395-5041c19409365204000053039865802BR5923Raul Militao dos Santos6009SAO PAULO62140510wvlD1Qh7ri63046AC7" readonly style="font-size: 9px;">
                 <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()">Copiar Código Pix</button>
             </div>
         </div>
 
         <input type="file" id="comprovante" accept="image/*,application/pdf" style="display:none">
-
         <button id="btn-enviar" class="btn-enviar">Selecionar Comprovante</button>
     </div>
 
     <script>
-        const inputFile = document.getElementById("comprovante");
-        const botao = document.getElementById("btn-enviar");
+        const URL_POWER_AUTOMATE = "SUA_URL_AQUI";
         const selectQtde = document.getElementById("quantidade");
+        const camposExtras = document.getElementById("campos-extras");
         const divValor = document.querySelector(".valor");
-        const campos = ["comprador", "cpf", "telefone"];
+        const botao = document.getElementById("btn-enviar");
+        const inputFile = document.getElementById("comprovante");
 
-        const URL_POWER_AUTOMATE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a4a0f1e7180342b89edfbd2c4539ac1e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=c__Lfqm_KuACPiz0hChwH4AAeN-AVZeJC4oBL4Pfdyg";
-
-        // Atualiza valor conforme seleção
+        // Gerar campos extras quando mudar quantidade
         selectQtde.addEventListener("change", function() {
-            const total = this.value * 5;
-            divValor.innerText = `Valor: R$ ${total},00`;
-        });
-
-        // Função para Copiar Pix
-        function copiarPix() {
-            const textoPix = document.getElementById("pix-codigo");
-            const btnCopiar = document.getElementById("btn-copiar");
-
-            textoPix.select();
-            textoPix.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(textoPix.value).then(() => {
-                const originalText = btnCopiar.innerText;
-                btnCopiar.innerText = "✓ Copiado!";
-                btnCopiar.style.backgroundColor = "#2e7d32";
-                setTimeout(() => {
-                    btnCopiar.innerText = originalText;
-                    btnCopiar.style.backgroundColor = "#616161";
-                }, 2000);
-            });
-        }
-
-        // Lógica do botão de envio
-        botao.addEventListener("click", function () {
-            if (botao.innerText === "Selecionar Comprovante") {
-                inputFile.click();
-            } else if (botao.innerText === "Enviar") {
-                enviarDados();
+            const qtde = parseInt(this.value);
+            divValor.innerText = `Total: R$ ${qtde * 5},00`;
+            camposExtras.innerHTML = "";
+            
+            for(let i = 1; i <= qtde; i++) {
+                const div = document.createElement("div");
+                div.className = "ingresso-extra";
+                div.innerHTML = `
+                    <label>Nome do Ingresso ${i}</label>
+                    <input class="nome-ing" placeholder="Nome no ingresso ${i}">
+                    <label>CPF do Ingresso ${i}</label>
+                    <input class="cpf-ing" placeholder="000.000.000-00">
+                `;
+                camposExtras.appendChild(div);
+                aplicarMascaras();
             }
         });
+        
+        // Disparar o evento uma vez para criar o primeiro campo
+        selectQtde.dispatchEvent(new Event('change'));
 
-        inputFile.addEventListener("change", function () {
+        function copiarPix() {
+            const pix = document.getElementById("pix-codigo");
+            pix.select();
+            navigator.clipboard.writeText(pix.value);
+            document.getElementById("btn-copiar").innerText = "✓ Copiado!";
+            setTimeout(() => { document.getElementById("btn-copiar").innerText = "Copiar Código Pix"; }, 2000);
+        }
+
+        botao.addEventListener("click", () => {
+            if (botao.innerText === "Selecionar Comprovante") inputFile.click();
+            else enviarDados();
+        });
+
+        inputFile.addEventListener("change", function() {
             if (this.files.length > 0) {
                 botao.innerText = "Enviar";
-                botao.style.backgroundColor = "#1565c0"; 
-                botao.style.boxShadow = "0 6px 0 #0d47a1";
+                botao.style.backgroundColor = "#1565c0";
             }
         });
 
         async function enviarDados() {
             const file = inputFile.files[0];
-            if (!file) { alert("Selecione o comprovante."); return; }
-
-            for (let id of campos) {
-                if (document.getElementById(id).value.trim() === "") {
-                    alert("Preencha todos os campos."); return;
-                }
+            const nomes = Array.from(document.querySelectorAll(".nome-ing")).map(i => i.value);
+            const cpfs = Array.from(document.querySelectorAll(".cpf-ing")).map(i => i.value);
+            
+            if (!file || nomes.some(n => n==="") || document.getElementById("comprador").value === "") {
+                alert("Preencha todos os nomes e anexe o comprovante.");
+                return;
             }
 
             botao.innerText = "Enviando...";
             botao.disabled = true;
 
             const reader = new FileReader();
-            reader.onload = async function () {
+            reader.onload = async function() {
                 const base64 = reader.result.split(",")[1];
+                
+                // Criar lista de ingressos para o Power Automate
+                const listaIngressos = nomes.map((nome, index) => ({
+                    "NOME_INGRESSO": nome,
+                    "CPF_INGRESSO": cpfs[index]
+                }));
 
-                const dados = {
+                const payload = {
                     "COMPRADOR": document.getElementById("comprador").value,
-                    "CPF": document.getElementById("cpf").value,
                     "TELEFONE": document.getElementById("telefone").value,
-                    "QUANTIDADE": selectQtde.value,
                     "ARQUIVO_BASE64": base64,
-                    "NOME_ARQUIVO": file.name
+                    "NOME_ARQUIVO": file.name,
+                    "INGRESSOS": listaIngressos
                 };
 
                 try {
                     const response = await fetch(URL_POWER_AUTOMATE, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(dados)
+                        body: JSON.stringify(payload)
                     });
-
-                    if (response.ok) {
-                        alert("Comprovante enviado com sucesso!");
-                        limparFormulario();
-                    } else {
-                        alert("Erro no servidor. Verifique o Power Automate.");
-                        resetBotao();
-                    }
-                } catch (error) {
-                    alert("Erro de conexão.");
-                    resetBotao();
-                }
+                    if (response.ok) { alert("Enviado com sucesso!"); location.reload(); }
+                    else { alert("Erro no servidor."); resetBotao(); }
+                } catch (e) { alert("Erro de conexão."); resetBotao(); }
             };
             reader.readAsDataURL(file);
         }
 
-        function limparFormulario() {
-            document.getElementById("comprador").value = "";
-            document.getElementById("cpf").value = "";
-            document.getElementById("telefone").value = "";
-            inputFile.value = "";
-            selectQtde.value = "1";
-            divValor.innerText = "Valor: R$ 5,00";
-            botao.innerText = "Enviado!";
-            setTimeout(resetBotao, 3000);
+        function resetBotao() { botao.innerText = "Selecionar Comprovante"; botao.disabled = false; botao.style.backgroundColor = "#2e7d32"; }
+
+        function aplicarMascaras() {
+            document.querySelectorAll(".cpf-ing").forEach(el => {
+                el.addEventListener("input", e => {
+                    let v = e.target.value.replace(/\D/g, "").slice(0, 11);
+                    v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+                    e.target.value = v;
+                });
+            });
         }
-
-        function resetBotao() {
-            botao.innerText = "Selecionar Comprovante";
-            botao.disabled = false;
-            botao.style.backgroundColor = "#2e7d32";
-            botao.style.boxShadow = "0 6px 0 #1b5e20";
-        }
-
-        // Máscaras de input
-        document.getElementById("telefone").addEventListener("input", function (e) {
-            let v = e.target.value.replace(/\D/g, "").slice(0, 11);
-            if (v.length > 6) v = v.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
-            else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
-            e.target.value = v;
-        });
-
-        document.getElementById("cpf").addEventListener("input", function (e) {
-            let v = e.target.value.replace(/\D/g, "").slice(0, 11);
-            v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-            e.target.value = v;
-        });
     </script>
 </body>
 </html>
