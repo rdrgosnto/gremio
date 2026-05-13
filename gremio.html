@@ -10,7 +10,7 @@
         body { 
             font-family: 'Poppins', sans-serif; 
             margin: 0; 
-            padding: 60px 20px 20px 20px; 
+            padding: 80px 20px 20px 20px; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -23,16 +23,17 @@
             position: relative;
         }
 
-        /* Varal de Bandeirinhas Realista */
+        /* Varal de Bandeirinhas Juntas e Emendadas */
         .varal {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 80px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60'%3E%3Cpath d='M0 10 Q 50 25 100 10 Q 150 25 200 10' stroke='%235D4037' fill='none' stroke-width='1'/%3E%3Cpath d='M10 13 L10 45 L22 35 L34 45 L34 16 Z' fill='%23FFD54F'/%3E%3Cpath d='M45 18 L45 50 L57 40 L69 50 L69 20 Z' fill='%23F44336'/%3E%3Cpath d='M80 16 L80 48 L92 38 L104 48 L104 15 Z' fill='%234CAF50'/%3E%3Cpath d='M115 16 L115 48 L127 38 L139 48 L139 18 Z' fill='%232196F3'/%3E%3Cpath d='M150 20 L150 52 L162 42 L174 52 L174 21 Z' fill='%23FF9800'/%3E%3Cpath d='M185 15 L185 45 L197 35 L209 45 L209 12 Z' fill='%239C27B0'/%3E%3C/svg%3E");
+            height: 100px;
+            /* SVG ajustado para as bandeiras se tocarem (x=0, 20, 40...) */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'%3E%3Cpath d='M0 5 Q 30 15 60 5 Q 90 15 120 5' stroke='%235D4037' fill='none' stroke-width='1.5'/%3E%3Cpath d='M0 7 L0 40 L10 32 L20 40 L20 8 Z' fill='%23FFD54F'/%3E%3Cpath d='M20 8 L20 41 L30 33 L40 41 L40 10 Z' fill='%23F44336'/%3E%3Cpath d='M40 10 L40 43 L50 35 L60 43 L60 11 Z' fill='%234CAF50'/%3E%3Cpath d='M60 11 L60 44 L70 36 L80 44 L80 12 Z' fill='%232196F3'/%3E%3Cpath d='M80 12 L80 45 L90 37 L100 45 L100 11 Z' fill='%23FF9800'/%3E%3Cpath d='M100 11 L100 44 L110 36 L120 44 L120 7 Z' fill='%239C27B0'/%3E%3C/svg%3E");
             background-repeat: repeat-x;
-            background-size: 400px 80px;
+            background-size: 300px 100px;
             z-index: 10;
         }
 
@@ -77,7 +78,7 @@
         
         .status-msg { margin-top: 15px; font-size: 15px; font-weight: bold; color: #bf360c; }
         
-        /* Estilos da Tela de Sucesso */
+        /* Sucesso com fonte Amatic SC unificada */
         .msg-sucesso { font-family: 'Amatic SC', cursive; color: #2e7d32; line-height: 1.1; }
         .msg-sucesso h2 { font-size: 45px; margin: 10px 0; }
         .msg-sucesso p { font-size: 32px; margin: 5px 0; }
@@ -126,6 +127,7 @@
     </div>
 
     <script>
+        // Mesmas URLs do seu Power Automate
         const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/8e1865f65f124dbdbca02b2638e70207/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=eNJyrOF_gmIW421bF4eCsTACCPO5pZ68q3o8OcZIO8s";
         const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
 
