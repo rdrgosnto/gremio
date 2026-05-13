@@ -21,20 +21,20 @@
             background-size: 40px 40px; 
             background-position: 0 0, 20px 20px; 
             position: relative;
+            overflow-x: hidden;
         }
 
-        /* Varal de Bandeirinhas Juntas e Emendadas */
-        .varal {
+        /* Teto de Bandeirinhas (Varais juntos) */
+        .varal-container {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100px;
-            /* SVG ajustado para as bandeiras se tocarem (x=0, 20, 40...) */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'%3E%3Cpath d='M0 5 Q 30 15 60 5 Q 90 15 120 5' stroke='%235D4037' fill='none' stroke-width='1.5'/%3E%3Cpath d='M0 7 L0 40 L10 32 L20 40 L20 8 Z' fill='%23FFD54F'/%3E%3Cpath d='M20 8 L20 41 L30 33 L40 41 L40 10 Z' fill='%23F44336'/%3E%3Cpath d='M40 10 L40 43 L50 35 L60 43 L60 11 Z' fill='%234CAF50'/%3E%3Cpath d='M60 11 L60 44 L70 36 L80 44 L80 12 Z' fill='%232196F3'/%3E%3Cpath d='M80 12 L80 45 L90 37 L100 45 L100 11 Z' fill='%23FF9800'/%3E%3Cpath d='M100 11 L100 44 L110 36 L120 44 L120 7 Z' fill='%239C27B0'/%3E%3C/svg%3E");
-            background-repeat: repeat-x;
-            background-size: 300px 100px;
-            z-index: 10;
+            height: 120px; /* Altura total do teto de bandeirinhas */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 40'%3E%3Cpath d='M0 5 Q 50 15 100 5 Q 150 15 200 5' stroke='%235D4037' fill='none' stroke-width='0.8'/%3E%3Cpath d='M15 7 L15 30 L25 22 L35 30 L35 9 Z' fill='%23FFD54F'/%3E%3Cpath d='M55 10 L55 33 L65 25 L75 33 L75 12 Z' fill='%23F44336'/%3E%3Cpath d='M95 8 L95 31 L105 23 L115 31 L115 7 Z' fill='%234CAF50'/%3E%3Cpath d='M135 10 L135 33 L145 25 L155 33 L155 11 Z' fill='%232196F3'/%3E%3Cpath d='M175 7 L175 30 L185 22 L195 30 L195 6 Z' fill='%23FF9800'/%3E%3C/svg%3E");
+            background-repeat: repeat; /* Repete em X e Y para colar os varais */
+            background-size: 300px 40px; /* Largura do padrão e altura de cada varal */
+            z-index: 1;
         }
 
         .container { 
@@ -49,6 +49,7 @@
             border: 3px dashed #d84315; 
             position: relative;
             z-index: 5;
+            margin-top: 20px;
         }
 
         h1 { margin-top: 10px; font-family: 'Amatic SC', cursive; font-size: 48px; color: #bf360c; }
@@ -78,18 +79,18 @@
         
         .status-msg { margin-top: 15px; font-size: 15px; font-weight: bold; color: #bf360c; }
         
-        /* Sucesso com fonte Amatic SC unificada */
-        .msg-sucesso { font-family: 'Amatic SC', cursive; color: #2e7d32; line-height: 1.1; }
-        .msg-sucesso h2 { font-size: 45px; margin: 10px 0; }
-        .msg-sucesso p { font-size: 32px; margin: 5px 0; }
+        /* Estilos da Tela de Sucesso Unificados */
+        .msg-confirmacao { font-family: 'Amatic SC', cursive; color: #2e7d32; line-height: 1.1; }
+        .msg-confirmacao h2 { font-size: 45px; margin: 10px 0; font-weight: 700; }
+        .msg-confirmacao p { font-size: 34px; margin: 5px 0; font-weight: 700; }
         
-        .icon-grande { font-size: 80px; display: block; margin-bottom: 10px; }
+        .icon-grande { font-size: 90px; display: block; margin-bottom: 15px; color: #2e7d32; }
         
         button:disabled { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; cursor: not-allowed; }
     </style>
 </head>
 <body>
-    <div class="varal"></div>
+    <div class="varal-container"></div>
     <div class="container">
         <h1>Festa Junina</h1>
         
@@ -127,7 +128,6 @@
     </div>
 
     <script>
-        // Mesmas URLs do seu Power Automate
         const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/8e1865f65f124dbdbca02b2638e70207/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=eNJyrOF_gmIW421bF4eCsTACCPO5pZ68q3o8OcZIO8s";
         const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
 
@@ -186,7 +186,7 @@
                     document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
                     document.getElementById("exibir-total").innerText = `Total: R$ ${selectQtde.value * 5},00`;
                 } else {
-                    alert("Erro ao gerar Pix.");
+                    alert("Erro ao gerar o QR Code.");
                     btn.disabled = false;
                 }
             } catch (e) {
@@ -215,7 +215,7 @@
 
                 if (resultado.includes("Sucesso")) {
                     document.getElementById("sessao-qr").innerHTML = `
-                        <div class="msg-sucesso">
+                        <div class="msg-confirmacao">
                             <span class="icon-grande">✅</span>
                             <h2>PAGAMENTO CONFIRMADO!</h2>
                             <p>ETA TREM BÃO!</p>
@@ -224,7 +224,7 @@
                     `;
                 } else {
                     msg.innerHTML = `
-                        <span class="icon-grande" style="font-size: 50px;">❌</span>
+                        <span class="icon-grande" style="font-size: 60px; color: #bf360c; margin-bottom: 5px;">❌</span>
                         Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!
                     `;
                     btn.disabled = false;
