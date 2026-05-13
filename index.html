@@ -17,7 +17,7 @@
         .qr img { width: 100%; max-width: 180px; }
         .valor { font-weight: bold; color: #bf360c; margin-top: 10px; font-size: 1.2em; }
         .pix-box { margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
-        .btn-enviar { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; background-color: #2e7d32; color: white; cursor: pointer; border: 2px dashed #a5d6a7; box-shadow: 0 6px 0 #1b5e20; }
+        .btn-enviar { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; background-color: #2e7d32; color: white; cursor: pointer; border: 2px dashed #a5d6a7; box-shadow: 0 6px 0 #1b5e20; border: none; }
         .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font-size: 12px; background-color: #616161; color: white; border: none; border-radius: 5px; cursor: pointer; }
         button:disabled { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; }
     </style>
@@ -45,7 +45,7 @@
             <img src="qr.png" alt="QR Code">
             <div class="valor">Total: R$ 5,00</div>
             <div class="pix-box">
-                <input id="pix-codigo" value="00020126580014BR.GOV.BCB.PIX0136701fcb2e-76c2-4b0c-9395-5041c19409365204000053039865802BR5923Raul Militao dos Santos6009SAO PAULO62140510wvlD1Qh7ri63046AC7" readonly style="font-size: 9px;">
+                <input id="pix-codigo" value="00020126580014BR.GOV.BCB.PIX0136701fcb2e-76c2-4b0c-9395-5041c19409365204000053039865802BR5923Raul Militao dos Santos6009SAO PAULO62140510wvlD1Qh7ri63046AC7" readonly style="font-size: 9px; width: 100%; text-align: center; border: 1px solid #ccc;">
                 <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()">Copiar Código Pix</button>
             </div>
         </div>
@@ -55,14 +55,14 @@
     </div>
 
     <script>
-        const URL_POWER_AUTOMATE = "SUA_URL_AQUI";
+        const URL_POWER_AUTOMATE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b35cfb9f015c4a64964d93c2e771c9f2/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=pkWxSzK2QqH0MAZjtDzhf8ERM_5CsgCT1TXtbEOKSLk";
+        
         const selectQtde = document.getElementById("quantidade");
         const camposExtras = document.getElementById("campos-extras");
         const divValor = document.querySelector(".valor");
         const botao = document.getElementById("btn-enviar");
         const inputFile = document.getElementById("comprovante");
 
-        // Gerar campos extras quando mudar quantidade
         selectQtde.addEventListener("change", function() {
             const qtde = parseInt(this.value);
             divValor.innerText = `Total: R$ ${qtde * 5},00`;
@@ -82,20 +82,23 @@
             }
         });
         
-        // Disparar o evento uma vez para criar o primeiro campo
         selectQtde.dispatchEvent(new Event('change'));
 
         function copiarPix() {
             const pix = document.getElementById("pix-codigo");
             pix.select();
+            pix.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(pix.value);
             document.getElementById("btn-copiar").innerText = "✓ Copiado!";
             setTimeout(() => { document.getElementById("btn-copiar").innerText = "Copiar Código Pix"; }, 2000);
         }
 
         botao.addEventListener("click", () => {
-            if (botao.innerText === "Selecionar Comprovante") inputFile.click();
-            else enviarDados();
+            if (botao.innerText === "Selecionar Comprovante") {
+                inputFile.click();
+            } else {
+                enviarDados();
+            }
         });
 
         inputFile.addEventListener("change", function() {
@@ -109,9 +112,11 @@
             const file = inputFile.files[0];
             const nomes = Array.from(document.querySelectorAll(".nome-ing")).map(i => i.value);
             const cpfs = Array.from(document.querySelectorAll(".cpf-ing")).map(i => i.value);
-            
-            if (!file || nomes.some(n => n==="") || document.getElementById("comprador").value === "") {
-                alert("Preencha todos os nomes e anexe o comprovante.");
+            const comprador = document.getElementById("comprador").value;
+            const telefone = document.getElementById("telefone").value;
+
+            if (!file || nomes.some(n => n.trim() === "") || comprador.trim() === "") {
+                alert("Por favor, preencha todos os nomes e anexe o comprovante.");
                 return;
             }
 
@@ -122,15 +127,14 @@
             reader.onload = async function() {
                 const base64 = reader.result.split(",")[1];
                 
-                // Criar lista de ingressos para o Power Automate
                 const listaIngressos = nomes.map((nome, index) => ({
                     "NOME_INGRESSO": nome,
                     "CPF_INGRESSO": cpfs[index]
                 }));
 
                 const payload = {
-                    "COMPRADOR": document.getElementById("comprador").value,
-                    "TELEFONE": document.getElementById("telefone").value,
+                    "COMPRADOR": comprador,
+                    "TELEFONE": telefone,
                     "ARQUIVO_BASE64": base64,
                     "NOME_ARQUIVO": file.name,
                     "INGRESSOS": listaIngressos
@@ -142,24 +146,57 @@
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(payload)
                     });
-                    if (response.ok) { alert("Enviado com sucesso!"); location.reload(); }
-                    else { alert("Erro no servidor."); resetBotao(); }
-                } catch (e) { alert("Erro de conexão."); resetBotao(); }
+                    
+                    if (response.ok) { 
+                        alert("Enviado com sucesso!"); 
+                        location.reload(); 
+                    } else { 
+                        const errorData = await response.text();
+                        console.error("Erro no Power Automate:", errorData);
+                        alert("Erro no servidor. Verifique o Power Automate."); 
+                        resetBotao(); 
+                    }
+                } catch (e) { 
+                    console.error("Erro de conexão:", e);
+                    alert("Erro de conexão. Verifique se a URL está correta."); 
+                    resetBotao(); 
+                }
+            };
+            reader.onerror = function() {
+                alert("Erro ao ler o arquivo.");
+                resetBotao();
             };
             reader.readAsDataURL(file);
         }
 
-        function resetBotao() { botao.innerText = "Selecionar Comprovante"; botao.disabled = false; botao.style.backgroundColor = "#2e7d32"; }
+        function resetBotao() { 
+            botao.innerText = "Selecionar Comprovante"; 
+            botao.disabled = false; 
+            botao.style.backgroundColor = "#2e7d32"; 
+        }
 
         function aplicarMascaras() {
             document.querySelectorAll(".cpf-ing").forEach(el => {
                 el.addEventListener("input", e => {
                     let v = e.target.value.replace(/\D/g, "").slice(0, 11);
-                    v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+                    if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+                    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
+                    else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
                     e.target.value = v;
                 });
             });
+            
+            document.getElementById("telefone").addEventListener("input", e => {
+                let v = e.target.value.replace(/\D/g, "").slice(0, 11);
+                if (v.length > 6) v = v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+                else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
+                e.target.value = v;
+            });
         }
+        
+        document.getElementById("comprador").addEventListener("input", e => {
+            e.target.value = e.target.value.toUpperCase();
+        });
     </script>
 </body>
 </html>
