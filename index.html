@@ -10,7 +10,7 @@
         body { 
             font-family: 'Poppins', sans-serif; 
             margin: 0; 
-            padding: 80px 20px 20px 20px; 
+            padding: 20px; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -20,21 +20,6 @@
             background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%), linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%); 
             background-size: 40px 40px; 
             background-position: 0 0, 20px 20px; 
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Teto de Bandeirinhas (Varais juntos) */
-        .varal-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 120px; /* Altura total do teto de bandeirinhas */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 40'%3E%3Cpath d='M0 5 Q 50 15 100 5 Q 150 15 200 5' stroke='%235D4037' fill='none' stroke-width='0.8'/%3E%3Cpath d='M15 7 L15 30 L25 22 L35 30 L35 9 Z' fill='%23FFD54F'/%3E%3Cpath d='M55 10 L55 33 L65 25 L75 33 L75 12 Z' fill='%23F44336'/%3E%3Cpath d='M95 8 L95 31 L105 23 L115 31 L115 7 Z' fill='%234CAF50'/%3E%3Cpath d='M135 10 L135 33 L145 25 L155 33 L155 11 Z' fill='%232196F3'/%3E%3Cpath d='M175 7 L175 30 L185 22 L195 30 L195 6 Z' fill='%23FF9800'/%3E%3C/svg%3E");
-            background-repeat: repeat; /* Repete em X e Y para colar os varais */
-            background-size: 300px 40px; /* Largura do padrão e altura de cada varal */
-            z-index: 1;
         }
 
         .container { 
@@ -47,9 +32,6 @@
             text-align: center; 
             box-sizing: border-box; 
             border: 3px dashed #d84315; 
-            position: relative;
-            z-index: 5;
-            margin-top: 20px;
         }
 
         h1 { margin-top: 10px; font-family: 'Amatic SC', cursive; font-size: 48px; color: #bf360c; }
@@ -79,7 +61,6 @@
         
         .status-msg { margin-top: 15px; font-size: 15px; font-weight: bold; color: #bf360c; }
         
-        /* Estilos da Tela de Sucesso Unificados */
         .msg-confirmacao { font-family: 'Amatic SC', cursive; color: #2e7d32; line-height: 1.1; }
         .msg-confirmacao h2 { font-size: 45px; margin: 10px 0; font-weight: 700; }
         .msg-confirmacao p { font-size: 34px; margin: 5px 0; font-weight: 700; }
@@ -90,7 +71,6 @@
     </style>
 </head>
 <body>
-    <div class="varal-container"></div>
     <div class="container">
         <h1>Festa Junina</h1>
         
@@ -103,9 +83,9 @@
 
             <label>Quantidade de ingressos</label>
             <select id="quantidade">
-                <option value="1">1 ingresso (R$ 5,00)</option>
-                <option value="2">2 ingressos (R$ 10,00)</option>
-                <option value="3">3 ingressos (R$ 15,00)</option>
+                <option value="1">1 ingresso</option>
+                <option value="2">2 ingressos</option>
+                <option value="3">3 ingressos</option>
             </select>
 
             <div id="campos-extras"></div>
@@ -113,9 +93,9 @@
         </div>
 
         <div class="qr-container" id="sessao-qr">
-            <div id="carregando-qr">Preparando seu pagamento...</div>
+            <div id="carregando-qr">Processando pagamento e descontos...</div>
             <img src="" id="img-qr" alt="QR Code Pix" style="display:none;">
-            <div class="valor" id="exibir-total">Total: R$ 0,00</div>
+            <div class="valor" id="exibir-total">Total: Calculando...</div>
             
             <div class="pix-box">
                 <input id="pix-codigo" readonly style="font-size: 9px; width: 100%; text-align: center; border: 1px solid #ccc; background: #fff;">
@@ -155,17 +135,24 @@
             
             if (!comprador) { alert("Por favor, preencha o nome do comprador."); return; }
 
+            const listaIngressos = Array.from(document.querySelectorAll(".nome-ing")).map((n, i) => ({
+                "NOME_INGRESSO": n.value,
+                "CPF_INGRESSO": document.querySelectorAll(".cpf-ing")[i].value
+            }));
+
+            if (listaIngressos.some(ing => ing.CPF_INGRESSO.length < 14)) {
+                alert("Por favor, preencha todos os CPFs corretamente para verificar descontos.");
+                return;
+            }
+
             btn.disabled = true;
-            btn.innerText = "Processando...";
+            btn.innerText = "Consultando Base Escolar...";
 
             const payload = {
                 "COMPRADOR": comprador,
                 "TELEFONE": document.getElementById("telefone").value,
                 "QUANTIDADE": selectQtde.value,
-                "INGRESSOS": Array.from(document.querySelectorAll(".nome-ing")).map((n, i) => ({
-                    "NOME_INGRESSO": n.value,
-                    "CPF_INGRESSO": document.querySelectorAll(".cpf-ing")[i].value
-                }))
+                "INGRESSOS": listaIngressos
             };
 
             try {
@@ -177,6 +164,7 @@
 
                 if (response.ok) {
                     const data = await response.json();
+                    
                     idPagamentoAtual = data.pagamento_id; 
                     document.getElementById("sessao-formulario").style.display = "none";
                     document.getElementById("sessao-qr").style.display = "block";
@@ -184,21 +172,25 @@
                     document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
                     document.getElementById("img-qr").style.display = "inline-block";
                     document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
-                    document.getElementById("exibir-total").innerText = `Total: R$ ${selectQtde.value * 5},00`;
+                    
+                    // O Power Automate agora devolve o valor já calculado (5 ou cheio) no campo 'valor_calculado'
+                    const valorFormatado = data.valor_calculado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    document.getElementById("exibir-total").innerText = `Total: ${valorFormatado}`;
                 } else {
-                    alert("Erro ao gerar o QR Code.");
+                    alert("Erro ao processar consulta de CPFs.");
                     btn.disabled = false;
+                    btn.innerText = "Gerar QR Code";
                 }
             } catch (e) {
                 alert("Erro de conexão.");
                 btn.disabled = false;
+                btn.innerText = "Gerar QR Code";
             }
         });
 
         document.getElementById("btn-validar").addEventListener("click", async () => {
             const btn = document.getElementById("btn-validar");
             const msg = document.getElementById("status-verificacao");
-            
             if (!idPagamentoAtual) return;
 
             btn.disabled = true;
