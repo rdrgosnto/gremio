@@ -135,6 +135,7 @@
             
             if (!comprador) { alert("Por favor, preencha o nome do comprador."); return; }
 
+            // Envia o CPF formatado (com pontos e traço) conforme solicitado
             const listaIngressos = Array.from(document.querySelectorAll(".nome-ing")).map((n, i) => ({
                 "NOME_INGRESSO": n.value,
                 "CPF_INGRESSO": document.querySelectorAll(".cpf-ing")[i].value
@@ -164,18 +165,14 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    
                     idPagamentoAtual = data.pagamento_id; 
                     
-                    // Configura os dados antes de exibir a sessão
                     document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
                     document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
                     
-                    // Lendo da sua variável que você configurou no fluxo chamada "variavel"
                     const valorTotal = data.variavel; 
                     document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(valorTotal).toFixed(2).replace('.', ',')}`;
 
-                    // Troca de tela
                     document.getElementById("sessao-formulario").style.display = "none";
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
@@ -241,6 +238,7 @@
         }
 
         function aplicarMascaras() {
+            // Máscara CPF (000.000.000-00)
             document.querySelectorAll(".cpf-ing").forEach(el => {
                 el.addEventListener("input", e => {
                     let v = e.target.value.replace(/\D/g, "").slice(0, 11);
@@ -250,7 +248,21 @@
                     e.target.value = v;
                 });
             });
+
+            // Máscara Telefone ((00) 00000-0000)
+            const telInput = document.getElementById("telefone");
+            if(telInput) {
+                telInput.addEventListener("input", e => {
+                    let v = e.target.value.replace(/\D/g, "").slice(0, 11);
+                    if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
+                    else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
+                    else if (v.length > 2) v = v.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
+                    else if (v.length > 0) v = v.replace(/^(\d{0,2})/, "($1");
+                    e.target.value = v;
+                });
+            }
         }
+        aplicarMascaras();
     </script>
 </body>
 </html>
