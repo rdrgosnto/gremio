@@ -116,13 +116,37 @@
         const selectQtde = document.getElementById("quantidade");
         const camposExtras = document.getElementById("campos-extras");
 
+        // Função para formatar nomes com a regra das preposições
+        function formatarNomeProprio(nome) {
+            const preposicoes = ["da", "das", "de", "do", "dos"];
+            return nome.toLowerCase().split(' ').map(palavra => {
+                if (preposicoes.includes(palavra)) return palavra;
+                if (palavra === "") return "";
+                return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+            }).join(' ');
+        }
+
+        // Aplica a formatação automática quando o usuário sai do campo de nome
+        document.addEventListener('blur', function (e) {
+            if (e.target.id === 'comprador' || e.target.classList.contains('nome-ing')) {
+                if (e.target.value.trim() !== "") {
+                    e.target.value = formatarNomeProprio(e.target.value);
+                }
+            }
+        }, true);
+
         selectQtde.addEventListener("change", () => {
             const qtde = parseInt(selectQtde.value);
             camposExtras.innerHTML = "";
             for(let i = 1; i <= qtde; i++) {
                 const div = document.createElement("div");
                 div.className = "ingresso-extra";
-                div.innerHTML = `<label>Nome no Ingresso ${i}</label><input class="nome-ing" placeholder="Nome do convidado"><label>CPF ${i}</label><input class="cpf-ing" placeholder="000.000.000-00">`;
+                div.innerHTML = `
+                    <label>Nome no Ingresso ${i}</label>
+                    <input class="nome-ing" placeholder="Nome do convidado">
+                    <label>CPF ${i}</label>
+                    <input class="cpf-ing" placeholder="000.000.000-00">
+                `;
                 camposExtras.appendChild(div);
             }
             aplicarMascaras();
@@ -131,18 +155,37 @@
 
         document.getElementById("btn-gerar").addEventListener("click", async () => {
             const btn = document.getElementById("btn-gerar");
-            const comprador = document.getElementById("comprador").value;
+            const comprador = document.getElementById("comprador").value.trim();
+            const telefone = document.getElementById("telefone").value.trim();
             
-            if (!comprador) { alert("Por favor, preencha o nome do comprador."); return; }
+            // Validação do comprador e telefone
+            if (!comprador || telefone.length < 14) { 
+                alert("Por favor, preencha o nome do comprador e o telefone corretamente."); 
+                return; 
+            }
 
-            // Envia o CPF formatado (com pontos e traço) conforme solicitado
-            const listaIngressos = Array.from(document.querySelectorAll(".nome-ing")).map((n, i) => ({
-                "NOME_INGRESSO": n.value,
-                "CPF_INGRESSO": document.querySelectorAll(".cpf-ing")[i].value
-            }));
+            const inputsNomes = document.querySelectorAll(".nome-ing");
+            const inputsCpfs = document.querySelectorAll(".cpf-ing");
+            let listaIngressos = [];
+            let erroValidacao = false;
 
-            if (listaIngressos.some(ing => ing.CPF_INGRESSO.length < 14)) {
-                alert("Por favor, preencha todos os CPFs corretamente.");
+            // Validação de todos os campos de ingressos extras
+            inputsNomes.forEach((input, i) => {
+                const nomeVal = input.value.trim();
+                const cpfVal = inputsCpfs[i].value.trim();
+
+                if (!nomeVal || cpfVal.length < 14) {
+                    erroValidacao = true;
+                }
+
+                listaIngressos.push({
+                    "NOME_INGRESSO": nomeVal,
+                    "CPF_INGRESSO": cpfVal
+                });
+            });
+
+            if (erroValidacao) {
+                alert("Por favor, preencha todos os nomes e CPFs dos ingressos.");
                 return;
             }
 
@@ -151,7 +194,7 @@
 
             const payload = {
                 "COMPRADOR": comprador,
-                "TELEFONE": document.getElementById("telefone").value,
+                "TELEFONE": telefone,
                 "QUANTIDADE": selectQtde.value,
                 "INGRESSOS": listaIngressos
             };
