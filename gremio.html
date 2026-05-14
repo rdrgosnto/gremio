@@ -187,12 +187,12 @@
             // Validação de CPFs duplicados no próprio formulário antes de enviar
             const cpfsUnicos = new Set(cpfsDigitados);
             if (cpfsUnicos.size !== cpfsDigitados.length) {
-                alert("Atenção: Você inseriu o mesmo CPF em mais de um ingresso.");
+                alert("Atenção: Os campos contém CPFs duplicados.");
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "Validando dados...";
+            btn.innerText = "Por favor, aguarde...";
 
             const payload = {
                 "COMPRADOR": comprador,
