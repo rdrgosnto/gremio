@@ -108,6 +108,7 @@
     </div>
 
     <script>
+        // Mantenha suas URLs aqui
         const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/8e1865f65f124dbdbca02b2638e70207/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=eNJyrOF_gmIW421bF4eCsTACCPO5pZ68q3o8OcZIO8s";
         const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
 
@@ -116,7 +117,6 @@
         const selectQtde = document.getElementById("quantidade");
         const camposExtras = document.getElementById("campos-extras");
 
-        // Função para formatar nomes com a regra das preposições
         function formatarNomeProprio(nome) {
             const preposicoes = ["da", "das", "de", "do", "dos"];
             return nome.toLowerCase().split(' ').map(palavra => {
@@ -126,7 +126,6 @@
             }).join(' ');
         }
 
-        // Aplica a formatação automática quando o usuário sai do campo de nome
         document.addEventListener('blur', function (e) {
             if (e.target.id === 'comprador' || e.target.classList.contains('nome-ing')) {
                 if (e.target.value.trim() !== "") {
@@ -158,7 +157,6 @@
             const comprador = document.getElementById("comprador").value.trim();
             const telefone = document.getElementById("telefone").value.trim();
             
-            // Validação do comprador e telefone
             if (!comprador || telefone.length < 14) { 
                 alert("Por favor, preencha o nome do comprador e o telefone corretamente."); 
                 return; 
@@ -167,9 +165,9 @@
             const inputsNomes = document.querySelectorAll(".nome-ing");
             const inputsCpfs = document.querySelectorAll(".cpf-ing");
             let listaIngressos = [];
+            let cpfsDigitados = [];
             let erroValidacao = false;
 
-            // Validação de todos os campos de ingressos extras
             inputsNomes.forEach((input, i) => {
                 const nomeVal = input.value.trim();
                 const cpfVal = inputsCpfs[i].value.trim();
@@ -177,20 +175,24 @@
                 if (!nomeVal || cpfVal.length < 14) {
                     erroValidacao = true;
                 }
-
-                listaIngressos.push({
-                    "NOME_INGRESSO": nomeVal,
-                    "CPF_INGRESSO": cpfVal
-                });
+                listaIngressos.push({ "NOME_INGRESSO": nomeVal, "CPF_INGRESSO": cpfVal });
+                cpfsDigitados.push(cpfVal);
             });
 
             if (erroValidacao) {
-                alert("Por favor, preencha todos os nomes e CPFs dos ingressos.");
+                alert("Por favor, preencha todos os nomes e CPFs corretamente.");
+                return;
+            }
+
+            // Validação de CPFs duplicados no próprio formulário antes de enviar
+            const cpfsUnicos = new Set(cpfsDigitados);
+            if (cpfsUnicos.size !== cpfsDigitados.length) {
+                alert("Atenção: Você inseriu o mesmo CPF em mais de um ingresso.");
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "Por favor, aguarde...";
+            btn.innerText = "Validando dados...";
 
             const payload = {
                 "COMPRADOR": comprador,
@@ -208,20 +210,26 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    idPagamentoAtual = data.pagamento_id; 
                     
+                    // VERIFICAÇÃO DE BLOQUEIO VINDA DO POWER AUTOMATE
+                    if (data.status === "bloqueado") {
+                        alert("⚠️ BLOQUEIO: " + data.mensagem);
+                        btn.disabled = false;
+                        btn.innerText = "Gerar QR Code";
+                        return;
+                    }
+
+                    idPagamentoAtual = data.pagamento_id; 
                     document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
                     document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
-                    
-                    const valorTotal = data.variavel; 
-                    document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(valorTotal).toFixed(2).replace('.', ',')}`;
+                    document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(data.variavel).toFixed(2).replace('.', ',')}`;
 
                     document.getElementById("sessao-formulario").style.display = "none";
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
                 } else {
-                    alert("Erro ao processar consulta de CPFs.");
+                    alert("Erro ao processar consulta. Tente novamente.");
                     btn.disabled = false;
                     btn.innerText = "Gerar QR Code";
                 }
@@ -281,7 +289,6 @@
         }
 
         function aplicarMascaras() {
-            // Máscara CPF (000.000.000-00)
             document.querySelectorAll(".cpf-ing").forEach(el => {
                 el.addEventListener("input", e => {
                     let v = e.target.value.replace(/\D/g, "").slice(0, 11);
@@ -292,7 +299,6 @@
                 });
             });
 
-            // Máscara Telefone ((00) 00000-0000)
             const telInput = document.getElementById("telefone");
             if(telInput) {
                 telInput.addEventListener("input", e => {
