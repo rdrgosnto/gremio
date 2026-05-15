@@ -51,7 +51,9 @@
         /* Estilos de Validação */
         .input-erro { border: 2px solid #ff1744 !important; background-color: #fff5f5; }
         .input-sucesso { border: 2px solid #2e7d32 !important; background-color: #f1f8e9; }
-        .msg-erro-cpf { color: #ff1744; font-size: 11px; display: block; text-align: left; margin-top: 2px; font-weight: bold; }
+        
+        /* Mensagem de erro com negrito reduzido (400 é o normal) */
+        .msg-erro-cpf { color: #ff1744; font-size: 11px; display: block; text-align: left; margin-top: 2px; font-weight: 400; }
 
         .ingresso-extra { background: #fdf2e9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #ebba95; }
         .qr-container { display: none; margin-top: 25px; padding: 15px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
@@ -122,7 +124,6 @@
         const selectQtde = document.getElementById("quantidade");
         const camposExtras = document.getElementById("campos-extras");
 
-        // Função para Validar CPF (Algoritmo oficial)
         function validarCPF(cpf) {
             cpf = cpf.replace(/[^\d]+/g, '');
             if (cpf == '' || cpf.length != 11 || /^(\d)\1{10}$/.test(cpf)) return false;
@@ -194,7 +195,6 @@
                 const cpfVal = input.value.trim();
                 const nomeVal = inputsNomes[i].value.trim();
 
-                // Validação rigorosa de cada CPF antes de enviar
                 if (!nomeVal || !validarCPF(cpfVal)) {
                     erroValidacao = true;
                     input.classList.add("input-erro");
@@ -312,7 +312,6 @@
 
         function aplicarMascaras() {
             document.querySelectorAll(".cpf-ing").forEach(el => {
-                // Máscara
                 el.addEventListener("input", e => {
                     let v = e.target.value.replace(/\D/g, "").slice(0, 11);
                     if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
@@ -321,11 +320,8 @@
                     e.target.value = v;
                 });
 
-                // Validação visual ao sair do campo
                 el.addEventListener("blur", e => {
                     const val = e.target.value;
-                    // Limpa erro anterior
-                    const pai = e.target.parentNode;
                     const erroExistente = e.target.nextElementSibling;
                     if (erroExistente && erroExistente.classList.contains('msg-erro-cpf')) {
                         erroExistente.remove();
