@@ -80,6 +80,15 @@
         
         button:disabled { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; cursor: not-allowed; }
 
+        /* Estilo do Contador Regressivo */
+        .texto-expiracao {
+            color: #ff1744;
+            font-size: 15px;
+            font-weight: 600; /* Levemente mais grosso que o normal, sem ser negrito pesado */
+            margin-bottom: 15px;
+            margin-top: 5px;
+        }
+
         /* ==================== ESTILOS DO POP-UP RESPONSIVO ==================== */
         .popup-overlay {
             position: fixed;
@@ -185,6 +194,9 @@
         </div>
 
         <div class="qr-container" id="sessao-qr">
+            <!-- Mensagem de Expiração do Código em ordem regressiva -->
+            <div class="texto-expiracao" id="timer-expiracao">O código a seguir expira em 10:00.</div>
+
             <div id="carregando-qr">Processando pagamento e descontos...</div>
             <img src="" id="img-qr" alt="QR Code Pix" style="display:none;">
             <div class="valor" id="exibir-total">Total: Calculando...</div>
@@ -210,7 +222,35 @@
             document.getElementById('popupOverlay').style.display = 'none';
         }
 
-        // SEU CÓDIGO DO POWER AUTOMATE E VALIDAÇÕES (Mantido intacto)
+        // Função do Cronômetro Regressivo (10 minutos)
+        function iniciarCronometro() {
+            let tempoRestante = 10 * 60; // 10 minutos convertidos em segundos
+            const elementoTimer = document.getElementById('timer-expiracao');
+
+            const intervalo = setInterval(() => {
+                let minutos = Math.floor(tempoRestante / 60);
+                let segundos = tempoRestante % 60;
+
+                // Adiciona o zero à esquerda quando os números forem menores que 10
+                minutos = minutos < 10 ? '0' + minutos : minutos;
+                segundos = segundos < 10 ? '0' + segundos : segundos;
+
+                elementoTimer.innerText = `O código a seguir expira em ${minutos}:${segundos}.`;
+
+                if (tempoRestante <= 0) {
+                    clearInterval(intervalo);
+                    elementoTimer.innerText = "Este código Pix expirou! Por favor, atualize a página e gere um novo código.";
+                    // Bloqueia e esconde os elementos por segurança caso expire
+                    document.getElementById('img-qr').style.display = 'none';
+                    document.getElementById('btn-copiar').disabled = true;
+                    document.getElementById('btn-validar').disabled = true;
+                }
+
+                tempoRestante--;
+            }, 1000);
+        }
+
+        // SEU CÓDIGO DO POWER AUTOMATE E VALIDAÇÕES
         const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2ad0529973d74605bffbb1f1dd89c063/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9cFG_dFkGjSMngbCZU7Rj7MW02aldXs66m7z14mS89c";
         const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
 
@@ -346,6 +386,9 @@
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
+
+                    // GATILHO DO CRONÔMETRO: Começa exatamente quando o QR Code carrega na tela
+                    iniciarCronometro();
                 } else {
                     alert("Erro ao processar. Tente novamente.");
                     btn.disabled = false;
