@@ -239,7 +239,7 @@
 
                 if (tempoRestante <= 0) {
                     clearInterval(intervalo);
-                    elementoTimer.innerText = "Este código Pix expirou! Por favor, atualize a página e gere um novo código.";
+                    elementoTimer.innerText = "O código não foi processado dentro do tempo! Por favor, refaça sua compra.";
                     document.getElementById('img-qr').style.display = 'none';
                     document.getElementById('btn-copiar').disabled = true;
                     document.getElementById('btn-validar').disabled = true;
