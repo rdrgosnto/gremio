@@ -59,7 +59,7 @@
         .msg-erro-cpf { color: #ff1744; font-size: 11px; display: block; text-align: left; margin-top: 2px; font-weight: 400; }
 
         .ingresso-extra { background: #fdf2e9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #ebba95; }
-        .qr-container { display: none; margin-top: 25px; padding: 15px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
+        .qr-container { display: none; margin-top: 15px; padding: 15px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
         .qr-container img { width: 100%; max-width: 180px; }
         .valor { font-weight: bold; color: #bf360c; margin-top: 10px; font-size: 1.2em; }
         
@@ -79,6 +79,16 @@
         .icon-grande { font-size: 90px; display: block; margin-bottom: 15px; color: #2e7d32; }
         
         button:disabled { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; cursor: not-allowed; }
+
+        /* Estilo do Contador Regressivo (Invisível no início) */
+        .texto-expiracao {
+            display: none;
+            color: #ff1744;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
 
         /* ==================== ESTILOS DO POP-UP RESPONSIVO ==================== */
         .popup-overlay {
@@ -184,6 +194,9 @@
             <button id="btn-gerar" class="btn-principal">Gerar QR Code</button>
         </div>
 
+        <!-- Mensagem de Expiração do Código FORA da caixa branca do QR Code -->
+        <div class="texto-expiracao" id="timer-expiracao">O código a seguir expira em 10:00.</div>
+
         <div class="qr-container" id="sessao-qr">
             <div id="carregando-qr">Processando pagamento e descontos...</div>
             <img src="" id="img-qr" alt="QR Code Pix" style="display:none;">
@@ -208,6 +221,32 @@
 
         function fecharPopup() {
             document.getElementById('popupOverlay').style.display = 'none';
+        }
+
+        // Função do Cronômetro Regressivo (10 minutos)
+        function iniciarCronometro() {
+            let tempoRestante = 10 * 60; // 10 minutos convertidos em segundos
+            const elementoTimer = document.getElementById('timer-expiracao');
+
+            const intervalo = setInterval(() => {
+                let minutes = Math.floor(tempoRestante / 60);
+                let segundos = tempoRestante % 60;
+
+                minutes = minutes < 10 ? '0' + minutes : minutes;
+                segundos = segundos < 10 ? '0' + segundos : segundos;
+
+                elementoTimer.innerText = `O código a seguir expira em ${minutes}:${segundos}.`;
+
+                if (tempoRestante <= 0) {
+                    clearInterval(intervalo);
+                    elementoTimer.innerText = "O código não foi processado dentro do tempo! Por favor, refaça sua compra.";
+                    document.getElementById('img-qr').style.display = 'none';
+                    document.getElementById('btn-copiar').disabled = true;
+                    document.getElementById('btn-validar').disabled = true;
+                }
+
+                tempoRestante--;
+            }, 1000);
         }
 
         // SEU CÓDIGO DO POWER AUTOMATE E VALIDAÇÕES (Mantido intacto)
@@ -343,9 +382,15 @@
                     document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(data.variavel).toFixed(2).replace('.', ',')}`;
 
                     document.getElementById("sessao-formulario").style.display = "none";
+                    
+                    // Exibe o cronômetro e a caixa do QR Code ao mesmo tempo
+                    document.getElementById("timer-expiracao").style.display = "block";
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
+
+                    // Dispara a contagem regressiva
+                    iniciarCronometro();
                 } else {
                     alert("Erro ao processar. Tente novamente.");
                     btn.disabled = false;
@@ -375,6 +420,8 @@
                 const resultado = await response.text();
 
                 if (resultado.includes("Sucesso")) {
+                    // Se o pagamento for bem sucedido, esconde também o cronômetro
+                    document.getElementById("timer-expiracao").style.display = "none";
                     document.getElementById("sessao-qr").innerHTML = `
                         <div class="msg-confirmacao">
                             <span class="icon-grande">✅</span>
