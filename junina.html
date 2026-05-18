@@ -10,7 +10,7 @@
         body { 
             font-family: 'Poppins', sans-serif; 
             margin: 0; 
-            padding: 40px 20px; /* Garante uma distância mínima de 40px no topo/fundo e 20px nas laterais */
+            padding: 40px 20px; /* Mantém a distância de 40px no topo/fundo e 20px nas laterais */
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -34,7 +34,7 @@
             text-align: center; 
             box-sizing: border-box; 
             border: 3px dashed #d84315; 
-            margin: auto 0; /* Trabalha junto com o flex do body para manter centralizado */
+            margin: auto 0; /* Centralização vertical dinâmica perfeita */
         }
 
         h1 { margin-top: 10px; font-family: 'Amatic SC', cursive; font-size: 48px; color: #bf360c; }
@@ -59,7 +59,9 @@
         .msg-erro-cpf { color: #ff1744; font-size: 11px; display: block; text-align: left; margin-top: 2px; font-weight: 400; }
 
         .ingresso-extra { background: #fdf2e9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #ebba95; }
-        .qr-container { display: none; margin-top: 15px; padding: 15px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
+        
+        /* Reduzido margin-top de 25px para 10px para puxar a caixa para cima */
+        .qr-container { display: none; margin-top: 10px; padding: 15px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
         .qr-container img { width: 100%; max-width: 180px; }
         .valor { font-weight: bold; color: #bf360c; margin-top: 10px; font-size: 1.2em; }
         
@@ -80,14 +82,16 @@
         
         button:disabled { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; cursor: not-allowed; }
 
-        /* Estilo do Contador Regressivo (Invisível no início) */
+        /* Ajuste Fino do Contador Regressivo (Mais compacto e em 1 única linha) */
         .texto-expiracao {
             display: none;
             color: #ff1744;
-            font-size: 15px;
+            font-size: 13px; /* Tamanho ligeiramente menor para caber em uma linha */
             font-weight: 600;
-            margin-bottom: 10px;
-            margin-top: 15px;
+            margin-bottom: 5px; /* Espaço mínimo para não empurrar a caixa branca */
+            margin-top: 5px;
+            white-space: nowrap; /* Força o texto a ficar em uma única linha */
+            overflow: hidden;
         }
 
         /* ==================== ESTILOS DO POP-UP RESPONSIVO ==================== */
@@ -194,7 +198,7 @@
             <button id="btn-gerar" class="btn-principal">Gerar QR Code</button>
         </div>
 
-        <!-- Mensagem de Expiração do Código FORA da caixa branca do QR Code -->
+        <!-- Mensagem de Expiração compactada e alinhada -->
         <div class="texto-expiracao" id="timer-expiracao">O código a seguir expira em 10:00.</div>
 
         <div class="qr-container" id="sessao-qr">
@@ -225,7 +229,7 @@
 
         // Função do Cronômetro Regressivo (10 minutos)
         function iniciarCronometro() {
-            let tempoRestante = 10 * 60; // 10 minutos convertidos em segundos
+            let tempoRestante = 10 * 60; // Para testar com 10 segundos, mude para: let tempoRestante = 10;
             const elementoTimer = document.getElementById('timer-expiracao');
 
             const intervalo = setInterval(() => {
@@ -239,7 +243,7 @@
 
                 if (tempoRestante <= 0) {
                     clearInterval(intervalo);
-                    elementoTimer.innerText = "O código não foi processado dentro do tempo! Por favor, refaça sua compra.";
+                    elementoTimer.innerText = "Este código Pix expirou! Atualize a página.";
                     document.getElementById('img-qr').style.display = 'none';
                     document.getElementById('btn-copiar').disabled = true;
                     document.getElementById('btn-validar').disabled = true;
@@ -383,13 +387,12 @@
 
                     document.getElementById("sessao-formulario").style.display = "none";
                     
-                    // Exibe o cronômetro e a caixa do QR Code ao mesmo tempo
+                    // Exibe o cronômetro compacto e a caixa do QR Code perfeitamente alinhados
                     document.getElementById("timer-expiracao").style.display = "block";
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
 
-                    // Dispara a contagem regressiva
                     iniciarCronometro();
                 } else {
                     alert("Erro ao processar. Tente novamente.");
@@ -420,7 +423,6 @@
                 const resultado = await response.text();
 
                 if (resultado.includes("Sucesso")) {
-                    // Se o pagamento for bem sucedido, esconde também o cronômetro
                     document.getElementById("timer-expiracao").style.display = "none";
                     document.getElementById("sessao-qr").innerHTML = `
                         <div class="msg-confirmacao">
