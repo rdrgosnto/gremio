@@ -69,7 +69,15 @@
         
         .btn-principal { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; background-color: #2e7d32; color: white; cursor: pointer; border: none; box-shadow: 0 6px 0 #1b5e20; transition: 0.2s; }
         .btn-principal:active { box-shadow: 0 2px 0 #1b5e20; transform: translateY(4px); }
-        .btn-validar { background-color: #1565c0; box-shadow: 0 6px 0 #0d47a1; margin-top: 15px; }
+        
+        /* Alterado botão validar para permitir controle de camadas na frente do overlay */
+        .btn-validar { 
+            position: relative;
+            background-color: #1565c0; 
+            box-shadow: 0 6px 0 #0d47a1; 
+            margin-top: 15px; 
+            z-index: 1; /* Valor padrão controlado via script depois */
+        }
         .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font-size: 12px; background-color: #616161; color: white; border: none; border-radius: 5px; cursor: pointer; }
         
         .status-msg { margin-top: 15px; font-size: 15px; font-weight: bold; color: #bf360c; }
@@ -164,6 +172,33 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             z-index: 10000;
         }
+
+        /* ==================== ESTILO DO OVERLAY DE PAGAMENTO ==================== */
+        .pagamento-overlay {
+            display: none; /* Oculto inicialmente */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.82);
+            z-index: 5000; /* Fica acima de tudo, mas abaixo do popup-overlay principal */
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: opacity 0.4s ease;
+        }
+
+        .pagamento-overlay-texto {
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            max-width: 340px;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -174,6 +209,13 @@
             <button class="btn-x-popup" id="btnXPopup" onclick="fecharPopup()">X</button>
             <img src="aviso.jpg" alt="Aviso Importante" class="popup-imagem">
             <button class="btn-fechar-popup" id="btnFecharPopup" onclick="fecharPopup()">Fechar mensagem</button>
+        </div>
+    </div>
+
+    <!-- OVERLAY DE INSTRUÇÃO DE PAGAMENTO (Aparece ao carregar o QR Code) -->
+    <div class="pagamento-overlay" id="pagamentoOverlay">
+        <div class="pagamento-overlay-texto">
+            Não se esqueça de clicar no botão abaixo ao finalizar o seu pagamento.
         </div>
     </div>
 
@@ -392,6 +434,22 @@
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
+
+                    // === NOVA ATIVAÇÃO DO OVERLAY DE ESMAECIMENTO ===
+                    const overlayPagamento = document.getElementById("pagamentoOverlay");
+                    const btnValidar = document.getElementById("btn-validar");
+                    
+                    overlayPagamento.style.display = "flex";
+                    btnValidar.style.zIndex = "6000"; // Puxa o botão para a frente do fundo escuro
+
+                    // Remove a cobertura de forma automática após 6 segundos (6000ms)
+                    setTimeout(() => {
+                        overlayPagamento.style.opacity = "0";
+                        setTimeout(() => {
+                            overlayPagamento.style.display = "none";
+                            btnValidar.style.zIndex = "1"; // Devolve o botão para a camada normal da página
+                        }, 4000); // Aguarda o fim da transição suave antes de ocultar o bloco
+                    }, 6000);
 
                     iniciarCronometro();
                 } else {
