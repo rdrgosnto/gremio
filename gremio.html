@@ -10,7 +10,7 @@
         body { 
             font-family: 'Poppins', sans-serif; 
             margin: 0; 
-            padding: 40px 20px; /* Mantém a distância de 40px no topo/fundo e 20px nas laterais */
+            padding: 40px 20px; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -34,7 +34,7 @@
             text-align: center; 
             box-sizing: border-box; 
             border: 3px dashed #d84315; 
-            margin: auto 0; /* Centralização vertical dinâmica perfeita */
+            margin: auto 0; 
         }
 
         h1 { margin-top: 10px; font-family: 'Amatic SC', cursive; font-size: 48px; color: #bf360c; }
@@ -51,58 +51,48 @@
             transition: all 0.3s;
         }
 
-        /* Estilos de Validação */
         .input-erro { border: 2px solid #ff1744 !important; background-color: #fff5f5; }
         .input-sucesso { border: 2px solid #2e7d32 !important; background-color: #f1f8e9; }
-        
-        /* Mensagem de erro com negrito reduzido (400 é o normal) */
         .msg-erro-cpf { color: #ff1744; font-size: 11px; display: block; text-align: left; margin-top: 2px; font-weight: 400; }
 
         .ingresso-extra { background: #fdf2e9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #ebba95; }
-        
-        /* Reduzido margin-top de 25px para 10px para puxar a caixa para cima */
         .qr-container { display: none; margin-top: 10px; padding: 15px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
         .qr-container img { width: 100%; max-width: 180px; }
         .valor { font-weight: bold; color: #bf360c; margin-top: 10px; font-size: 1.2em; }
-        
         .pix-box { margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
         
         .btn-principal { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; background-color: #2e7d32; color: white; cursor: pointer; border: none; box-shadow: 0 6px 0 #1b5e20; transition: 0.2s; }
         .btn-principal:active { box-shadow: 0 2px 0 #1b5e20; transform: translateY(4px); }
         
-        /* Alterado botão validar para permitir controle de camadas na frente do overlay */
         .btn-validar { 
             position: relative;
             background-color: #1565c0; 
             box-shadow: 0 6px 0 #0d47a1; 
             margin-top: 15px; 
-            z-index: 1; /* Valor padrão controlado via script depois */
+            z-index: 1; 
         }
         .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font-size: 12px; background-color: #616161; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        
         .status-msg { margin-top: 15px; font-size: 15px; font-weight: bold; color: #bf360c; }
         
         .msg-confirmacao { font-family: 'Amatic SC', cursive; color: #2e7d32; line-height: 1.1; }
         .msg-confirmacao h2 { font-size: 45px; margin: 10px 0; font-weight: 700; }
         .msg-confirmacao p { font-size: 34px; margin: 5px 0; font-weight: 700; }
-        
         .icon-grande { font-size: 90px; display: block; margin-bottom: 15px; color: #2e7d32; }
         
         button:disabled { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; cursor: not-allowed; }
 
-        /* Ajuste Fino do Contador Regressivo (Mais compacto e em 1 única linha) */
         .texto-expiracao {
             display: none;
             color: #ff1744;
-            font-size: 13px; /* Tamanho ligeiramente menor para caber em uma linha */
+            font-size: 13px; 
             font-weight: 600;
-            margin-bottom: 5px; /* Espaço mínimo para não empurrar a caixa branca */
+            margin-bottom: 5px; 
             margin-top: 5px;
-            white-space: nowrap; /* Força o texto a ficar em uma única linha */
+            white-space: nowrap; 
             overflow: hidden;
         }
 
-        /* ==================== ESTILOS DO POP-UP RESPONSIVO ==================== */
+        /* POP-UP RESPONSIVO */
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -149,9 +139,7 @@
             transition: background 0.2s;
             white-space: nowrap;
         }
-        .btn-fechar-popup:hover {
-            background-color: #424242;
-        }
+        .btn-fechar-popup:hover { background-color: #424242; }
 
         .btn-x-popup {
             display: none;
@@ -173,16 +161,16 @@
             z-index: 10000;
         }
 
-        /* ==================== ESTILO DO OVERLAY DE PAGAMENTO ==================== */
+        /* OVERLAY DE ESMAECIMENTO */
         .pagamento-overlay {
-            display: none; /* Oculto inicialmente */
+            display: none; 
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.82);
-            z-index: 5000; /* Fica acima de tudo, mas abaixo do popup-overlay principal */
+            z-index: 5000; 
             justify-content: center;
             align-items: center;
             padding: 20px;
@@ -203,7 +191,6 @@
 </head>
 <body>
 
-    <!-- POP-UP CODE -->
     <div class="popup-overlay" id="popupOverlay">
         <div class="popup-conteudo">
             <button class="btn-x-popup" id="btnXPopup" onclick="fecharPopup()">X</button>
@@ -212,7 +199,6 @@
         </div>
     </div>
 
-    <!-- OVERLAY DE INSTRUÇÃO DE PAGAMENTO (Aparece ao carregar o QR Code) -->
     <div class="pagamento-overlay" id="pagamentoOverlay">
         <div class="pagamento-overlay-texto">
             Não se esqueça de clicar no botão abaixo ao finalizar o seu pagamento.
@@ -225,6 +211,10 @@
         <div id="sessao-formulario">
             <label>Nome do Comprador</label>
             <input id="comprador" placeholder="Escreva seu nome aqui...">
+            
+            <!-- NOVO CAMPO: CPF DO COMPRADOR PRINCIPAL -->
+            <label>CPF do Comprador</label>
+            <input id="cpf-comprador" class="cpf-validar" placeholder="000.000.000-00">
             
             <label>Telefone</label>
             <input id="telefone" placeholder="(00) 00000-0000">
@@ -240,11 +230,10 @@
             <button id="btn-gerar" class="btn-principal">Gerar QR Code</button>
         </div>
 
-        <!-- Mensagem de Expiração compactada e alinhada -->
         <div class="texto-expiracao" id="timer-expiracao">O código a seguir expira em 10:00.</div>
 
         <div class="qr-container" id="sessao-qr">
-            <div id="carregando-qr">Processando pagamento e descontos...</div>
+            <div id="carregando-qr">Processando pagamento e discounts...</div>
             <img src="" id="img-qr" alt="QR Code Pix" style="display:none;">
             <div class="valor" id="exibir-total">Total: Calculando...</div>
             
@@ -259,7 +248,6 @@
     </div>
 
     <script>
-        // LÓGICA DO POP-UP (Aparece após 6 segundos)
         setTimeout(() => {
             document.getElementById('btnFecharPopup').style.display = 'block';
             document.getElementById('btnXPopup').style.display = 'block';
@@ -269,9 +257,8 @@
             document.getElementById('popupOverlay').style.display = 'none';
         }
 
-        // Função do Cronômetro Regressivo (10 minutos)
         function iniciarCronometro() {
-            let tempoRestante = 10 * 60; // Para testar com 10 segundos, mude para: let tempoRestante = 10;
+            let tempoRestante = 10 * 60; 
             const elementoTimer = document.getElementById('timer-expiracao');
 
             const intervalo = setInterval(() => {
@@ -295,12 +282,10 @@
             }, 1000);
         }
 
-        // SEU CÓDIGO DO POWER AUTOMATE E VALIDAÇÕES (Mantido intacto)
         const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2ad0529973d74605bffbb1f1dd89c063/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9cFG_dFkGjSMngbCZU7Rj7MW02aldXs66m7z14mS89c";
         const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
 
         let idPagamentoAtual = null;
-
         const selectQtde = document.getElementById("quantidade");
         const camposExtras = document.getElementById("campos-extras");
 
@@ -346,8 +331,8 @@
                 div.innerHTML = `
                     <label>Nome no Ingresso ${i}</label>
                     <input class="nome-ing" placeholder="Nome do convidado">
-                    <label>CPF ${i}</label>
-                    <input class="cpf-ing" placeholder="000.000.000-00">
+                    <label>CPF Convidado ${i}</label>
+                    <input class="cpf-ing cpf-validar" placeholder="000.000.000-00">
                 `;
                 camposExtras.appendChild(div);
             }
@@ -358,17 +343,19 @@
         document.getElementById("btn-gerar").addEventListener("click", async () => {
             const btn = document.getElementById("btn-gerar");
             const comprador = document.getElementById("comprador").value.trim();
+            const cpfComprador = document.getElementById("cpf-comprador").value.trim();
             const telefone = document.getElementById("telefone").value.trim();
             
-            if (!comprador || telefone.length < 14) { 
-                alert("Por favor, preencha o nome do comprador e o telefone corretamente."); 
+            if (!comprador || !validarCPF(cpfComprador) || telefone.length < 14) { 
+                alert("Por favor, preencha o nome, CPF do comprador e o telefone corretamente."); 
+                document.getElementById("cpf-comprador").classList.add("input-erro");
                 return; 
             }
 
             const inputsNomes = document.querySelectorAll(".nome-ing");
             const inputsCpfs = document.querySelectorAll(".cpf-ing");
             let listaIngressos = [];
-            let cpfsDigitados = [];
+            let cpfsDigitados = [cpfComprador]; // O CPF do comprador entra na checagem de duplicados
             let erroValidacao = false;
 
             inputsCpfs.forEach((input, i) => {
@@ -387,13 +374,13 @@
             });
 
             if (erroValidacao) {
-                alert("Existem nomes vazios ou CPFs inválidos. Por favor, verifique os campos em vermelho.");
+                alert("Existem nomes vazios ou CPFs inválidos nos convidados. Verifique os campos em vermelho.");
                 return;
             }
 
             const cpfsUnicos = new Set(cpfsDigitados);
             if (cpfsUnicos.size !== cpfsDigitados.length) {
-                alert("Atenção: Existem CPFs duplicados nos ingressos.");
+                alert("Atenção: Existem CPFs duplicados. O comprador não pode usar o mesmo CPF nos convidados.");
                 return;
             }
 
@@ -402,6 +389,7 @@
 
             const payload = {
                 "COMPRADOR": comprador,
+                "CPF_COMPRADOR": cpfComprador, // NOVA PROPRIEDADE ENVIADA AO FLUXO
                 "TELEFONE": telefone,
                 "QUANTIDADE": selectQtde.value,
                 "INGRESSOS": listaIngressos
@@ -428,27 +416,23 @@
                     document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(data.variavel).toFixed(2).replace('.', ',')}`;
 
                     document.getElementById("sessao-formulario").style.display = "none";
-                    
-                    // Exibe o cronômetro compacto e a caixa do QR Code perfeitamente alinhados
                     document.getElementById("timer-expiracao").style.display = "block";
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
 
-                    // === NOVA ATIVAÇÃO DO OVERLAY DE ESMAECIMENTO ===
                     const overlayPagamento = document.getElementById("pagamentoOverlay");
                     const btnValidar = document.getElementById("btn-validar");
                     
                     overlayPagamento.style.display = "flex";
-                    btnValidar.style.zIndex = "6000"; // Puxa o botão para a frente do fundo escuro
+                    btnValidar.style.zIndex = "6000";
 
-                    // Remove a cobertura de forma automática após 6 segundos (6000ms)
                     setTimeout(() => {
                         overlayPagamento.style.opacity = "0";
                         setTimeout(() => {
                             overlayPagamento.style.display = "none";
-                            btnValidar.style.zIndex = "1"; // Devolve o botão para a camada normal da página
-                        }, 4000); // Aguarda o fim da transição suave antes de ocultar o bloco
+                            btnValidar.style.zIndex = "1"; 
+                        }, 4000);
                     }, 6000);
 
                     iniciarCronometro();
@@ -501,6 +485,7 @@
             } catch (e) {
                 msg.innerText = "Erro ao conectar. Tente de novo!";
                 btn.disabled = false;
+                btn.innerText = "Verificar Pagamento";
             }
         });
 
@@ -513,38 +498,11 @@
         }
 
         function aplicarMascaras() {
-            document.querySelectorAll(".cpf-ing").forEach(el => {
-                el.addEventListener("input", e => {
-                    let v = e.target.value.replace(/\D/g, "").slice(0, 11);
-                    if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-                    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
-                    else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
-                    e.target.value = v;
-                });
-
-                el.addEventListener("blur", e => {
-                    const val = e.target.value;
-                    const erroExistente = e.target.nextElementSibling;
-                    if (erroExistente && erroExistente.classList.contains('msg-erro-cpf')) {
-                        erroExistente.remove();
-                    }
-
-                    if (val.length > 0) {
-                        if (validarCPF(val)) {
-                            e.target.classList.remove("input-erro");
-                            e.target.classList.add("input-sucesso");
-                        } else {
-                            e.target.classList.remove("input-sucesso");
-                            e.target.classList.add("input-erro");
-                            const span = document.createElement("span");
-                            span.className = "msg-erro-cpf";
-                            span.innerText = "CPF Inválido";
-                            e.target.after(span);
-                        }
-                    } else {
-                        e.target.classList.remove("input-erro", "input-sucesso");
-                    }
-                });
+            document.querySelectorAll(".cpf-validar").forEach(el => {
+                el.removeEventListener("input", maskCPF);
+                el.addEventListener("input", maskCPF);
+                el.removeEventListener("blur", validateCPFBlur);
+                el.addEventListener("blur", validateCPFBlur);
             });
 
             const telInput = document.getElementById("telefone");
@@ -559,6 +517,39 @@
                 });
             }
         }
+
+        function maskCPF(e) {
+            let v = e.target.value.replace(/\D/g, "").slice(0, 11);
+            if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+            else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
+            else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
+            e.target.value = v;
+        }
+
+        function validateCPFBlur(e) {
+            const val = e.target.value;
+            const erroExistente = e.target.nextElementSibling;
+            if (erroExistente && erroExistente.classList.contains('msg-erro-cpf')) {
+                erroExistente.remove();
+            }
+
+            if (val.length > 0) {
+                if (validarCPF(val)) {
+                    e.target.classList.remove("input-erro");
+                    e.target.classList.add("input-sucesso");
+                } else {
+                    e.target.classList.remove("input-sucesso");
+                    e.target.classList.add("input-erro");
+                    const span = document.createElement("span");
+                    span.className = "msg-erro-cpf";
+                    span.innerText = "CPF Inválido";
+                    e.target.after(span);
+                }
+            } else {
+                e.target.classList.remove("input-erro", "input-sucesso");
+            }
+        }
+
         aplicarMascaras();
     </script>
 </body>
