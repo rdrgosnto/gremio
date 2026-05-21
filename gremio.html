@@ -212,7 +212,6 @@
             <label>Nome do Comprador</label>
             <input id="comprador" placeholder="Escreva seu nome aqui...">
             
-            <!-- NOVO CAMPO: CPF DO COMPRADOR PRINCIPAL -->
             <label>CPF do Comprador</label>
             <input id="cpf-comprador" class="cpf-validar" placeholder="000.000.000-00">
             
@@ -233,7 +232,7 @@
         <div class="texto-expiracao" id="timer-expiracao">O código a seguir expira em 10:00.</div>
 
         <div class="qr-container" id="sessao-qr">
-            <div id="carregando-qr">Processando pagamento e discounts...</div>
+            <div id="carregando-qr">Processando pagamento e descontos...</div>
             <img src="" id="img-qr" alt="QR Code Pix" style="display:none;">
             <div class="valor" id="exibir-total">Total: Calculando...</div>
             
@@ -355,7 +354,8 @@
             const inputsNomes = document.querySelectorAll(".nome-ing");
             const inputsCpfs = document.querySelectorAll(".cpf-ing");
             let listaIngressos = [];
-            let cpfsDigitados = [cpfComprador]; // O CPF do comprador entra na checagem de duplicados
+            let cpfsConvidados = [];
+            let contadorCpfComprador = 0;
             let erroValidacao = false;
 
             inputsCpfs.forEach((input, i) => {
@@ -369,8 +369,13 @@
                     input.classList.remove("input-erro");
                 }
                 
+                if (cpfVal === cpfComprador) {
+                    contadorCpfComprador++;
+                } else {
+                    cpfsConvidados.push(cpfVal);
+                }
+                
                 listaIngressos.push({ "NOME_INGRESSO": nomeVal, "CPF_INGRESSO": cpfVal });
-                cpfsDigitados.push(cpfVal);
             });
 
             if (erroValidacao) {
@@ -378,9 +383,16 @@
                 return;
             }
 
-            const cpfsUnicos = new Set(cpfsDigitados);
-            if (cpfsUnicos.size !== cpfsDigitados.length) {
-                alert("Atenção: Existem CPFs duplicados. O comprador não pode usar o mesmo CPF nos convidados.");
+            // Validação 1: Comprador só pode aparecer 1 única vez nos ingressos
+            if (contadorCpfComprador > 1) {
+                alert("Atenção: O comprador só pode incluir o seu próprio CPF uma única vez nos ingressos.");
+                return;
+            }
+
+            // Validação 2: Convidados não podem ter CPFs repetidos entre si
+            const convidadosUnicos = new Set(cpfsConvidados);
+            if (convidadosUnicos.size !== cpfsConvidados.length) {
+                alert("Atenção: Existem CPFs duplicados na lista de convidados.");
                 return;
             }
 
@@ -389,7 +401,7 @@
 
             const payload = {
                 "COMPRADOR": comprador,
-                "CPF_COMPRADOR": cpfComprador, // NOVA PROPRIEDADE ENVIADA AO FLUXO
+                "CPF_COMPRADOR": cpfComprador,
                 "TELEFONE": telefone,
                 "QUANTIDADE": selectQtde.value,
                 "INGRESSOS": listaIngressos
@@ -404,12 +416,27 @@
 
                 if (response.ok) {
                     const data = await response.json();
+                    
                     if (data.status === "bloqueado") {
                         alert("⚠️ BLOQUEIO: " + data.mensagem);
                         btn.disabled = false;
                         btn.innerText = "Gerar QR Code";
                         return;
                     }
+                    
+                    // INTEL DE AUTO-RECUPERAÇÃO: Se o status for pendente (recuperar), dispara a validação direto
+                    if (data.status === "pendente" && data.mensagem === "recuperar") {
+                        idPagamentoAtual = data.pagamento_id;
+                        document.getElementById("sessao-formulario").style.display = "none";
+                        document.getElementById("sessao-qr").style.display = "block";
+                        document.getElementById("carregando-qr").style.display = "block";
+                        document.getElementById("carregando-qr").innerText = "Buscando seu Pix ativo... Aguarde um instante.";
+                        
+                        // Executa o clique invisível no botão de verificar para trazer o QR Code
+                        document.getElementById("btn-validar").click();
+                        return;
+                    }
+
                     idPagamentoAtual = data.pagamento_id; 
                     document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
                     document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
@@ -475,6 +502,25 @@
                         </div>
                     `;
                 } else {
+                    // Se veio da auto-recuperação, monta a estrutura visual do Pix que o fluxo 2 retornou
+                    if (document.getElementById("carregando-qr").style.display !== "none") {
+                        try {
+                            const dadosPix = JSON.parse(resultado);
+                            if(dadosPix.qr_code_base64) {
+                                document.getElementById("img-qr").src = `data:image/png;base64,${dadosPix.qr_code_base64}`;
+                                document.getElementById("pix-codigo").value = dadosPix.qr_code;
+                                document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(dadosPix.valor).toFixed(2).replace('.', ',')}`;
+                                
+                                document.getElementById("timer-expiracao").style.display = "block";
+                                document.getElementById("carregando-qr").style.display = "none";
+                                document.getElementById("img-qr").style.display = "inline-block";
+                                iniciarCronometro();
+                            }
+                        } catch(err) {
+                            // Se falhar o parse, apenas trata como pendente normal
+                        }
+                    }
+
                     msg.innerHTML = `
                         <span class="icon-grande" style="font-size: 60px; color: #bf360c; margin-bottom: 5px;">❌</span>
                         Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!
