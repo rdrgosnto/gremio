@@ -232,7 +232,7 @@
         <div class="texto-expiracao" id="timer-expiracao">O código a seguir expira em 10:00.</div>
 
         <div class="qr-container" id="sessao-qr">
-            <div id="carregando-qr">Processando pagamento e descontos...</div>
+            <div id="carregando-qr">Processando pagamento e discounts...</div>
             <img src="" id="img-qr" alt="QR Code Pix" style="display:none;">
             <div class="valor" id="exibir-total">Total: Calculando...</div>
             
@@ -313,13 +313,11 @@
             }).join(' ');
         }
 
-        document.addEventListener('blur', function (e) {
-            if (e.target.id === 'comprador' || e.target.classList.contains('nome-ing')) {
-                if (e.target.value.trim() !== "") {
-                    e.target.value = formatarNomeProprio(e.target.value);
-                }
+        document.getElementById('comprador').addEventListener('blur', function (e) {
+            if (e.target.value.trim() !== "") {
+                e.target.value = formatarNomeProprio(e.target.value);
             }
-        }, true);
+        });
 
         selectQtde.addEventListener("change", () => {
             const qtde = parseInt(selectQtde.value);
@@ -336,6 +334,14 @@
                 camposExtras.appendChild(div);
             }
             aplicarMascaras();
+            
+            document.querySelectorAll(".nome-ing").forEach(el => {
+                el.addEventListener('blur', function(e) {
+                    if (e.target.value.trim() !== "") {
+                        e.target.value = formatarNomeProprio(e.target.value);
+                    }
+                });
+            });
         });
         selectQtde.dispatchEvent(new Event('change'));
 
@@ -383,13 +389,11 @@
                 return;
             }
 
-            // Validação 1: Comprador só pode aparecer 1 única vez nos ingressos
             if (contadorCpfComprador > 1) {
                 alert("Atenção: O comprador só pode incluir o seu próprio CPF uma única vez nos ingressos.");
                 return;
             }
 
-            // Validação 2: Convidados não podem ter CPFs repetidos entre si
             const convidadosUnicos = new Set(cpfsConvidados);
             if (convidadosUnicos.size !== cpfsConvidados.length) {
                 alert("Atenção: Existem CPFs duplicados na lista de convidados.");
@@ -424,15 +428,15 @@
                         return;
                     }
                     
-                    // INTEL DE AUTO-RECUPERAÇÃO: Se o status for pendente (recuperar), dispara a validação direto
-                    if (data.status === "pendente" && data.mensagem === "recuperar") {
+                    // AUTO-RECUPERAÇÃO: Se o status for pending ou pendente (recuperar), executa a montagem direta
+                    if ((data.status === "pending" || data.status === "pendente") && data.mensagem === "recuperar") {
                         idPagamentoAtual = data.pagamento_id;
                         document.getElementById("sessao-formulario").style.display = "none";
                         document.getElementById("sessao-qr").style.display = "block";
                         document.getElementById("carregando-qr").style.display = "block";
                         document.getElementById("carregando-qr").innerText = "Buscando seu Pix ativo... Aguarde um instante.";
                         
-                        // Executa o clique invisível no botão de verificar para trazer o QR Code
+                        // Executa o clique invisível para forçar a renderização do bloco "else" da verificação
                         document.getElementById("btn-validar").click();
                         return;
                     }
@@ -502,22 +506,42 @@
                         </div>
                     `;
                 } else {
-                    // Se veio da auto-recuperação, monta a estrutura visual do Pix que o fluxo 2 retornou
+                    // Se veio da auto-recuperação (carregando visível), intercepta e renderiza os dados do Fluxo 1
                     if (document.getElementById("carregando-qr").style.display !== "none") {
                         try {
-                            const dadosPix = JSON.parse(resultado);
-                            if(dadosPix.qr_code_base64) {
-                                document.getElementById("img-qr").src = `data:image/png;base64,${dadosPix.qr_code_base64}`;
-                                document.getElementById("pix-codigo").value = dadosPix.qr_code;
-                                document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(dadosPix.valor).toFixed(2).replace('.', ',')}`;
+                            // Simulamos a chamada interna obtendo os dados que o fluxo 1 já enviou no clique inicial
+                            // Como o response da URL_VALIDAR_PAGAMENTO não retorna o Pix, pegamos os dados estruturados
+                            // que foram repassados no gatilho do formulário. Para blindar, montamos a interface:
+                            
+                            const responseG = await fetch(URL_GERAR_PIX, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    "COMPRADOR": document.getElementById("comprador").value.trim(),
+                                    "CPF_COMPRADOR": document.getElementById("cpf-comprador").value.trim(),
+                                    "TELEFONE": document.getElementById("telefone").value.trim(),
+                                    "QUANTIDADE": selectQtde.value,
+                                    "INGRESSOS": []
+                                })
+                            });
+                            const dadosPix = await responseG.json();
+                            
+                            if(dadosPix.pix_qr_code_base64) {
+                                document.getElementById("img-qr").src = `data:image/png;base64,${dadosPix.pix_qr_code_base64}`;
+                                document.getElementById("pix-codigo").value = dadosPix.pix_copia_e_cola;
+                                document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(dadosPix.variavel).toFixed(2).replace('.', ',')}`;
                                 
                                 document.getElementById("timer-expiracao").style.display = "block";
                                 document.getElementById("carregando-qr").style.display = "none";
                                 document.getElementById("img-qr").style.display = "inline-block";
+                                msg.innerHTML = ""; // Limpa a mensagem de erro
+                                btn.disabled = false;
+                                btn.innerText = "Verificar Pagamento";
                                 iniciarCronometro();
+                                return;
                             }
                         } catch(err) {
-                            // Se falhar o parse, apenas trata como pendente normal
+                            // Fallback caso falte comunicação complementar
                         }
                     }
 
