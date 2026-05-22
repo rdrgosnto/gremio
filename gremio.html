@@ -208,15 +208,16 @@
     <div class="container">
         <h1>Festa Junina</h1>
         
-        <div id="sessao-formulario">
+        <!-- Formulário encapsulado em tag form para controle nativo do Submit -->
+        <form id="sessao-formulario" onsubmit="processarEnvioFormulario(event)">
             <label>Nome do Comprador</label>
-            <input id="comprador" placeholder="Escreva seu nome aqui...">
+            <input id="comprador" required placeholder="Escreva seu nome aqui...">
             
             <label>CPF do Comprador</label>
-            <input id="cpf-comprador" class="cpf-validar" placeholder="000.000.000-00">
+            <input id="cpf-comprador" required class="cpf-validar" placeholder="000.000.000-00">
             
             <label>Telefone</label>
-            <input id="telefone" placeholder="(00) 00000-0000">
+            <input id="telefone" required placeholder="(00) 00000-0000">
 
             <label>Quantidade de ingressos</label>
             <select id="quantidade">
@@ -226,8 +227,8 @@
             </select>
 
             <div id="campos-extras"></div>
-            <button id="btn-gerar" class="btn-principal">Gerar QR Code</button>
-        </div>
+            <button type="submit" id="btn-gerar" class="btn-principal">Gerar QR Code</button>
+        </form>
 
         <div class="texto-expiracao" id="timer-expiracao">O código a seguir expira em 10:00.</div>
 
@@ -327,9 +328,9 @@
                 div.className = "ingresso-extra";
                 div.innerHTML = `
                     <label>Nome no Ingresso ${i}</label>
-                    <input class="nome-ing" placeholder="Nome do convidado">
+                    <input class="nome-ing" required placeholder="Nome do convidado">
                     <label>CPF Convidado ${i}</label>
-                    <input class="cpf-ing cpf-validar" placeholder="000.000.000-00">
+                    <input class="cpf-ing cpf-validar" required placeholder="000.000.000-00">
                 `;
                 camposExtras.appendChild(div);
             }
@@ -345,7 +346,10 @@
         });
         selectQtde.dispatchEvent(new Event('change'));
 
-        document.getElementById("btn-gerar").addEventListener("click", async () => {
+        // Nova função que intercepta de forma limpa o evento do formulário evitando double click
+        async function processarEnvioFormulario(e) {
+            e.preventDefault(); // TRAVA O SEGUNDO DISPARO DO NAVEGADOR IMEDIATAMENTE
+
             const btn = document.getElementById("btn-gerar");
             const comprador = document.getElementById("comprador").value.trim();
             const cpfComprador = document.getElementById("cpf-comprador").value.trim();
@@ -400,6 +404,7 @@
                 return;
             }
 
+            // CINZA O BOTÃO LOGO NO INÍCIO DO PROCESSO REAL
             btn.disabled = true;
             btn.innerText = "Por favor, aguarde...";
 
@@ -428,16 +433,22 @@
                         return;
                     }
                     
-                    // AUTO-RECUPERAÇÃO: Se o status for pending ou pendente (recuperar), executa a montagem direta
+                    // AUTO-RECUPERAÇÃO AJUSTADA: Renderiza direto os dados retornados pelo seu fluxo 1 sem fazer loop infinito
                     if ((data.status === "pending" || data.status === "pendente") && data.mensagem === "recuperar") {
                         idPagamentoAtual = data.pagamento_id;
                         document.getElementById("sessao-formulario").style.display = "none";
                         document.getElementById("sessao-qr").style.display = "block";
-                        document.getElementById("carregando-qr").style.display = "block";
-                        document.getElementById("carregando-qr").innerText = "Buscando seu Pix ativo... Aguarde um instante.";
                         
-                        // Executa o clique invisível para forçar a renderização do bloco "else" da verificação
-                        document.getElementById("btn-validar").click();
+                        // Montagem direta das variáveis recuperadas do fluxo no HTML
+                        document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
+                        document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
+                        document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(data.variavel).toFixed(2).replace('.', ',')}`;
+                        
+                        document.getElementById("carregando-qr").style.display = "none";
+                        document.getElementById("img-qr").style.display = "inline-block";
+                        document.getElementById("timer-expiracao").style.display = "block";
+                        
+                        iniciarCronometro();
                         return;
                     }
 
@@ -477,7 +488,7 @@
                 btn.disabled = false;
                 btn.innerText = "Gerar QR Code";
             }
-        });
+        }
 
         document.getElementById("btn-validar").addEventListener("click", async () => {
             const btn = document.getElementById("btn-validar");
@@ -506,45 +517,6 @@
                         </div>
                     `;
                 } else {
-                    // Se veio da auto-recuperação (carregando visível), intercepta e renderiza os dados do Fluxo 1
-                    if (document.getElementById("carregando-qr").style.display !== "none") {
-                        try {
-                            // Simulamos a chamada interna obtendo os dados que o fluxo 1 já enviou no clique inicial
-                            // Como o response da URL_VALIDAR_PAGAMENTO não retorna o Pix, pegamos os dados estruturados
-                            // que foram repassados no gatilho do formulário. Para blindar, montamos a interface:
-                            
-                            const responseG = await fetch(URL_GERAR_PIX, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                    "COMPRADOR": document.getElementById("comprador").value.trim(),
-                                    "CPF_COMPRADOR": document.getElementById("cpf-comprador").value.trim(),
-                                    "TELEFONE": document.getElementById("telefone").value.trim(),
-                                    "QUANTIDADE": selectQtde.value,
-                                    "INGRESSOS": []
-                                })
-                            });
-                            const dadosPix = await responseG.json();
-                            
-                            if(dadosPix.pix_qr_code_base64) {
-                                document.getElementById("img-qr").src = `data:image/png;base64,${dadosPix.pix_qr_code_base64}`;
-                                document.getElementById("pix-codigo").value = dadosPix.pix_copia_e_cola;
-                                document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(dadosPix.variavel).toFixed(2).replace('.', ',')}`;
-                                
-                                document.getElementById("timer-expiracao").style.display = "block";
-                                document.getElementById("carregando-qr").style.display = "none";
-                                document.getElementById("img-qr").style.display = "inline-block";
-                                msg.innerHTML = ""; // Limpa a mensagem de erro
-                                btn.disabled = false;
-                                btn.innerText = "Verificar Pagamento";
-                                iniciarCronometro();
-                                return;
-                            }
-                        } catch(err) {
-                            // Fallback caso falte comunicação complementar
-                        }
-                    }
-
                     msg.innerHTML = `
                         <span class="icon-grande" style="font-size: 60px; color: #bf360c; margin-bottom: 5px;">❌</span>
                         Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!
