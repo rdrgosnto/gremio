@@ -11,9 +11,9 @@
 </head>
 <body class="bg-amber-50 font-sans min-h-screen flex flex-col smooth-scroll antialiased text-slate-900">
 
-    <!-- Cabeçalho com Altura Igualada ao Botão Flutuante (h-16) -->
-    <header class="bg-orange-600 text-white flex items-center justify-center h-16 shadow-md border-b-4 border-yellow-400 sticky top-0 z-50">
-        <h1 class="text-2xl font-black tracking-widest">Festa Junina</h1>
+    <!-- Cabeçalho Mais Fino, Compacto e com Sombra Leve -->
+    <header class="bg-orange-600 text-white text-center py-2 shadow-md border-b-4 border-yellow-400 sticky top-0 z-50">
+        <h1 class="text-2xl font-black tracking-widest uppercase">Festa Junina</h1>
     </header>
 
     <!-- Corpo Principal -->
@@ -30,12 +30,11 @@
         </section>
 
         <!-- Lado Direito: Carrinho e Fechamento -->
-        <section class="bg-white rounded-2xl shadow-xl border border-amber-100 p-5 flex flex-col justify-between lg:h-[calc(100vh-120px)] lg:sticky lg:top-20">
+        <section class="bg-white rounded-2xl shadow-xl border border-amber-100 p-5 flex flex-col justify-between lg:h-[calc(100vh-100px)] lg:sticky lg:top-16">
             <div>
-                <!-- Alinhamento e tamanho igualados entre os títulos do topo do carrinho -->
-                <h2 class="text-lg font-black text-amber-950 border-b pb-2 mb-3 flex justify-between items-center">
+                <h2 class="text-base font-bold text-amber-950 border-b pb-2 mb-3 flex justify-between items-center">
                     <span>Pedido Atual</span>
-                    <span id="contador-itens" class="text-lg bg-orange-100 text-orange-700 px-3 py-0.5 rounded-full font-black">0 itens</span>
+                    <span id="contador-itens" class="text-xs bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full font-semibold">0 itens</span>
                 </h2>
 
                 <!-- Lista de itens no carrinho -->
@@ -73,22 +72,22 @@
         </section>
     </main>
 
-    <!-- Botão Laranja Flutuante com Largura Fixa Robusta (w-80 md:w-[450px]) e h-16 (Igual ao Topo) -->
+    <!-- Botão Laranja Flutuante - Otimizado (Sem animação de bounce / Pula-pula) -->
     <div id="container-botao-flutuante" class="fixed bottom-5 left-0 right-0 px-4 z-40 hidden flex justify-center pointer-events-none">
-        <button onclick="irParaFechamento()" class="pointer-events-auto bg-orange-600 hover:bg-orange-700 text-white font-black h-16 w-full max-w-md rounded-full shadow-2xl border-2 border-yellow-400 flex items-center justify-center gap-4 transform active:scale-95 transition-all text-lg">
+        <button onclick="irParaFechamento()" class="pointer-events-auto bg-orange-600 hover:bg-orange-700 text-white font-black py-3.5 px-10 rounded-full shadow-2xl border-2 border-yellow-400 flex items-center justify-center gap-3 transform active:scale-95 transition-all text-base sm:text-lg">
             <span>Valor Total:</span>
             <span id="valor-total-flutuante" class="text-yellow-300">R$ 0,00</span>
-            <span class="text-base font-bold opacity-90 lowercase">(pagar)</span>
+            <span class="text-xs font-normal opacity-90 lowercase">(pagar)</span>
         </button>
     </div>
 
     <script>
-        // Banco de dados com simulações de estoque critico e esgotado
+        // Banco de dados simulando cenários reais: Água esgotada (0) e Pipoca baixa (4)
         const produtos = [
             { id: 1, nome: "Cachorro Quente", preco: 12.00, estoque: 50, critico: 5 },
-            { id: 2, nome: "Pipoca Doce/Salgada", preco: 6.00, estoque: 4, critico: 5 }, 
+            { id: 2, nome: "Pipoca Doce/Salgada", preco: 6.00, estoque: 4, critico: 5 }, // 🛑 SIMULAÇÃO: BAIXO ESTOQUE (Número ficará vermelho)
             { id: 3, nome: "Refrigerante (Lata)", preco: 6.00, estoque: 80, critico: 10 },
-            { id: 4, nome: "Água Mineral", preco: 4.00, estoque: 0, critico: 5 },         
+            { id: 4, nome: "Água Mineral", preco: 4.00, estoque: 0, critico: 5 },         // 🛑 SIMULAÇÃO: ACABOU A CAIXA (Card cinza e travado)
             { id: 5, nome: "Quentão", preco: 10.00, estoque: 30, critico: 5 },
             { id: 6, nome: "Canjica", preco: 8.00, estoque: 25, critico: 5 },
             { id: 7, nome: "Espetinho de Carne", preco: 14.00, estoque: 40, critico: 8 },
@@ -105,69 +104,56 @@
             return valor.toFixed(2).replace('.', ',');
         }
 
-        // Renderiza a interface com alinhamentos travados por colunas flexíveis
+        // Renderiza os blocos com regras estritas de esgotamento e criticidade
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos");
             grid.innerHTML = "";
 
+            // Ordem alfabética (A-Z)
             produtos.sort((a, b) => a.nome.localeCompare(b.nome));
 
             produtos.forEach(p => {
                 const qtdNoCarrinho = carrinho[p.id] || 0;
                 
                 let statusEstoqueHtml = `<span class="text-green-600 font-black">${p.estoque}</span>`;
-                let cardBg = "bg-white border-amber-100";
-                
-                // Variável que vai guardar os botões ou o bloco "ESGOTADO"
-                let controleDireitoHtml = "";
+                let cardEstilo = "bg-white border-amber-100";
+                let botoesBloqueados = "";
+                let opacidadeBotoes = "opacity-100";
 
+                // Regra 1: O item ACABOU completamente (Card cinza, opaco e sem cliques)
                 if (p.estoque === 0) {
-                    // Exibe textualmente Estoque 0
-                    statusEstoqueHtml = `<span class="text-red-600 font-black">0</span>`;
-                    cardBg = "bg-gray-100 border-gray-300 text-gray-400 select-none opacity-60";
-                    
-                    // Substitui a área de quantidade inteira pelo bloco ESGOTADO estático
-                    controleDireitoHtml = `
-                        <div class="bg-red-600 text-white font-black text-sm px-4 py-2 rounded-xl tracking-wider text-center w-36 shadow-sm select-none pointer-events-none">
-                            ESGOTADO
-                        </div>`;
-                } else {
-                    if (p.estoque <= p.critico) {
-                        statusEstoqueHtml = `<span class="text-red-600 font-black">${p.estoque}</span>`;
-                    }
-                    
-                    // Mantém os controles normais se houver estoque
-                    controleDireitoHtml = `
-                        <div class="flex items-center gap-3 shrink-0">
-                            <span class="text-sm sm:text-base text-gray-400 font-bold whitespace-nowrap">Qtd: <b class="text-slate-900 font-black">${qtdNoCarrinho}</b></span>
-                            <div class="flex items-center gap-1 bg-gray-100 rounded-xl p-0.5 border border-gray-200">
-                                <button onclick="alterarQuantidade(${p.id}, -1)" class="w-10 h-10 rounded-lg bg-white font-black text-xl text-gray-700 hover:bg-orange-50 hover:text-orange-600 active:scale-95 transition-all flex items-center justify-center border shadow-sm">-</button>
-                                <button onclick="alterarQuantidade(${p.id}, 1)" class="w-10 h-10 rounded-lg bg-white font-black text-xl text-gray-700 hover:bg-orange-50 hover:text-orange-600 active:scale-95 transition-all flex items-center justify-center border shadow-sm">+</button>
-                            </div>
-                        </div>`;
+                    statusEstoqueHtml = `<span class="text-red-600 font-black">🚫 ESGOTADO</span>`;
+                    cardEstilo = "bg-gray-200/80 border-gray-300 text-gray-500 shadow-none select-none pointer-events-none opacity-50";
+                    botoesBloqueados = "disabled";
+                    opacidadeBotoes = "opacity-0"; // Desaparece com os botões de ação para segurança total
+                } 
+                // Regra 2: O item está com BAIXO ESTOQUE (Apenas o número fica em vermelho vivo)
+                else if (p.estoque <= p.critico) {
+                    statusEstoqueHtml = `<span class="text-red-600 font-black">${p.estoque}</span>`;
                 }
 
-                // Cards com ganho sutil de altura interna (py-4), grid de dados travado para alinhamento vertical perfeito
                 grid.innerHTML += `
-                    <div class="border rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4 transition-all ${cardBg}">
+                    <div class="border rounded-2xl p-3.5 shadow-sm flex items-center justify-between gap-4 transition-all ${cardEstilo}">
                         
-                        <!-- TABELA INVISÍVEL DE DADOS (Travando o alinhamento da palavra Estoque e Preço) -->
-                        <div class="flex-1 grid grid-cols-2 sm:grid-cols-3 items-center gap-2 min-w-0">
-                            <!-- Coluna 1: Nome do produto ocupando espaço principal -->
-                            <h3 class="font-black text-slate-800 text-lg truncate text-left leading-tight tracking-tight sm:col-span-1">${p.nome}</h3>
+                        <!-- LADO ESQUERDO: TEXTOS DO PRODUTO -->
+                        <div class="flex flex-col justify-center min-w-0 flex-1">
+                            <h3 class="font-black text-slate-800 text-base sm:text-lg truncate text-left leading-tight tracking-tight">${p.nome}</h3>
                             
-                            <!-- Coluna 2 e 3 unificadas no mobile: Preço e Estoque perfeitamente cravados na mesma posição -->
-                            <div class="flex items-center gap-6 text-base sm:text-lg font-black col-span-1 sm:col-span-2">
-                                <span class="text-orange-600 whitespace-nowrap">R$ ${formatarMoeda(p.preco)}</span>
-                                <div class="text-slate-800 whitespace-nowrap">
+                            <div class="flex items-center gap-4 mt-1 text-sm sm:text-base font-black">
+                                <span class="${p.estoque === 0 ? 'text-gray-400' : 'text-orange-600'}">R$ ${formatarMoeda(p.preco)}</span>
+                                <div class="${p.estoque === 0 ? 'text-gray-400' : 'text-slate-800'} whitespace-nowrap">
                                     <span class="opacity-60 font-medium text-gray-400">Estoque</span> ${statusEstoqueHtml}
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- LADO DIREITO: ÁREA DINÂMICA (Controles ou Bloco de Esgotado) -->
-                        <div class="shrink-0">
-                            ${controleDireitoHtml}
+                        <!-- LADO DIREITO: CONTROLES DE QUANTIDADE (Bloqueados e sumidos se esgotado) -->
+                        <div class="flex items-center gap-3 shrink-0 ${opacidadeBotoes}">
+                            <span class="text-sm sm:text-base text-gray-400 font-medium">Qtd: <b class="text-slate-900 font-black">${qtdNoCarrinho}</b></span>
+                            <div class="flex items-center gap-1 bg-gray-100 rounded-xl p-0.5 border border-gray-200">
+                                <button onclick="alterarQuantidade(${p.id}, -1)" ${botoesBloqueados} class="w-9 h-9 rounded-lg bg-white font-black text-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 active:scale-95 transition-all flex items-center justify-center border shadow-sm">-</button>
+                                <button onclick="alterarQuantidade(${p.id}, 1)" ${botoesBloqueados} class="w-9 h-9 rounded-lg bg-white font-black text-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 active:scale-95 transition-all flex items-center justify-center border shadow-sm">+</button>
+                            </div>
                         </div>
 
                     </div>
@@ -194,7 +180,7 @@
             atualizarCarrinho();
         }
 
-        // Atualiza o carrinho e os totais
+        // Atualiza a barra lateral do pedido
         function atualizarCarrinho() {
             const lista = document.getElementById("lista-carrinho");
             const contador = document.getElementById("contador-itens");
@@ -233,11 +219,13 @@
             verificarStatusBotao();
         }
 
+        // Mecânica de Rolagem do Botão Flutuante
         function irParaFechamento() {
             const blocoOriginal = document.getElementById("bloco-fechamento-original");
             blocoOriginal.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
 
+        // Monitor de Visibilidade Nativo
         const observer = new IntersectionObserver((entries) => {
             const containerFlutuante = document.getElementById("container-botao-flutuante");
             entries.forEach(entry => {
@@ -251,6 +239,7 @@
 
         observer.observe(document.getElementById("bloco-fechamento-original"));
 
+        // Altera o visual dos botões de pagamento
         function selecionarPagamento(tipo) {
             formaPagamento = tipo;
             const btnPix = document.getElementById("btn-pix");
@@ -266,6 +255,7 @@
             verificarStatusBotao();
         }
 
+        // Valida liberação do botão de conclusão
         function verificarStatusBotao() {
             const btn = document.getElementById("btn-finalizar");
             const temItens = Object.keys(carrinho).length > 0;
@@ -281,6 +271,7 @@
             }
         }
 
+        // Registro finalizado e abate real
         function finalizarVenda() {
             const dadosVenda = {
                 data: new Date().toLocaleString('pt-BR'),
@@ -291,14 +282,16 @@
                 })
             };
 
-            console.log("Venda Registrada:", dadosVenda);
+            console.log("Payload enviado para auditoria posterior:", dadosVenda);
             alert(`🎉 Venda Registrada!\nForma de Pagamento: ${formaPagamento}\n\nRetire as fichas físicas para o comprador.`);
             
+            // Abate estoque local em tempo real
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id);
                 p.estoque -= carrinho[id];
             });
 
+            // Reseta estados
             carrinho = {};
             formaPagamento = null;
             document.getElementById("btn-pix").className = "py-3 rounded-xl border-2 font-black text-base text-center transition-all flex items-center justify-center border-gray-200 text-gray-700 bg-white hover:bg-gray-50";
@@ -309,6 +302,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // Carga Inicial
         renderizarProdutos();
     </script>
 </body>
