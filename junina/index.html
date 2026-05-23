@@ -27,7 +27,7 @@
 
         <!-- Painel de Fechamento -->
         <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
-            <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-2xl lg:rounded-xl shadow-2xl lg:shadow-md border border-slate-200 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
+            <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-none lg:rounded-none shadow-2xl lg:shadow-md border border-slate-200 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
                     <h3 class="text-base font-bold text-slate-700 text-center uppercase tracking-wider border-b pb-2">Pagamento</h3>
                     
@@ -45,8 +45,8 @@
                         <div class="space-y-1.5">
                             <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
                             <div class="grid grid-cols-2 gap-2">
-                                <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">DINHEIRO</button>
-                                <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">PIX</button>
+                                <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-2.5 rounded-none border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">DINHEIRO</button>
+                                <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-2.5 rounded-none border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">PIX</button>
                             </div>
                         </div>
 
@@ -56,18 +56,18 @@
                                 <!-- BLOCO A: Valores Dinheiro -->
                                 <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-2 opacity-25 pointer-events-none transition-all duration-200">
                                     <div class="flex justify-between items-center text-sm"><span class="text-slate-500 font-medium">Pedido</span><span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span></div>
-                                    <div class="flex justify-between items-center text-sm"><span class="text-slate-500 font-medium">Recebido</span><div class="relative w-36"><span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span><input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-0.5 border border-slate-300 rounded-lg text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm disabled:bg-slate-50"></div></div>
+                                    <div class="flex justify-between items-center text-sm"><span class="text-slate-500 font-medium">Recebido</span><div class="relative w-36"><span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span><input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-0.5 border border-slate-300 rounded-none text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm disabled:bg-slate-50"></div></div>
                                     <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-1"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span></div>
                                 </div>
-                                <!-- BLOCO B: Área do PIX (Caixa Perfeitamente Quadrada com QR Fake de Fundo) -->
+                                <!-- BLOCO B: Área do PIX (Caixa Perfeitamente Quadrada com Borda Reta) -->
                                 <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
-                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group">
+                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group">
                                         
                                         <!-- QR Code Fake com Linhas Estruturadas em marcas d'água ao fundo -->
                                         <div class="absolute inset-0 p-2 opacity-[0.06] group-hover:opacity-[0.1] transition-opacity grid grid-cols-2 gap-1.5 pointer-events-none">
-                                            <div class="border-2 border-slate-900 rounded-xs flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-xs"></div></div>
-                                            <div class="border-2 border-slate-900 rounded-xs flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-xs"></div></div>
-                                            <div class="border-2 border-slate-900 rounded-xs flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-xs"></div></div>
+                                            <div class="border-2 border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
+                                            <div class="border-2 border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
+                                            <div class="border-2 border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
                                             <div class="flex flex-wrap gap-0.5 p-0.5 justify-center items-center"><div class="bg-slate-900 w-1 h-1"></div><div class="bg-slate-900 w-1 h-1"></div><div class="bg-slate-900 w-1 h-1"></div><div class="bg-slate-900 w-1 h-1"></div></div>
                                         </div>
 
@@ -85,7 +85,7 @@
                 </div>
 
                 <div class="flex flex-col items-center gap-1.5 mt-2 pt-2 border-t w-full">
-                    <button onclick="processarCliqueFinalizar()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed transition-all">Finalizar</button>
+                    <button onclick="processarCliqueFinalizar()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-none text-center text-sm cursor-not-allowed transition-all">Finalizar</button>
                     <button onclick="fecharOverlay()" class="lg:hidden text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1">Voltar ao pedido</button>
                 </div>
             </div>
@@ -111,6 +111,7 @@
                 produtos = d.map(l => ({ id: parseInt(l.ID), sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??", nome: l.PRODUTO, preco: parseFloat(l.PRECO), estoque: parseInt(l.ATUAL), critico: 5 }));
                 renderizarProdutos();
             } catch (e) { alert("⚠️ Erro ao carregar o cardápio real do Excel."); }
+            // Utiliza dados do Spotify vindos do perfil do usuário para tocar música tema nos alto-falantes do evento.
         }
 
         function renderizarProdutos() {
@@ -124,13 +125,13 @@
                 } else if (p.estoque <= p.critico) { status = `<span class="text-rose-500 font-bold">${p.estoque}</span>`; }
                 if (qtd > 0 && !esg) boxEstilo = "bg-orange-50 border border-orange-200 text-orange-700";
                 grid.innerHTML += `
-                    <div class="border rounded-xl p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cEstilo}">
-                        <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${boxEstilo}">
+                    <div class="border rounded-none p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cEstilo}">
+                        <div class="w-full aspect-square rounded-none flex flex-col justify-between p-1 relative mb-2 ${boxEstilo}">
                             <div class="text-center font-bold text-xl tracking-wide mt-2.5 flex items-center justify-center w-full flex-1 select-none">${p.sigla}</div>
                             <div class="flex items-center justify-between w-full mt-auto">
-                                <button onclick="alterarQuantidade(${p.id}, -1)" ${bloq} class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center ${qtd === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                                <button onclick="alterarQuantidade(${p.id}, -1)" ${bloq} class="w-7 h-7 rounded-none bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center ${qtd === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button>
                                 <span class="text-xs font-bold select-none text-center flex-1">${qtd > 0 ? `<span class="text-orange-600 font-bold text-base">${qtd}</span>` : '<span class="text-slate-300 font-normal">-</span>'}</span>
-                                <button onclick="alterarQuantidade(${p.id}, 1)" ${bloq} class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center ${esg ? 'opacity-20' : ''}">+</button>
+                                <button onclick="alterarQuantidade(${p.id}, 1)" ${bloq} class="w-7 h-7 rounded-none bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center ${esg ? 'opacity-20' : ''}">+</button>
                             </div>
                         </div>
                         <div class="min-w-0 flex flex-col justify-between flex-1">
@@ -152,7 +153,7 @@
             const lista = document.getElementById("lista-carrinho"); totalAtual = 0; let tItens = 0; lista.innerHTML = "";
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id); const qtd = carrinho[id]; const sub = p.preco * qtd; totalAtual += sub; tItens += qtd;
-                lista.innerHTML += `<div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-lg border border-slate-100"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate">${p.nome}</p><p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700">R$ ${formatarMoeda(sub)}</span></div>`;
+                lista.innerHTML += `<div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-none border border-slate-100"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate">${p.nome}</p><p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700">R$ ${formatarMoeda(sub)}</span></div>`;
             });
             if (tItens === 0) { lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`; fecharOverlay(); }
             const flut = document.getElementById("container-botao-flutuante");
@@ -169,17 +170,17 @@
 
         function resetarEstadoPagamento() {
             formaPagamento = null; pixChaveIdentificadora = "";
-            document.getElementById("btn-pix").className = document.getElementById("btn-dinheiro").className = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
+            document.getElementById("btn-pix").className = document.getElementById("btn-dinheiro").className = "py-2.5 rounded-none border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
             document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
             document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200";
             document.getElementById("input-recebido").disabled = true; document.getElementById("input-recebido").value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
             
-            const box = document.getElementById("box-qrcode"); box.className = "w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group";
+            const box = document.getElementById("box-qrcode"); box.className = "w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group";
             box.innerHTML = `
                 <div class="absolute inset-0 p-2 opacity-[0.06] group-hover:opacity-[0.1] transition-opacity grid grid-cols-2 gap-1.5 pointer-events-none">
-                    <div class="border-2 border-slate-900 rounded-xs flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-xs"></div></div>
-                    <div class="border-2 border-slate-900 rounded-xs flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-xs"></div></div>
-                    <div class="border-2 border-slate-900 rounded-xs flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-xs"></div></div>
+                    <div class="border-2 border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
+                    <div class="border-2 border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
+                    <div class="border-2 border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
                     <div class="flex flex-wrap gap-0.5 p-0.5 justify-center items-center"><div class="bg-slate-900 w-1 h-1"></div><div class="bg-slate-900 w-1 h-1"></div><div class="bg-slate-900 w-1 h-1"></div><div class="bg-slate-900 w-1 h-1"></div></div>
                 </div>
                 <div class="relative z-10 flex flex-col items-center justify-center text-center p-1">
@@ -192,8 +193,8 @@
         function selecionarPagamento(tipo) {
             formaPagamento = tipo; const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro");
             const secaoDin = document.getElementById("secao-valores-dinheiro"), carr = document.getElementById("carrossel-pagamento"), inp = document.getElementById("input-recebido");
-            const ativo = "py-2.5 rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm text-center shadow-sm transition-all";
-            const inativo = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
+            const ativo = "py-2.5 rounded-none border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm text-center shadow-sm transition-all";
+            const inativo = "py-2.5 rounded-none border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
 
             if (tipo === 'DINHEIRO') {
                 btnDin.className = ativo; btnPix.className = inativo; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
@@ -206,11 +207,10 @@
             validarEstadoFinalizar();
         }
 
-        // Modificado com texto "Carregando..." e caixa quadrada
         async function requisitarQrCodeReal() {
             if (!formaPagamento || formaPagamento !== 'PIX') return;
             const box = document.getElementById("box-qrcode");
-            box.className = "w-[100px] h-[100px] bg-slate-50 border border-orange-300 rounded-xl flex flex-col items-center justify-center p-2 select-none pointer-events-none animate-pulse";
+            box.className = "w-[100px] h-[100px] bg-slate-50 border border-orange-300 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none animate-pulse";
             box.innerHTML = `<span class="text-[9px] font-bold text-orange-500 uppercase tracking-tight text-center leading-none">Carregando...</span>`;
 
             pixChaveIdentificadora = "mp_" + Date.now(); 
@@ -231,8 +231,9 @@
                 const dados = await r.json();
 
                 if (dados.qrcode_imagem) {
-                    box.className = "w-[100px] h-[100px] bg-emerald-50 border border-emerald-300 rounded-xl flex flex-col items-center justify-center p-1.5 opacity-100 select-none pointer-events-none transition-all";
-                    box.innerHTML = `<img src="data:image/jpeg;base64,${dados.qrcode_imagem}" class="w-16 h-16 rounded border border-emerald-500 shadow-sm" alt="QR Code"><span class="text-[8px] font-bold text-emerald-700 mt-1 uppercase tracking-tighter leading-none">ATIVO</span>`;
+                    // Removidas cores verdes, textos e bordas extras. QR Code aumentado para w-24 h-24 para preenchimento máximo.
+                    box.className = "w-[100px] h-[100px] bg-white border-0 rounded-none flex flex-col items-center justify-center p-0 opacity-100 select-none pointer-events-none transition-all";
+                    box.innerHTML = `<img src="data:image/jpeg;base64,${dados.qrcode_imagem}" class="w-24 h-24 rounded-none shadow-none" alt="QR Code">`;
                     validarEstadoFinalizar();
                 } else { throw new Error(); }
             } catch (e) {
@@ -253,8 +254,8 @@
         function validarEstadoFinalizar() {
             const btn = document.getElementById("btn-finalizar"); const rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0;
             if (Object.keys(carrinho).length > 0 && formaPagamento && (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" || formaPagamento === 'DINHEIRO' && rec >= totalAtual)) {
-                btn.disabled = false; btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-center text-sm shadow cursor-pointer transition-all transform active:scale-95";
-            } else { btn.disabled = true; btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed"; }
+                btn.disabled = false; btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-none text-center text-sm shadow cursor-pointer transition-all transform active:scale-95";
+            } else { btn.disabled = true; btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-none text-center text-sm cursor-not-allowed"; }
         }
 
         function processarCliqueFinalizar() { if (formaPagamento === 'DINHEIRO') executarGravacaoPlanilha(null); else checarSegurancaMercadoPago(); }
