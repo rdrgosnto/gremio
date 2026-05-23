@@ -3,99 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caixa - Festa Junina</title>
+    <title>Caixa - Festa Junina Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .transicao-tema { transition: all 0.2s ease-in-out; }
+        .transicao-geral { transition: all 0.25s ease-in-out; }
+        /* Remove setas padrão de inputs numéricos */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
-<body id="corpo-pagina" class="bg-amber-50 text-gray-800 font-sans min-h-screen flex flex-col transicao-tema">
+<body id="corpo-pagina" class="bg-amber-50 text-gray-800 font-sans min-h-screen flex flex-col transicao-geral">
 
-    <!-- Cabeçalho com o Seletor Suspenso de 22 Layouts -->
-    <header id="cabecalho" class="bg-orange-600 text-white py-4 px-6 shadow-md border-b-4 border-yellow-400 flex flex-col md:flex-row justify-between items-center gap-4 transicao-tema">
-        <div class="text-center md:text-left">
-            <h1 class="text-2xl font-bold tracking-wide">Arraiá do Grêmio - Sistema de Caixa</h1>
-            <p class="text-xs opacity-90 mt-0.5">Controle de Vendas e Auditoria de Estoque</p>
+    <!-- Cabeçalho com o Painel de Engenharia de Layout (Gerador de 99+ Opções) -->
+    <header id="cabecalho" class="bg-orange-600 text-white py-3 px-4 shadow-md border-b-4 border-yellow-400 flex flex-col xl:flex-row justify-between items-center gap-3">
+        <div class="text-center xl:text-left">
+            <h1 class="text-xl font-bold tracking-wide">Arraiá do Grêmio - Engenharia de Caixa</h1>
+            <p class="text-xs opacity-90">Combine os seletores abaixo para gerar mais de 99 opções de layouts e mecânicas</p>
         </div>
         
-        <!-- Caixa Suspensa (Select) com os 22 Modelos -->
-        <div class="flex items-center gap-2 bg-black/20 p-2 rounded-xl border border-white/10 w-full md:w-auto">
-            <label for="seletor-layout" class="text-xs font-bold uppercase tracking-wider text-white whitespace-nowrap">Layout:</label>
-            <select id="seletor-layout" onchange="aplicarLayoutDoSeletor()" class="bg-white text-gray-800 text-sm font-semibold rounded-lg p-2 w-full md:w-72 focus:outline-none cursor-pointer">
-                <!-- Os 22 modelos injetados de forma organizada -->
-                <optgroup label="Layout: Grade Clássica (Blocos)">
-                    <option value="grade-festa" selected>01. Grade - Festa Junina (Padrão)</option>
-                    <option value="grade-gremio">02. Grade - Grêmio Oficial</option>
-                    <option value="grade-floresta">03. Grade - Floresta Junina</option>
-                    <option value="grade-noite">04. Grade - Noite de São João</option>
-                    <option value="grade-clean">05. Grade - Minimalista Clean</option>
-                    <option value="grade-doce">06. Grade - Barraca do Doce</option>
-                    <option value="grade-vinho">07. Grade - Vinho Caipira</option>
-                </optgroup>
-                <optgroup label="Layout: Lista Compacta (Linhas horizontais)">
-                    <option value="lista-festa">08. Lista - Festa Junina</option>
-                    <option value="lista-gremio">09. Lista - Grêmio Oficial</option>
-                    <option value="lista-floresta">10. Lista - Floresta Junina</option>
-                    <option value="lista-noite">11. Lista - Noite de São João</option>
-                    <option value="lista-clean">12. Lista - Minimalista Clean</option>
-                    <option value="lista-doce">13. Lista - Barraca do Doce</option>
-                    <option value="lista-vinho">14. Lista - Vinho Caipira</option>
-                </optgroup>
-                <optgroup label="Layout: Botões Gigantes (Touch Máximo)">
-                    <option value="gigante-festa">15. Touch - Festa Junina</option>
-                    <option value="gigante-gremio">16. Touch - Grêmio Oficial</option>
-                    <option value="gigante-floresta">17. Touch - Floresta Junina</option>
-                    <option value="gigante-noite">18. Touch - Noite de São João</option>
-                    <option value="gigante-clean">19. Touch - Minimalista Clean</option>
-                    <option value="gigante-doce">20. Touch - Barraca do Doce</option>
-                    <option value="gigante-vinho">21. Touch - Vinho Caipira</option>
-                </optgroup>
-                <optgroup label="Layout: Acessibilidade">
-                    <option value="acessibilidade-alto">22. Máximo Contraste (Preto e Branco)</option>
-                </optgroup>
-            </select>
+        <!-- Matriz de Configuração Dinâmica -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 bg-black/20 p-2 rounded-xl border border-white/10 w-full xl:w-auto">
+            
+            <!-- 1. Disposição dos Menus -->
+            <div class="flex flex-col gap-0.5">
+                <span class="text-[10px] font-bold uppercase text-yellow-300">1. Disposição dos Menus</span>
+                <select id="sel-disposicao" onchange="reconstruirPainel()" class="bg-white text-gray-800 text-xs font-semibold rounded p-1.5 focus:outline-none">
+                    <option value="padrao">Carrinho na Direita (Padrão)</option>
+                    <option value="invertido">Carrinho na Esquerda</option>
+                    <option value="topo">Carrinho no Topo / Horizontal</option>
+                    <option value="dividido">Tela Dividida (50% / 50%)</option>
+                    <option value="oculto">Carrinho Oculto (Foco total no Menu)</option>
+                </select>
+            </div>
+
+            <!-- 2. Tipo de Botões e Controles -->
+            <div class="flex flex-col gap-0.5">
+                <span class="text-[10px] font-bold uppercase text-yellow-300">2. Estilo de Controles</span>
+                <select id="sel-controles" onchange="reconstruirPainel()" class="bg-white text-gray-800 text-xs font-semibold rounded p-1.5 focus:outline-none">
+                    <option value="padrao">Controles em Linha (Lista Clássica)</option>
+                    <option value="gigante">Botões Gigantes (Touch Máximo)</option>
+                    <option value="teclado">Teclado Numérico Direto (Digitado)</option>
+                    <option value="barra">Barra Deslizante (Slider Quantidade)</option>
+                    <option value="minimalista">Apenas Clique Simples (Adiciona +1)</option>
+                </select>
+            </div>
+
+            <!-- 3. Funcionalidades Extras -->
+            <div class="flex flex-col gap-0.5">
+                <span class="text-[10px] font-bold uppercase text-yellow-300">3. Recursos Extras</span>
+                <select id="sel-recursos" onchange="reconstruirPainel()" class="bg-white text-gray-800 text-xs font-semibold rounded p-1.5 focus:outline-none">
+                    <option value="nenhum">Nenhum Recurso (Simples)</option>
+                    <option value="busca">Ativar Barra de Busca por Texto</option>
+                    <option value="desconto">Ativar Desconto Rápido no Caixa</option>
+                    <option value="tudo">Ativar Busca + Desconto + Limpar Tudo</option>
+                </select>
+            </div>
+
+            <!-- 4. Estilo Visual / Filtro Junino -->
+            <div class="flex flex-col gap-0.5">
+                <span class="text-[10px] font-bold uppercase text-yellow-300">4. Temática Visual</span>
+                <select id="sel-tema" onchange="reconstruirPainel()" class="bg-white text-gray-800 text-xs font-semibold rounded p-1.5 focus:outline-none">
+                    <option value="festa">08. Lista - Festa Junina (Laranja Seu Favorito)</option>
+                    <option value="noite_junina">Modo Noturno Junino (Escuro/Laranja)</option>
+                    <option value="contraste_junino">Alto Contraste Festa (Preto/Laranja Neon)</option>
+                </select>
+            </div>
+
         </div>
     </header>
 
-    <!-- Corpo Principal -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Área de Recursos Extras Dinâmicos (Busca/Desconto) -->
+    <section id="area-recursos-topo" class="max-w-7xl w-full mx-auto px-4 mt-3 hidden">
+        <!-- Injetado via JS dependendo da opção 3 -->
+    </section>
+
+    <!-- Área Layout de Conteúdo Principal -->
+    <main id="container-principal" class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <!-- Lado Esquerdo: Área de Exibição dos Itens -->
-        <section class="lg:col-span-2 space-y-4">
-            <h2 id="titulo-menu" class="text-xl font-bold border-b-2 pb-2 transicao-tema">Menu de Produtos</h2>
-            <div id="grid-produtos" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <!-- Injeção via JavaScript -->
+        <!-- Bloco do Menu de Produtos -->
+        <section id="secao-produtos" class="lg:col-span-2 space-y-4">
+            <h2 id="titulo-menu" class="text-lg font-bold text-orange-950 border-b-2 border-orange-200 pb-1">Menu de Produtos (A-Z)</h2>
+            <div id="grid-produtos" class="flex flex-col gap-2">
+                <!-- Os produtos entram alinhados aqui -->
             </div>
         </section>
 
-        <!-- Lado Direito: Carrinho e Fechamento -->
-        <section id="painel-carrinho" class="bg-white rounded-2xl shadow-xl border p-6 flex flex-col justify-between h-[calc(100vh-140px)] sticky top-4 transicao-tema">
+        <!-- Bloco do Carrinho de Compras -->
+        <section id="secao-carrinho" class="bg-white rounded-xl shadow-md border border-orange-100 p-4 flex flex-col justify-between h-[calc(100vh-140px)] sticky top-4 transicao-geral">
             <div>
-                <h2 id="titulo-pedido" class="text-xl font-bold border-b pb-3 mb-4 flex justify-between items-center transicao-tema">
+                <h2 class="text-lg font-bold text-orange-950 border-b pb-2 mb-3 flex justify-between items-center">
                     <span>Pedido Atual</span>
-                    <span id="contador-itens" class="text-xs px-2.5 py-1 rounded-full font-semibold">0 itens</span>
+                    <span id="contador-itens" class="text-xs bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full font-semibold">0 itens</span>
                 </h2>
-                <div id="lista-carrinho" class="space-y-3 overflow-y-auto max-h-[35vh] pr-1">
-                    <p class="text-gray-400 text-center py-8 text-sm italic">Nenhum produto selecionado...</p>
+                <div id="lista-carrinho" class="space-y-2 overflow-y-auto max-h-[40vh] pr-1">
+                    <p class="text-gray-400 text-center py-6 text-sm italic">Nenhum produto selecionado...</p>
                 </div>
             </div>
 
-            <!-- Resumo e Formas de Pagamento -->
-            <div id="area-fechamento" class="border-t pt-4 mt-4 space-y-4">
-                <div class="flex justify-between items-center">
-                    <span id="txt-total" class="text-lg font-medium">Valor Total:</span>
-                    <span id="valor-total" class="text-3xl font-black text-orange-600">R$ 0,00</span>
-                </div>
-
-                <div class="space-y-2">
-                    <label id="txt-pagamento" class="text-sm font-semibold text-gray-600 block">Forma de Pagamento:</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-3 rounded-xl border-2 font-bold text-center transition-all">PIX</button>
-                        <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-3 rounded-xl border-2 font-bold text-center transition-all">DINHEIRO</button>
+            <!-- Totalizador e Finalização -->
+            <div class="border-t pt-3 mt-3 space-y-3">
+                <div class="space-y-1">
+                    <div id="linha-desconto" class="flex justify-between items-center text-sm text-green-600 hidden">
+                        <span>Desconto Aplicado:</span>
+                        <span id="valor-desconto">- R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-gray-900">
+                        <span class="text-base font-semibold">Valor Total:</span>
+                        <span id="valor-total" class="text-2xl font-black text-orange-600">R$ 0,00</span>
                     </div>
                 </div>
 
-                <button onclick="finalizarVenda()" id="btn-finalizar" disabled class="w-full bg-gray-300 text-gray-500 font-bold py-4 rounded-xl text-center text-lg shadow transition-all cursor-not-allowed">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-gray-500 uppercase tracking-wider block">Forma de Pagamento:</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-2.5 rounded-lg border-2 font-bold text-sm text-center transition-all">PIX</button>
+                        <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-2.5 rounded-lg border-2 font-bold text-sm text-center transition-all">DINHEIRO</button>
+                    </div>
+                </div>
+
+                <button onclick="finalizarVenda()" id="btn-finalizar" disabled class="w-full bg-gray-300 text-gray-500 font-bold py-3.5 rounded-xl text-center text-base shadow transition-all cursor-not-allowed">
                     Selecione o Pagamento
                 </button>
             </div>
@@ -103,7 +128,7 @@
     </main>
 
     <script>
-        // Banco de Dados com os 10 Produtos (Sempre em Ordem Alfabética Automática)
+        // Banco de Dados unificado dos 10 itens
         const produtos = [
             { id: 1, nome: "Cachorro Quente", preco: 12.00, estoque: 50, critico: 5 },
             { id: 2, nome: "Pipoca Doce/Salgada", preco: 6.00, estoque: 4, critico: 5 },
@@ -119,136 +144,208 @@
 
         let carrinho = {};
         let formaPagamento = null;
-        
-        // Variáveis de controle de estilo ativo
-        let estruturaVisual = 'grade'; 
-        let temaCores = 'festa';      
+        let filtroBusca = "";
+        let descontoCaixa = 0; // Valor em Reais
 
-        // Definição dos 7 temas de cores aplicáveis
-        const dicionarioTemas = {
-            festa: { bg: "bg-amber-50", text: "text-gray-800", header: "bg-orange-600 border-yellow-400 text-white", card: "bg-white border-amber-100 text-gray-800", painel: "bg-white border-amber-100 text-gray-800", destaque: "text-orange-600", badge: "bg-orange-100 text-orange-700", botoes: "bg-gray-100" },
-            gremio: { bg: "bg-slate-100", text: "text-blue-950", header: "bg-blue-600 border-sky-400 text-white", card: "bg-white border-blue-100 text-gray-800", painel: "bg-white border-blue-100 text-gray-800", destaque: "text-blue-600", badge: "bg-blue-100 text-blue-700", botoes: "bg-blue-50" },
-            floresta: { bg: "bg-stone-100", text: "text-emerald-950", header: "bg-emerald-700 border-lime-400 text-white", card: "bg-white border-stone-200 text-gray-800", painel: "bg-white border-stone-200 text-gray-800", destaque: "text-emerald-600", badge: "bg-emerald-100 text-emerald-800", botoes: "bg-stone-100" },
-            noite: { bg: "bg-slate-900", text: "text-slate-100", header: "bg-slate-950 border-purple-500 text-white", card: "bg-slate-800 border-slate-700 text-white", painel: "bg-slate-800 border-slate-700 text-white", destaque: "text-purple-400", badge: "bg-purple-950 text-purple-300", botoes: "bg-slate-700" },
-            clean: { bg: "bg-white", text: "text-gray-900", header: "bg-gray-800 border-gray-600 text-white", card: "bg-white border-gray-200 text-gray-800", painel: "bg-white border-gray-200 text-gray-800", destaque: "text-gray-900", badge: "bg-gray-200 text-gray-800", botoes: "bg-gray-100" },
-            doce: { bg: "bg-pink-50/60", text: "text-pink-950", header: "bg-pink-500 border-amber-300 text-white", card: "bg-white border-pink-100 text-gray-800", painel: "bg-white border-pink-100 text-gray-800", destaque: "text-pink-600", badge: "bg-pink-100 text-pink-700", botoes: "bg-pink-50/50" },
-            vinho: { bg: "bg-stone-50", text: "text-red-950", header: "bg-red-900 border-amber-500 text-white", card: "bg-white border-stone-200 text-gray-800", painel: "bg-white border-stone-200 text-gray-800", destaque: "text-red-700", badge: "bg-red-100 text-red-800", botoes: "bg-stone-100" },
-            acessibilidade: { bg: "bg-white", text: "text-black", header: "bg-black border-black text-white", card: "bg-white border-2 border-black text-black rounded-none", painel: "bg-white border-2 border-black text-black rounded-none", destaque: "text-black underline font-black", badge: "border border-black text-black", botoes: "bg-white border border-black" }
-        };
+        // Função Master que reconstrói a mecânica e a arquitetura visual na hora
+        function reconstruirPainel() {
+            const disp = document.getElementById("sel-disposicao").value;
+            const tema = document.getElementById("sel-tema").value;
+            const rec = document.getElementById("sel-recursos").value;
 
-        // Função do Seletor que quebra o valor em Estrutura + Tema
-        function aplicarLayoutDoSeletor() {
-            const val = document.getElementById("seletor-layout").value;
-            
-            if (val === 'acessibilidade-alto') {
-                estruturaVisual = 'grade';
-                temaCores = 'acessibilidade';
+            const principal = document.getElementById("container-principal");
+            const secaoProds = document.getElementById("secao-produtos");
+            const secaoCart = document.getElementById("secao-carrinho");
+            const corpo = document.getElementById("corpo-pagina");
+            const cabecalho = document.getElementById("cabecalho");
+            const tituloMenu = document.getElementById("titulo-menu");
+
+            // Aplicação dos Temas de Cores com base na identidade visual Laranja favorita
+            if (tema === 'noite_junina') {
+                corpo.className = "bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col transicao-geral";
+                cabecalho.className = "bg-slate-950 text-white py-3 px-4 shadow-md border-b-4 border-orange-500 flex flex-col xl:flex-row justify-between items-center gap-3";
+                secaoCart.className = "bg-slate-800 rounded-xl shadow-md border border-slate-700 p-4 flex flex-col justify-between h-[calc(100vh-140px)] sticky top-4 text-white transicao-geral";
+                tituloMenu.className = "text-lg font-bold text-orange-400 border-b-2 border-slate-700 pb-1";
+            } else if (tema === 'contraste_junino') {
+                corpo.className = "bg-black text-white font-sans min-h-screen flex flex-col transicao-geral";
+                cabecalho.className = "bg-black text-white py-3 px-4 shadow-md border-b-4 border-orange-600 flex flex-col xl:flex-row justify-between items-center gap-3";
+                secaoCart.className = "bg-black rounded-none border-2 border-orange-600 p-4 flex flex-col justify-between h-[calc(100vh-140px)] sticky top-4 text-white transicao-geral";
+                tituloMenu.className = "text-lg font-bold text-orange-500 border-b-2 border-orange-600 pb-1";
             } else {
-                const partes = val.split('-');
-                estruturaVisual = partes[0]; // grade, lista, gigante
-                temaCores = partes[1];       // festa, gremio, etc.
+                // Padrão Favorito: 08. Lista - Festa Junina (Laranja)
+                corpo.className = "bg-amber-50 text-gray-800 font-sans min-h-screen flex flex-col transicao-geral";
+                cabecalho.className = "bg-orange-600 text-white py-3 px-4 shadow-md border-b-4 border-yellow-400 flex flex-col xl:flex-row justify-between items-center gap-3";
+                secaoCart.className = "bg-white rounded-xl shadow-md border border-orange-100 p-4 flex flex-col justify-between h-[calc(100vh-140px)] sticky top-4 transicao-geral";
+                tituloMenu.className = "text-lg font-bold text-orange-950 border-b-2 border-orange-200 pb-1";
             }
 
-            atualizarCoresDoLayout();
+            // Aplicação da Disposição dos Menus (Layout Estrutural)
+            secaoCart.classList.remove("hidden");
+            if (disp === "invertido") {
+                principal.className = "flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6";
+                secaoProds.className = "lg:col-span-2 space-y-4 order-2";
+                secaoCart.className = secaoCart.className.replace("sticky top-4", "") + " order-1 lg:h-[calc(100vh-140px)] lg:sticky lg:top-4";
+            } else if (disp === "topo") {
+                principal.className = "flex-1 max-w-7xl w-full mx-auto p-4 flex flex-col gap-6";
+                secaoProds.className = "w-full space-y-4 order-2";
+                secaoCart.className = secaoCart.className.replace("h-[calc(100vh-140px)] sticky top-4", "h-auto w-full");
+                secaoCart.classList.add("order-1");
+            } else if (disp === "dividido") {
+                principal.className = "flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-2 gap-6";
+                secaoProds.className = "space-y-4";
+                secaoCart.className = secaoCart.className.replace("sticky top-4", "") + " lg:h-[calc(100vh-140px)] lg:sticky lg:top-4";
+            } else if (disp === "oculto") {
+                principal.className = "flex-1 max-w-7xl w-full mx-auto p-4 flex flex-col";
+                secaoProds.className = "w-full space-y-4";
+                secaoCart.classList.add("hidden");
+            } else {
+                // Padrão original à Direita
+                principal.className = "flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6";
+                secaoProds.className = "lg:col-span-2 space-y-4 order-1";
+                secaoCart.className = secaoCart.className.replace("sticky top-4", "") + " order-2 lg:h-[calc(100vh-140px)] lg:sticky lg:top-4";
+            }
+
+            // Gerenciamento de Recursos Extras
+            const areaRecursos = document.getElementById("area-recursos-topo");
+            if (rec === "nenhum") {
+                areaRecursos.classList.add("hidden");
+                filtroBusca = "";
+                descontoCaixa = 0;
+            } else {
+                areaRecursos.classList.remove("hidden");
+                let htmlRecursos = `<div class="bg-white p-3 rounded-xl shadow-sm border border-orange-100 flex flex-col sm:flex-row gap-3 items-center ${tema==='noite_junina'?'bg-slate-800 border-slate-700':tema==='contraste_junino'?'bg-black border-orange-600':''}">`;
+                
+                if (rec === "busca" || rec === "tudo") {
+                    htmlRecursos += `
+                        <div class="flex-1 w-full">
+                            <input type="text" id="input-busca" value="${filtroBusca}" oninput="filtrarPorTexto(this.value)" placeholder="🔍 Buscar produto pelo nome..." class="w-full px-3 py-1.5 text-xs rounded-lg border focus:outline-none focus:border-orange-500 ${tema==='noite_junina'?'bg-slate-900 border-slate-700 text-white':tema==='contraste_junino'?'bg-black border-orange-600 text-white':''}">
+                        </div>`;
+                }
+                if (rec === "desconto" || rec === "tudo") {
+                    htmlRecursos += `
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <span class="text-xs font-bold whitespace-nowrap">Desconto R$:</span>
+                            <input type="number" id="input-desconto" value="${descontoCaixa||''}" oninput="aplicarDescontoMecanico(this.value)" placeholder="0,00" class="w-20 px-2 py-1.5 text-xs text-center rounded-lg border focus:outline-none focus:border-orange-500 ${tema==='noite_junina'?'bg-slate-900 border-slate-700 text-white':tema==='contraste_junino'?'bg-black border-orange-600 text-white':''}">
+                        </div>`;
+                }
+                if (rec === "tudo") {
+                    htmlRecursos += `
+                        <button onclick="limparCarrinhoCompleto()" class="w-full sm:w-auto px-4 py-1.5 text-xs bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all">
+                            💥 Limpar Tudo
+                        </button>`;
+                }
+                htmlRecursos += `</div>`;
+                areaRecursos.innerHTML = htmlRecursos;
+            }
+
             renderizarProdutos();
             atualizarCarrinho();
         }
 
-        // Atualiza as classes do DOM com base no tema escolhido
-        function atualizarCoresDoLayout() {
-            const t = dicionarioTemas[temaCores];
-            
-            document.getElementById("corpo-pagina").className = `${t.bg} ${t.text} font-sans min-h-screen flex flex-col transicao-tema`;
-            document.getElementById("cabecalho").className = `${t.header} py-4 px-6 shadow-md border-b-4 flex flex-col md:flex-row justify-between items-center gap-4 transicao-tema`;
-            document.getElementById("painel-carrinho").className = `${t.painel} rounded-2xl shadow-xl p-6 flex flex-col justify-between h-[calc(100vh-140px)] sticky top-4 transicao-tema`;
-            document.getElementById("titulo-menu").className = `text-xl font-bold border-b-2 pb-2 transicao-tema ${temaCores==='noite'?'border-slate-700':'border-gray-200'}`;
-            document.getElementById("titulo-pedido").className = `text-xl font-bold border-b pb-3 mb-4 flex justify-between items-center transicao-tema ${temaCores==='noite'?'border-slate-700':'border-gray-200'}`;
-            document.getElementById("valor-total").className = `text-3xl font-black ${t.destaque}`;
-            document.getElementById("contador-itens").className = `text-xs px-2.5 py-1 rounded-full font-semibold ${t.badge}`;
-        }
-
-        // Desenha a tela aplicando Ordem Alfabética e o Formato Visual escolhido
+        // Renderização Inteligente dos Cards e Alinhamento do Estoque
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos");
-            const t = dicionarioTemas[temaCores];
+            const ctrl = document.getElementById("sel-controles").value;
+            const tema = document.getElementById("sel-tema").value;
             grid.innerHTML = "";
 
-            // Ordem Alfabética de A a Z garantida
+            // Garante Ordem Alfabética Rígida (A-Z)
             produtos.sort((a, b) => a.nome.localeCompare(b.nome));
 
-            // Configura a distribuição espacial dos cards
-            if (estruturaVisual === 'lista') {
-                grid.className = "flex flex-col gap-2";
-            } else if (estruturaVisual === 'gigante') {
-                grid.className = "grid grid-cols-1 gap-4"; // 1 coluna gigante
-            } else {
-                grid.className = "grid grid-cols-1 sm:grid-cols-2 gap-4"; // Grade padrão
+            // Filtro de Busca por texto ativo
+            const listaFiltrada = produtos.filter(p => p.nome.toLowerCase().includes(filtroBusca.toLowerCase()));
+
+            if (listaFiltrada.length === 0) {
+                grid.innerHTML = `<p class="text-center py-6 text-sm italic text-gray-400">Nenhum produto encontrado...</p>`;
+                return;
             }
 
-            produtos.forEach(p => {
-                const qtdNoCarrinho = carrinho[p.id] || 0;
+            listaFiltrada.forEach(p => {
+                const qtd = carrinho[p.id] || 0;
                 let disabledBtn = p.estoque === 0 ? "disabled" : "";
                 
-                let statusEstoqueHtml = `<span class="text-xs ${temaCores==='noite'?'text-green-400':'text-green-600'} font-medium">Estoque: ${p.estoque}</span>`;
-                let cardBg = t.card;
-                let btnBox = t.botoes;
+                // Configuração das Tags de Estoque
+                let tagEstoque = `<span class="text-green-600 font-bold">${p.estoque}</span>`;
+                if (p.estoque === 0) tagEstoque = `<span class="text-red-500 font-black">🚫 ESGOTADO</span>`;
+                else if (p.estoque <= p.critico) tagEstoque = `<span class="text-amber-500 font-black">${p.estoque} (Baixo)</span>`;
 
-                if (p.estoque === 0) {
-                    statusEstoqueHtml = `<span class="text-xs text-red-500 font-bold bg-red-500/10 px-2 py-0.5 rounded">ESGOTADO</span>`;
-                    cardBg = temaCores === 'noite' ? "bg-slate-950 text-gray-600 border-slate-900 opacity-40" : "bg-gray-100 text-gray-400 border-gray-200 opacity-60";
-                } else if (p.estoque <= p.critico) {
-                    statusEstoqueHtml = `<span class="text-xs text-amber-500 font-bold bg-amber-500/10 px-2 py-0.5 rounded">CRÍTICO: ${p.estoque}</span>`;
-                }
+                // Classes de estilo do Card com base no tema selecionado
+                let classeCard = "bg-white border-orange-100 text-gray-800";
+                if (tema === 'noite_junina') classeCard = "bg-slate-800 border-slate-700 text-white";
+                else if (tema === 'contraste_junino') classeCard = "bg-black border-2 border-orange-600 text-white rounded-none";
 
-                // Renderização 1: Lista Compacta
-                if (estruturaVisual === 'lista') {
-                    grid.innerHTML += `
-                        <div class="border rounded-xl p-3 shadow-sm flex items-center justify-between gap-4 transicao-tema ${cardBg}">
-                            <div class="flex-1 min-w-0">
-                                <h3 class="font-bold text-base truncate">${p.nome}</h3>
-                                <div class="flex items-center gap-3 mt-0.5">
-                                    <span class="font-extrabold text-sm ${t.destaque}">R$ ${p.preco.toFixed(2)}</span>
-                                    ${statusEstoqueHtml}
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="text-sm font-bold">Qtd: ${qtdNoCarrinho}</span>
-                                <div class="flex items-center gap-1 ${btnBox} rounded-lg p-0.5 border">
-                                    <button onclick="alterarQuantidade(${p.id}, -1)" class="w-8 h-8 rounded bg-white text-gray-800 border font-bold flex items-center justify-center hover:bg-orange-50">-</button>
-                                    <button onclick="alterarQuantidade(${p.id}, 1)" ${disabledBtn} class="w-8 h-8 rounded bg-white text-gray-800 border font-bold flex items-center justify-center hover:bg-orange-50">+</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                // Gerador de Mecânicas de Controle (A escolha de botões)
+                let areaControlesHtml = "";
+
+                if (ctrl === "gigante") {
+                    // Opção: Botões Gigantes para Touch
+                    areaControlesHtml = `
+                        <div class="flex items-center gap-2 border rounded-xl p-1 bg-gray-50 ${tema==='noite_junina'?'bg-slate-900 border-slate-700':tema==='contraste_junino'?'bg-black border-orange-600':''}">
+                            <button onclick="alterarQuantidade(${p.id}, -1)" class="w-14 h-14 bg-white border rounded-lg text-2xl font-black text-gray-700 active:bg-orange-100 flex items-center justify-center">-</button>
+                            <span class="text-xl font-black px-4 min-w-[40px] text-center">${qtd}</span>
+                            <button onclick="alterarQuantidade(${p.id}, 1)" ${disabledBtn} class="w-14 h-14 bg-white border rounded-lg text-2xl font-black text-gray-700 active:bg-orange-100 flex items-center justify-center">+</button>
+                        </div>`;
+                } else if (ctrl === "teclado") {
+                    // Opção: Teclado Numérico Direto (Modo digitação veloz)
+                    areaControlesHtml = `
+                        <div class="flex items-center gap-1">
+                            <span class="text-xs text-gray-400 mr-1">Qtd:</span>
+                            <input type="number" min="0" max="${p.estoque}" value="${qtd || ''}" oninput="digitarQuantidade(${p.id}, this.value)" placeholder="0" class="w-16 p-2 text-center text-sm font-bold border rounded-lg focus:outline-none focus:border-orange-500 ${tema==='noite_junina'?'bg-slate-900 border-slate-700 text-white':tema==='contraste_junino'?'bg-black border-orange-600 text-white':''}">
+                        </div>`;
+                } else if (ctrl === "barra") {
+                    // Opção: Slider Deslizante
+                    areaControlesHtml = `
+                        <div class="flex flex-col items-end gap-1 w-32 sm:w-44">
+                            <input type="range" min="0" max="${p.estoque}" value="${qtd}" oninput="digitarQuantidade(${p.id}, this.value)" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-600">
+                            <span class="text-xs font-bold opacity-80">Selecionado: ${qtd}</span>
+                        </div>`;
+                } else if (ctrl === "minimalista") {
+                    // Opção: Toque Direto Único (Apenas clica para adicionar +1)
+                    areaControlesHtml = `
+                        <button onclick="alterarQuantidade(${p.id}, 1)" ${disabledBtn} class="px-4 py-2 text-xs font-bold bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all shadow-sm">
+                            ${qtd > 0 ? `Adicionado (${qtd})` : '➕ Adicionar'}
+                        </button>`;
                 } else {
-                    // Renderização 2 & 3: Grade Clássica ou Botões Gigantes
-                    let paddingCard = estruturaVisual === 'gigante' ? 'p-6' : 'p-4';
-                    let textTamanho = estruturaVisual === 'gigante' ? 'text-2xl' : 'text-lg';
-                    let hBtn = estruturaVisual === 'gigante' ? 'w-14 h-14 text-xl' : 'w-10 h-10';
+                    // Padrão: Lista Compacta com Alinhamento Fixo dos botões à direita
+                    areaControlesHtml = `
+                        <div class="flex items-center gap-1.5 border rounded-lg p-0.5 bg-gray-50 ${tema==='noite_junina'?'bg-slate-900 border-slate-700':tema==='contraste_junino'?'bg-black border-orange-600':''}">
+                            <button onclick="alterarQuantidade(${p.id}, -1)" class="w-8 h-8 bg-white border rounded font-black text-gray-600 flex items-center justify-center hover:bg-orange-50">-</button>
+                            <span class="text-sm font-bold px-2 min-w-[28px] text-center">${qtd}</span>
+                            <button onclick="alterarQuantidade(${p.id}, 1)" ${disabledBtn} class="w-8 h-8 bg-white border rounded font-black text-gray-600 flex items-center justify-center hover:bg-orange-50">+</button>
+                        </div>`;
+                }
 
-                    grid.innerHTML += `
-                        <div class="border rounded-2xl shadow-sm flex flex-col justify-between transicao-tema ${cardBg} ${paddingCard}">
-                            <div>
-                                <div class="flex justify-between items-start gap-2">
-                                    <h3 class="font-bold leading-tight ${textTamanho}">${p.nome}</h3>
-                                    <span class="font-black whitespace-nowrap ${t.destaque} ${estruturaVisual==='gigante'?'text-2xl':'text-lg'}">R$ ${p.preco.toFixed(2)}</span>
-                                </div>
-                                <div class="mt-1">${statusEstoqueHtml}</div>
-                            </div>
-                            <div class="flex items-center justify-between mt-4 border-t pt-3 border-dashed ${temaCores==='noite'?'border-slate-700':'border-gray-100'}">
-                                <span class="text-sm font-medium opacity-70">Selecionado: <b class="text-base font-bold">${qtdNoCarrinho}</b></span>
-                                <div class="flex items-center gap-1 ${btnBox} rounded-xl p-1 border">
-                                    <button onclick="alterarQuantidade(${p.id}, -1)" class="rounded-lg bg-white text-gray-800 border font-bold flex items-center justify-center hover:bg-orange-50 ${hBtn}">-</button>
-                                    <button onclick="alterarQuantidade(${p.id}, 1)" ${disabledBtn} class="rounded-lg bg-white text-gray-800 border font-bold flex items-center justify-center hover:bg-orange-50 ${hBtn}">+</button>
-                                </div>
+                // 🌟 RENDERIZAÇÃO DA TABELA INVISÍVEL FLEX (Correção Absoluta do Desalinhamento)
+                grid.innerHTML += `
+                    <div class="border rounded-xl p-3 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 transicao-geral ${classeCard}">
+                        
+                        <!-- Coluna 1: Dados do Produto (Largura controlada e alinhada) -->
+                        <div class="flex-1 grid grid-cols-3 items-center gap-2 min-w-0">
+                            <!-- Nome alinhado à esquerda -->
+                            <h3 class="font-bold text-sm sm:text-base truncate col-span-1">${p.nome}</h3>
+                            
+                            <!-- Preço centralizado milimetricamente -->
+                            <span class="font-extrabold text-sm text-orange-500 text-center col-span-1">
+                                R$ ${p.preco.toFixed(2)}
+                            </span>
+                            
+                            <!-- Palavra ESTOQUE e Número travados e alinhados perfeitamente à direita -->
+                            <div class="text-xs text-gray-400 text-right col-span-1 whitespace-nowrap pr-2">
+                                <span class="opacity-70">Estoque</span> ${tagEstoque}
                             </div>
                         </div>
-                    `;
-                }
+                        
+                        <!-- Coluna 2: Painel de Controles Selecionado -->
+                        <div class="flex items-center justify-end">
+                            ${areaControlesHtml}
+                        </div>
+
+                    </div>
+                `;
             });
         }
 
-        // Altera quantidades respeitando os estoques
+        // Funções de Processamento e Controle Numérico
         function alterarQuantidade(id, delta) {
             const produto = produtos.find(p => p.id === id);
             const qtdAtual = carrinho[id] || 0;
@@ -256,7 +353,7 @@
 
             if (novaQtd < 0) return;
             if (novaQtd > produto.estoque) {
-                alert(`Ops! Limite de estoque atingido para ${produto.nome}.`);
+                alert(`Lote indisponível. Estoque máximo de ${produto.nome} é de ${produto.estoque} unidades.`);
                 return;
             }
 
@@ -267,13 +364,52 @@
             atualizarCarrinho();
         }
 
-        // Atualiza painel do carrinho de compras
+        function digitarQuantidade(id, valor) {
+            const produto = produtos.find(p => p.id === id);
+            let novaQtd = parseInt(valor) || 0;
+
+            if (novaQtd < 0) novaQtd = 0;
+            if (novaQtd > produto.estoque) {
+                alert(`Estoque máximo atingido (${produto.estoque} unidades).`);
+                novaQtd = produto.estoque;
+            }
+
+            if (novaQtd === 0) delete carrinho[id];
+            else carrinho[id] = novaQtd;
+
+            // Atualização silenciosa para não quebrar o foco da digitação no teclado
+            atualizarCarrinho();
+        }
+
+        function filtrarPorTexto(valor) {
+            filtroBusca = valor;
+            renderizarProdutos();
+        }
+
+        function aplicarDescontoMecanico(valor) {
+            descontoCaixa = parseFloat(valor) || 0;
+            atualizarCarrinho();
+        }
+
+        function limparCarrinhoCompleto() {
+            carrinho = {};
+            descontoCaixa = 0;
+            const inputDesc = document.getElementById("input-desconto");
+            if (inputDesc) inputDesc.value = "";
+            renderizarProdutos();
+            atualizarCarrinho();
+        }
+
+        // Atualização Dinâmica do Carrinho e Totalizadores
         function atualizarCarrinho() {
             const lista = document.getElementById("lista-carrinho");
             const totalTxt = document.getElementById("valor-total");
             const contador = document.getElementById("contador-itens");
+            const linhaDesc = document.getElementById("linha-desconto");
+            const valDescTxt = document.getElementById("valor-desconto");
+            const tema = document.getElementById("sel-tema").value;
             
-            let total = 0;
+            let bruto = 0;
             let totalItens = 0;
             lista.innerHTML = "";
 
@@ -281,17 +417,18 @@
                 const p = produtos.find(item => item.id == id);
                 const qtd = carrinho[id];
                 const subtotal = p.preco * qtd;
-                total += subtotal;
+                bruto += subtotal;
                 totalItens += qtd;
 
-                let itemBg = temaCores === 'noite' ? "bg-slate-900/50 border-slate-700" : "bg-amber-50/50 border-gray-100";
-                if (temaCores === 'acessibilidade') itemBg = "border-black border";
+                let classeItem = "bg-amber-50/50 border-gray-100";
+                if (tema === 'noite_junina') classeItem = "bg-slate-900/50 border-slate-700";
+                else if (tema === 'contraste_junino') classeItem = "bg-black border border-orange-600 text-white rounded-none";
 
                 lista.innerHTML += `
-                    <div class="flex justify-between items-center text-sm p-2.5 rounded-xl border ${itemBg}">
-                        <div class="max-w-[65%]">
-                            <p class="font-semibold">${p.nome}</p>
-                            <p class="text-xs opacity-60">${qtd}x R$ ${p.preco.toFixed(2)}</p>
+                    <div class="flex justify-between items-center text-xs p-2 rounded-lg border ${classeItem}">
+                        <div class="max-w-[70%]">
+                            <p class="font-bold">${p.nome}</p>
+                            <p class="opacity-60">${qtd}x R$ ${p.preco.toFixed(2)}</p>
                         </div>
                         <span class="font-bold">R$ ${subtotal.toFixed(2)}</span>
                     </div>
@@ -299,66 +436,78 @@
             });
 
             if (totalItens === 0) {
-                lista.innerHTML = `<p class="text-gray-400 text-center py-8 text-sm italic">Nenhum produto selecionado...</p>`;
+                lista.innerHTML = `<p class="text-gray-400 text-center py-6 text-xs italic">Nenhum produto selecionado...</p>`;
+            }
+
+            // Cálculo do Desconto e Validação Líquida
+            let liquido = bruto - descontoCaixa;
+            if (liquido < 0) liquido = 0;
+
+            if (descontoCaixa > 0 && totalItens > 0) {
+                linhaDesc.classList.remove("hidden");
+                valDescTxt.innerText = `- R$ ${descontoCaixa.toFixed(2)}`;
+            } else {
+                linhaDesc.classList.add("hidden");
             }
 
             contador.innerText = `${totalItens} ${totalItens === 1 ? 'item' : 'itens'}`;
-            totalTxt.innerText = `R$ ${total.toFixed(2)}`;
+            totalTxt.innerText = `R$ ${liquido.toFixed(2)}`;
             verificarStatusBotao();
         }
 
-        // Controla e destaca botões de pagamento ativo
+        // Seleção Visual de Pagamento e Liberação de Comandos
         function selecionarPagamento(tipo) {
             formaPagamento = tipo;
             const btnPix = document.getElementById("btn-pix");
             const btnDinheiro = document.getElementById("btn-dinheiro");
+            const tema = document.getElementById("sel-tema").value;
 
-            let ativo = "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-inner";
+            let ativo = "border-emerald-500 bg-emerald-50 text-emerald-700 font-black shadow-inner";
             let inativo = "border-gray-200 text-gray-700 bg-white hover:bg-gray-50";
 
-            if (temaCores === 'noite') {
-                ativo = "border-emerald-400 bg-emerald-950/50 text-emerald-400 shadow-md";
+            if (tema === 'noite_junina') {
+                ativo = "border-emerald-400 bg-emerald-950/40 text-emerald-400 font-black";
                 inativo = "border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700";
-            } else if (temaCores === 'acessibilidade') {
-                ativo = "border-4 border-black bg-black text-white rounded-none";
-                inativo = "border-2 border-black text-black bg-white rounded-none";
+            } else if (tema === 'contraste_junino') {
+                ativo = "border-4 border-orange-500 bg-orange-600 text-black font-black rounded-none";
+                inativo = "border-2 border-orange-600 text-white bg-black rounded-none";
             }
 
             if (tipo === 'PIX') {
-                btnPix.className = `py-3 rounded-xl border-2 font-bold text-center transition-all ${ativo}`;
-                btnDinheiro.className = `py-3 rounded-xl border-2 font-bold text-center transition-all ${inativo}`;
+                btnPix.className = `py-2.5 rounded-lg border-2 text-sm text-center transition-all ${ativo}`;
+                btnDinheiro.className = `py-2.5 rounded-lg border-2 text-sm text-center transition-all ${inativo}`;
             } else {
-                btnDinheiro.className = `py-3 rounded-xl border-2 font-bold text-center transition-all ${ativo}`;
-                btnPix.className = `py-3 rounded-xl border-2 font-bold text-center transition-all ${inativo}`;
+                btnDinheiro.className = `py-2.5 rounded-lg border-2 text-sm text-center transition-all ${ativo}`;
+                btnPix.className = `py-2.5 rounded-lg border-2 text-sm text-center transition-all ${inativo}`;
             }
             verificarStatusBotao();
         }
 
-        // Valida ativação do botão concluir
         function verificarStatusBotao() {
             const btn = document.getElementById("btn-finalizar");
             const temItens = Object.keys(carrinho).length > 0;
-            const t = dicionarioTemas[temaCores];
+            const tema = document.getElementById("sel-tema").value;
 
             if (temItens && formaPagamento) {
                 btn.disabled = false;
-                let classeBtn = (temaCores === 'noite' || temaCores==='acessibilidade') ? "bg-emerald-500 text-slate-950 hover:bg-emerald-400" : "bg-orange-600 text-white hover:bg-orange-700";
-                if (temaCores === 'acessibilidade') { btn.className = `w-full bg-black text-white font-bold py-4 text-center text-lg border-4 border-black rounded-none`; }
-                else { btn.className = `w-full ${classeBtn} font-bold py-4 rounded-xl text-center text-lg shadow-lg transition-all transform active:scale-95`; }
-                btn.innerText = `Finalizar em ${formaPagamento}`;
+                let classeBtn = (tema === 'noite_junina' || tema === 'contraste_junino') ? "bg-orange-500 text-slate-950 hover:bg-orange-400" : "bg-orange-600 text-white hover:bg-orange-700";
+                if (tema === 'contraste_junino') { btn.className = `w-full bg-orange-600 text-black font-black py-3.5 text-center text-base border-2 border-white rounded-none`; }
+                else { btn.className = `w-full ${classeBtn} font-bold py-3.5 rounded-xl text-center text-base shadow-md transition-all transform active:scale-95`; }
+                btn.innerText = `Finalizar Venda (${formaPagamento})`;
             } else {
                 btn.disabled = true;
-                let desativado = temaCores === 'noite' ? "bg-slate-700 text-slate-500 border-slate-800" : "bg-gray-300 text-gray-500 border-gray-200";
-                btn.className = `w-full ${desativado} font-bold py-4 rounded-xl text-center text-lg border cursor-not-allowed`;
+                let desativado = tema === 'noite_junina' ? "bg-slate-700 text-slate-500 border-slate-800" : "bg-gray-300 text-gray-500 border-gray-200";
+                if (tema === 'contraste_junino') btn.className = `w-full bg-black text-gray-600 border border-gray-800 py-3.5 text-center text-base cursor-not-allowed rounded-none`;
+                else btn.className = `w-full ${desativado} font-bold py-3.5 rounded-xl text-center text-base border cursor-not-allowed`;
                 btn.innerText = temItens ? "Selecione o Pagamento" : "Adicione Itens ao Pedido";
             }
         }
 
-        // Executa a limpeza e simula o disparo
+        // Execução da baixa e gravação simulada
         function finalizarVenda() {
-            alert(`Venda concluída com sucesso via ${formaPagamento}!\nFichas liberadas para a entrega.`);
+            alert(`Venda registrada via ${formaPagamento}!\nFichas prontas para entrega.`);
             
-            // Simula baixa no estoque
+            // Abate de estoque oficial
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id);
                 p.estoque -= carrinho[id];
@@ -366,19 +515,24 @@
 
             carrinho = {};
             formaPagamento = null;
+            descontoCaixa = 0;
             
-            // Reseta botões de pagamento
-            const r = temaCores === 'noite' ? "border-slate-700 text-slate-300 bg-slate-800" : (temaCores==='acessibilidade' ? "border-2 border-black text-black bg-white rounded-none":"border-gray-200 text-gray-700 bg-white");
-            document.getElementById("btn-pix").className = `py-3 rounded-xl border-2 font-bold text-center ${r}`;
-            document.getElementById("btn-dinheiro").className = `py-3 rounded-xl border-2 font-bold text-center ${r}`;
+            // Reseta controles de campos extras
+            const inputDesc = document.getElementById("input-desconto");
+            if (inputDesc) inputDesc.value = "";
+            const inputBsc = document.getElementById("input-busca");
+            if (inputBsc) { inputBsc.value = ""; filtroBusca = ""; }
+
+            const resetClasse = tema === 'noite_junina' ? "border-slate-700 text-slate-300 bg-slate-800" : (tema==='contraste_junino' ? "border-2 border-orange-600 text-white bg-black rounded-none":"border-gray-200 text-gray-700 bg-white");
+            document.getElementById("btn-pix").className = `py-2.5 rounded-lg border-2 text-sm text-center ${resetClasse}`;
+            document.getElementById("btn-dinheiro").className = `py-2.5 rounded-lg border-2 text-sm text-center ${resetClasse}`;
             
             renderizarProdutos();
             atualizarCarrinho();
         }
 
-        // Carga Inicial do Sistema
-        atualizarCoresDoLayout();
-        renderizarProdutos();
+        // Inicialização de Fábrica do Painel
+        reconstruirPainel();
     </script>
 </body>
 </html>
