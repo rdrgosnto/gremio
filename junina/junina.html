@@ -59,20 +59,22 @@
                                     <div class="flex justify-between items-center text-sm"><span class="text-slate-500 font-medium">Recebido</span><div class="relative w-36"><span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span><input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-0.5 border border-slate-300 rounded-md text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm disabled:bg-slate-50"></div></div>
                                     <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-1"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span></div>
                                 </div>
-                                <!-- BLOCO B: Área do PIX (Expandido para 110px para Máximo Aproveitamento Vertical) -->
+                                <!-- BLOCO B: Área do PIX (Borda 100% Reta e Sem Margens para Máximo Tamanho) -->
                                 <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
-                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-[110px] h-[110px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group border border-slate-100 shadow-sm">
+                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-[100px] h-[100px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group">
                                         
                                         <!-- QR Code Fake Totalmente Expandido -->
-                                        <div class="absolute inset-0 opacity-[0.07] group-hover:opacity-[0.11] transition-opacity grid grid-cols-2 pointer-events-none">
+                                        <div class="absolute inset-0 opacity-[0.08] group-hover:opacity-[0.12] transition-opacity grid grid-cols-2 pointer-events-none">
                                             <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
                                             <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
                                             <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
+                                            <div class="flex flex-wrap gap-1 p-1 justify-center items-center"><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div></div>
                                         </div>
 
                                         <!-- Conteúdo de texto centralizado à frente -->
                                         <div class="relative z-10 flex flex-col items-center justify-center text-center p-1">
-                                            <span id="txt-qrcode-box" class="text-[10px] font-bold text-slate-500 uppercase tracking-tight leading-tight">Gerar<br>PIX</span>
+                                            <svg class="w-5 h-5 text-slate-400 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg>
+                                            <span id="txt-qrcode-box" class="text-[9px] font-bold text-slate-500 uppercase tracking-tight leading-none">Gerar<br>QRCODE</span>
                                         </div>
                                         
                                     </div>
@@ -169,18 +171,20 @@
             formaPagamento = null; pixChaveIdentificadora = "";
             document.getElementById("btn-pix").className = document.getElementById("btn-dinheiro").className = "py-2.5 rounded-md border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
             document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
-            document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-2 opacity-25 pointer-events-none transition-all duration-200";
+            document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200";
             document.getElementById("input-recebido").disabled = true; document.getElementById("input-recebido").value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
             
-            const box = document.getElementById("box-qrcode"); box.className = "w-[110px] h-[110px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group border border-slate-100 shadow-sm";
+            const box = document.getElementById("box-qrcode"); box.className = "w-[100px] h-[100px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group";
             box.innerHTML = `
                 <div class="absolute inset-0 opacity-[0.07] group-hover:opacity-[0.11] transition-opacity grid grid-cols-2 pointer-events-none">
                     <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
                     <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
                     <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
+                    <div class="flex flex-wrap gap-1 p-1 justify-center items-center"><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div></div>
                 </div>
                 <div class="relative z-10 flex flex-col items-center justify-center text-center p-1">
-                    <span id="txt-qrcode-box" class="text-[10px] font-bold text-slate-500 uppercase tracking-tight leading-tight">Gerar<br>PIX</span>
+                    <svg class="w-5 h-5 text-slate-400 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg>
+                    <span id="txt-qrcode-box" class="text-[9px] font-bold text-slate-500 uppercase tracking-tight leading-none">Gerar<br>QRCODE</span>
                 </div>`;
             validarEstadoFinalizar();
         }
@@ -193,11 +197,11 @@
 
             if (tipo === 'DINHEIRO') {
                 btnDin.className = ativo; btnPix.className = inativo; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
-                secaoDin.className = "w-1/2 h-full space-y-2 opacity-100 pointer-events-auto transition-all duration-200";
+                secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-100 pointer-events-auto transition-all duration-200";
                 inp.disabled = false; inp.value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00"; inp.focus();
             } else {
                 btnPix.className = ativo; btnDin.className = inativo; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform -translate-x-1/2";
-                secaoDin.className = "w-1/2 h-full space-y-2 opacity-25 pointer-events-none transition-all duration-200"; inp.disabled = true;
+                secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200"; inp.disabled = true;
             }
             validarEstadoFinalizar();
         }
@@ -206,8 +210,8 @@
             if (!formaPagamento || formaPagamento !== 'PIX') return;
             const box = document.getElementById("box-qrcode");
             
-            box.className = "w-[110px] h-[110px] bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none";
-            box.innerHTML = `<span class="text-[10px] font-bold text-slate-400 uppercase tracking-tight text-center leading-none">Carregando...</span>`;
+            box.className = "w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none";
+            box.innerHTML = `<span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight text-center leading-none">Carregando...</span>`;
 
             pixChaveIdentificadora = "mp_" + Date.now(); 
 
@@ -229,7 +233,7 @@
                 if (dados.qrcode_imagem) {
                     pixChaveIdentificadora = dados.id_mercado_pago;
 
-                    box.className = "w-[110px] h-[110px] bg-white rounded-none flex items-center justify-center p-0 opacity-100 select-none pointer-events-none transition-all";
+                    box.className = "w-[100px] h-[100px] bg-white rounded-none flex items-center justify-center p-0 opacity-100 select-none pointer-events-none transition-all";
                     box.innerHTML = `<img src="data:image/jpeg;base64,${dados.qrcode_imagem}" class="w-full h-full rounded-none shadow-none" alt="QR Code">`;
                     validarEstadoFinalizar();
                 } else { throw new Error(); }
@@ -250,7 +254,7 @@
 
         function validarEstadoFinalizar() {
             const btn = document.getElementById("btn-finalizar"); const rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0;
-            if (Object.keys(carrinho).length > 0 && formaPagamento && (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_") || formaPagamento === 'DINHEIRO' && rec >= totalAtual)) {
+            if (Object.keys(carrinho).length > 0 && formaPagamento && (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" || formaPagamento === 'DINHEIRO' && rec >= totalAtual)) {
                 btn.disabled = false; btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95";
             } else { btn.disabled = true; btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed"; }
         }
@@ -259,19 +263,43 @@
 
         async function checarSegurancaMercadoPago() {
             const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando...";
+            
+            // CORREÇÃO: Mapeia o payload usando estritamente as chaves combinadas no novo esquema JSON
             const payloadValidacao = {
-                id_pagamento: pixChaveIdentificadora,
+                id: pixChaveIdentificadora,
                 pagamento: "PIX",
                 total_pedido_consolidado: parseFloat(totalAtual),
-                itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
+                itens: Object.keys(carrinho).map(id => { 
+                    const p = produtos.find(item => item.id == id); 
+                    return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
+                })
             };
+
             try {
-                const r = await fetch(URL_VALIDA_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payloadValidacao) });
+                const r = await fetch(URL_VALIDA_PIX, { 
+                    method: "POST", 
+                    headers: { "Content-Type": "application/json" }, 
+                    body: JSON.stringify(payloadValidacao) 
+                });
                 if (!r.ok) throw new Error(); const res = await r.json();
+                
                 if (res.pago === true) {
-                    alert("🎉 Venda Finalizada com Sucesso!"); fecharOverlay(); carrinho = {}; resetarEstadoPagamento(); atualizarCarrinhoDOM(); carregarEstoqueReal();
-                } else { alert("⚠️ Pagamento pendente ⚠️"); btn.innerText = "Finalizar"; validarEstadoFinalizar(); }
-            } catch (e) { alert("⚠️ Erro ao verificar pagamento. Tente novamente."); btn.innerText = "Finalizar"; validarEstadoFinalizar(); }
+                    alert("🎉 Venda Finalizada com Sucesso!"); 
+                    fecharOverlay(); 
+                    carrinho = {}; 
+                    resetarEstadoPagamento(); 
+                    atualizarCarrinhoDOM(); 
+                    carregarEstoqueReal();
+                } else { 
+                    alert("⚠️ Pagamento pendente ⚠️"); 
+                    btn.innerText = "Finalizar"; 
+                    validarEstadoFinalizar(); 
+                }
+            } catch (e) { 
+                alert("⚠️ Erro ao verificar pagamento. Tente novamente."); 
+                btn.innerText = "Finalizar"; 
+                validarEstadoFinalizar(); 
+            }
         }
 
         async function executarGravacaoDinheiroDirecto() {
