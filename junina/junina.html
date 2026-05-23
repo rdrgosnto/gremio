@@ -59,11 +59,24 @@
                                     <div class="flex justify-between items-center text-sm"><span class="text-slate-500 font-medium">Recebido</span><div class="relative w-36"><span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span><input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-0.5 border border-slate-300 rounded-lg text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm disabled:bg-slate-50"></div></div>
                                     <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-1"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span></div>
                                 </div>
-                                <!-- BLOCO B: Área do PIX -->
+                                <!-- BLOCO B: Área do PIX (Caixa Perfeitamente Quadrada com QR Fake de Fundo) -->
                                 <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
-                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-44 h-full bg-slate-100 border border-slate-200 rounded-lg flex flex-col items-center justify-center p-1.5 cursor-pointer hover:bg-slate-200 active:scale-95 transition-all select-none">
-                                        <svg class="w-6 h-6 text-slate-400 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg>
-                                        <span id="txt-qrcode-box" class="text-[10px] font-bold text-slate-500 uppercase tracking-tight text-center">Gerar QRCODE</span>
+                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group">
+                                        
+                                        <!-- QR Code Fake com Linhas Estruturadas em marcas d'água ao fundo -->
+                                        <div class="absolute inset-0 p-2 opacity-[0.06] group-hover:opacity-[0.1] transition-opacity grid grid-cols-2 gap-1.5 pointer-events-none">
+                                            <div class="border-2 border-slate-900 rounded-xs flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-xs"></div></div>
+                                            <div class="border-2 border-slate-900 rounded-xs flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-xs"></div></div>
+                                            <div class="border-2 border-slate-900 rounded-xs flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-xs"></div></div>
+                                            <div class="flex flex-wrap gap-0.5 p-0.5 justify-center items-center"><div class="bg-slate-900 w-1 h-1"></div><div class="bg-slate-900 w-1 h-1"></div><div class="bg-slate-900 w-1 h-1"></div><div class="bg-slate-900 w-1 h-1"></div></div>
+                                        </div>
+
+                                        <!-- Conteúdo de texto centralizado à frente -->
+                                        <div class="relative z-10 flex flex-col items-center justify-center text-center p-1">
+                                            <svg class="w-5 h-5 text-slate-400 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg>
+                                            <span id="txt-qrcode-box" class="text-[9px] font-bold text-slate-500 uppercase tracking-tight leading-none">Gerar<br>QRCODE</span>
+                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -160,8 +173,19 @@
             document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
             document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200";
             document.getElementById("input-recebido").disabled = true; document.getElementById("input-recebido").value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
-            const box = document.getElementById("box-qrcode"); box.className = "w-44 h-full bg-slate-100 border border-slate-200 rounded-lg flex flex-col items-center justify-center p-2 cursor-pointer hover:bg-slate-200 active:scale-95 transition-all select-none";
-            box.innerHTML = `<svg class="w-6 h-6 text-slate-400 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg><span class="text-[10px] font-bold text-slate-500 uppercase tracking-tight text-center">Gerar QRCODE</span>`;
+            
+            const box = document.getElementById("box-qrcode"); box.className = "w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group";
+            box.innerHTML = `
+                <div class="absolute inset-0 p-2 opacity-[0.06] group-hover:opacity-[0.1] transition-opacity grid grid-cols-2 gap-1.5 pointer-events-none">
+                    <div class="border-2 border-slate-900 rounded-xs flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-xs"></div></div>
+                    <div class="border-2 border-slate-900 rounded-xs flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-xs"></div></div>
+                    <div class="border-2 border-slate-900 rounded-xs flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-xs"></div></div>
+                    <div class="flex flex-wrap gap-0.5 p-0.5 justify-center items-center"><div class="bg-slate-900 w-1 h-1"></div><div class="bg-slate-900 w-1 h-1"></div><div class="bg-slate-900 w-1 h-1"></div><div class="bg-slate-900 w-1 h-1"></div></div>
+                </div>
+                <div class="relative z-10 flex flex-col items-center justify-center text-center p-1">
+                    <svg class="w-5 h-5 text-slate-400 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg>
+                    <span id="txt-qrcode-box" class="text-[9px] font-bold text-slate-500 uppercase tracking-tight leading-none">Gerar<br>QRCODE</span>
+                </div>`;
             validarEstadoFinalizar();
         }
 
@@ -182,12 +206,12 @@
             validarEstadoFinalizar();
         }
 
-        // Dispara para a URL_GRAVACAO enviando o total consolidado para gerar o PIX
+        // Modificado com texto "Carregando..." e caixa quadrada
         async function requisitarQrCodeReal() {
             if (!formaPagamento || formaPagamento !== 'PIX') return;
             const box = document.getElementById("box-qrcode");
-            box.className = "w-44 h-full bg-slate-50 border border-orange-300 rounded-lg flex flex-col items-center justify-center p-2 select-none pointer-events-none animate-pulse";
-            box.innerHTML = `<span class="text-[10px] font-bold text-orange-500 uppercase tracking-tight text-center">Buscando PIX...</span>`;
+            box.className = "w-[100px] h-[100px] bg-slate-50 border border-orange-300 rounded-xl flex flex-col items-center justify-center p-2 select-none pointer-events-none animate-pulse";
+            box.innerHTML = `<span class="text-[9px] font-bold text-orange-500 uppercase tracking-tight text-center leading-none">Carregando...</span>`;
 
             pixChaveIdentificadora = "mp_" + Date.now(); 
 
@@ -207,8 +231,8 @@
                 const dados = await r.json();
 
                 if (dados.qrcode_imagem) {
-                    box.className = "w-44 h-full bg-emerald-50 border border-emerald-300 rounded-lg flex flex-col items-center justify-center p-1.5 opacity-100 select-none pointer-events-none transition-all";
-                    box.innerHTML = `<img src="data:image/jpeg;base64,${dados.qrcode_imagem}" class="w-14 h-14 rounded border border-emerald-500 shadow-sm" alt="QR Code"><span class="text-[9px] font-bold text-emerald-700 mt-1 uppercase tracking-tighter">QRCODE ATIVO</span>`;
+                    box.className = "w-[100px] h-[100px] bg-emerald-50 border border-emerald-300 rounded-xl flex flex-col items-center justify-center p-1.5 opacity-100 select-none pointer-events-none transition-all";
+                    box.innerHTML = `<img src="data:image/jpeg;base64,${dados.qrcode_imagem}" class="w-16 h-16 rounded border border-emerald-500 shadow-sm" alt="QR Code"><span class="text-[8px] font-bold text-emerald-700 mt-1 uppercase tracking-tighter leading-none">ATIVO</span>`;
                     validarEstadoFinalizar();
                 } else { throw new Error(); }
             } catch (e) {
@@ -245,7 +269,6 @@
             } catch (e) { alert("Pagamento Pendente"); btn.innerText = "Finalizar"; validarEstadoFinalizar(); }
         }
 
-        // Envia o payload do dinheiro consolidando os dados para a mesma URL_GRAVACAO
         async function executarGravacaoPlanilha(cPix) {
             const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando...";
             let idF = formaPagamento === 'DINHEIRO' ? `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}${String(new Date().getSeconds()).padStart(2,'0')}` : cPix;
@@ -253,7 +276,7 @@
                 id_pagamento: idF,
                 pagamento: formaPagamento,
                 total_pedido_consolidado: parseFloat(totalAtual),
-                itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantity: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
+                itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
             };
             try {
                 const r = await fetch(URL_GRAVACAO, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); if (!r.ok) throw new Error();
