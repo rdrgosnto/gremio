@@ -210,7 +210,9 @@
             if (!formaPagamento || formaPagamento !== 'PIX') return;
             const box = document.getElementById("box-qrcode");
             
-            // Transição totalmente limpa e estática (sem textos temporários de carregamento ou alertas)
+            box.className = "w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none";
+            box.innerHTML = `<span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight text-center leading-none">Carregando...</span>`;
+
             pixChaveIdentificadora = "mp_" + Date.now(); 
 
             const payload = {
@@ -219,7 +221,7 @@
                 total_pedido_consolidado: parseFloat(totalAtual),
                 itens: Object.keys(carrinho).map(id => {
                     const p = produtos.find(item => item.id == id);
-                    return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) };
+                    return { sigla: p.sigla, produto: p.nome, quantity: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) };
                 })
             };
 
@@ -231,7 +233,6 @@
                 if (dados.qrcode_imagem) {
                     pixChaveIdentificadora = dados.id_mercado_pago;
 
-                    // O QR Code real substitui o fake num corte seco e cresce para w-[100px] h-[100px] (100% da área), sem nenhuma borda
                     box.className = "w-[100px] h-[100px] bg-white rounded-none flex items-center justify-center p-0 opacity-100 select-none pointer-events-none transition-all";
                     box.innerHTML = `<img src="data:image/jpeg;base64,${dados.qrcode_imagem}" class="w-full h-full rounded-none shadow-none" alt="QR Code">`;
                     validarEstadoFinalizar();
@@ -260,14 +261,25 @@
 
         function processarCliqueFinalizar() { if (formaPagamento === 'DINHEIRO') executarGravacaoPlanilha(null); else checarSegurancaMercadoPago(); }
 
+        // PASSO 1 CORRIGIDO: Valida estritamente se pago é true antes de mandar gravar na planilha
         async function checarSegurancaMercadoPago() {
             const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando...";
             try {
                 const r = await fetch(URL_VALIDA_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: pixChaveIdentificadora, total: totalAtual }) });
                 if (!r.ok) throw new Error(); const res = await r.json();
-                if (res.status === "sucesso" || res.pago === true) executarGravacaoPlanilha(pixChaveIdentificadora);
-                else { alert("Pagamento Pendente"); btn.innerText = "Finalizar"; validarEstadoFinalizar(); }
-            } catch (e) { alert("Pagamento Pendente"); btn.innerText = "Finalizar"; validarEstadoFinalizar(); }
+                
+                if (res.pago === true) {
+                    executarGravacaoPlanilha(pixChaveIdentificadora);
+                } else { 
+                    alert("⚠️ Pagamento ainda não foi aprovado no Mercado Pago. Aguardando transferência..."); 
+                    btn.innerText = "Finalizar"; 
+                    validarEstadoFinalizar(); 
+                }
+            } catch (e) { 
+                alert("⚠️ Erro ao verificar pagamento. Tente novamente."); 
+                btn.innerText = "Finalizar"; 
+                validarEstadoFinalizar(); 
+            }
         }
 
         async function executarGravacaoPlanilha(cPix) {
