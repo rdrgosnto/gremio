@@ -63,7 +63,7 @@
                                 <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
                                     <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-[100px] h-[100px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group">
                                         
-                                        <!-- QR Code Fake Totalmente Expandido (Sem nenhuma borda ou margem) -->
+                                        <!-- QR Code Fake Totalmente Expandido -->
                                         <div class="absolute inset-0 opacity-[0.08] group-hover:opacity-[0.12] transition-opacity grid grid-cols-2 pointer-events-none">
                                             <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
                                             <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
@@ -221,7 +221,7 @@
                 total_pedido_consolidado: parseFloat(totalAtual),
                 itens: Object.keys(carrinho).map(id => {
                     const p = produtos.find(item => item.id == id);
-                    return { sigla: p.sigla, produto: p.nome, quantity: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) };
+                    return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) };
                 })
             };
 
@@ -259,19 +259,40 @@
             } else { btn.disabled = true; btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed"; }
         }
 
-        function processarCliqueFinalizar() { if (formaPagamento === 'DINHEIRO') executarGravacaoPlanilha(null); else checarSegurancaMercadoPago(); }
+        function processarCliqueFinalizar() { if (formaPagamento === 'DINHEIRO') executarGravacaoDinheiroDirecto(); else checarSegurancaMercadoPago(); }
 
-        // PASSO 1 CORRIGIDO: Valida estritamente se pago é true antes de mandar gravar na planilha
+        // NOVO COMPORTAMENTO DO PIX: O fluxo de verificação valida e joga na planilha tudo de uma vez só em linha reta
         async function checarSegurancaMercadoPago() {
             const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando...";
+            
+            // Monta o payload completo com os itens para o fluxo de verificação poder ler e gravar
+            const payloadValidacao = {
+                id: pixChaveIdentificadora,
+                total: parseFloat(totalAtual),
+                pagamento: "PIX",
+                itens: Object.keys(carrinho).map(id => { 
+                    const p = produtos.find(item => item.id == id); 
+                    return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
+                })
+            };
+
             try {
-                const r = await fetch(URL_VALIDA_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: pixChaveIdentificadora, total: totalAtual }) });
+                const r = await fetch(URL_VALIDA_PIX, { 
+                    method: "POST", 
+                    headers: { "Content-Type": "application/json" }, 
+                    body: JSON.stringify(payloadValidacao) 
+                });
                 if (!r.ok) throw new Error(); const res = await r.json();
                 
                 if (res.pago === true) {
-                    executarGravacaoPlanilha(pixChaveIdentificadora);
+                    alert("🎉 Venda Finalizada com Sucesso!"); 
+                    fecharOverlay(); 
+                    carrinho = {}; 
+                    resetarEstadoPagamento(); 
+                    atualizarCarrinhoDOM(); 
+                    carregarEstoqueReal();
                 } else { 
-                    alert("⚠️ Pagamento pendente ⚠️"); 
+                    alert("⚠️ Pagamento ainda não foi aprovado no Mercado Pago. Aguardando transferência..."); 
                     btn.innerText = "Finalizar"; 
                     validarEstadoFinalizar(); 
                 }
@@ -282,12 +303,13 @@
             }
         }
 
-        async function executarGravacaoPlanilha(cPix) {
+        // FUNÇÃO EXCLUSIVA PARA DINHEIRO: Continua usando o fluxo original de gravação direta
+        async function executarGravacaoDinheiroDirecto() {
             const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando...";
-            let idF = formaPagamento === 'DINHEIRO' ? `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}${String(new Date().getSeconds()).padStart(2,'0')}` : cPix;
+            let idF = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}${String(new Date().getSeconds()).padStart(2,'0')}`;
             const payload = {
                 id_pagamento: idF,
-                pagamento: formaPagamento,
+                pagamento: "DINHEIRO",
                 total_pedido_consolidado: parseFloat(totalAtual),
                 itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
             };
