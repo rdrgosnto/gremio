@@ -271,7 +271,7 @@
                 if (res.pago === true) {
                     executarGravacaoPlanilha(pixChaveIdentificadora);
                 } else { 
-                    alert("⚠️ Pagamento ainda não foi aprovado no Mercado Pago. Aguardando transferência..."); 
+                    alert("⚠️ Pagamento pendente ⚠️"); 
                     btn.innerText = "Finalizar"; 
                     validarEstadoFinalizar(); 
                 }
