@@ -40,28 +40,19 @@
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
                     <h3 class="text-base font-bold text-slate-700 text-center uppercase tracking-wider border-b pb-2">Pagamento</h3>
                     
-                    <!-- Resumo do Pedido -->
-                    <div class="flex-1 flex flex-col min-h-0 max-h-[22vh]">
+                    <!-- 1. Resumo do Pedido -->
+                    <div class="flex-1 flex flex-col min-h-0 max-h-[25vh]">
                         <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Resumo do Pedido:</h4>
                         <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
                             <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
                         </div>
                     </div>
 
-                    <!-- Métodos de Seleção -->
-                    <div class="space-y-1.5 pt-2 border-t">
-                        <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">DINHEIRO</button>
-                            <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">PIX</button>
-                        </div>
-                    </div>
-
-                    <!-- ESTRELA DO FLUXO: Janela de Altura Travada com Efeito Slide Horizontal -->
+                    <!-- 2. Janela de Altura Travada com Efeito Slide Horizontal (Mudou para antes dos botões) -->
                     <div class="w-full overflow-hidden border-t border-dashed pt-3 h-[105px] relative">
                         <div id="carrossel-pagamento" class="w-[200%] h-full flex transition-transform duration-300 transform translate-x-0">
                             
-                            <!-- BLOCO 1: Área do Dinheiro (Ocupa 50% do carrossel - Inicia Ativo, mas Opaco) -->
+                            <!-- BLOCO A: Valores Dinheiro (Inicia visível na janela, porém opaco/apagado) -->
                             <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200">
                                 <div class="flex justify-between items-center text-sm">
                                     <span class="text-slate-500 font-medium">Pedido</span>
@@ -80,7 +71,7 @@
                                 </div>
                             </div>
 
-                            <!-- BLOCO 2: Área do PIX (Ocupa os outros 50% do carrossel - Alinhado à mesma altura) -->
+                            <!-- BLOCO B: Área do PIX (Ocupa os outros 50% horizontais do carrossel) -->
                             <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
                                 <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-44 h-[95px] bg-slate-100 border border-slate-200 rounded-lg flex flex-col items-center justify-center p-2 cursor-pointer hover:bg-slate-200 active:scale-95 transition-all select-none">
                                     <svg class="w-7 h-7 text-slate-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg>
@@ -88,6 +79,15 @@
                                 </div>
                             </div>
 
+                        </div>
+                    </div>
+
+                    <!-- 3. Formas de Pagamento (Desceu para a posição original abaixo dos valores) -->
+                    <div class="space-y-1.5 pt-2 border-t">
+                        <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">DINHEIRO</button>
+                            <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">PIX</button>
                         </div>
                     </div>
 
@@ -221,7 +221,7 @@
         function abrirOverlayCelular() {
             document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm";
             resetarEstadoPagamento();
-            // Rolagem suave até a base do painel solicitada para centralizar o foco do operador
+            // Desloca suavemente até o fim do card para focar na digitação no celular
             setTimeout(() => { document.getElementById("card-checkout").scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 100);
         }
 
@@ -234,17 +234,15 @@
             document.getElementById("btn-pix").className = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
             document.getElementById("btn-dinheiro").className = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
             
-            // Retorna o carrossel para a esquerda (posição 0 - Dinheiro)
+            // Retorna o carrossel para a esquerda (posição 0)
             document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
             
-            // Bloco de dinheiro volta a ficar fixo, porém totalmente apagado/opaco
             const secaoDin = document.getElementById("secao-valores-dinheiro");
             secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200";
             document.getElementById("input-recebido").disabled = true;
             document.getElementById("input-recebido").value = "";
             document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
 
-            // Reseta a caixinha do QR Code para o estado inicial "Gerar QRCODE"
             const box = document.getElementById("box-qrcode");
             box.className = "w-44 h-[95px] bg-slate-100 border border-slate-200 rounded-lg flex flex-col items-center justify-center p-2 cursor-pointer hover:bg-slate-200 active:scale-95 transition-all select-none";
             box.innerHTML = `<svg class="w-7 h-7 text-slate-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg><span id="txt-qrcode-box" class="text-[10px] font-bold text-slate-500 uppercase tracking-tight text-center">Gerar QRCODE</span>`;
@@ -252,7 +250,6 @@
             validarEstadoFinalizar();
         }
 
-        // Executa o efeito de "Empurrão" horizontal (Slide) sem alterar a altura do painel
         function selecionarPagamento(tipo) {
             formaPagamento = tipo;
             const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro");
@@ -266,10 +263,10 @@
             if (tipo === 'DINHEIRO') {
                 btnDin.className = ativo; btnPix.className = inativo;
                 
-                // Empurra o carrossel para a ESQUERDA (mostrando o dinheiro)
+                // Desliza para o bloco Dinheiro (Esquerda)
                 carrossel.className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
                 
-                // Acende o bloco de dinheiro com 100% de cor e libera input
+                // Acende o bloco Dinheiro
                 secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-100 pointer-events-auto transition-all duration-200";
                 inputDin.disabled = false; inputDin.value = "";
                 document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
@@ -277,17 +274,16 @@
             } else {
                 btnPix.className = ativo; btnDin.className = inativo;
                 
-                // Empurra o carrossel para a DIREITA (O Bloco de dinheiro sai e o QR Code entra)
+                // Dá o empurrão para a DIREITA (O Dinheiro sai de cena, o QR Code entra)
                 carrossel.className = "w-[200%] h-full flex transition-transform duration-300 transform -translate-x-1/2";
                 
-                // Deixa o bloco de dinheiro apagado em segundo plano
+                // Apaga o bloco de dinheiro em segundo plano
                 secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200";
                 inputDin.disabled = true;
             }
             validarEstadoFinalizar();
         }
 
-        // Transforma o QR Code Fake em Real ao clicar em cima dele
         function requisitarQrCodeReal() {
             const box = document.getElementById("box-qrcode");
             pixChaveIdentificadora = "mp_" + Date.now(); 
@@ -341,7 +337,6 @@
             else { checarSegurancaMercadoPago(); }
         }
 
-        // Validação obrigatória de segurança do Mercado Pago
         async function checarSegurancaMercadoPago() {
             const btn = document.getElementById("btn-finalizar");
             btn.disabled = true; btn.innerText = "Processando...";
@@ -368,7 +363,7 @@
             }
         }
 
-        async function executarGravacaoPlanilha(chavePix) {
+        async function ejecutarGravacaoPlanilha(chavePix) {
             const btn = document.getElementById("btn-finalizar");
             btn.disabled = true; btn.innerText = "Processando...";
 
