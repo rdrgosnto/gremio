@@ -40,55 +40,60 @@
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
                     <h3 class="text-base font-bold text-slate-700 text-center uppercase tracking-wider border-b pb-2">Pagamento</h3>
                     
-                    <!-- 1. Resumo do Pedido -->
-                    <div class="flex-1 flex flex-col min-h-0 max-h-[25vh]">
+                    <!-- 1. Resumo do Pedido (Ocupa o topo e cresce livremente) -->
+                    <div class="flex-1 flex flex-col min-h-0">
                         <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Resumo do Pedido:</h4>
                         <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
                             <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
                         </div>
                     </div>
 
-                    <!-- 2. Janela de Altura Travada com Efeito Slide Horizontal (Mudou para antes dos botões) -->
-                    <div class="w-full overflow-hidden border-t border-dashed pt-3 h-[105px] relative">
-                        <div id="carrossel-pagamento" class="w-[200%] h-full flex transition-transform duration-300 transform translate-x-0">
-                            
-                            <!-- BLOCO A: Valores Dinheiro (Inicia visível na janela, porém opaco/apagado) -->
-                            <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200">
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-slate-500 font-medium">Pedido</span>
-                                    <span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span>
-                                </div>
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-slate-500 font-medium">Recebido</span>
-                                    <div class="relative w-36">
-                                        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span>
-                                        <input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-1 border border-slate-300 rounded-lg text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm disabled:bg-slate-50">
+                    <!-- BLOCO INFERIOR DE FECHAMENTO (Agrupado perfeitamente na base conforme solicitado) -->
+                    <div class="space-y-3 pt-2 border-t">
+                        
+                        <!-- 2. Formas de Pagamento (Posicionada acima dos valores e QR Code no bloco de fechamento) -->
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">DINHEIRO</button>
+                                <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">PIX</button>
+                            </div>
+                        </div>
+
+                        <!-- 3. Janela de Altura Travada com Efeito Slide Horizontal -->
+                        <div class="w-full overflow-hidden border-t border-dashed pt-3 h-[105px] relative">
+                            <div id="carrossel-pagamento" class="w-[200%] h-full flex transition-transform duration-300 transform translate-x-0">
+                                
+                                <!-- BLOCO A: Valores Dinheiro (Inicia visível, porém opaco/apagado) -->
+                                <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200">
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-slate-500 font-medium">Pedido</span>
+                                        <span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-slate-500 font-medium">Recebido</span>
+                                        <div class="relative w-36">
+                                            <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span>
+                                            <input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-1 border border-slate-300 rounded-lg text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm disabled:bg-slate-50">
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-1">
+                                        <span class="text-slate-500 font-medium">Troco</span>
+                                        <span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span>
                                     </div>
                                 </div>
-                                <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-1">
-                                    <span class="text-slate-500 font-medium">Troco</span>
-                                    <span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span>
+
+                                <!-- BLOCO B: Área do PIX (Alinhada horizontalmente para o efeito de empurrão) -->
+                                <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
+                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-44 h-[95px] bg-slate-100 border border-slate-200 rounded-lg flex flex-col items-center justify-center p-2 cursor-pointer hover:bg-slate-200 active:scale-95 transition-all select-none">
+                                        <svg class="w-7 h-7 text-slate-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg>
+                                        <span id="txt-qrcode-box" class="text-[10px] font-bold text-slate-500 uppercase tracking-tight text-center">Gerar QRCODE</span>
+                                    </div>
                                 </div>
+
                             </div>
-
-                            <!-- BLOCO B: Área do PIX (Ocupa os outros 50% horizontais do carrossel) -->
-                            <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
-                                <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-44 h-[95px] bg-slate-100 border border-slate-200 rounded-lg flex flex-col items-center justify-center p-2 cursor-pointer hover:bg-slate-200 active:scale-95 transition-all select-none">
-                                    <svg class="w-7 h-7 text-slate-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg>
-                                    <span id="txt-qrcode-box" class="text-[10px] font-bold text-slate-500 uppercase tracking-tight text-center">Gerar QRCODE</span>
-                                </div>
-                            </div>
-
                         </div>
-                    </div>
 
-                    <!-- 3. Formas de Pagamento (Desceu para a posição original abaixo dos valores) -->
-                    <div class="space-y-1.5 pt-2 border-t">
-                        <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">DINHEIRO</button>
-                            <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">PIX</button>
-                        </div>
                     </div>
 
                 </div>
@@ -114,6 +119,7 @@
     </div>
 
     <script>
+        // Links das 3 automações do Power Automate lineares (sem condições!)
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_GRAVACAO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
         const URL_VALIDA_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
@@ -221,7 +227,7 @@
         function abrirOverlayCelular() {
             document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm";
             resetarEstadoPagamento();
-            // Desloca suavemente até o fim do card para focar na digitação no celular
+            // Deslocamento de scroll suave direcionando para a base no celular
             setTimeout(() => { document.getElementById("card-checkout").scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 100);
         }
 
@@ -234,7 +240,7 @@
             document.getElementById("btn-pix").className = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
             document.getElementById("btn-dinheiro").className = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
             
-            // Retorna o carrossel para a esquerda (posição 0)
+            // Retorna o slide horizontal para a posição inicial (Dinheiro)
             document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
             
             const secaoDin = document.getElementById("secao-valores-dinheiro");
@@ -250,6 +256,7 @@
             validarEstadoFinalizar();
         }
 
+        // Executa a mecânica de empurrão horizontal perfeita controlando os estados aceso/apagado
         function selecionarPagamento(tipo) {
             formaPagamento = tipo;
             const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro");
@@ -266,7 +273,7 @@
                 // Desliza para o bloco Dinheiro (Esquerda)
                 carrossel.className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
                 
-                // Acende o bloco Dinheiro
+                // Acende o bloco Dinheiro com 100% de cor e foca teclado
                 secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-100 pointer-events-auto transition-all duration-200";
                 inputDin.disabled = false; inputDin.value = "";
                 document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
@@ -274,16 +281,17 @@
             } else {
                 btnPix.className = ativo; btnDin.className = inativo;
                 
-                // Dá o empurrão para a DIREITA (O Dinheiro sai de cena, o QR Code entra)
+                // Empurrão para a direita (O bloco de dinheiro "sai" e o QR Code fake aparece)
                 carrossel.className = "w-[200%] h-full flex transition-transform duration-300 transform -translate-x-1/2";
                 
-                // Apaga o bloco de dinheiro em segundo plano
+                // Mantém o dinheiro apagado em segundo plano
                 secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200";
                 inputDin.disabled = true;
             }
             validarEstadoFinalizar();
         }
 
+        // Transforma o QR Code de estado fake em real brilhante/aceso
         function requisitarQrCodeReal() {
             const box = document.getElementById("box-qrcode");
             pixChaveIdentificadora = "mp_" + Date.now(); 
@@ -337,6 +345,7 @@
             else { checarSegurancaMercadoPago(); }
         }
 
+        // Nova rota de verificação de segurança do PIX
         async function checarSegurancaMercadoPago() {
             const btn = document.getElementById("btn-finalizar");
             btn.disabled = true; btn.innerText = "Processando...";
@@ -363,7 +372,8 @@
             }
         }
 
-        async function ejecutarGravacaoPlanilha(chavePix) {
+        // Dispara a gravação final que alimentará o Loop 1 ou Loop 2 do Power Automate
+        async function executarGravacaoPlanilha(chavePix) {
             const btn = document.getElementById("btn-finalizar");
             btn.disabled = true; btn.innerText = "Processando...";
 
