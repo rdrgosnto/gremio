@@ -7,156 +7,119 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.cdnfonts.com/css/aptos');
-        
-        .font-aptos {
-            font-family: 'Aptos', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .smooth-scroll { scroll-behavior: smooth; }
-        
-        /* Oculta a barra de rolagem padrão */
+        .font-aptos { font-family: 'Aptos', 'Segoe UI', Tahoma, sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Animação suave para a abertura do overlay e expansão de elementos */
-        .transition-overlay {
-            transition: all 0.3s ease-in-out;
-        }
     </style>
 </head>
-<body class="bg-slate-50 font-aptos min-h-screen flex flex-col smooth-scroll antialiased text-slate-800">
+<body class="bg-slate-50 font-aptos min-h-screen flex flex-col antialiased text-slate-800">
 
-    <!-- Cabeçalho Mais Fino, Compacto e Elegante -->
+    <!-- Cabeçalho Compacto -->
     <header class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
         <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
     </header>
 
-    <!-- Corpo Principal (Grid Otimizado apenas para os Produtos) -->
-    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3">
-        <section class="space-y-2">
+    <!-- Corpo Principal: Layout Responsivo Adaptável -->
+    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+        
+        <!-- Lado Esquerdo: Grid de Produtos (Ocupa 3 colunas no PC, tela cheia no celular) -->
+        <section class="lg:col-span-3 space-y-2">
             <div class="flex justify-between items-center border-b border-slate-200 pb-1">
                 <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2>
-                <span class="text-xs text-slate-400">Clique nos botões para adicionar ao pedido</span>
             </div>
+            <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2">
+                <!-- Injetados via JavaScript -->
+            </div>
+        </section>
+
+        <!-- Lado Direito / Overlay: O Painel de Fechamento Único -->
+        <!-- No PC: Fica fixo na lateral (lg:flex). No celular: Vira um overlay escuro oculto (hidden) -->
+        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
             
-            <!-- Grid responsivo carregado dinamicamente -->
-            <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-8 gap-2">
-                <!-- Os produtos reais vindos do Excel serão injetados aqui -->
+            <!-- Card de Checkout (Branco) -->
+            <div class="bg-white w-full max-w-lg lg:max-w-none rounded-2xl lg:rounded-xl shadow-2xl lg:shadow-md border border-slate-200 p-5 flex flex-col justify-between h-[80vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
+                
+                <div class="space-y-4 flex-1 flex flex-col min-h-0">
+                    <h3 class="text-base font-bold text-slate-700 text-center uppercase tracking-wider border-b pb-2">Pagamento</h3>
+                    
+                    <!-- Resumo dos Itens Selecionados -->
+                    <div class="flex-1 flex flex-col min-h-0">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Resumo do Pedido:</h4>
+                        <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
+                            <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
+                        </div>
+                    </div>
+
+                    <!-- Seleção da Forma de Pagamento -->
+                    <div class="space-y-1.5 pt-2 border-t">
+                        <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">DINHEIRO</button>
+                            <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">PIX</button>
+                        </div>
+                    </div>
+
+                    <!-- Bloco Expansível Dinâmico (Dinheiro) -->
+                    <div id="secao-valores-dinheiro" class="hidden border-t border-dashed pt-3 space-y-2.5">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-500 font-medium">Pedido</span>
+                            <span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-500 font-medium">Recebido</span>
+                            <div class="relative w-36">
+                                <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span>
+                                <input type="text" id="input-recebido" placeholder="0,00" oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-1 border border-slate-300 rounded-lg text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm">
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-2">
+                            <span class="text-slate-500 font-medium">Troco</span>
+                            <span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação na Base -->
+                <div class="flex flex-col items-center gap-2 mt-4 pt-2 border-t w-full">
+                    <button onclick="finalizarVenda()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed transition-all">
+                        Finalizar
+                    </button>
+                    <!-- Exibido apenas em celulares/tablets para fechar o overlay -->
+                    <button onclick="fecharOverlay()" class="lg:hidden text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1">
+                        Voltar ao pedido
+                    </button>
+                </div>
             </div>
         </section>
     </main>
 
-    <!-- Botão Laranja Flutuante de Fechamento -->
-    <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 hidden flex justify-center pointer-events-none">
-        <button onclick="solicitarFechamento()" class="pointer-events-auto bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-full shadow-lg flex items-center justify-center transform active:scale-95 transition-all text-sm tracking-wide">
+    <!-- Botão Laranja Flutuante (Exibido apenas em celulares/tablets quando há itens) -->
+    <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 hidden lg:hidden flex justify-center pointer-events-none">
+        <button onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform active:scale-95 transition-all text-sm tracking-wide">
             <span id="texto-botao-flutuante">Pedido: R$ 0,00 - Revisar e Pagar</span>
         </button>
     </div>
 
-    <!-- OVERLAY DE FECHAMENTO ÚNICO (Fundo Escuro com Transparência 75%) -->
-    <div id="overlay-fechamento" class="fixed inset-0 bg-black/75 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-6 flex flex-col justify-between relative transition-overlay">
-            
-            <div class="space-y-4">
-                <!-- Título Centralizado -->
-                <h3 class="text-base font-bold text-slate-700 text-center uppercase tracking-wider">Pagamento</h3>
-                
-                <!-- Resumo dos Itens do Pedido Atual transferido para o Overlay -->
-                <div class="border-b pb-3">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Resumo do Pedido:</h4>
-                    <div id="modal-lista-itens" class="space-y-1.5 overflow-y-auto max-h-[20vh] pr-1 no-scrollbar">
-                        <!-- Itens do carrinho aparecem aqui -->
-                    </div>
-                </div>
-
-                <!-- Seleção da Forma de Pagamento dentro do Overlay -->
-                <div class="space-y-1.5">
-                    <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider text-center">Selecione a Forma de Pagamento:</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center transition-all bg-white hover:bg-slate-50 text-slate-700">
-                            DINHEIRO
-                        </button>
-                        <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center transition-all bg-white hover:bg-slate-50 text-slate-700">
-                            PIX
-                        </button>
-                    </div>
-                </div>
-
-                <!-- BLOCO EXPANSÍVEL: Seção de valores específicos de Dinheiro -->
-                <div id="secao-valores-dinheiro" class="hidden border-t border-dashed pt-4 space-y-3 transition-overlay">
-                    
-                    <!-- Linha 1: Pedido -->
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="text-slate-500 font-medium">Pedido</span>
-                        <span id="modal-valor-pedido" class="font-bold text-slate-700">R$ 0,00</span>
-                    </div>
-                    
-                    <!-- Linha 2: Recebido -->
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="text-slate-500 font-medium">Recebido</span>
-                        <div class="relative w-36">
-                            <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span>
-                            <input type="text" id="input-recebido" placeholder="0,00" oninput="tratarMascaraDinheiro(this)"
-                                class="w-full pl-7 pr-2.5 py-1 border border-slate-300 rounded-lg text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm">
-                        </div>
-                    </div>
-                    
-                    <!-- Linha 3: Troco -->
-                    <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-2">
-                        <span class="text-slate-500 font-medium">Troco</span>
-                        <span id="modal-valor-troco" class="font-bold text-slate-400">R$ 0,00</span>
-                    </div>
-                    
-                </div>
-            </div>
-
-            <!-- Botões de Ação na Base Inferior Centralizada -->
-            <div class="flex flex-col items-center gap-2 mt-6 w-full">
-                <button onclick="finalizarVenda()" id="btn-modal-finalizar" disabled
-                    class="w-full sm:w-64 bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed transition-all">
-                    Finalizar
-                </button>
-                <button onclick="fecharOverlay()" class="text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1 cursor-pointer">
-                    Voltar ao pedido
-                </button>
-            </div>
-
-        </div>
-    </div>
-
     <script>
-        // URLs Oficiais das duas automações do Power Automate
-        const URL_LEITURA_ESTOQUE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
-        const URL_GRAVACAO_VENDA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
+        const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
+        const URL_GRAVACAO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
 
-        let produtos = [];
-        let carrinho = {};
-        let formaPagamento = null;
-        let totalAtual = 0;
+        let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0;
 
-        function formatarMoeda(valor) {
-            return valor.toFixed(2).replace('.', ',');
-        }
+        function formatarMoeda(valor) { return valor.toFixed(2).replace('.', ','); }
 
-        // Busca o estoque e as informações completas em tempo real da planilha Excel
+        // Puxa o cardápio e estoque 100% gerenciado pelo Excel
         async function carregarEstoqueReal() {
             try {
-                const resposta = await fetch(URL_LEITURA_ESTOQUE);
+                const resposta = await fetch(URL_LEITURA);
                 if (!resposta.ok) throw new Error();
-                const dadosExcel = await resposta.json();
-                
-                // Mapeamento corrigido pareando exatamente com as letras maiúsculas da sua tabela
-                produtos = dadosExcel.map(linha => ({
-                    id: parseInt(linha.ID),
-                    sigla: linha.SIGLA ? String(linha.SIGLA).trim().toUpperCase() : "??", // Puxa a sigla direto do Excel agora!
-                    nome: linha.PRODUTO,
-                    preco: parseFloat(linha.PRECO), // Lê a coluna PRECO sem o cedilha
-                    estoque: parseInt(linha.ATUAL), // Lê a coluna ATUAL do estoque matemático
-                    critico: 5
+                const dados = await resposta.json();
+                produtos = dados.map(l => ({
+                    id: parseInt(l.ID), sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??",
+                    nome: l.PRODUTO, preco: parseFloat(l.PRECO), estoque: parseInt(l.ATUAL), critico: 5
                 }));
-                
                 renderizarProdutos();
-            } catch (erro) {
-                console.error(erro);
+            } catch (e) {
                 alert("⚠️ Erro ao carregar o cardápio real do Excel. Verifique a automação.");
             }
         }
@@ -164,257 +127,189 @@
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos");
             grid.innerHTML = "";
-            
-            // Coloca o cardápio em ordem alfabética automaticamente
             produtos.sort((a, b) => a.nome.localeCompare(b.nome));
 
             produtos.forEach(p => {
-                const qtdNoCarrinho = carrinho[p.id] || 0;
-                
-                let statusEstoqueHtml = `<span class="text-emerald-600 font-semibold">${p.estoque}</span>`;
-                let cardEstilo = "bg-white border-slate-200 hover:border-slate-300";
-                let caixaQuadradaEstilo = "bg-slate-100 text-slate-600";
-                let botoesBloqueados = "";
-                let itemEsgotado = false;
+                const qtd = carrinho[p.id] || 0;
+                let statusEstoque = `<span class="text-emerald-600 font-semibold">${p.estoque}</span>`;
+                let cardEstilo = "bg-white border-slate-200 hover:border-slate-300", caixaEstilo = "bg-slate-100 text-slate-600", bloqueado = "", esgotado = false;
 
                 if (p.estoque === 0) {
-                    statusEstoqueHtml = `<span class="text-rose-500 font-semibold text-[11px]">0</span>`;
+                    statusEstoque = `<span class="text-rose-500 font-semibold text-[11px]">0</span>`;
                     cardEstilo = "bg-slate-100 border-slate-200 text-slate-400 select-none pointer-events-none opacity-60";
-                    caixaQuadradaEstilo = "bg-slate-200 text-slate-400";
-                    botoesBloqueados = "disabled";
-                    itemEsgotado = true;
+                    caixaEstilo = "bg-slate-200 text-slate-400"; bloqueado = "disabled"; esgotado = true;
                 } else if (p.estoque <= p.critico) {
-                    statusEstoqueHtml = `<span class="text-rose-500 font-bold">${p.estoque}</span>`;
+                    statusEstoque = `<span class="text-rose-500 font-bold">${p.estoque}</span>`;
                 }
-
-                if (qtdNoCarrinho > 0 && !itemEsgotado) {
-                    caixaQuadradaEstilo = "bg-orange-50 border border-orange-200 text-orange-700";
-                }
+                if (qtd > 0 && !esgotado) { caixaEstilo = "bg-orange-50 border border-orange-200 text-orange-700"; }
 
                 grid.innerHTML += `
                     <div class="border rounded-xl p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cardEstilo}">
-                        <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${caixaQuadradaEstilo}">
-                            <div class="text-center font-bold text-xl tracking-wide mt-2.5 leading-none select-none flex-1 flex items-center justify-center w-full">
-                                ${p.sigla}
-                            </div>
+                        <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${caixaEstilo}">
+                            <div class="text-center font-bold text-xl tracking-wide mt-2.5 flex items-center justify-center w-full flex-1 select-none">${p.sigla}</div>
                             <div class="flex items-center justify-between w-full mt-auto">
-                                <button onclick="alterarQuantidade(${p.id}, -1)" ${botoesBloqueados} class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center transition-all ${qtdNoCarrinho === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button>
-                                <span class="text-xs font-bold select-none text-center flex-1">
-                                    ${qtdNoCarrinho > 0 ? `<span class="text-orange-600 font-bold text-base">${qtdNoCarrinho}</span>` : '<span class="text-slate-300 font-normal">-</span>'}
-                                </span>
-                                <button onclick="alterarQuantidade(${p.id}, 1)" ${botoesBloqueados} class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center transition-all ${itemEsgotado ? 'opacity-20' : ''}">+</button>
+                                <button onclick="alterarQuantidade(${p.id}, -1)" ${bloqueado} class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center ${qtd === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                                <span class="text-xs font-bold select-none text-center flex-1">${qtd > 0 ? `<span class="text-orange-600 font-bold text-base">${qtd}</span>` : '<span class="text-slate-300 font-normal">-</span>'}</span>
+                                <button onclick="alterarQuantidade(${p.id}, 1)" ${bloqueado} class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center ${esgotado ? 'opacity-20' : ''}">+</button>
                             </div>
                         </div>
-                        <div class="min-w-0 flex-1 flex flex-col justify-between">
-                            <h3 class="font-semibold text-slate-700 text-[13px] truncate text-left leading-tight tracking-tight mb-0.5" title="${p.nome}">${p.nome}</h3>
+                        <div class="min-w-0 flex flex-col justify-between flex-1">
+                            <h3 class="font-semibold text-slate-700 text-[13px] truncate leading-tight tracking-tight mb-0.5" title="${p.nome}">${p.nome}</h3>
                             <div class="flex items-center justify-between text-[12px] font-medium w-full">
                                 <span class="text-orange-600 font-bold">R$ ${formatarMoeda(p.preco)}</span>
-                                <div class="text-slate-500 font-semibold"><span class="text-slate-300 font-normal">E:</span> ${statusEstoqueHtml}</div>
+                                <div class="text-slate-500 font-semibold"><span class="text-slate-300 font-normal">E:</span> ${statusEstoque}</div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
         function alterarQuantidade(id, delta) {
-            const produto = produtos.find(p => p.id === id);
-            const qtdAtual = carrinho[id] || 0;
-            const novaQtd = qtdAtual + delta;
+            const p = produtos.find(item => item.id === id);
+            const novaQtd = (carrinho[id] || 0) + delta;
 
             if (novaQtd < 0) return;
-            if (novaQtd > produto.estoque) {
-                alert(`Ops! Só temos ${produto.estoque} unidades de ${produto.nome} no estoque.`);
-                return;
-            }
-
+            if (novaQtd > p.estoque) { alert(`Ops! Só temos ${p.estoque} unidades de ${p.nome} no estoque.`); return; }
+            
             if (novaQtd === 0) delete carrinho[id];
             else carrinho[id] = novaQtd;
 
             renderizarProdutos();
-            atualizarCarrinhoInterno();
+            atualizarCarrinhoDOM();
         }
 
-        function atualizarCarrinhoInterno() {
-            totalAtual = 0;
-            let totalItens = 0;
+        function atualizarCarrinhoDOM() {
+            const lista = document.getElementById("lista-carrinho");
+            totalAtual = 0; let totalItens = 0; lista.innerHTML = "";
 
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id);
-                totalAtual += p.preco * carrinho[id];
-                totalItens += carrinho[id];
-            });
+                const qtd = carrinho[id]; const subtotal = p.preco * qtd;
+                totalAtual += subtotal; totalItens += qtd;
 
-            const containerFlutuante = document.getElementById("container-botao-flutuante");
-            if (totalItens > 0) {
-                containerFlutuante.classList.remove("hidden");
-                document.getElementById("texto-botao-flutuante").innerText = `Pedido: R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
-            } else {
-                containerFlutuante.classList.add("hidden");
-            }
-        }
-
-        function solicitarFechamento() {
-            const listaModal = document.getElementById("modal-lista-itens");
-            listaModal.innerHTML = "";
-
-            Object.keys(carrinho).forEach(id => {
-                const p = produtos.find(item => item.id == id);
-                const qtd = carrinho[id];
-                const subtotal = p.preco * qtd;
-
-                listaModal.innerHTML += `
+                lista.innerHTML += `
                     <div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-lg border border-slate-100">
                         <div class="max-w-[75%]">
                             <p class="font-semibold text-slate-700 truncate">${p.nome}</p>
                             <p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(p.preco)}</p>
                         </div>
                         <span class="font-bold text-slate-700">R$ ${formatarMoeda(subtotal)}</span>
-                    </div>
-                `;
+                    </div>`;
             });
 
-            formaPagamento = null;
-            document.getElementById("btn-pix").className = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700";
-            document.getElementById("btn-dinheiro").className = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700";
-            document.getElementById("secao-valores-dinheiro").classList.add("hidden");
-            
-            const btnFinalizar = document.getElementById("btn-modal-finalizar");
-            btnFinalizar.disabled = true;
-            btnFinalizar.className = "w-full sm:w-64 bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed";
+            if (totalItens === 0) {
+                lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
+                fecharOverlay(); // Se esvaziar o carrinho no mobile, fecha a tela
+            }
 
-            document.getElementById("overlay-fechamento").classList.remove("hidden");
+            const flutuante = document.getElementById("container-botao-flutuante");
+            if (totalItens > 0) {
+                flutuante.classList.remove("hidden");
+                document.getElementById("texto-botao-flutuante").innerText = `Pedido: R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
+            } else { flutuante.classList.add("hidden"); }
+
+            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`;
+            validarEstadoFinalizar();
+        }
+
+        function abrirOverlayCelular() {
+            const p = document.getElementById("painel-fechamento");
+            p.className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm";
+            resetarEstadoPagamento();
         }
 
         function fecharOverlay() {
-            document.getElementById("overlay-fechamento").classList.add("hidden");
+            const p = document.getElementById("painel-fechamento");
+            p.className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
+        }
+
+        function resetarEstadoPagamento() {
+            formaPagamento = null;
+            document.getElementById("btn-pix").className = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
+            document.getElementById("btn-dinheiro").className = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
+            document.getElementById("secao-valores-dinheiro").classList.add("hidden");
+            validarEstadoFinalizar();
         }
 
         function selecionarPagamento(tipo) {
             formaPagamento = tipo;
-            const btnPix = document.getElementById("btn-pix");
-            const btnDinheiro = document.getElementById("btn-dinheiro");
-            const secaoDinheiro = document.getElementById("secao-valores-dinheiro");
-            const btnFinalizar = document.getElementById("btn-modal-finalizar");
-
-            const ativoClasse = "py-2.5 rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm text-center shadow-sm";
-            const inativoClasse = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700";
+            const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro"), secaoDin = document.getElementById("secao-valores-dinheiro");
+            const ativo = "py-2.5 rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm text-center shadow-sm transition-all";
+            const inativo = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
 
             if (tipo === 'PIX') {
-                btnPix.className = ativoClasse;
-                btnDinheiro.className = inativoClasse;
-                secaoDinheiro.classList.add("hidden");
-                
-                btnFinalizar.disabled = false;
-                btnFinalizar.className = "w-full sm:w-64 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-center text-sm shadow cursor-pointer transition-all transform active:scale-95";
+                btnPix.className = ativo; btnDin.className = inativo; secaoDin.classList.add("hidden");
             } else {
-                btnDinheiro.className = ativoClasse;
-                btnPix.className = inativoClasse;
-                
-                document.getElementById("modal-valor-pedido").innerText = `R$ ${formatarMoeda(totalAtual)}`;
+                btnDin.className = ativo; btnPix.className = inativo;
                 document.getElementById("input-recebido").value = "";
-                document.getElementById("modal-valor-troco").innerText = "R$ 0,00";
-                document.getElementById("modal-valor-troco").className = "font-bold text-slate-400";
-                
-                secaoDinheiro.classList.remove("hidden");
+                document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
+                document.getElementById("valor-troco-txt").className = "font-bold text-slate-400";
+                secaoDin.classList.remove("hidden");
                 document.getElementById("input-recebido").focus();
-                
-                btnFinalizar.disabled = true;
-                btnFinalizar.className = "w-full sm:w-64 bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed";
             }
+            validarEstadoFinalizar();
         }
 
-        // Máscara monetária acumulativa (Ex: 5000 ➔ 50,00)
         function tratarMascaraDinheiro(input) {
             let valor = input.value.replace(/\D/g, "");
-            if (valor === "") {
-                input.value = "";
-                executarCalculoTroco(0);
-                return;
-            }
+            if (valor === "") { input.value = ""; validarEstadoFinalizar(); return; }
+            let num = parseFloat(valor) / 100;
+            input.value = num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             
-            let valorNumerico = parseFloat(valor) / 100;
-            input.value = valorNumerico.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            executarCalculoTroco(valorNumerico);
+            const txtTroco = document.getElementById("valor-troco-txt");
+            if (num < totalAtual) {
+                txtTroco.innerText = "Valor Insuficiente"; txtTroco.className = "font-bold text-rose-500 text-xs";
+            } else {
+                txtTroco.innerText = `R$ ${formatarMoeda(num - totalAtual)}`; txtTroco.className = "font-bold text-emerald-600 text-base";
+            }
+            validarEstadoFinalizar();
         }
 
-        function executarCalculoTroco(recebido) {
-            const btnFinalizar = document.getElementById("btn-modal-finalizar");
-            const txtTroco = document.getElementById("modal-valor-troco");
+        function validarEstadoFinalizar() {
+            const btn = document.getElementById("btn-finalizar");
+            const inputVal = document.getElementById("input-recebido").value.replace(/\D/g, "");
+            const recebido = parseFloat(inputVal) / 100 || 0;
+            const temItens = Object.keys(carrinho).length > 0;
 
-            if (recebido < totalAtual) {
-                txtTroco.innerText = recebido === 0 ? "R$ 0,00" : "Valor Insuficiente";
-                txtTroco.className = "font-bold text-rose-500 text-xs";
-                btnFinalizar.disabled = true;
-                btnFinalizar.className = "w-full sm:w-64 bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed";
+            if (temItens && formaPagamento && (formaPagamento === 'PIX' || recebido >= totalAtual)) {
+                btn.disabled = false;
+                btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-center text-sm shadow cursor-pointer transition-all transform active:scale-95";
             } else {
-                const troco = recebido - totalAtual;
-                txtTroco.innerText = `R$ ${formatarMoeda(troco)}`;
-                txtTroco.className = "font-bold text-emerald-600 text-base";
-                btnFinalizar.disabled = false;
-                btnFinalizar.className = "w-full sm:w-64 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-center text-sm shadow cursor-pointer transition-all transform active:scale-95";
+                btn.disabled = true;
+                btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed";
             }
         }
 
-        // Disparo e gravação assíncrona na planilha
         async function finalizarVenda() {
-            const btnFinalizar = document.getElementById("btn-modal-finalizar");
-            btnFinalizar.disabled = true;
-            btnFinalizar.innerText = "Processando..."; 
+            const btn = document.getElementById("btn-finalizar");
+            btn.disabled = true; btn.innerText = "Processando..."; // Texto solicitado
 
-            let idPagamentoFinal = "-";
-            if (formaPagamento === 'PIX') {
-                idPagamentoFinal = "mp_" + Date.now();
-            } else {
-                const agora = new Date();
-                const hh = String(agora.getHours()).padStart(2, '0');
-                const mm = String(agora.getMinutes()).padStart(2, '0');
-                const ss = String(agora.getSeconds()).padStart(2, '0');
-                idPagamentoFinal = `DINHEIRO-${hh}${mm}${ss}`;
-            }
+            let idPagamento = formaPagamento === 'PIX' ? "mp_" + Date.now() : `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}${String(new Date().getSeconds()).padStart(2,'0')}`;
 
-            const dadosPayload = {
-                id_pagamento: idPagamentoFinal,
-                pedido: 0, 
-                pagamento: formaPagamento,
+            const payload = {
+                id_pagamento: idPagamento, pedido: 0, pagamento: formaPagamento,
                 itens: Object.keys(carrinho).map(id => {
                     const p = produtos.find(item => item.id == id);
-                    return {
-                        sigla: p.sigla, // Envia a sigla do Excel para o histórico de auditoria
-                        produto: p.nome,
-                        quantidade: parseInt(carrinho[id]),
-                        preco: parseFloat(p.preco),
-                        total: parseFloat(p.preco * carrinho[id])
-                    };
+                    return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) };
                 })
             };
 
             try {
-                const resposta = await fetch(URL_GRAVACAO_VENDA, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(dadosPayload)
+                const resposta = await fetch(URL_GRAVACAO, {
+                    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
                 });
-
                 if (!resposta.ok) throw new Error();
 
-                alert("Venda Finalizada!"); 
+                alert("Venda Finalizada!"); // Alerta simplificado conforme solicitado
 
-                fecharOverlay();
-                carrinho = {};
-                formaPagamento = null;
-                atualizarCarrinhoInterno();
-                carregarEstoqueReal(); // Atualiza a tela puxando o estoque matemático recalculado do Excel!
-                
-            } catch (erro) {
-                console.error(erro);
+                fecharOverlay(); carrinho = {}; resetarEstadoPagamento();
+                atualizarCarrinhoDOM(); carregarEstoqueReal(); // Recarrega o estoque matemático real
+            } catch (e) {
                 alert("⚠️ Falha de comunicação. A venda não pôde ser gravada.");
-                btnFinalizar.disabled = false;
-                btnFinalizar.innerText = "Finalizar";
+                btn.innerText = "Finalizar"; validarEstadoFinalizar();
             }
         }
 
-        // Inicialização automática do Caixa chamando a planilha
         carregarEstoqueReal();
     </script>
 </body>
