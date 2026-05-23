@@ -14,15 +14,15 @@
 </head>
 <body class="bg-slate-50 font-aptos min-h-screen flex flex-col antialiased text-slate-800">
 
-    <!-- Cabeçalho Compacto -->
+    <!-- Cabeçalho -->
     <header class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
         <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
     </header>
 
-    <!-- Corpo Principal: Layout Responsivo Adaptável -->
+    <!-- Corpo Principal -->
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
         
-        <!-- Lado Esquerdo: Grid de Produtos (Ocupa 3 colunas no PC, tela cheia no celular) -->
+        <!-- Grid de Produtos -->
         <section class="lg:col-span-3 space-y-2">
             <div class="flex justify-between items-center border-b border-slate-200 pb-1">
                 <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2>
@@ -32,25 +32,23 @@
             </div>
         </section>
 
-        <!-- Lado Direito / Overlay: O Painel de Fechamento Único -->
-        <!-- No PC: Fica fixo na lateral (lg:flex). No celular: Vira um overlay escuro oculto (hidden) -->
+        <!-- Painel de Fechamento Único (PC: Fixo na lateral | Celular: Overlay) -->
         <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
             
-            <!-- Card de Checkout (Branco) -->
-            <div class="bg-white w-full max-w-lg lg:max-w-none rounded-2xl lg:rounded-xl shadow-2xl lg:shadow-md border border-slate-200 p-5 flex flex-col justify-between h-[80vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
+            <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-2xl lg:rounded-xl shadow-2xl lg:shadow-md border border-slate-200 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
                 
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
                     <h3 class="text-base font-bold text-slate-700 text-center uppercase tracking-wider border-b pb-2">Pagamento</h3>
                     
-                    <!-- Resumo dos Itens Selecionados -->
-                    <div class="flex-1 flex flex-col min-h-0">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Resumo do Pedido:</h4>
+                    <!-- Resumo do Pedido -->
+                    <div class="flex-1 flex flex-col min-h-0 max-h-[22vh]">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Resumo do Pedido:</h4>
                         <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
                             <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
                         </div>
                     </div>
 
-                    <!-- Seleção da Forma de Pagamento -->
+                    <!-- Métodos de Seleção -->
                     <div class="space-y-1.5 pt-2 border-t">
                         <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
                         <div class="grid grid-cols-2 gap-2">
@@ -59,32 +57,47 @@
                         </div>
                     </div>
 
-                    <!-- Bloco Expansível Dinâmico (Dinheiro) -->
-                    <div id="secao-valores-dinheiro" class="hidden border-t border-dashed pt-3 space-y-2.5">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-slate-500 font-medium">Pedido</span>
-                            <span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-slate-500 font-medium">Recebido</span>
-                            <div class="relative w-36">
-                                <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span>
-                                <input type="text" id="input-recebido" placeholder="0,00" oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-1 border border-slate-300 rounded-lg text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm">
+                    <!-- ESTRELA DO FLUXO: Janela de Altura Travada com Efeito Slide Horizontal -->
+                    <div class="w-full overflow-hidden border-t border-dashed pt-3 h-[105px] relative">
+                        <div id="carrossel-pagamento" class="w-[200%] h-full flex transition-transform duration-300 transform translate-x-0">
+                            
+                            <!-- BLOCO 1: Área do Dinheiro (Ocupa 50% do carrossel - Inicia Ativo, mas Opaco) -->
+                            <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-slate-500 font-medium">Pedido</span>
+                                    <span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-slate-500 font-medium">Recebido</span>
+                                    <div class="relative w-36">
+                                        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span>
+                                        <input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-1 border border-slate-300 rounded-lg text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm disabled:bg-slate-50">
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-1">
+                                    <span class="text-slate-500 font-medium">Troco</span>
+                                    <span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-2">
-                            <span class="text-slate-500 font-medium">Troco</span>
-                            <span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span>
+
+                            <!-- BLOCO 2: Área do PIX (Ocupa os outros 50% do carrossel - Alinhado à mesma altura) -->
+                            <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
+                                <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-44 h-[95px] bg-slate-100 border border-slate-200 rounded-lg flex flex-col items-center justify-center p-2 cursor-pointer hover:bg-slate-200 active:scale-95 transition-all select-none">
+                                    <svg class="w-7 h-7 text-slate-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg>
+                                    <span id="txt-qrcode-box" class="text-[10px] font-bold text-slate-500 uppercase tracking-tight text-center">Gerar QRCODE</span>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
+
                 </div>
 
-                <!-- Botões de Ação na Base -->
-                <div class="flex flex-col items-center gap-2 mt-4 pt-2 border-t w-full">
-                    <button onclick="finalizarVenda()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed transition-all">
+                <!-- Botão de Ação Final na Base -->
+                <div class="flex flex-col items-center gap-1.5 mt-2 pt-2 border-t w-full">
+                    <button onclick="processarCliqueFinalizar()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed transition-all">
                         Finalizar
                     </button>
-                    <!-- Exibido apenas em celulares/tablets para fechar o overlay -->
                     <button onclick="fecharOverlay()" class="lg:hidden text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1">
                         Voltar ao pedido
                     </button>
@@ -93,7 +106,7 @@
         </section>
     </main>
 
-    <!-- Botão Laranja Flutuante (Exibido apenas em celulares/tablets quando há itens) -->
+    <!-- Botão Laranja Flutuante (Mobile) -->
     <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 hidden lg:hidden flex justify-center pointer-events-none">
         <button onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform active:scale-95 transition-all text-sm tracking-wide">
             <span id="texto-botao-flutuante">Pedido: R$ 0,00 - Revisar e Pagar</span>
@@ -103,12 +116,12 @@
     <script>
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_GRAVACAO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
+        const URL_VALIDA_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
 
-        let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0;
+        let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "";
 
         function formatarMoeda(valor) { return valor.toFixed(2).replace('.', ','); }
 
-        // Puxa o cardápio e estoque 100% gerenciado pelo Excel
         async function carregarEstoqueReal() {
             try {
                 const resposta = await fetch(URL_LEITURA);
@@ -138,9 +151,7 @@
                     statusEstoque = `<span class="text-rose-500 font-semibold text-[11px]">0</span>`;
                     cardEstilo = "bg-slate-100 border-slate-200 text-slate-400 select-none pointer-events-none opacity-60";
                     caixaEstilo = "bg-slate-200 text-slate-400"; bloqueado = "disabled"; esgotado = true;
-                } else if (p.estoque <= p.critico) {
-                    statusEstoque = `<span class="text-rose-500 font-bold">${p.estoque}</span>`;
-                }
+                } else if (p.estoque <= p.critico) { statusEstoque = `<span class="text-rose-500 font-bold">${p.estoque}</span>`; }
                 if (qtd > 0 && !esgotado) { caixaEstilo = "bg-orange-50 border border-orange-200 text-orange-700"; }
 
                 grid.innerHTML += `
@@ -167,13 +178,9 @@
         function alterarQuantidade(id, delta) {
             const p = produtos.find(item => item.id === id);
             const novaQtd = (carrinho[id] || 0) + delta;
-
             if (novaQtd < 0) return;
             if (novaQtd > p.estoque) { alert(`Ops! Só temos ${p.estoque} unidades de ${p.nome} no estoque.`); return; }
-            
-            if (novaQtd === 0) delete carrinho[id];
-            else carrinho[id] = novaQtd;
-
+            if (novaQtd === 0) delete carrinho[id]; else carrinho[id] = novaQtd;
             renderizarProdutos();
             atualizarCarrinhoDOM();
         }
@@ -186,7 +193,6 @@
                 const p = produtos.find(item => item.id == id);
                 const qtd = carrinho[id]; const subtotal = p.preco * qtd;
                 totalAtual += subtotal; totalItens += qtd;
-
                 lista.innerHTML += `
                     <div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-lg border border-slate-100">
                         <div class="max-w-[75%]">
@@ -199,7 +205,7 @@
 
             if (totalItens === 0) {
                 lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
-                fecharOverlay(); // Se esvaziar o carrinho no mobile, fecha a tela
+                fecharOverlay();
             }
 
             const flutuante = document.getElementById("container-botao-flutuante");
@@ -213,40 +219,90 @@
         }
 
         function abrirOverlayCelular() {
-            const p = document.getElementById("painel-fechamento");
-            p.className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm";
+            document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm";
             resetarEstadoPagamento();
+            // Rolagem suave até a base do painel solicitada para centralizar o foco do operador
+            setTimeout(() => { document.getElementById("card-checkout").scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 100);
         }
 
         function fecharOverlay() {
-            const p = document.getElementById("painel-fechamento");
-            p.className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
+            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
         }
 
         function resetarEstadoPagamento() {
-            formaPagamento = null;
+            formaPagamento = null; pixChaveIdentificadora = "";
             document.getElementById("btn-pix").className = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
             document.getElementById("btn-dinheiro").className = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
-            document.getElementById("secao-valores-dinheiro").classList.add("hidden");
+            
+            // Retorna o carrossel para a esquerda (posição 0 - Dinheiro)
+            document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
+            
+            // Bloco de dinheiro volta a ficar fixo, porém totalmente apagado/opaco
+            const secaoDin = document.getElementById("secao-valores-dinheiro");
+            secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200";
+            document.getElementById("input-recebido").disabled = true;
+            document.getElementById("input-recebido").value = "";
+            document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
+
+            // Reseta a caixinha do QR Code para o estado inicial "Gerar QRCODE"
+            const box = document.getElementById("box-qrcode");
+            box.className = "w-44 h-[95px] bg-slate-100 border border-slate-200 rounded-lg flex flex-col items-center justify-center p-2 cursor-pointer hover:bg-slate-200 active:scale-95 transition-all select-none";
+            box.innerHTML = `<svg class="w-7 h-7 text-slate-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg><span id="txt-qrcode-box" class="text-[10px] font-bold text-slate-500 uppercase tracking-tight text-center">Gerar QRCODE</span>`;
+            
             validarEstadoFinalizar();
         }
 
+        // Executa o efeito de "Empurrão" horizontal (Slide) sem alterar a altura do painel
         function selecionarPagamento(tipo) {
             formaPagamento = tipo;
-            const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro"), secaoDin = document.getElementById("secao-valores-dinheiro");
+            const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro");
+            const secaoDin = document.getElementById("secao-valores-dinheiro");
+            const carrossel = document.getElementById("carrossel-pagamento");
+            const inputDin = document.getElementById("input-recebido");
+
             const ativo = "py-2.5 rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm text-center shadow-sm transition-all";
             const inativo = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
 
-            if (tipo === 'PIX') {
-                btnPix.className = ativo; btnDin.className = inativo; secaoDin.classList.add("hidden");
-            } else {
+            if (tipo === 'DINHEIRO') {
                 btnDin.className = ativo; btnPix.className = inativo;
-                document.getElementById("input-recebido").value = "";
+                
+                // Empurra o carrossel para a ESQUERDA (mostrando o dinheiro)
+                carrossel.className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
+                
+                // Acende o bloco de dinheiro com 100% de cor e libera input
+                secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-100 pointer-events-auto transition-all duration-200";
+                inputDin.disabled = false; inputDin.value = "";
                 document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
-                document.getElementById("valor-troco-txt").className = "font-bold text-slate-400";
-                secaoDin.classList.remove("hidden");
-                document.getElementById("input-recebido").focus();
+                inputDin.focus();
+            } else {
+                btnPix.className = ativo; btnDin.className = inativo;
+                
+                // Empurra o carrossel para a DIREITA (O Bloco de dinheiro sai e o QR Code entra)
+                carrossel.className = "w-[200%] h-full flex transition-transform duration-300 transform -translate-x-1/2";
+                
+                // Deixa o bloco de dinheiro apagado em segundo plano
+                secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200";
+                inputDin.disabled = true;
             }
+            validarEstadoFinalizar();
+        }
+
+        // Transforma o QR Code Fake em Real ao clicar em cima dele
+        function requisitarQrCodeReal() {
+            const box = document.getElementById("box-qrcode");
+            pixChaveIdentificadora = "mp_" + Date.now(); 
+            
+            box.className = "w-44 h-[95px] bg-emerald-50 border border-emerald-300 rounded-lg flex flex-col items-center justify-center p-2 opacity-100 select-none pointer-events-none transition-all";
+            box.innerHTML = `
+                <div class="w-16 h-16 bg-slate-800 flex items-center justify-center rounded border border-emerald-500 shadow-sm animate-pulse">
+                    <div class="grid grid-cols-3 gap-1 p-1.5 w-full h-full text-white opacity-90">
+                        <div class="bg-white rounded-xs"></div><div class="bg-white rounded-xs"></div><div class="bg-white rounded-xs"></div>
+                        <div class="bg-white rounded-xs"></div><div class="border border-white"></div><div class="bg-white rounded-xs"></div>
+                        <div class="bg-white rounded-xs"></div><div class="bg-white rounded-xs"></div><div class="bg-white rounded-xs"></div>
+                    </div>
+                </div>
+                <span class="text-[9px] font-bold text-emerald-700 mt-1 tracking-tighter uppercase">QRCODE ATIVO</span>`;
+            
             validarEstadoFinalizar();
         }
 
@@ -271,7 +327,7 @@
             const recebido = parseFloat(inputVal) / 100 || 0;
             const temItens = Object.keys(carrinho).length > 0;
 
-            if (temItens && formaPagamento && (formaPagamento === 'PIX' || recebido >= totalAtual)) {
+            if (temItens && formaPagamento && (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" || formaPagamento === 'DINHEIRO' && recebido >= totalAtual)) {
                 btn.disabled = false;
                 btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-center text-sm shadow cursor-pointer transition-all transform active:scale-95";
             } else {
@@ -280,14 +336,46 @@
             }
         }
 
-        async function finalizarVenda() {
-            const btn = document.getElementById("btn-finalizar");
-            btn.disabled = true; btn.innerText = "Processando..."; // Texto solicitado
+        function processarCliqueFinalizar() {
+            if (formaPagamento === 'DINHEIRO') { executarGravacaoPlanilha(null); } 
+            else { checarSegurancaMercadoPago(); }
+        }
 
-            let idPagamento = formaPagamento === 'PIX' ? "mp_" + Date.now() : `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}${String(new Date().getSeconds()).padStart(2,'0')}`;
+        // Validação obrigatória de segurança do Mercado Pago
+        async function checarSegurancaMercadoPago() {
+            const btn = document.getElementById("btn-finalizar");
+            btn.disabled = true; btn.innerText = "Processando...";
+
+            try {
+                const resposta = await fetch(URL_VALIDA_PIX, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id_pagamento: pixChaveIdentificadora, total: totalAtual })
+                });
+
+                if (!resposta.ok) throw new Error();
+                const resultado = await resposta.json();
+
+                if (resultado.status === "sucesso" || resultado.pago === true) {
+                    executarGravacaoPlanilha(pixChaveIdentificadora);
+                } else {
+                    alert("Pagamento Pendente");
+                    btn.innerText = "Finalizar"; validarEstadoFinalizar();
+                }
+            } catch (e) {
+                alert("Pagamento Pendente");
+                btn.innerText = "Finalizar"; validarEstadoFinalizar();
+            }
+        }
+
+        async function executarGravacaoPlanilha(chavePix) {
+            const btn = document.getElementById("btn-finalizar");
+            btn.disabled = true; btn.innerText = "Processando...";
+
+            let idFinal = formaPagamento === 'DINHEIRO' ? `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}${String(new Date().getSeconds()).padStart(2,'0')}` : chavePix;
 
             const payload = {
-                id_pagamento: idPagamento, pedido: 0, pagamento: formaPagamento,
+                id_pagamento: idFinal, pedido: 0, pagamento: formaPagamento,
                 itens: Object.keys(carrinho).map(id => {
                     const p = produtos.find(item => item.id == id);
                     return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) };
@@ -300,12 +388,12 @@
                 });
                 if (!resposta.ok) throw new Error();
 
-                alert("Venda Finalizada!"); // Alerta simplificado conforme solicitado
+                alert("Venda Finalizada!");
 
                 fecharOverlay(); carrinho = {}; resetarEstadoPagamento();
-                atualizarCarrinhoDOM(); carregarEstoqueReal(); // Recarrega o estoque matemático real
+                atualizarCarrinhoDOM(); carregarEstoqueReal();
             } catch (e) {
-                alert("⚠️ Falha de comunicação. A venda não pôde ser gravada.");
+                alert("⚠️ Erro de rede ao tentar gravar na planilha.");
                 btn.innerText = "Finalizar"; validarEstadoFinalizar();
             }
         }
