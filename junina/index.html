@@ -8,7 +8,7 @@
 </head>
 <body class="bg-amber-50 font-sans min-h-screen flex flex-col">
 
-    <!-- Cabeçalho caipira -->
+    <!-- Cabeçalho Laranja Festa Junina -->
     <header class="bg-orange-600 text-white text-center py-4 shadow-md border-b-4 border-yellow-400">
         <h1 class="text-3xl font-bold tracking-wide">Arraiá do Grêmio - Sistema de Caixa</h1>
         <p class="text-sm opacity-90 mt-1">Controle de Vendas e Auditoria de Estoque</p>
@@ -17,11 +17,12 @@
     <!-- Corpo Principal -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <!-- Lado Esquerdo: Grade de Produtos (Ocupa 2 colunas no desktop) -->
+        <!-- Lado Esquerdo: Menu em Lista Alinhada (Ocupa 2 colunas no desktop) -->
         <section class="lg:col-span-2 space-y-4">
-            <h2 class="text-xl font-bold text-amber-900 border-b-2 border-orange-200 pb-2">Menu de Produtos</h2>
+            <h2 class="text-xl font-bold text-amber-900 border-b-2 border-orange-200 pb-2">Menu de Produtos (A-Z)</h2>
             
-            <div id="grid-produtos" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Container em formato de lista vertical -->
+            <div id="grid-produtos" class="flex flex-col gap-2">
                 <!-- Os produtos serão injetados dinamicamente via JavaScript aqui embaixo -->
             </div>
         </section>
@@ -70,7 +71,7 @@
     </main>
 
     <script>
-        // Lista de produtos inicial (Alterável sem problemas)
+        // Itens da festa (Organizados automaticamente em ordem alfabética)
         const produtos = [
             { id: 1, nome: "Cachorro Quente", preco: 12.00, estoque: 50, critico: 5 },
             { id: 2, nome: "Pipoca Doce/Salgada", preco: 6.00, estoque: 4, critico: 5 },
@@ -87,52 +88,61 @@
         let carrinho = {};
         let formaPagamento = null;
 
-        // Renderiza os cards de produtos na tela em ordem alfabética
+        // Renderiza as linhas de produtos alinhando perfeitamente os blocos de texto
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos");
             grid.innerHTML = "";
 
-            // Força a ordenação alfabética (A-Z) com base na propriedade "nome"
+            // Força a ordenação alfabética (A-Z) antes de desenhar na tela
             produtos.sort((a, b) => a.nome.localeCompare(b.nome));
 
             produtos.forEach(p => {
                 const qtdNoCarrinho = carrinho[p.id] || 0;
-                let statusEstoqueHtml = `<span class="text-xs text-green-600 font-medium">Disponível: ${p.estoque}</span>`;
+                let statusEstoqueHtml = `<span class="text-green-600 font-bold">${p.estoque}</span>`;
                 let cardBg = "bg-white border-amber-100";
                 let disabledBtn = "";
 
                 if (p.estoque === 0) {
-                    statusEstoqueHtml = `<span class="text-xs text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded">ESGOTADO</span>`;
+                    statusEstoqueHtml = `<span class="text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded">ESGOTADO</span>`;
                     cardBg = "bg-gray-100 border-gray-200 opacity-60";
                     disabledBtn = "disabled";
                 } else if (p.estoque <= p.critico) {
-                    statusEstoqueHtml = `<span class="text-xs text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded">CRÍTICO: ${p.estoque}</span>`;
-                    cardBg = "bg-amber-50/60 border-amber-200";
+                    statusEstoqueHtml = `<span class="text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded">${p.estoque} (Baixo)</span>`;
                 }
 
+                // A mágica do alinhamento está no grid interno (grid-cols-3) com text-left, text-center e text-right
                 grid.innerHTML += `
-                    <div class="border rounded-2xl p-4 shadow-sm transition-all flex flex-col justify-between ${cardBg}">
-                        <div>
-                            <div class="flex justify-between items-start gap-2">
-                                <h3 class="font-bold text-amber-950 text-lg leading-tight">${p.nome}</h3>
-                                <span class="text-orange-600 font-black whitespace-nowrap">R$ ${p.preco.toFixed(2)}</span>
+                    <div class="border rounded-xl p-3 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${cardBg}">
+                        
+                        <!-- ÁREA DE DADOS ALINHADOS (Nome, Preço e Estoque fixos nas suas colunas) -->
+                        <div class="flex-1 grid grid-cols-3 items-center gap-2 min-w-0">
+                            <!-- Coluna 1: Nome do produto alinhado à esquerda -->
+                            <h3 class="font-bold text-amber-950 text-sm sm:text-base truncate">${p.nome}</h3>
+                            
+                            <!-- Coluna 2: Preço centralizado na linha -->
+                            <span class="text-orange-600 font-black text-sm sm:text-base text-center">R$ ${p.preco.toFixed(2)}</span>
+                            
+                            <!-- Coluna 3: Palavra Estoque e o número cravados à direita -->
+                            <div class="text-xs text-gray-400 text-right pr-2 whitespace-nowrap">
+                                <span class="opacity-70">Estoque</span> ${statusEstoqueHtml}
                             </div>
-                            <div class="mt-1">${statusEstoqueHtml}</div>
                         </div>
                         
-                        <div class="flex items-center justify-between mt-4 border-t pt-3 border-dashed border-gray-100">
-                            <span class="text-sm font-medium text-gray-500">Qtd: <b class="text-gray-800 text-base">${qtdNoCarrinho}</b></span>
-                            <div class="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
-                                <button onclick="alterarQuantidade(${p.id}, -1)" class="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center font-bold text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all">-</button>
-                                <button onclick="alterarQuantidade(${p.id}, 1)" ${disabledBtn} class="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center font-bold text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all ${p.estoque === 0 ? 'opacity-40 cursor-not-allowed':''}">+</button>
+                        <!-- CONTROLES DE QUANTIDADE -->
+                        <div class="flex items-center justify-end gap-3">
+                            <span class="text-xs font-semibold text-gray-500">Qtd: <b class="text-gray-800 text-sm">${qtdNoCarrinho}</b></span>
+                            <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 border">
+                                <button onclick="alterarQuantidade(${p.id}, -1)" class="w-8 h-8 rounded bg-white font-bold text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all">-</button>
+                                <button onclick="alterarQuantidade(${p.id}, 1)" ${disabledBtn} class="w-8 h-8 rounded bg-white font-bold text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all ${p.estoque === 0 ? 'opacity-40 cursor-not-allowed':''}">+</button>
                             </div>
                         </div>
+
                     </div>
                 `;
             });
         }
 
-        // Altera as quantidades salvando o limite do estoque atual do front
+        // Altera quantidades limitando ao teto do estoque
         function alterarQuantidade(id, delta) {
             const produto = produtos.find(p => p.id === id);
             const qtdAtual = carrinho[id] || 0;
@@ -207,7 +217,7 @@
             verificarStatusBotao();
         }
 
-        // Valida se o botão de finalizar pode ser clicado
+        // Valida liberação do botão de conclusão
         function verificarStatusBotao() {
             const btn = document.getElementById("btn-finalizar");
             const temItens = Object.keys(carrinho).length > 0;
@@ -223,7 +233,7 @@
             }
         }
 
-        // Processamento da venda e log de dados
+        // Simulação do envio de fechamento do lote
         function finalizarVenda() {
             const dadosVenda = {
                 data: new Date().toLocaleString('pt-BR'),
@@ -234,17 +244,16 @@
                 })
             };
 
-            // Log no console com a estrutura que o Power Automate receberá futuramente
-            console.log("Payload para o Power Automate:", dadosVenda);
-            alert(`Venda Registrada com Sucesso!\nForma de Pagamento: ${formaPagamento}\n\nRetire as fichas físicas do produto para entregar ao comprador.`);
+            console.log("Payload enviado para auditoria posterior:", dadosVenda);
+            alert(`🎉 Venda Registrada!\nForma de Pagamento: ${formaPagamento}\n\nEntregue as fichas correspondentes ao cliente.`);
             
-            // Abate o estoque local
+            // Abate estoque local
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id);
                 p.estoque -= carrinho[id];
             });
 
-            // Limpa o estado atual do carrinho
+            // Reseta tela
             carrinho = {};
             formaPagamento = null;
             document.getElementById("btn-pix").className = "py-3 rounded-xl border-2 font-bold text-center transition-all flex flex-col items-center justify-center border-gray-200 text-gray-700 hover:bg-gray-50";
@@ -254,7 +263,7 @@
             atualizarCarrinho();
         }
 
-        // Inicializa o sistema na primeira carga
+        // Carga Inicial
         renderizarProdutos();
     </script>
 </body>
