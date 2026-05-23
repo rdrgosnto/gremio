@@ -108,6 +108,9 @@
         let carrinho = {};
         let formaPagamento = null;
         let totalAtual = 0;
+        
+        // Controle interno e simples para gerar números ordinais e sequenciais de pedidos (Ex: 1, 2, 3...)
+        let proximoNumeroPedido = parseInt(localStorage.getItem('seq_pedido')) || 1;
 
         function formatarMoeda(valor) {
             return valor.toFixed(2).replace('.', ',');
@@ -164,7 +167,7 @@
                         <!-- CAIXA QUADRADA CENTRALIZADA (Sigla maior ao centro + Controles robustos na base) -->
                         <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${caixaQuadradaEstilo}">
                             
-                            <!-- Sigla aumentada e posicionada perto do centro vertical (ajuste fino com mt-2) -->
+                            <!-- Sigla aumentada e posicionada perto do centro vertical -->
                             <div class="text-center font-bold text-xl tracking-wide mt-2.5 leading-none select-none flex-1 flex items-center justify-center w-full">
                                 ${sigla}
                             </div>
@@ -313,32 +316,70 @@
             }
         }
 
-        function finalizarVenda() {
-            const dadosVenda = {
-                data: new Date().toLocaleString('pt-BR'),
-                origem: formaPagamento,
+        // Nova Função de Finalização Integrada ao seu Webhook do Power Automate
+        async function finalizarVenda() {
+            const URL_FLOW = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
+            
+            const btnFinalizar = document.getElementById("btn-finalizar");
+            
+            // Trava o botão para o operador não dar duplo clique durante o envio de rede
+            btnFinalizar.disabled = true;
+            btnFinalizar.innerText = "Enviando para o Caixa...";
+
+            // Estrutura o pacote de dados exato mapeado no esquema JSON do Power Automate
+            const dadosPayload = {
+                id_pagamento: formaPagamento === 'PIX' ? "mp_" + Date.now() : "-", 
+                pedido: proximoNumeroPedido,
+                pagamento: formaPagamento,
                 itens: Object.keys(carrinho).map(id => {
                     const p = produtos.find(item => item.id == id);
-                    return { nome: p.nome, quantidade: carrinho[id], subtotal: p.preco * carrinho[id] };
+                    return {
+                        sigla: gerarSigla(p.nome),
+                        produto: p.nome,
+                        quantidade: parseInt(carrinho[id]),
+                        preco: parseFloat(p.preco),
+                        total: parseFloat(p.preco * carrinho[id])
+                    };
                 })
             };
 
-            console.log("Auditoria de Venda:", dadosVenda);
-            alert(`🎉 Venda Registrada com Sucesso!\nForma de Pagamento: ${formaPagamento}`);
-            
-            Object.keys(carrinho).forEach(id => {
-                const p = produtos.find(item => item.id == id);
-                p.estoque -= carrinho[id];
-            });
+            try {
+                // Executa a chamada HTTP assíncrona enviando o pacote formatado
+                const resposta = await fetch(URL_FLOW, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dadosPayload)
+                });
 
-            carrinho = {};
-            formaPagamento = null;
-            document.getElementById("btn-pix").className = "py-2 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700";
-            document.getElementById("btn-dinheiro").className = "py-2 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700";
-            
-            renderizarProdutos();
-            atualizarCarrinho();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (!resposta.ok) throw new Error("Erro de resposta do servidor");
+
+                // Se a rede respondeu com sucesso, abate o estoque local na tela
+                Object.keys(carrinho).forEach(id => {
+                    const p = produtos.find(item => item.id == id);
+                    p.estoque -= carrinho[id];
+                });
+
+                alert(`🎉 Venda Registrada com Sucesso!\nPedido Nº: ${proximoNumeroPedido}\nForma: ${formaPagamento}\n\nEnviado automaticamente para a tabela tsistema.`);
+
+                // Incrementa a numeração sequencial do próximo pedido
+                proximoNumeroPedido++;
+                localStorage.setItem('seq_pedido', proximoNumeroPedido);
+
+                // Reseta os estados do aplicativo para a próxima venda
+                carrinho = {};
+                formaPagamento = null;
+                document.getElementById("btn-pix").className = "py-2 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700";
+                document.getElementById("btn-dinheiro").className = "py-2 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700";
+                
+                renderizarProdutos();
+                atualizarCarrinho();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (erro) {
+                console.error("Falha na integração:", erro);
+                alert("⚠️ Erro ao salvar a venda na nuvem.\nVerifique a conexão de rede ou o status do fluxo no Power Automate.");
+                verificarStatusBotao(); // Devolve o estado interativo ao botão para nova tentativa
+            }
         }
 
         renderizarProdutos();
