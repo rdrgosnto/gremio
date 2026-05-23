@@ -7,36 +7,35 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .smooth-scroll { scroll-behavior: smooth; }
-        /* Transição suave para o botão flutuante */
         .fade-btn { transition: opacity 0.3s ease, transform 0.3s ease; }
     </style>
 </head>
-<body class="bg-amber-50 font-sans min-h-screen flex flex-col smooth-scroll">
+<body class="bg-amber-50 font-sans min-h-screen flex flex-col smooth-scroll antialiased text-slate-900">
 
-    <!-- Cabeçalho Compacto, Fixo no Topo e com Sombra Inferior -->
-    <header class="bg-orange-600 text-white text-center py-2.5 shadow-lg border-b-2 border-yellow-400 sticky top-0 z-50">
+    <!-- Cabeçalho Mais Alto, Fixo no Topo e com Sombra Intensa -->
+    <header class="bg-orange-600 text-white text-center py-4 shadow-2xl border-b-4 border-yellow-400 sticky top-0 z-50">
         <h1 class="text-xl font-black tracking-wider uppercase">Festa Junina</h1>
     </header>
 
-    <!-- Corpo Principal -->
+    <!-- Corpo Principal com Ajustes de Grade Responsiva -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Lado Esquerdo: Menu em Lista Alinhada -->
         <section class="lg:col-span-2 space-y-3">
             <h2 class="text-base font-bold text-amber-900 border-b border-orange-200 pb-1">Menu de Produtos (A-Z)</h2>
             
-            <!-- Container em formato de lista vertical -->
-            <div id="grid-produtos" class="flex flex-col gap-1.5">
+            <!-- Container em formato de lista vertical flexível -->
+            <div id="grid-produtos" class="flex flex-col gap-2">
                 <!-- Os produtos serão injetados dinamicamente via JavaScript aqui embaixo -->
             </div>
         </section>
 
-        <!-- Lado Direito: Carrinho e Fechamento -->
-        <section class="bg-white rounded-2xl shadow-xl border border-amber-100 p-5 flex flex-col justify-between lg:h-[calc(100vh-100px)] lg:sticky lg:top-16">
+        <!-- Lado Direito: Carrinho e Fechamento (Tipografia Ampliada) -->
+        <section class="bg-white rounded-2xl shadow-xl border border-amber-100 p-5 flex flex-col justify-between lg:h-[calc(100vh-120px)] lg:sticky lg:top-20">
             <div>
                 <h2 class="text-base font-bold text-amber-950 border-b pb-2 mb-3 flex justify-between items-center">
                     <span>Pedido Atual</span>
-                    <span id="contador-itens" class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-semibold">0 itens</span>
+                    <span id="contador-itens" class="text-xs bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full font-semibold">0 itens</span>
                 </h2>
 
                 <!-- Lista de itens no carrinho -->
@@ -45,29 +44,29 @@
                 </div>
             </div>
 
-            <!-- Área de Fechamento Original (O sistema monitora a visibilidade deste bloco) -->
-            <div id="bloco-fechamento-original" class="border-t pt-3 mt-4 space-y-3">
-                <!-- Totalizador -->
+            <!-- Área de Fechamento Original (Tipografia pro-caixa aumentada) -->
+            <div id="bloco-fechamento-original" class="border-t pt-4 mt-4 space-y-4">
+                <!-- Totalizador Principal Avançado -->
                 <div class="flex justify-between items-center text-amber-950">
-                    <span class="text-sm font-semibold">Valor Total:</span>
-                    <span id="valor-total" class="text-2xl font-black text-orange-600">R$ 0,00</span>
+                    <span class="text-base font-bold uppercase tracking-wider text-slate-700">Valor Total:</span>
+                    <span id="valor-total" class="text-3xl font-black text-orange-600 tracking-tight">R$ 0,00</span>
                 </div>
 
-                <!-- Método de Pagamento -->
-                <div class="space-y-1">
+                <!-- Método de Pagamento (Invertido: DINHEIRO primeiro, PIX depois) -->
+                <div class="space-y-2">
                     <label class="text-xs font-bold text-gray-500 block uppercase tracking-wider">Forma de Pagamento:</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-2 rounded-xl border-2 font-bold text-sm text-center transition-all flex items-center justify-center border-gray-200 text-gray-700 hover:bg-gray-50">
-                            PIX
-                        </button>
-                        <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-2 rounded-xl border-2 font-bold text-sm text-center transition-all flex items-center justify-center border-gray-200 text-gray-700 hover:bg-gray-50">
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-3 rounded-xl border-2 font-black text-base text-center transition-all flex items-center justify-center border-gray-200 text-gray-700 hover:bg-gray-50">
                             DINHEIRO
+                        </button>
+                        <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-3 rounded-xl border-2 font-black text-base text-center transition-all flex items-center justify-center border-gray-200 text-gray-700 hover:bg-gray-50">
+                            PIX
                         </button>
                     </div>
                 </div>
 
-                <!-- Botão Concluir -->
-                <button onclick="finalizarVenda()" id="btn-finalizar" disabled class="w-full bg-gray-300 text-gray-500 font-bold py-3 rounded-xl text-center text-sm shadow transition-all cursor-not-allowed">
+                <!-- Botão Concluir Grande para Touch Mobile -->
+                <button onclick="finalizarVenda()" id="btn-finalizar" disabled class="w-full bg-gray-300 text-gray-500 font-black py-4 rounded-xl text-center text-base shadow transition-all cursor-not-allowed">
                     Selecione o Pagamento
                 </button>
             </div>
@@ -75,11 +74,11 @@
     </main>
 
     <!-- Botão Laranja Flutuante Dinâmico do Total (Atalho para o Fechamento) -->
-    <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 hidden flex justify-center pointer-events-none">
-        <button onclick="irParaFechamento()" class="pointer-events-auto bg-orange-600 hover:bg-orange-700 text-white font-black py-3 px-6 rounded-full shadow-2xl border-2 border-yellow-400 flex items-center gap-3 transform active:scale-95 transition-all text-sm md:text-base animate-bounce">
-            <span>🛒 Valor Total:</span>
+    <div id="container-botao-flutuante" class="fixed bottom-5 left-0 right-0 px-4 z-40 hidden flex justify-center pointer-events-none">
+        <button onclick="irParaFechamento()" class="pointer-events-auto bg-orange-600 hover:bg-orange-700 text-white font-black py-3.5 px-6 rounded-full shadow-2xl border-2 border-yellow-400 flex items-center gap-3 transform active:scale-95 transition-all text-sm md:text-base animate-bounce">
+            <span>🛒 Total:</span>
             <span id="valor-total-flutuante" class="text-yellow-300">R$ 0,00</span>
-            <span class="text-xs font-medium opacity-80">(Ir p/ Pagar ↓)</span>
+            <span class="text-xs font-medium opacity-80">(Pagar ↓)</span>
         </button>
     </div>
 
@@ -102,7 +101,7 @@
         let formaPagamento = null;
         let totalAtual = 0;
 
-        // Renderiza as linhas de produtos com blocos muito mais finos e compactos
+        // Renderiza os blocos de produtos com ergonomia aumentada para telas móveis e visão noturna
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos");
             grid.innerHTML = "";
@@ -112,42 +111,42 @@
 
             produtos.forEach(p => {
                 const qtdNoCarrinho = carrinho[p.id] || 0;
-                let statusEstoqueHtml = `<span class="text-green-600 font-bold">${p.estoque}</span>`;
+                let statusEstoqueHtml = `<span class="text-green-600 font-black">${p.estoque}</span>`;
                 let cardBg = "bg-white border-amber-100";
                 let disabledBtn = "";
 
                 if (p.estoque === 0) {
-                    statusEstoqueHtml = `<span class="text-red-600 font-bold bg-red-50 px-1.5 py-0.5 rounded text-[10px]">ESGOTADO</span>`;
+                    statusEstoqueHtml = `<span class="text-red-600 font-black bg-red-50 px-2 py-0.5 rounded text-xs">ESGOTADO</span>`;
                     cardBg = "bg-gray-100 border-gray-200 opacity-60";
                     disabledBtn = "disabled";
                 } else if (p.estoque <= p.critico) {
-                    statusEstoqueHtml = `<span class="text-amber-600 font-bold bg-amber-50 px-1.5 py-0.5 rounded text-[10px]">${p.estoque}</span>`;
+                    statusEstoqueHtml = `<span class="text-amber-600 font-black bg-amber-50 px-2 py-0.5 rounded text-xs">${p.estoque} (Baixo)</span>`;
                 }
 
-                // Ajuste Fino: Padding reduzido (p-2.5) e sem altura fixa engessada para deixar o bloco fino
+                // Caixa proporcionalmente maior: mudou de p-2.5 para p-3.5 e fontes maiores (text-base/text-sm)
                 grid.innerHTML += `
-                    <div class="border rounded-xl p-2.5 shadow-sm flex items-center justify-between gap-3 transition-all ${cardBg}">
+                    <div class="border rounded-2xl p-3.5 shadow-sm flex items-center justify-between gap-4 transition-all ${cardBg}">
                         
-                        <!-- LADO ESQUERDO: TEXTOS DO PRODUTO (Compactado) -->
+                        <!-- LADO ESQUERDO: TEXTOS DO PRODUTO (Tamanho Ampliado para Mobile) -->
                         <div class="flex flex-col justify-center min-w-0 flex-1">
-                            <!-- Nome do produto alinhado à esquerda -->
-                            <h3 class="font-bold text-amber-950 text-sm sm:text-base truncate text-left leading-tight">${p.nome}</h3>
+                            <!-- Nome aumentado para text-base sm:text-lg para leitura rápida -->
+                            <h3 class="font-black text-slate-800 text-base sm:text-lg truncate text-left leading-tight tracking-tight">${p.nome}</h3>
                             
-                            <!-- Segunda linha: Preço à esquerda e Estoque logo na frente -->
-                            <div class="flex items-center gap-3 mt-0.5 text-xs">
+                            <!-- Segunda linha: Preço e Estoque maiores -->
+                            <div class="flex items-center gap-4 mt-1 text-sm sm:text-base">
                                 <span class="text-orange-600 font-black">R$ ${p.preco.toFixed(2)}</span>
-                                <div class="text-gray-400 whitespace-nowrap">
-                                    <span class="opacity-70">Estoque</span> ${statusEstoqueHtml}
+                                <div class="text-gray-400 whitespace-nowrap text-xs sm:text-sm">
+                                    <span class="opacity-70 font-medium">Estoque</span> ${statusEstoqueHtml}
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- LADO DIREITO: CONTROLES DE QUANTIDADE -->
-                        <div class="flex items-center gap-2 shrink-0">
-                            <span class="text-[11px] font-semibold text-gray-500">Qtd: <b class="text-gray-800 text-xs">${qtdNoCarrinho}</b></span>
-                            <div class="flex items-center gap-0.5 bg-gray-100 rounded-lg p-0.5 border">
-                                <button onclick="alterarQuantidade(${p.id}, -1)" class="w-7 h-7 rounded bg-white font-bold text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all flex items-center justify-center">-</button>
-                                <button onclick="alterarQuantidade(${p.id}, 1)" ${disabledBtn} class="w-7 h-7 rounded bg-white font-bold text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all flex items-center justify-center ${p.estoque === 0 ? 'opacity-40 cursor-not-allowed':''}">+</button>
+                        <!-- LADO DIREITO: CONTROLES DE QUANTIDADE (Ergonomia Noturna) -->
+                        <div class="flex items-center gap-3 shrink-0">
+                            <span class="text-xs font-bold text-gray-500">Qtd: <b class="text-slate-900 text-sm sm:text-base font-black">${qtdNoCarrinho}</b></span>
+                            <div class="flex items-center gap-1 bg-gray-100 rounded-xl p-0.5 border border-gray-200">
+                                <button onclick="alterarQuantidade(${p.id}, -1)" class="w-9 h-9 rounded-lg bg-white font-black text-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 active:scale-95 transition-all flex items-center justify-center border shadow-sm">-</button>
+                                <button onclick="alterarQuantidade(${p.id}, 1)" ${disabledBtn} class="w-9 h-9 rounded-lg bg-white font-black text-lg text-gray-700 hover:bg-orange-50 hover:text-orange-600 active:scale-95 transition-all flex items-center justify-center border shadow-sm ${p.estoque === 0 ? 'opacity-40 cursor-not-allowed':''}">+</button>
                             </div>
                         </div>
 
@@ -194,12 +193,12 @@
                 totalItens += qtd;
 
                 lista.innerHTML += `
-                    <div class="flex justify-between items-center text-xs bg-amber-50/50 p-2 rounded-xl border border-amber-100/60">
+                    <div class="flex justify-between items-center text-sm bg-amber-50/50 p-2.5 rounded-xl border border-amber-100/60">
                         <div class="max-w-[65%]">
-                            <p class="font-semibold text-amber-950">${p.nome}</p>
-                            <p class="text-[10px] text-gray-400">${qtd}x R$ ${p.preco.toFixed(2)}</p>
+                            <p class="font-bold text-amber-950">${p.nome}</p>
+                            <p class="text-xs text-gray-400">${qtd}x R$ ${p.preco.toFixed(2)}</p>
                         </div>
-                        <span class="font-bold text-amber-950">R$ ${subtotal.toFixed(2)}</span>
+                        <span class="font-extrabold text-amber-950">R$ ${subtotal.toFixed(2)}</span>
                     </div>
                 `;
             });
@@ -220,36 +219,32 @@
             blocoOriginal.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
 
-        // Monitor de Visibilidade (Intersection Observer)
-        // Controla de forma nativa e inteligente quando o fechamento sai ou entra na tela
+        // Monitor de Visibilidade Nativo (Intersection Observer)
         const observer = new IntersectionObserver((entries) => {
             const containerFlutuante = document.getElementById("container-botao-flutuante");
             entries.forEach(entry => {
-                // Se a área de pagamento original NÃO está visível na tela, ativa o botão flutuante
                 if (!entry.isIntersecting) {
                     containerFlutuante.classList.remove("hidden");
                 } else {
-                    // Se a área original apareceu na visão, esconde o botão flutuante
                     containerFlutuante.classList.add("hidden");
                 }
             });
-        }, { root: null, threshold: 0.1 }); // Dispara o gatilho assim que 10% do bloco entrar/sair da tela
+        }, { root: null, threshold: 0.05 });
 
-        // Vincula o monitor ao bloco original de fechamento
         observer.observe(document.getElementById("bloco-fechamento-original"));
 
-        // Altera o visual dos botões de pagamento
+        // Altera o visual dos botões de pagamento (DINHEIRO à esquerda / PIX à direita)
         function selecionarPagamento(tipo) {
             formaPagamento = tipo;
             const btnPix = document.getElementById("btn-pix");
             const btnDinheiro = document.getElementById("btn-dinheiro");
 
             if (tipo === 'PIX') {
-                btnPix.className = "py-2 rounded-xl border-2 font-bold text-center transition-all flex items-center justify-center border-emerald-500 bg-emerald-50 text-emerald-700 shadow-inner";
-                btnDinheiro.className = "py-2 rounded-xl border-2 font-bold text-center transition-all flex items-center justify-center border-gray-200 text-gray-700 bg-white hover:bg-gray-50";
+                btnPix.className = "py-3 rounded-xl border-2 font-black text-base text-center transition-all flex items-center justify-center border-emerald-500 bg-emerald-50 text-emerald-700 shadow-inner";
+                btnDinheiro.className = "py-3 rounded-xl border-2 font-black text-base text-center transition-all flex items-center justify-center border-gray-200 text-gray-700 bg-white hover:bg-gray-50";
             } else {
-                btnDinheiro.className = "py-2 rounded-xl border-2 font-bold text-center transition-all flex items-center justify-center border-emerald-500 bg-emerald-50 text-emerald-700 shadow-inner";
-                btnPix.className = "py-2 rounded-xl border-2 font-bold text-center transition-all flex items-center justify-center border-gray-200 text-gray-700 bg-white hover:bg-gray-50";
+                btnDinheiro.className = "py-3 rounded-xl border-2 font-black text-base text-center transition-all flex items-center justify-center border-emerald-500 bg-emerald-50 text-emerald-700 shadow-inner";
+                btnPix.className = "py-3 rounded-xl border-2 font-black text-base text-center transition-all flex items-center justify-center border-gray-200 text-gray-700 bg-white hover:bg-gray-50";
             }
             verificarStatusBotao();
         }
@@ -261,11 +256,11 @@
 
             if (temItens && formaPagamento) {
                 btn.disabled = false;
-                btn.className = "w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl text-center text-sm shadow-md transition-all transform active:scale-95";
+                btn.className = "w-full bg-orange-600 hover:bg-orange-700 text-white font-black py-4 rounded-xl text-center text-base shadow-lg shadow-orange-200 transition-all transform active:scale-95";
                 btn.innerText = `Finalizar em ${formaPagamento}`;
             } else {
                 btn.disabled = true;
-                btn.className = "w-full bg-gray-300 text-gray-500 font-bold py-3 rounded-xl text-center text-sm border cursor-not-allowed";
+                btn.className = "w-full bg-gray-300 text-gray-500 font-black py-4 rounded-xl text-center text-base border cursor-not-allowed";
                 btn.innerText = temItens ? "Selecione o Pagamento" : "Adicione Itens ao Pedido";
             }
         }
@@ -277,11 +272,11 @@
                 origem: formaPagamento,
                 itens: Object.keys(carrinho).map(id => {
                     const p = produtos.find(item => item.id == id);
-                    return { nome: p.nome, quantidade: carrinho[id], subtotal: p.preco * carrinho[id] };
+                    return { nome: p.nome, quantity: carrinho[id], subtotal: p.preco * carrinho[id] };
                 })
             };
 
-            console.log("Payload enviado para auditoria posterior:", dadosVenda);
+            console.log("Venda Registrada:", dadosVenda);
             alert(`🎉 Venda Registrada!\nForma de Pagamento: ${formaPagamento}\n\nRetire as fichas físicas para o comprador.`);
             
             // Abate estoque local
@@ -293,12 +288,11 @@
             // Reseta estados
             carrinho = {};
             formaPagamento = null;
-            document.getElementById("btn-pix").className = "py-2 rounded-xl border-2 font-bold text-center transition-all flex items-center justify-center border-gray-200 text-gray-700 bg-white hover:bg-gray-50";
-            document.getElementById("btn-dinheiro").className = "py-2 rounded-xl border-2 font-bold text-center transition-all flex items-center justify-center border-gray-200 text-gray-700 bg-white hover:bg-gray-50";
+            document.getElementById("btn-pix").className = "py-3 rounded-xl border-2 font-black text-base text-center transition-all flex items-center justify-center border-gray-200 text-gray-700 bg-white hover:bg-gray-50";
+            document.getElementById("btn-dinheiro").className = "py-3 rounded-xl border-2 font-black text-base text-center transition-all flex items-center justify-center border-gray-200 text-gray-700 bg-white hover:bg-gray-50";
             
             renderizarProdutos();
             atualizarCarrinho();
-            // Joga o operador de volta para o topo de forma suave após fechar a venda
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
