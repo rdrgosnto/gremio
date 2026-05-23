@@ -59,16 +59,16 @@
                                     <div class="flex justify-between items-center text-sm"><span class="text-slate-500 font-medium">Recebido</span><div class="relative w-36"><span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span><input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-0.5 border border-slate-300 rounded-md text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm disabled:bg-slate-50"></div></div>
                                     <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-1"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span></div>
                                 </div>
-                                <!-- BLOCO B: Área do PIX (Borda 100% Reta e Sem Arredondados) -->
+                                <!-- BLOCO B: Área do PIX (Borda 100% Reta e Sem Margens para Máximo Tamanho) -->
                                 <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
-                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group">
+                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-[100px] h-[100px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group">
                                         
-                                        <!-- QR Code Fake Expandido (Ocupa o mesmo tamanho do real) -->
-                                        <div class="absolute inset-0 p-1 opacity-[0.07] group-hover:opacity-[0.11] transition-opacity grid grid-cols-2 gap-1 pointer-events-none">
-                                            <div class="border-[3px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
-                                            <div class="border-[3px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
-                                            <div class="border-[3px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
-                                            <div class="flex flex-wrap gap-0.5 p-0.5 justify-center items-center"><div class="bg-slate-900 w-1.5 h-1.5"></div><div class="bg-slate-900 w-1.5 h-1.5"></div><div class="bg-slate-900 w-1.5 h-1.5"></div><div class="bg-slate-900 w-1.5 h-1.5"></div></div>
+                                        <!-- QR Code Fake Totalmente Expandido (Sem nenhuma borda ou margem) -->
+                                        <div class="absolute inset-0 opacity-[0.08] group-hover:opacity-[0.12] transition-opacity grid grid-cols-2 pointer-events-none">
+                                            <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
+                                            <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
+                                            <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
+                                            <div class="flex flex-wrap gap-1 p-1 justify-center items-center"><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div></div>
                                         </div>
 
                                         <!-- Conteúdo de texto centralizado à frente -->
@@ -99,7 +99,7 @@
     <script>
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_GRAVACAO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
-        const URL_VALIDA_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
+        const URL_VALIDA_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fc8e0c1a405b4430b0f6390521bada48/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=1yfg6o-AMAAavobkG-AE22s_StAGlL_lkw0GqSfWk4g";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "";
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
@@ -113,7 +113,6 @@
             } catch (e) { alert("⚠️ Erro ao carregar o cardápio real do Excel."); }
         }
 
-        // Modificado com cantos levemente arredondados nos cartões de produtos (rounded-md)
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos"); grid.innerHTML = "";
             produtos.sort((a, b) => a.nome.localeCompare(b.nome));
@@ -175,13 +174,13 @@
             document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200";
             document.getElementById("input-recebido").disabled = true; document.getElementById("input-recebido").value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
             
-            const box = document.getElementById("box-qrcode"); box.className = "w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group";
+            const box = document.getElementById("box-qrcode"); box.className = "w-[100px] h-[100px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group";
             box.innerHTML = `
-                <div class="absolute inset-0 p-1 opacity-[0.07] group-hover:opacity-[0.11] transition-opacity grid grid-cols-2 gap-1 pointer-events-none">
-                    <div class="border-[3px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
-                    <div class="border-[3px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
-                    <div class="border-[3px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
-                    <div class="flex flex-wrap gap-0.5 p-0.5 justify-center items-center"><div class="bg-slate-900 w-1.5 h-1.5"></div><div class="bg-slate-900 w-1.5 h-1.5"></div><div class="bg-slate-900 w-1.5 h-1.5"></div><div class="bg-slate-900 w-1.5 h-1.5"></div></div>
+                <div class="absolute inset-0 opacity-[0.07] group-hover:opacity-[0.11] transition-opacity grid grid-cols-2 pointer-events-none">
+                    <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
+                    <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
+                    <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
+                    <div class="flex flex-wrap gap-1 p-1 justify-center items-center"><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div></div>
                 </div>
                 <div class="relative z-10 flex flex-col items-center justify-center text-center p-1">
                     <svg class="w-5 h-5 text-slate-400 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg>
@@ -211,10 +210,7 @@
             if (!formaPagamento || formaPagamento !== 'PIX') return;
             const box = document.getElementById("box-qrcode");
             
-            // Transição limpa e discreta: sem caixa de borda laranja, apenas o aviso de carregamento mantendo a estrutura padrão de borda reta
-            box.className = "w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none";
-            box.innerHTML = `<span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight text-center leading-none">Carregando...</span>`;
-
+            // Transição totalmente limpa e estática (sem textos temporários de carregamento ou alertas)
             pixChaveIdentificadora = "mp_" + Date.now(); 
 
             const payload = {
@@ -235,9 +231,9 @@
                 if (dados.qrcode_imagem) {
                     pixChaveIdentificadora = dados.id_mercado_pago;
 
-                    // O QR Code real renderiza de forma instantânea, com bordas 100% retas, ocupando w-24 h-24 da caixa de 100px, sem fundos verdes
-                    box.className = "w-[100px] h-[100px] bg-white border border-slate-200 rounded-none flex flex-col items-center justify-center p-0 opacity-100 select-none pointer-events-none transition-all";
-                    box.innerHTML = `<img src="data:image/jpeg;base64,${dados.qrcode_imagem}" class="w-24 h-24 rounded-none shadow-none" alt="QR Code">`;
+                    // O QR Code real substitui o fake num corte seco e cresce para w-[100px] h-[100px] (100% da área), sem nenhuma borda
+                    box.className = "w-[100px] h-[100px] bg-white rounded-none flex items-center justify-center p-0 opacity-100 select-none pointer-events-none transition-all";
+                    box.innerHTML = `<img src="data:image/jpeg;base64,${dados.qrcode_imagem}" class="w-full h-full rounded-none shadow-none" alt="QR Code">`;
                     validarEstadoFinalizar();
                 } else { throw new Error(); }
             } catch (e) {
