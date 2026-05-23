@@ -90,7 +90,7 @@
                         <span id="modal-valor-pedido" class="font-bold text-slate-700">R$ 0,00</span>
                     </div>
                     
-                    <!-- Linha 2: Recebido (Input com Máscara de Caixa Real) -->
+                    <!-- Linha 2: Recebido -->
                     <div class="flex justify-between items-center text-sm">
                         <span class="text-slate-500 font-medium">Recebido</span>
                         <div class="relative w-36">
@@ -124,7 +124,7 @@
     </div>
 
     <script>
-        // URLs Oficiais das duas automações do Power Automate prontas e integradas!
+        // URLs Oficiais das duas automações do Power Automate
         const URL_LEITURA_ESTOQUE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_GRAVACAO_VENDA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
 
@@ -137,36 +137,23 @@
             return valor.toFixed(2).replace('.', ',');
         }
 
-        function gerarSigla(nome) {
-            const nomeLimpo = nome.replace(/\(.*?\)/g, '').replace(/[^a-zA-ZáéíóúÁÉÍÓÚâêîôûÂÊÎÔÛãõÃÕçÇ\s]/g, '');
-            const palavras = nomeLimpo.trim().split(/\s+/).filter(p => p.toLowerCase() !== 'de' && p.toLowerCase() !== 'da' && p.toLowerCase() !== 'do');
-            if (palavras.length === 1) return palavras[0].substring(0, 2).toUpperCase();
-            return (palavras[0][0] + palaces => palaces ? palaces[1][0] : '')(palavras).toUpperCase();
-        }
-
-        // Função auxiliar robusta para segurar siglas de array com segurança
-        function gerarSigla(nome) {
-            const nomeLimpo = nome.replace(/\(.*?\)/g, '').replace(/[^a-zA-ZáéíóúÁÉÍÓÚâêîôûÂÊÎÔÛãõÃÕçÇ\s]/g, '');
-            const palavras = nomeLimpo.trim().split(/\s+/).filter(p => p.toLowerCase() !== 'de' && p.toLowerCase() !== 'da' && p.toLowerCase() !== 'do');
-            if (palavras.length === 1) return palavras[0].substring(0, 2).toUpperCase();
-            return (palavras[0][0] + (palavras[1] ? palavras[1][0] : '')).toUpperCase();
-        }
-
-        // Busca o estoque em tempo real da planilha Excel
+        // Busca o estoque e as informações completas em tempo real da planilha Excel
         async function carregarEstoqueReal() {
             try {
                 const resposta = await fetch(URL_LEITURA_ESTOQUE);
                 if (!resposta.ok) throw new Error();
                 const dadosExcel = await resposta.json();
                 
-                // Popula o catálogo com 100% dos produtos cadastrados no Excel
+                // Mapeamento corrigido pareando exatamente com as letras maiúsculas da sua tabela
                 produtos = dadosExcel.map(linha => ({
                     id: parseInt(linha.ID),
+                    sigla: linha.SIGLA ? String(linha.SIGLA).trim().toUpperCase() : "??", // Puxa a sigla direto do Excel agora!
                     nome: linha.PRODUTO,
-                    preco: parseFloat(linha.PRECO),
-                    estoque: parseInt(linha.ATUAL), 
+                    preco: parseFloat(linha.PRECO), // Lê a coluna PRECO sem o cedilha
+                    estoque: parseInt(linha.ATUAL), // Lê a coluna ATUAL do estoque matemático
                     critico: 5
                 }));
+                
                 renderizarProdutos();
             } catch (erro) {
                 console.error(erro);
@@ -177,11 +164,12 @@
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos");
             grid.innerHTML = "";
+            
+            // Coloca o cardápio em ordem alfabética automaticamente
             produtos.sort((a, b) => a.nome.localeCompare(b.nome));
 
             produtos.forEach(p => {
                 const qtdNoCarrinho = carrinho[p.id] || 0;
-                const sigla = gerarSigla(p.nome);
                 
                 let statusEstoqueHtml = `<span class="text-emerald-600 font-semibold">${p.estoque}</span>`;
                 let cardEstilo = "bg-white border-slate-200 hover:border-slate-300";
@@ -207,7 +195,7 @@
                     <div class="border rounded-xl p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cardEstilo}">
                         <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${caixaQuadradaEstilo}">
                             <div class="text-center font-bold text-xl tracking-wide mt-2.5 leading-none select-none flex-1 flex items-center justify-center w-full">
-                                ${sigla}
+                                ${p.sigla}
                             </div>
                             <div class="flex items-center justify-between w-full mt-auto">
                                 <button onclick="alterarQuantidade(${p.id}, -1)" ${botoesBloqueados} class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center transition-all ${qtdNoCarrinho === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button>
@@ -336,7 +324,7 @@
             }
         }
 
-        // Máscara monetária acumulativa para Caixas (Ex: 5000 ➔ 50,00)
+        // Máscara monetária acumulativa (Ex: 5000 ➔ 50,00)
         function tratarMascaraDinheiro(input) {
             let valor = input.value.replace(/\D/g, "");
             if (valor === "") {
@@ -350,7 +338,7 @@
             executarCalculoTroco(valorNumerico);
         }
 
-        function ejecutarCalculoTroco(recebido) {
+        function executarCalculoTroco(recebido) {
             const btnFinalizar = document.getElementById("btn-modal-finalizar");
             const txtTroco = document.getElementById("modal-valor-troco");
 
@@ -368,7 +356,7 @@
             }
         }
 
-        // Envio dos dados para gravação na planilha
+        // Disparo e gravação assíncrona na planilha
         async function finalizarVenda() {
             const btnFinalizar = document.getElementById("btn-modal-finalizar");
             btnFinalizar.disabled = true;
@@ -392,7 +380,7 @@
                 itens: Object.keys(carrinho).map(id => {
                     const p = produtos.find(item => item.id == id);
                     return {
-                        sigla: gerarSigla(p.nome),
+                        sigla: p.sigla, // Envia a sigla do Excel para o histórico de auditoria
                         produto: p.nome,
                         quantidade: parseInt(carrinho[id]),
                         preco: parseFloat(p.preco),
@@ -416,7 +404,7 @@
                 carrinho = {};
                 formaPagamento = null;
                 atualizarCarrinhoInterno();
-                carregarEstoqueReal(); // Recarrega os números novos de estoque direto do Excel
+                carregarEstoqueReal(); // Atualiza a tela puxando o estoque matemático recalculado do Excel!
                 
             } catch (erro) {
                 console.error(erro);
@@ -426,7 +414,7 @@
             }
         }
 
-        // Executa a carga inicial do estoque vindo do Excel
+        // Inicialização automática do Caixa chamando a planilha
         carregarEstoqueReal();
     </script>
 </body>
