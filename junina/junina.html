@@ -13,29 +13,35 @@
         }
         .smooth-scroll { scroll-behavior: smooth; }
         
-        /* Oculta a barra de rolagem padrão mas mantém a funcionalidade se necessário */
+        /* Oculta a barra de rolagem padrão */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-slate-50 font-aptos min-h-screen flex flex-col smooth-scroll antialiased text-slate-800">
 
+    <!-- Cabeçalho Mais Fino, Compacto e Elegante -->
     <header class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
         <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
     </header>
 
+    <!-- Corpo Principal -->
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4">
         
+        <!-- Lado Esquerdo: Grid Ultra Compacto de Produtos -->
         <section class="lg:col-span-3 space-y-2">
             <div class="flex justify-between items-center border-b border-slate-200 pb-1">
                 <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2>
                 <span class="text-xs text-slate-400">Layout Otimizado</span>
             </div>
             
+            <!-- Grid responsivo: 3 colunas no celular, 4 em tablets, 6 no computador -->
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-6 gap-2">
-                </div>
+                <!-- Os produtos serão injetados dinamicamente via JavaScript aqui -->
+            </div>
         </section>
 
+        <!-- Lado Direito: Carrinho e Fechamento -->
         <section class="bg-white rounded-xl shadow-md border border-slate-200 p-4 flex flex-col justify-between lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
             <div>
                 <h2 class="text-sm font-bold text-slate-700 border-b pb-2 mb-2 flex justify-between items-center">
@@ -43,17 +49,20 @@
                     <span id="contador-itens" class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-semibold">0 itens</span>
                 </h2>
 
+                <!-- Lista de itens no carrinho -->
                 <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto max-h-[25vh] lg:max-h-[50vh] pr-1">
                     <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
                 </div>
             </div>
 
+            <!-- Área de Fechamento -->
             <div id="bloco-fechamento-original" class="border-t border-slate-100 pt-3 mt-3 space-y-3">
                 <div class="flex justify-between items-center text-slate-800">
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Total:</span>
                     <span id="valor-total" class="text-2xl font-bold text-orange-600 tracking-tight">R$ 0,00</span>
                 </div>
 
+                <!-- Método de Pagamento -->
                 <div class="space-y-1">
                     <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider">Forma de Pagamento:</label>
                     <div class="grid grid-cols-2 gap-2">
@@ -66,6 +75,7 @@
                     </div>
                 </div>
 
+                <!-- Botão Concluir Grande -->
                 <button onclick="finalizarVenda()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-lg text-center text-sm transition-all cursor-not-allowed">
                     Selecione o Pagamento
                 </button>
@@ -73,11 +83,10 @@
         </section>
     </main>
 
+    <!-- Botão Laranja Flutuante - Texto Padronizado e Uniforme -->
     <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 hidden flex justify-center pointer-events-none">
-        <button onclick="irParaFechamento()" class="pointer-events-auto bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-8 rounded-full shadow-lg flex items-center justify-center gap-2 transform active:scale-95 transition-all text-sm">
-            <span>Ver Pedido:</span>
-            <span id="valor-total-flutuante" class="text-yellow-300 font-bold">R$ 0,00</span>
-            <span class="text-[11px] font-normal opacity-80 lowercase">(fechar)</span>
+        <button onclick="irParaFechamento()" class="pointer-events-auto bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-8 rounded-full shadow-lg flex items-center justify-center transform active:scale-95 transition-all text-sm tracking-wide">
+            <span>Pedido: <span id="valor-total-flutuante">R$ 0,00</span> (fechar)</span>
         </button>
     </div>
 
@@ -135,7 +144,7 @@
                 let itemEsgotado = false;
 
                 if (p.estoque === 0) {
-                    statusEstoqueHtml = `<span class="text-rose-500 font-medium text-[10px]">ZERADO</span>`;
+                    statusEstoqueHtml = `<span class="text-rose-500 font-semibold text-[11px]">0</span>`;
                     cardEstilo = "bg-slate-100 border-slate-200 text-slate-400 select-none pointer-events-none opacity-60";
                     caixaQuadradaEstilo = "bg-slate-200 text-slate-400";
                     botoesBloqueados = "disabled";
@@ -152,37 +161,42 @@
                 grid.innerHTML += `
                     <div class="border rounded-xl p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cardEstilo}">
                         
-                        <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1.5 relative mb-2 ${caixaQuadradaEstilo}">
-                            <div class="text-center font-bold text-base tracking-wide mt-1 leading-none select-none">
+                        <!-- CAIXA QUADRADA CENTRALIZADA (Sigla maior ao centro + Controles robustos na base) -->
+                        <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${caixaQuadradaEstilo}">
+                            
+                            <!-- Sigla aumentada e posicionada perto do centro vertical (ajuste fino com mt-2) -->
+                            <div class="text-center font-bold text-xl tracking-wide mt-2.5 leading-none select-none flex-1 flex items-center justify-center w-full">
                                 ${sigla}
                             </div>
                             
+                            <!-- Base da caixa quadrada: Botões maiores e alinhados perfeitamente nos cantos inferiores -->
                             <div class="flex items-center justify-between w-full mt-auto">
                                 <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, -1)" ${botoesBloqueados} 
-                                    class="w-5 h-5 rounded bg-black/5 hover:bg-black/10 active:scale-90 font-bold text-xs flex items-center justify-center transition-all ${qtdNoCarrinho === 0 ? 'opacity-30 pointer-events-none' : ''}">
+                                    class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 active:scale-90 font-bold text-sm flex items-center justify-center transition-all ${qtdNoCarrinho === 0 ? 'opacity-20 pointer-events-none' : ''}">
                                     -
                                 </button>
                                 
                                 <span class="text-xs font-bold select-none text-center flex-1">
-                                    ${qtdNoCarrinho > 0 ? `<span class="text-orange-600 font-bold text-sm">${qtdNoCarrinho}</span>` : '<span class="text-slate-300 font-normal">-</span>'}
+                                    ${qtdNoCarrinho > 0 ? `<span class="text-orange-600 font-bold text-base">${qtdNoCarrinho}</span>` : '<span class="text-slate-300 font-normal">-</span>'}
                                 </span>
                                 
                                 <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, 1)" ${botoesBloqueados} 
-                                    class="w-5 h-5 rounded bg-black/5 hover:bg-black/10 active:scale-90 font-bold text-xs flex items-center justify-center transition-all ${itemEsgotado ? 'opacity-30' : ''}">
+                                    class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 active:scale-90 font-bold text-sm flex items-center justify-center transition-all ${itemEsgotado ? 'opacity-20' : ''}">
                                     +
                                 </button>
                             </div>
                         </div>
                         
+                        <!-- TEXTOS DO PRODUTO (Nome um pouco maior, Preço e Estoque "E:" otimizados) -->
                         <div class="min-w-0 flex-1 flex flex-col justify-between">
-                            <h3 class="font-semibold text-slate-700 text-xs truncate text-left leading-tight tracking-tight" title="${p.nome}">
+                            <h3 class="font-semibold text-slate-700 text-[13px] truncate text-left leading-tight tracking-tight mb-0.5" title="${p.nome}">
                                 ${p.nome}
                             </h3>
                             
-                            <div class="flex items-center justify-between mt-1 text-[11px] font-medium w-full">
-                                <span class="text-orange-600 font-semibold whitespace-nowrap">R$ ${formatarMoeda(p.preco)}</span>
-                                <div class="text-slate-500 whitespace-nowrap text-right">
-                                    <span class="text-slate-300 font-normal">Est:</span> ${statusEstoqueHtml}
+                            <div class="flex items-center justify-between text-[12px] font-medium w-full">
+                                <span class="text-orange-600 font-bold whitespace-nowrap">R$ ${formatarMoeda(p.preco)}</span>
+                                <div class="text-slate-500 whitespace-nowrap text-right font-semibold">
+                                    <span class="text-slate-300 font-normal">E:</span> ${statusEstoqueHtml}
                                 </div>
                             </div>
                         </div>
