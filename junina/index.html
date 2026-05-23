@@ -10,7 +10,7 @@
 
     <!-- Cabeçalho caipira -->
     <header class="bg-orange-600 text-white text-center py-4 shadow-md border-b-4 border-yellow-400">
-        <h1 class="text-3xl font-bold tracking-wide">🍿 Arraiá do Grêmio - Sistema de Caixa 🌭</h1>
+        <h1 class="text-3xl font-bold tracking-wide">Arraiá do Grêmio - Sistema de Caixa</h1>
         <p class="text-sm opacity-90 mt-1">Controle de Vendas e Auditoria de Estoque</p>
     </header>
 
@@ -53,12 +53,10 @@
                     <label class="text-sm font-semibold text-gray-600 block">Forma de Pagamento:</label>
                     <div class="grid grid-cols-2 gap-3">
                         <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-3 rounded-xl border-2 font-bold text-center transition-all flex flex-col items-center justify-center border-gray-200 text-gray-700 hover:bg-gray-50">
-                            <span class="text-xl">⚡</span>
-                            <span class="text-xs mt-0.5">PIX</span>
+                            <span class="text-lg font-bold">PIX</span>
                         </button>
                         <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-3 rounded-xl border-2 font-bold text-center transition-all flex flex-col items-center justify-center border-gray-200 text-gray-700 hover:bg-gray-50">
-                            <span class="text-xl">💵</span>
-                            <span class="text-xs mt-0.5">Dinheiro</span>
+                            <span class="text-lg font-bold">DINHEIRO</span>
                         </button>
                     </div>
                 </div>
@@ -72,12 +70,12 @@
     </main>
 
     <script>
-        // Banco de dados simulado inicial (Fácil de alterar preços e estoques depois)
+        // Lista de produtos inicial (Alterável sem problemas)
         const produtos = [
             { id: 1, nome: "Cachorro Quente", preco: 12.00, estoque: 50, critico: 5 },
-            { id: 2, nome: "Pipoca Doce/Salgada", preco: 6.00, estoque: 4, critico: 5 }, // Teste nível crítico
+            { id: 2, nome: "Pipoca Doce/Salgada", preco: 6.00, estoque: 4, critico: 5 },
             { id: 3, nome: "Refrigerante (Lata)", preco: 6.00, estoque: 80, critico: 10 },
-            { id: 4, nome: "Água Mineral", preco: 4.00, estoque: 0, critico: 5 }, // Teste esgotado
+            { id: 4, nome: "Água Mineral", preco: 4.00, estoque: 30, critico: 5 },
             { id: 5, nome: "Quentão", preco: 10.00, estoque: 30, critico: 5 },
             { id: 6, nome: "Canjica", preco: 8.00, estoque: 25, critico: 5 },
             { id: 7, nome: "Espetinho de Carne", preco: 14.00, estoque: 40, critico: 8 },
@@ -89,10 +87,13 @@
         let carrinho = {};
         let formaPagamento = null;
 
-        // Renderiza os cards de produtos na tela
+        // Renderiza os cards de produtos na tela em ordem alfabética
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos");
             grid.innerHTML = "";
+
+            // Força a ordenação alfabética (A-Z) com base na propriedade "nome"
+            produtos.sort((a, b) => a.nome.localeCompare(b.nome));
 
             produtos.forEach(p => {
                 const qtdNoCarrinho = carrinho[p.id] || 0;
@@ -101,11 +102,11 @@
                 let disabledBtn = "";
 
                 if (p.estoque === 0) {
-                    statusEstoqueHtml = `<span class="text-xs text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded">🚫 ESGOTADO</span>`;
+                    statusEstoqueHtml = `<span class="text-xs text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded">ESGOTADO</span>`;
                     cardBg = "bg-gray-100 border-gray-200 opacity-60";
                     disabledBtn = "disabled";
                 } else if (p.estoque <= p.critico) {
-                    statusEstoqueHtml = `<span class="text-xs text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded">⚠️ CRÍTICO: ${p.estoque}</span>`;
+                    statusEstoqueHtml = `<span class="text-xs text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded">CRÍTICO: ${p.estoque}</span>`;
                     cardBg = "bg-amber-50/60 border-amber-200";
                 }
 
@@ -222,9 +223,8 @@
             }
         }
 
-        // Simulação do envio (Onde futuramente chamaremos o Power Automate via fetch)
+        // Processamento da venda e log de dados
         function finalizarVenda() {
-            // Monta o objeto exatamente estruturado para nossa futura auditoria
             const dadosVenda = {
                 data: new Date().toLocaleString('pt-BR'),
                 origem: formaPagamento,
@@ -234,16 +234,17 @@
                 })
             };
 
-            console.log("Dado pronto para o Power Automate:", dadosVenda);
-            alert(`🎉 Venda Registrada!\nOrigem: ${formaPagamento}\n\nEntregue as fichas correspondentes ao cliente.`);
+            // Log no console com a estrutura que o Power Automate receberá futuramente
+            console.log("Payload para o Power Automate:", dadosVenda);
+            alert(`Venda Registrada com Sucesso!\nForma de Pagamento: ${formaPagamento}\n\nRetire as fichas físicas do produto para entregar ao comprador.`);
             
-            // Simula baixa do estoque local após o fechamento
+            // Abate o estoque local
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id);
                 p.estoque -= carrinho[id];
             });
 
-            // Reseta o caixa para a próxima venda
+            // Limpa o estado atual do carrinho
             carrinho = {};
             formaPagamento = null;
             document.getElementById("btn-pix").className = "py-3 rounded-xl border-2 font-bold text-center transition-all flex flex-col items-center justify-center border-gray-200 text-gray-700 hover:bg-gray-50";
@@ -253,7 +254,7 @@
             atualizarCarrinho();
         }
 
-        // Inicialização
+        // Inicializa o sistema na primeira carga
         renderizarProdutos();
     </script>
 </body>
