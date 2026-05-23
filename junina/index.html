@@ -104,7 +104,7 @@
             return valor.toFixed(2).replace('.', ',');
         }
 
-        // Renderiza os blocks com regras estritas de esgotamento e criticidade
+        // Renderiza os blocos com regras estritas de esgotamento e criticidade
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos");
             grid.innerHTML = "";
@@ -140,7 +140,7 @@
                             <h3 class="font-black text-slate-800 text-base sm:text-lg truncate text-left leading-tight tracking-tight">${p.nome}</h3>
                             
                             <div class="flex items-center gap-4 mt-1 text-sm sm:text-base font-black">
-                                <span class="${p.estoque === 0 ? 'text-gray-400' : 'text-orange-600'}">R$ ${formatarMoeda(p.preco)}</span>
+                                <span class="${p.estoque === 0 ? 'text-gray-400' : 'text-orange-600'} whitespace-nowrap">R$ ${formatarMoeda(p.preco)}</span>
                                 <div class="${p.estoque === 0 ? 'text-gray-400' : 'text-slate-800'} whitespace-nowrap">
                                     <span class="opacity-60 font-medium text-gray-400">Estoque</span> ${statusEstoqueHtml}
                                 </div>
