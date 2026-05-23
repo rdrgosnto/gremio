@@ -76,7 +76,7 @@
                 </div>
 
                 <!-- Botão Concluir Grande -->
-                <button onclick="finalizarVenda()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-lg text-center text-sm transition-all cursor-not-allowed">
+                <button onclick="solicitarFechamento()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-lg text-center text-sm transition-all cursor-not-allowed">
                     Selecione o Pagamento
                 </button>
             </div>
@@ -90,8 +90,56 @@
         </button>
     </div>
 
+    <!-- OVERLAY DE DINHEIRO (Cobre 75% da tela, Centralizado) -->
+    <div id="overlay-dinheiro" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg h-[75vh] rounded-2xl shadow-2xl p-6 flex flex-col justify-between relative animate-fade-in">
+            
+            <div>
+                <h3 class="text-base font-bold text-slate-700 border-b pb-2 mb-6 uppercase tracking-wider">Fechamento em Dinheiro</h3>
+                
+                <!-- Estrutura de Atendimento com Labels à Esquerda e Valores à Direita -->
+                <div class="space-y-5">
+                    
+                    <!-- Linha 1: Pedido (Total a Pagar) -->
+                    <div class="flex justify-between items-center text-lg">
+                        <span class="text-slate-500 font-medium">Pedido</span>
+                        <span id="modal-valor-pedido" class="font-bold text-slate-800">R$ 0,00</span>
+                    </div>
+                    
+                    <!-- Linha 2: Recebido (Input Controlado) -->
+                    <div class="flex justify-between items-center text-lg">
+                        <span class="text-slate-500 font-medium">Recebido</span>
+                        <div class="relative w-44">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">R$</span>
+                            <input type="number" id="input-recebido" step="0.01" min="0" placeholder="0,00" oninput="calcularTroco()"
+                                class="w-full pl-9 pr-3 py-1.5 border border-slate-300 rounded-lg text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-base">
+                        </div>
+                    </div>
+                    
+                    <!-- Linha 3: Troco -->
+                    <div class="flex justify-between items-center text-lg border-t border-dashed pt-4">
+                        <span class="text-slate-500 font-medium">Troco</span>
+                        <span id="modal-valor-troco" class="font-bold text-slate-400">R$ 0,00</span>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Botões de Ação na Base Inferior Centralizada -->
+            <div class="flex flex-col items-center gap-2 mt-auto w-full">
+                <button onclick="finalizarVenda()" id="btn-modal-finalizar" disabled
+                    class="w-full sm:w-64 bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed transition-all">
+                    Finalizar
+                </button>
+                <button onclick="fecharOverlay()" class="text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1">
+                    Voltar ao pedido
+                </button>
+            </div>
+
+        </div>
+    </div>
+
     <script>
-        // Banco de dados simulando os cenários reais
         const produtos = [
             { id: 1, nome: "Cachorro Quente", preco: 12.00, estoque: 50, critico: 5 },
             { id: 2, nome: "Pipoca Doce/Salgada", preco: 6.00, estoque: 4, critico: 5 }, 
@@ -108,15 +156,11 @@
         let carrinho = {};
         let formaPagamento = null;
         let totalAtual = 0;
-        
-        // Controle interno e simples para gerar números ordinais e sequenciais de pedidos (Ex: 1, 2, 3...)
-        let proximoNumeroPedido = parseInt(localStorage.getItem('seq_pedido')) || 1;
 
         function formatarMoeda(valor) {
             return valor.toFixed(2).replace('.', ',');
         }
 
-        // Função auxiliar para gerar a sigla automaticamente de forma inteligente
         function gerarSigla(nome) {
             const nomeLimpo = nome.replace(/\(.*?\)/g, '').replace(/[^a-zA-ZáéíóúÁÉÍÓÚâêîôûÂÊÎÔÛãõÃÕçÇ\s]/g, '');
             const palavras = nomeLimpo.trim().split(/\s+/).filter(p => p.toLowerCase() !== 'de' && p.toLowerCase() !== 'da' && p.toLowerCase() !== 'do');
@@ -128,12 +172,9 @@
             return (palavras[0][0] + palavras[1][0]).toUpperCase();
         }
 
-        // Renderiza os blocos no formato de grid compacto com os controles embutidos na caixa quadrada
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos");
             grid.innerHTML = "";
-
-            // Ordem alfabética (A-Z)
             produtos.sort((a, b) => a.nome.localeCompare(b.nome));
 
             produtos.forEach(p => {
@@ -163,39 +204,28 @@
 
                 grid.innerHTML += `
                     <div class="border rounded-xl p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cardEstilo}">
-                        
-                        <!-- CAIXA QUADRADA CENTRALIZADA (Sigla maior ao centro + Controles robustos na base) -->
                         <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${caixaQuadradaEstilo}">
-                            
-                            <!-- Sigla aumentada e posicionada perto do centro vertical -->
                             <div class="text-center font-bold text-xl tracking-wide mt-2.5 leading-none select-none flex-1 flex items-center justify-center w-full">
                                 ${sigla}
                             </div>
-                            
-                            <!-- Base da caixa quadrada: Botões maiores e alinhados perfeitamente nos cantos inferiores -->
                             <div class="flex items-center justify-between w-full mt-auto">
                                 <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, -1)" ${botoesBloqueados} 
                                     class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 active:scale-90 font-bold text-sm flex items-center justify-center transition-all ${qtdNoCarrinho === 0 ? 'opacity-20 pointer-events-none' : ''}">
                                     -
                                 </button>
-                                
                                 <span class="text-xs font-bold select-none text-center flex-1">
                                     ${qtdNoCarrinho > 0 ? `<span class="text-orange-600 font-bold text-base">${qtdNoCarrinho}</span>` : '<span class="text-slate-300 font-normal">-</span>'}
                                 </span>
-                                
                                 <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, 1)" ${botoesBloqueados} 
                                     class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 active:scale-90 font-bold text-sm flex items-center justify-center transition-all ${itemEsgotado ? 'opacity-20' : ''}">
                                     +
                                 </button>
                             </div>
                         </div>
-                        
-                        <!-- TEXTOS DO PRODUTO (Nome um pouco maior, Preço e Estoque "E:" otimizados) -->
                         <div class="min-w-0 flex-1 flex flex-col justify-between">
                             <h3 class="font-semibold text-slate-700 text-[13px] truncate text-left leading-tight tracking-tight mb-0.5" title="${p.nome}">
                                 ${p.nome}
                             </h3>
-                            
                             <div class="flex items-center justify-between text-[12px] font-medium w-full">
                                 <span class="text-orange-600 font-bold whitespace-nowrap">R$ ${formatarMoeda(p.preco)}</span>
                                 <div class="text-slate-500 whitespace-nowrap text-right font-semibold">
@@ -203,7 +233,6 @@
                                 </div>
                             </div>
                         </div>
-                        
                     </div>
                 `;
             });
@@ -308,7 +337,7 @@
             if (temItens && formaPagamento) {
                 btn.disabled = false;
                 btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg text-center text-sm shadow transition-all transform active:scale-[0.99]";
-                btn.innerText = `Finalizar em ${formaPagamento}`;
+                btn.innerText = formaPagamento === 'DINHEIRO' ? "Receber em Dinheiro" : "Finalizar em PIX";
             } else {
                 btn.disabled = true;
                 btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-lg text-center text-sm cursor-not-allowed";
@@ -316,20 +345,77 @@
             }
         }
 
-        // Nova Função de Finalização Integrada ao seu Webhook do Power Automate
+        // Intercepta o clique de finalizar para abrir o overlay se for dinheiro
+        function solicitarFechamento() {
+            if (formaPagamento === 'DINHEIRO') {
+                document.getElementById("modal-valor-pedido").innerText = `R$ ${formatarMoeda(totalAtual)}`;
+                document.getElementById("input-recebido").value = "";
+                document.getElementById("modal-valor-troco").innerText = "R$ 0,00";
+                document.getElementById("modal-valor-troco").className = "font-bold text-slate-400";
+                
+                const btnModal = document.getElementById("btn-modal-finalizar");
+                btnModal.disabled = true;
+                btnModal.className = "w-full sm:w-64 bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed transition-all";
+
+                document.getElementById("overlay-dinheiro").classList.remove("hidden");
+                document.getElementById("input-recebido").focus();
+            } else {
+                finalizarVenda(); // Se for PIX vai direto
+            }
+        }
+
+        function fecharOverlay() {
+            document.getElementById("overlay-dinheiro").classList.add("hidden");
+        }
+
+        // Calcula o troco dinamicamente no overlay de dinheiro
+        function calcularTroco() {
+            const recebidoInput = document.getElementById("input-recebido").value;
+            const recebido = parseFloat(recebidoInput) || 0;
+            const btnModal = document.getElementById("btn-modal-finalizar");
+            const txtTroco = document.getElementById("modal-valor-troco");
+
+            if (recebidoInput === "" || recebido < totalAtual) {
+                txtTroco.innerText = recebidoInput === "" ? "R$ 0,00" : "Valor Insuficiente";
+                txtTroco.className = "font-bold text-rose-500 text-sm";
+                btnModal.disabled = true;
+                btnModal.className = "w-full sm:w-64 bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed transition-all";
+            } else {
+                const troco = recebido - totalAtual;
+                txtTroco.innerText = `R$ ${formatarMoeda(troco)}`;
+                txtTroco.className = "font-bold text-emerald-600 text-xl";
+                btnModal.disabled = false;
+                btnModal.className = "w-full sm:w-64 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-center text-sm shadow transition-all transform active:scale-95 cursor-pointer";
+            }
+        }
+
+        // Processo de envio síncrono para o Power Automate
         async function finalizarVenda() {
             const URL_FLOW = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
             
-            const btnFinalizar = document.getElementById("btn-finalizar");
+            const btnFinalizarNormal = document.getElementById("btn-finalizar");
+            const btnFinalizarModal = document.getElementById("btn-modal-finalizar");
             
-            // Trava o botão para o operador não dar duplo clique durante o envio de rede
-            btnFinalizar.disabled = true;
-            btnFinalizar.innerText = "Enviando para o Caixa...";
+            // Trava e muda o estado visual dos botões para indicar carregamento síncrono
+            btnFinalizarNormal.disabled = true;
+            btnFinalizarModal.disabled = true;
+            btnFinalizarModal.innerText = "Gravando na Planilha...";
 
-            // Estrutura o pacote de dados exato mapeado no esquema JSON do Power Automate
+            // Geração de ID de pagamento incluindo horas, minutos e segundos para dinheiro
+            let idPagamentoFinal = "-";
+            if (formaPagamento === 'PIX') {
+                idPagamentoFinal = "mp_" + Date.now();
+            } else {
+                const agora = new Date();
+                const hh = String(agora.getHours()).padStart(2, '0');
+                const mm = String(agora.getMinutes()).padStart(2, '0');
+                const ss = String(agora.getSeconds()).padStart(2, '0');
+                idPagamentoFinal = `DINHEIRO-${hh}${mm}${ss}`;
+            }
+
             const dadosPayload = {
-                id_pagamento: formaPagamento === 'PIX' ? "mp_" + Date.now() : "-", 
-                pedido: proximoNumeroPedido,
+                id_pagamento: idPagamentoFinal,
+                pedido: 0, // O Excel gerará o sequencial pela fórmula na coluna PEDIDO
                 pagamento: formaPagamento,
                 itens: Object.keys(carrinho).map(id => {
                     const p = produtos.find(item => item.id == id);
@@ -344,28 +430,25 @@
             };
 
             try {
-                // Executa a chamada HTTP assíncrona enviando o pacote formatado
+                // Envia e aguarda de forma síncrona a ação "Resposta" do Power Automate
                 const resposta = await fetch(URL_FLOW, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(dadosPayload)
                 });
 
-                if (!resposta.ok) throw new Error("Erro de resposta do servidor");
+                if (!resposta.ok) throw new Error("Erro na gravação remota");
 
-                // Se a rede respondeu com sucesso, abate o estoque local na tela
+                // Processo concluído com êxito! Aplica o abate no estoque local
                 Object.keys(carrinho).forEach(id => {
                     const p = produtos.find(item => item.id == id);
                     p.estoque -= carrinho[id];
                 });
 
-                alert(`🎉 Venda Registrada com Sucesso!\nPedido Nº: ${proximoNumeroPedido}\nForma: ${formaPagamento}\n\nEnviado automaticamente para a tabela tsistema.`);
+                alert("🎉 Venda Finalizada!\nO registro foi computado com sucesso na planilha tsistema.");
 
-                // Incrementa a numeração sequencial do próximo pedido
-                proximoNumeroPedido++;
-                localStorage.setItem('seq_pedido', proximoNumeroPedido);
-
-                // Reseta os estados do aplicativo para a próxima venda
+                // Reseta estados e fecha elementos visuais
+                fecharOverlay();
                 carrinho = {};
                 formaPagamento = null;
                 document.getElementById("btn-pix").className = "py-2 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700";
@@ -376,9 +459,12 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
             } catch (erro) {
-                console.error("Falha na integração:", erro);
-                alert("⚠️ Erro ao salvar a venda na nuvem.\nVerifique a conexão de rede ou o status do fluxo no Power Automate.");
-                verificarStatusBotao(); // Devolve o estado interativo ao botão para nova tentativa
+                console.error(erro);
+                alert("⚠️ Falha ao registrar a venda.\nA planilha não respondeu a tempo. Verifique a internet.");
+            } finally {
+                // Devolve os rótulos e estados originais aos botões de fechamento
+                btnFinalizarModal.innerText = "Finalizar";
+                verificarStatusBotao();
             }
         }
 
