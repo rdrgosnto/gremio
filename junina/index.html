@@ -7,341 +7,310 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.cdnfonts.com/css/aptos');
-        
-        .font-aptos {
-            font-family: 'Aptos', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .smooth-scroll { scroll-behavior: smooth; }
-        
-        /* Oculta a barra de rolagem padrão */
+        .font-aptos { font-family: 'Aptos', 'Segoe UI', Tahoma, sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-slate-50 font-aptos min-h-screen flex flex-col smooth-scroll antialiased text-slate-800">
+<body class="bg-slate-50 font-aptos min-h-screen flex flex-col antialiased text-slate-800">
 
-    <!-- Cabeçalho Mais Fino, Compacto e Elegante -->
+    <!-- Cabeçalho Compacto -->
     <header class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
         <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
     </header>
 
-    <!-- Corpo Principal -->
-    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4">
+    <!-- Corpo Principal: Layout Responsivo Adaptável -->
+    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
         
-        <!-- Lado Esquerdo: Grid Ultra Compacto de Produtos -->
+        <!-- Lado Esquerdo: Grid de Produtos (Ocupa 3 colunas no PC, tela cheia no celular) -->
         <section class="lg:col-span-3 space-y-2">
             <div class="flex justify-between items-center border-b border-slate-200 pb-1">
                 <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2>
-                <span class="text-xs text-slate-400">Layout Otimizado</span>
             </div>
-            
-            <!-- Grid responsivo: 3 colunas no celular, 4 em tablets, 6 no computador -->
-            <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-6 gap-2">
-                <!-- Os produtos serão injetados dinamicamente via JavaScript aqui -->
+            <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2">
+                <!-- Injetados via JavaScript -->
             </div>
         </section>
 
-        <!-- Lado Direito: Carrinho e Fechamento -->
-        <section class="bg-white rounded-xl shadow-md border border-slate-200 p-4 flex flex-col justify-between lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
-            <div>
-                <h2 class="text-sm font-bold text-slate-700 border-b pb-2 mb-2 flex justify-between items-center">
-                    <span>Pedido Atual</span>
-                    <span id="contador-itens" class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-semibold">0 itens</span>
-                </h2>
+        <!-- Lado Direito / Overlay: O Painel de Fechamento Único -->
+        <!-- No PC: Fica fixo na lateral (lg:flex). No celular: Vira um overlay escuro oculto (hidden) -->
+        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
+            
+            <!-- Card de Checkout (Branco) -->
+            <div class="bg-white w-full max-w-lg lg:max-w-none rounded-2xl lg:rounded-xl shadow-2xl lg:shadow-md border border-slate-200 p-5 flex flex-col justify-between h-[80vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
+                
+                <div class="space-y-4 flex-1 flex flex-col min-h-0">
+                    <h3 class="text-base font-bold text-slate-700 text-center uppercase tracking-wider border-b pb-2">Pagamento</h3>
+                    
+                    <!-- Resumo dos Itens Selecionados -->
+                    <div class="flex-1 flex flex-col min-h-0">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Resumo do Pedido:</h4>
+                        <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
+                            <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
+                        </div>
+                    </div>
 
-                <!-- Lista de itens no carrinho -->
-                <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto max-h-[25vh] lg:max-h-[50vh] pr-1">
-                    <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
-                </div>
-            </div>
+                    <!-- Seleção da Forma de Pagamento -->
+                    <div class="space-y-1.5 pt-2 border-t">
+                        <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">DINHEIRO</button>
+                            <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">PIX</button>
+                        </div>
+                    </div>
 
-            <!-- Área de Fechamento -->
-            <div id="bloco-fechamento-original" class="border-t border-slate-100 pt-3 mt-3 space-y-3">
-                <div class="flex justify-between items-center text-slate-800">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Total:</span>
-                    <span id="valor-total" class="text-2xl font-bold text-orange-600 tracking-tight">R$ 0,00</span>
-                </div>
-
-                <!-- Método de Pagamento -->
-                <div class="space-y-1">
-                    <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider">Forma de Pagamento:</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-2 rounded-lg border border-slate-200 font-semibold text-sm text-center transition-all bg-white hover:bg-slate-50 text-slate-700">
-                            DINHEIRO
-                        </button>
-                        <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-2 rounded-lg border border-slate-200 font-semibold text-sm text-center transition-all bg-white hover:bg-slate-50 text-slate-700">
-                            PIX
-                        </button>
+                    <!-- Bloco Expansível Dinâmico (Dinheiro) -->
+                    <div id="secao-valores-dinheiro" class="hidden border-t border-dashed pt-3 space-y-2.5">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-500 font-medium">Pedido</span>
+                            <span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-500 font-medium">Recebido</span>
+                            <div class="relative w-36">
+                                <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span>
+                                <input type="text" id="input-recebido" placeholder="0,00" oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-1 border border-slate-300 rounded-lg text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm">
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-2">
+                            <span class="text-slate-500 font-medium">Troco</span>
+                            <span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Botão Concluir Grande -->
-                <button onclick="finalizarVenda()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-lg text-center text-sm transition-all cursor-not-allowed">
-                    Selecione o Pagamento
-                </button>
+                <!-- Botões de Ação na Base -->
+                <div class="flex flex-col items-center gap-2 mt-4 pt-2 border-t w-full">
+                    <button onclick="finalizarVenda()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed transition-all">
+                        Finalizar
+                    </button>
+                    <!-- Exibido apenas em celulares/tablets para fechar o overlay -->
+                    <button onclick="fecharOverlay()" class="lg:hidden text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1">
+                        Voltar ao pedido
+                    </button>
+                </div>
             </div>
         </section>
     </main>
 
-    <!-- Botão Laranja Flutuante - Texto Padronizado e Uniforme -->
-    <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 hidden flex justify-center pointer-events-none">
-        <button onclick="irParaFechamento()" class="pointer-events-auto bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-8 rounded-full shadow-lg flex items-center justify-center transform active:scale-95 transition-all text-sm tracking-wide">
-            <span>Pedido: <span id="valor-total-flutuante">R$ 0,00</span> (fechar)</span>
+    <!-- Botão Laranja Flutuante (Exibido apenas em celulares/tablets quando há itens) -->
+    <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 hidden lg:hidden flex justify-center pointer-events-none">
+        <button onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform active:scale-95 transition-all text-sm tracking-wide">
+            <span id="texto-botao-flutuante">Pedido: R$ 0,00 - Revisar e Pagar</span>
         </button>
     </div>
 
     <script>
-        // Banco de dados simulando os cenários reais
-        const produtos = [
-            { id: 1, nome: "Cachorro Quente", preco: 12.00, estoque: 50, critico: 5 },
-            { id: 2, nome: "Pipoca Doce/Salgada", preco: 6.00, estoque: 4, critico: 5 }, 
-            { id: 3, nome: "Refrigerante (Lata)", preco: 6.00, estoque: 80, critico: 10 },
-            { id: 4, nome: "Água Mineral", preco: 4.00, estoque: 0, critico: 5 },        
-            { id: 5, nome: "Quentão", preco: 10.00, estoque: 30, critico: 5 },
-            { id: 6, nome: "Canjica", preco: 8.00, estoque: 25, critico: 5 },
-            { id: 7, nome: "Espetinho de Carne", preco: 14.00, estoque: 40, critico: 8 },
-            { id: 8, nome: "Milho Cozido", preco: 7.00, estoque: 20, critico: 5 },
-            { id: 9, nome: "Bolo de Fubá", preco: 5.00, estoque: 15, critico: 3 },
-            { id: 10, nome: "Pastel", preco: 9.00, estoque: 60, critico: 10 }
-        ];
+        const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
+        const URL_GRAVACAO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
 
-        let carrinho = {};
-        let formaPagamento = null;
-        let totalAtual = 0;
+        let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0;
 
-        function formatarMoeda(valor) {
-            return valor.toFixed(2).replace('.', ',');
-        }
+        function formatarMoeda(valor) { return valor.toFixed(2).replace('.', ','); }
 
-        // Função auxiliar para gerar a sigla automaticamente de forma inteligente
-        function gerarSigla(nome) {
-            const nomeLimpo = nome.replace(/\(.*?\)/g, '').replace(/[^a-zA-ZáéíóúÁÉÍÓÚâêîôûÂÊÎÔÛãõÃÕçÇ\s]/g, '');
-            const palavras = nomeLimpo.trim().split(/\s+/).filter(p => p.toLowerCase() !== 'de' && p.toLowerCase() !== 'da' && p.toLowerCase() !== 'do');
-            
-            if (palavras.length === 1) {
-                return palavras[0].substring(0, 2).toUpperCase();
+        // Puxa o cardápio e estoque 100% gerenciado pelo Excel
+        async function carregarEstoqueReal() {
+            try {
+                const resposta = await fetch(URL_LEITURA);
+                if (!resposta.ok) throw new Error();
+                const dados = await resposta.json();
+                produtos = dados.map(l => ({
+                    id: parseInt(l.ID), sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??",
+                    nome: l.PRODUTO, preco: parseFloat(l.PRECO), estoque: parseInt(l.ATUAL), critico: 5
+                }));
+                renderizarProdutos();
+            } catch (e) {
+                alert("⚠️ Erro ao carregar o cardápio real do Excel. Verifique a automação.");
             }
-            
-            return (palavras[0][0] + palavras[1][0]).toUpperCase();
         }
 
-        // Renderiza os blocos no formato de grid compacto com os controles embutidos na caixa quadrada
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos");
             grid.innerHTML = "";
-
-            // Ordem alfabética (A-Z)
             produtos.sort((a, b) => a.nome.localeCompare(b.nome));
 
             produtos.forEach(p => {
-                const qtdNoCarrinho = carrinho[p.id] || 0;
-                const sigla = gerarSigla(p.nome);
-                
-                let statusEstoqueHtml = `<span class="text-emerald-600 font-semibold">${p.estoque}</span>`;
-                let cardEstilo = "bg-white border-slate-200 hover:border-slate-300";
-                let caixaQuadradaEstilo = "bg-slate-100 text-slate-600";
-                let botoesBloqueados = "";
-                let itemEsgotado = false;
+                const qtd = carrinho[p.id] || 0;
+                let statusEstoque = `<span class="text-emerald-600 font-semibold">${p.estoque}</span>`;
+                let cardEstilo = "bg-white border-slate-200 hover:border-slate-300", caixaEstilo = "bg-slate-100 text-slate-600", bloqueado = "", esgotado = false;
 
                 if (p.estoque === 0) {
-                    statusEstoqueHtml = `<span class="text-rose-500 font-semibold text-[11px]">0</span>`;
+                    statusEstoque = `<span class="text-rose-500 font-semibold text-[11px]">0</span>`;
                     cardEstilo = "bg-slate-100 border-slate-200 text-slate-400 select-none pointer-events-none opacity-60";
-                    caixaQuadradaEstilo = "bg-slate-200 text-slate-400";
-                    botoesBloqueados = "disabled";
-                    itemEsgotado = true;
-                } 
-                else if (p.estoque <= p.critico) {
-                    statusEstoqueHtml = `<span class="text-rose-500 font-bold">${p.estoque}</span>`;
+                    caixaEstilo = "bg-slate-200 text-slate-400"; bloqueado = "disabled"; esgotado = true;
+                } else if (p.estoque <= p.critico) {
+                    statusEstoque = `<span class="text-rose-500 font-bold">${p.estoque}</span>`;
                 }
-
-                if (qtdNoCarrinho > 0 && !itemEsgotado) {
-                    caixaQuadradaEstilo = "bg-orange-50 border border-orange-200 text-orange-700";
-                }
+                if (qtd > 0 && !esgotado) { caixaEstilo = "bg-orange-50 border border-orange-200 text-orange-700"; }
 
                 grid.innerHTML += `
                     <div class="border rounded-xl p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cardEstilo}">
-                        
-                        <!-- CAIXA QUADRADA CENTRALIZADA (Sigla maior ao centro + Controles robustos na base) -->
-                        <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${caixaQuadradaEstilo}">
-                            
-                            <!-- Sigla aumentada e posicionada perto do centro vertical (ajuste fino com mt-2) -->
-                            <div class="text-center font-bold text-xl tracking-wide mt-2.5 leading-none select-none flex-1 flex items-center justify-center w-full">
-                                ${sigla}
-                            </div>
-                            
-                            <!-- Base da caixa quadrada: Botões maiores e alinhados perfeitamente nos cantos inferiores -->
+                        <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${caixaEstilo}">
+                            <div class="text-center font-bold text-xl tracking-wide mt-2.5 flex items-center justify-center w-full flex-1 select-none">${p.sigla}</div>
                             <div class="flex items-center justify-between w-full mt-auto">
-                                <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, -1)" ${botoesBloqueados} 
-                                    class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 active:scale-90 font-bold text-sm flex items-center justify-center transition-all ${qtdNoCarrinho === 0 ? 'opacity-20 pointer-events-none' : ''}">
-                                    -
-                                </button>
-                                
-                                <span class="text-xs font-bold select-none text-center flex-1">
-                                    ${qtdNoCarrinho > 0 ? `<span class="text-orange-600 font-bold text-base">${qtdNoCarrinho}</span>` : '<span class="text-slate-300 font-normal">-</span>'}
-                                </span>
-                                
-                                <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, 1)" ${botoesBloqueados} 
-                                    class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 active:scale-90 font-bold text-sm flex items-center justify-center transition-all ${itemEsgotado ? 'opacity-20' : ''}">
-                                    +
-                                </button>
+                                <button onclick="alterarQuantidade(${p.id}, -1)" ${bloqueado} class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center ${qtd === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                                <span class="text-xs font-bold select-none text-center flex-1">${qtd > 0 ? `<span class="text-orange-600 font-bold text-base">${qtd}</span>` : '<span class="text-slate-300 font-normal">-</span>'}</span>
+                                <button onclick="alterarQuantidade(${p.id}, 1)" ${bloqueado} class="w-7 h-7 rounded bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center ${esgotado ? 'opacity-20' : ''}">+</button>
                             </div>
                         </div>
-                        
-                        <!-- TEXTOS DO PRODUTO (Nome um pouco maior, Preço e Estoque "E:" otimizados) -->
-                        <div class="min-w-0 flex-1 flex flex-col justify-between">
-                            <h3 class="font-semibold text-slate-700 text-[13px] truncate text-left leading-tight tracking-tight mb-0.5" title="${p.nome}">
-                                ${p.nome}
-                            </h3>
-                            
+                        <div class="min-w-0 flex flex-col justify-between flex-1">
+                            <h3 class="font-semibold text-slate-700 text-[13px] truncate leading-tight tracking-tight mb-0.5" title="${p.nome}">${p.nome}</h3>
                             <div class="flex items-center justify-between text-[12px] font-medium w-full">
-                                <span class="text-orange-600 font-bold whitespace-nowrap">R$ ${formatarMoeda(p.preco)}</span>
-                                <div class="text-slate-500 whitespace-nowrap text-right font-semibold">
-                                    <span class="text-slate-300 font-normal">E:</span> ${statusEstoqueHtml}
-                                </div>
+                                <span class="text-orange-600 font-bold">R$ ${formatarMoeda(p.preco)}</span>
+                                <div class="text-slate-500 font-semibold"><span class="text-slate-300 font-normal">E:</span> ${statusEstoque}</div>
                             </div>
                         </div>
-                        
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
         function alterarQuantidade(id, delta) {
-            const produto = produtos.find(p => p.id === id);
-            const qtdAtual = carrinho[id] || 0;
-            const novaQtd = qtdAtual + delta;
+            const p = produtos.find(item => item.id === id);
+            const novaQtd = (carrinho[id] || 0) + delta;
 
             if (novaQtd < 0) return;
-            if (novaQtd > produto.estoque) {
-                alert(`Ops! Só temos ${produto.estoque} unidades de ${produto.nome} no estoque.`);
-                return;
-            }
-
+            if (novaQtd > p.estoque) { alert(`Ops! Só temos ${p.estoque} unidades de ${p.nome} no estoque.`); return; }
+            
             if (novaQtd === 0) delete carrinho[id];
             else carrinho[id] = novaQtd;
 
             renderizarProdutos();
-            atualizarCarrinho();
+            atualizarCarrinhoDOM();
         }
 
-        function atualizarCarrinho() {
+        function atualizarCarrinhoDOM() {
             const lista = document.getElementById("lista-carrinho");
-            const contador = document.getElementById("contador-itens");
-            const totalTxt = document.getElementById("valor-total");
-            const totalFlutuanteTxt = document.getElementById("valor-total-flutuante");
-            
-            totalAtual = 0;
-            let totalItens = 0;
-            lista.innerHTML = "";
+            totalAtual = 0; let totalItens = 0; lista.innerHTML = "";
 
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id);
-                const qtd = carrinho[id];
-                const subtotal = p.preco * qtd;
-                totalAtual += subtotal;
-                totalItens += qtd;
+                const qtd = carrinho[id]; const subtotal = p.preco * qtd;
+                totalAtual += subtotal; totalItens += qtd;
 
                 lista.innerHTML += `
                     <div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-lg border border-slate-100">
-                        <div class="max-w-[70%]">
+                        <div class="max-w-[75%]">
                             <p class="font-semibold text-slate-700 truncate">${p.nome}</p>
                             <p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(p.preco)}</p>
                         </div>
                         <span class="font-bold text-slate-700">R$ ${formatarMoeda(subtotal)}</span>
-                    </div>
-                `;
+                    </div>`;
             });
 
             if (totalItens === 0) {
                 lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
+                fecharOverlay(); // Se esvaziar o carrinho no mobile, fecha a tela
             }
 
-            contador.innerText = `${totalItens} ${totalItens === 1 ? 'item' : 'itens'}`;
-            totalTxt.innerText = `R$ ${formatarMoeda(totalAtual)}`;
-            totalFlutuanteTxt.innerText = `R$ ${formatarMoeda(totalAtual)}`;
-            verificarStatusBotao();
+            const flutuante = document.getElementById("container-botao-flutuante");
+            if (totalItens > 0) {
+                flutuante.classList.remove("hidden");
+                document.getElementById("texto-botao-flutuante").innerText = `Pedido: R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
+            } else { flutuante.classList.add("hidden"); }
+
+            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`;
+            validarEstadoFinalizar();
         }
 
-        function irParaFechamento() {
-            const blocoOriginal = document.getElementById("bloco-fechamento-original");
-            blocoOriginal.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        function abrirOverlayCelular() {
+            const p = document.getElementById("painel-fechamento");
+            p.className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm";
+            resetarEstadoPagamento();
         }
 
-        const observer = new IntersectionObserver((entries) => {
-            const containerFlutuante = document.getElementById("container-botao-flutuante");
-            entries.forEach(entry => {
-                if (!entry.isIntersecting) {
-                    containerFlutuante.classList.remove("hidden");
-                } else {
-                    containerFlutuante.classList.add("hidden");
-                }
-            });
-        }, { root: null, threshold: 0.05 });
+        function fecharOverlay() {
+            const p = document.getElementById("painel-fechamento");
+            p.className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
+        }
 
-        observer.observe(document.getElementById("bloco-fechamento-original"));
+        function resetarEstadoPagamento() {
+            formaPagamento = null;
+            document.getElementById("btn-pix").className = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
+            document.getElementById("btn-dinheiro").className = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
+            document.getElementById("secao-valores-dinheiro").classList.add("hidden");
+            validarEstadoFinalizar();
+        }
 
         function selecionarPagamento(tipo) {
             formaPagamento = tipo;
-            const btnPix = document.getElementById("btn-pix");
-            const btnDinheiro = document.getElementById("btn-dinheiro");
-
-            const ativoClasse = "py-2 rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm text-center shadow-sm";
-            const inativoClasse = "py-2 rounded-lg border border-slate-200 font-semibold text-sm text-center transition-all bg-white hover:bg-slate-50 text-slate-700";
+            const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro"), secaoDin = document.getElementById("secao-valores-dinheiro");
+            const ativo = "py-2.5 rounded-lg border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm text-center shadow-sm transition-all";
+            const inativo = "py-2.5 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
 
             if (tipo === 'PIX') {
-                btnPix.className = ativoClasse;
-                btnDinheiro.className = inativoClasse;
+                btnPix.className = ativo; btnDin.className = inativo; secaoDin.classList.add("hidden");
             } else {
-                btnDinheiro.className = ativoClasse;
-                btnPix.className = inativoClasse;
+                btnDin.className = ativo; btnPix.className = inativo;
+                document.getElementById("input-recebido").value = "";
+                document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
+                document.getElementById("valor-troco-txt").className = "font-bold text-slate-400";
+                secaoDin.classList.remove("hidden");
+                document.getElementById("input-recebido").focus();
             }
-            verificarStatusBotao();
+            validarEstadoFinalizar();
         }
 
-        function verificarStatusBotao() {
+        function tratarMascaraDinheiro(input) {
+            let valor = input.value.replace(/\D/g, "");
+            if (valor === "") { input.value = ""; validarEstadoFinalizar(); return; }
+            let num = parseFloat(valor) / 100;
+            input.value = num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            const txtTroco = document.getElementById("valor-troco-txt");
+            if (num < totalAtual) {
+                txtTroco.innerText = "Valor Insuficiente"; txtTroco.className = "font-bold text-rose-500 text-xs";
+            } else {
+                txtTroco.innerText = `R$ ${formatarMoeda(num - totalAtual)}`; txtTroco.className = "font-bold text-emerald-600 text-base";
+            }
+            validarEstadoFinalizar();
+        }
+
+        function validarEstadoFinalizar() {
             const btn = document.getElementById("btn-finalizar");
+            const inputVal = document.getElementById("input-recebido").value.replace(/\D/g, "");
+            const recebido = parseFloat(inputVal) / 100 || 0;
             const temItens = Object.keys(carrinho).length > 0;
 
-            if (temItens && formaPagamento) {
+            if (temItens && formaPagamento && (formaPagamento === 'PIX' || recebido >= totalAtual)) {
                 btn.disabled = false;
-                btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg text-center text-sm shadow transition-all transform active:scale-[0.99]";
-                btn.innerText = `Finalizar em ${formaPagamento}`;
+                btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-center text-sm shadow cursor-pointer transition-all transform active:scale-95";
             } else {
                 btn.disabled = true;
-                btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-lg text-center text-sm cursor-not-allowed";
-                btn.innerText = temItens ? "Selecione o Pagamento" : "Adicione Itens";
+                btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-xl text-center text-sm cursor-not-allowed";
             }
         }
 
-        function finalizarVenda() {
-            const dadosVenda = {
-                data: new Date().toLocaleString('pt-BR'),
-                origem: formaPagamento,
+        async function finalizarVenda() {
+            const btn = document.getElementById("btn-finalizar");
+            btn.disabled = true; btn.innerText = "Processando..."; // Texto solicitado
+
+            let idPagamento = formaPagamento === 'PIX' ? "mp_" + Date.now() : `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}${String(new Date().getSeconds()).padStart(2,'0')}`;
+
+            const payload = {
+                id_pagamento: idPagamento, pedido: 0, pagamento: formaPagamento,
                 itens: Object.keys(carrinho).map(id => {
                     const p = produtos.find(item => item.id == id);
-                    return { nome: p.nome, quantidade: carrinho[id], subtotal: p.preco * carrinho[id] };
+                    return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) };
                 })
             };
 
-            console.log("Auditoria de Venda:", dadosVenda);
-            alert(`🎉 Venda Registrada com Sucesso!\nForma de Pagamento: ${formaPagamento}`);
-            
-            Object.keys(carrinho).forEach(id => {
-                const p = produtos.find(item => item.id == id);
-                p.estoque -= carrinho[id];
-            });
+            try {
+                const resposta = await fetch(URL_GRAVACAO, {
+                    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+                });
+                if (!resposta.ok) throw new Error();
 
-            carrinho = {};
-            formaPagamento = null;
-            document.getElementById("btn-pix").className = "py-2 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700";
-            document.getElementById("btn-dinheiro").className = "py-2 rounded-lg border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700";
-            
-            renderizarProdutos();
-            atualizarCarrinho();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+                alert("Venda Finalizada!"); // Alerta simplificado conforme solicitado
+
+                fecharOverlay(); carrinho = {}; resetarEstadoPagamento();
+                atualizarCarrinhoDOM(); carregarEstoqueReal(); // Recarrega o estoque matemático real
+            } catch (e) {
+                alert("⚠️ Falha de comunicação. A venda não pôde ser gravada.");
+                btn.innerText = "Finalizar"; validarEstadoFinalizar();
+            }
         }
 
-        renderizarProdutos();
+        carregarEstoqueReal();
     </script>
 </body>
 </html>
