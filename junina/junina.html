@@ -104,6 +104,22 @@
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "";
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
 
+        // Inteligência de calendário para decidir entre ONLINE/PENDENTE e CAIXA/RETIRADO
+        function obterConfiguracaoVenda() {
+            const hoje = new Date();
+            const dia = hoje.getDate();
+            const mes = hoje.getMonth() + 1; // Junho é 6
+            const ano = hoje.getFullYear();
+
+            // Se for antes de 25/06/2026, assume pré-venda online
+            if (ano < 2026 || (ano === 2026 && mes < 6) || (ano === 2026 && mes === 6 && dia < 25)) {
+                return { tipo: "ONLINE", status: "PENDENTE" };
+            } else {
+                // Na data da festa ou posterior, assume o caixa físico
+                return { tipo: "CAIXA", status: "RETIRADO" };
+            }
+        }
+
         async function carregarEstoqueReal() {
             try {
                 const r = await fetch(URL_LEITURA); if (!r.ok) throw new Error();
@@ -215,10 +231,14 @@
 
             pixChaveIdentificadora = "mp_" + Date.now(); 
 
+            const configVenda = obterConfiguracaoVenda();
+
             const payload = {
                 id_pagamento: pixChaveIdentificadora,
                 pagamento: "PIX",
                 total_pedido_consolidado: parseFloat(totalAtual),
+                tipo_venda: configVenda.tipo,
+                status_retirada: configVenda.status,
                 itens: Object.keys(carrinho).map(id => {
                     const p = produtos.find(item => item.id == id);
                     return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) };
@@ -264,11 +284,14 @@
         async function checarSegurancaMercadoPago() {
             const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando...";
             
-            // CORREÇÃO: Mapeia o payload usando estritamente as chaves combinadas no novo esquema JSON
+            const configVenda = obterConfiguracaoVenda();
+
             const payloadValidacao = {
-                id: pixChaveIdentificadora,
+                id_pagamento: pixChaveIdentificadora,
                 pagamento: "PIX",
                 total_pedido_consolidado: parseFloat(totalAtual),
+                tipo_venda: configVenda.tipo,
+                status_retirada: configVenda.status,
                 itens: Object.keys(carrinho).map(id => { 
                     const p = produtos.find(item => item.id == id); 
                     return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
@@ -305,10 +328,15 @@
         async function executarGravacaoDinheiroDirecto() {
             const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando...";
             let idF = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}${String(new Date().getSeconds()).padStart(2,'0')}`;
+            
+            const configVenda = obterConfiguracaoVenda();
+
             const payload = {
                 id_pagamento: idF,
                 pagamento: "DINHEIRO",
                 total_pedido_consolidado: parseFloat(totalAtual),
+                tipo_venda: configVenda.tipo,
+                status_retirada: configVenda.status,
                 itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
             };
             try {
