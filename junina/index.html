@@ -88,12 +88,12 @@
         let carrinho = {};
         let formaPagamento = null;
 
-        // Renderiza as linhas de produtos alinhando perfeitamente os blocos de texto
+        // Renderiza as linhas de produtos mantendo a altura confortável e a disposição desejada
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos");
             grid.innerHTML = "";
 
-            // Força a ordenação alfabética (A-Z) antes de desenhar na tela
+            // Força a ordenação alfabética (A-Z)
             produtos.sort((a, b) => a.nome.localeCompare(b.nome));
 
             produtos.forEach(p => {
@@ -110,26 +110,26 @@
                     statusEstoqueHtml = `<span class="text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded">${p.estoque} (Baixo)</span>`;
                 }
 
-                // A mágica do alinhamento está no grid interno (grid-cols-3) com text-left, text-center e text-right
+                // Layout ajustado: Nome em cima, preço embaixo do nome (alinhados à esquerda) e estoque na frente do preço
                 grid.innerHTML += `
-                    <div class="border rounded-xl p-3 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${cardBg}">
+                    <div class="border rounded-xl p-4 shadow-sm flex items-center justify-between gap-4 h-24 transition-all ${cardBg}">
                         
-                        <!-- ÁREA DE DADOS ALINHADOS (Nome, Preço e Estoque fixos nas suas colunas) -->
-                        <div class="flex-1 grid grid-cols-3 items-center gap-2 min-w-0">
-                            <!-- Coluna 1: Nome do produto alinhado à esquerda -->
-                            <h3 class="font-bold text-amber-950 text-sm sm:text-base truncate">${p.nome}</h3>
+                        <!-- LADO ESQUERDO: TEXTOS DO PRODUTO -->
+                        <div class="flex flex-col justify-center min-w-0 flex-1">
+                            <!-- Nome do produto alinhado à esquerda -->
+                            <h3 class="font-bold text-amber-950 text-base sm:text-lg truncate text-left">${p.nome}</h3>
                             
-                            <!-- Coluna 2: Preço centralizado na linha -->
-                            <span class="text-orange-600 font-black text-sm sm:text-base text-center">R$ ${p.preco.toFixed(2)}</span>
-                            
-                            <!-- Coluna 3: Palavra Estoque e o número cravados à direita -->
-                            <div class="text-xs text-gray-400 text-right pr-2 whitespace-nowrap">
-                                <span class="opacity-70">Estoque</span> ${statusEstoqueHtml}
+                            <!-- Segunda linha: Preço à esquerda e Estoque logo na frente -->
+                            <div class="flex items-center gap-4 mt-1 text-sm">
+                                <span class="text-orange-600 font-black">R$ ${p.preco.toFixed(2)}</span>
+                                <div class="text-gray-400 whitespace-nowrap">
+                                    <span class="opacity-70">Estoque</span> ${statusEstoqueHtml}
+                                </div>
                             </div>
                         </div>
                         
-                        <!-- CONTROLES DE QUANTIDADE -->
-                        <div class="flex items-center justify-end gap-3">
+                        <!-- LADO DIREITO: CONTROLES DE QUANTIDADE -->
+                        <div class="flex items-center gap-3 shrink-0">
                             <span class="text-xs font-semibold text-gray-500">Qtd: <b class="text-gray-800 text-sm">${qtdNoCarrinho}</b></span>
                             <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 border">
                                 <button onclick="alterarQuantidade(${p.id}, -1)" class="w-8 h-8 rounded bg-white font-bold text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all">-</button>
@@ -144,7 +144,7 @@
 
         // Altera quantidades limitando ao teto do estoque
         function alterarQuantidade(id, delta) {
-            const produto = produtos.find(p => p.id === id);
+            const produto = whites = produtos.find(p => p.id === id);
             const qtdAtual = carrinho[id] || 0;
             const novaQtd = qtdAtual + delta;
 
@@ -239,17 +239,17 @@
                 data: new Date().toLocaleString('pt-BR'),
                 origem: formaPagamento,
                 itens: Object.keys(carrinho).map(id => {
-                    const p = produtos.find(item => item.id == id);
+                    const p = whites = produtos.find(item => item.id == id);
                     return { nome: p.nome, quantidade: carrinho[id], subtotal: p.preco * carrinho[id] };
                 })
             };
 
             console.log("Payload enviado para auditoria posterior:", dadosVenda);
-            alert(`🎉 Venda Registrada!\nForma de Pagamento: ${formaPagamento}\n\nEntregue as fichas correspondentes ao cliente.`);
+            alert(`🎉 Venda Registrada!\nForma de Pagamento: ${formaPagamento}\n\nRetire as fichas físicas do produto para entregar ao comprador.`);
             
             // Abate estoque local
             Object.keys(carrinho).forEach(id => {
-                const p = produtos.find(item => item.id == id);
+                const p = whites = produtos.find(item => item.id == id);
                 p.estoque -= carrinho[id];
             });
 
