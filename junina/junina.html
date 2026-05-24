@@ -138,7 +138,6 @@
                     </div>`;
             });
             
-            // CORREÇÃO DOS BOTÕES ONLINE (PRE)
             let preBoxEstilo = "bg-slate-100 text-slate-600";
             let preStatusTxt = "-";
             if (modoBuscaAtivo || modoResgateManual) {
@@ -151,7 +150,7 @@
                     <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${preBoxEstilo}">
                         <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">PRE</div>
                         <div class="flex items-center justify-between w-full mt-auto">
-                            <button onclick="resetSistemicoTotal(false)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${!(modoBuscaAtivo || modoResgateManual) ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                            <button onclick="forçarFechamentoSistemico(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${!(modoBuscaAtivo || modoResgateManual) ? 'opacity-20 pointer-events-none' : ''}">-</button>
                             <span class="text-[13px] font-semibold text-center flex-1">${preStatusTxt}</span>
                             <button onclick="ativarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${(modoBuscaAtivo || modoResgateManual) ? 'opacity-20 pointer-events-none' : ''}">+</button>
                         </div>
@@ -186,7 +185,7 @@
             bf.innerHTML = `
                 <div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div>
                 <input type="text" id="input-id-busca" placeholder="000000000000" class="bg-transparent text-white font-medium text-sm focus:outline-none flex-1 h-full px-2 text-center placeholder-white/30 min-w-0" maxlength="12" oninput="tratarDigitacaoIdBusca(this)">
-                <div onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`;
+                <div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`;
             setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100);
         }
 
@@ -202,14 +201,14 @@
             if (lines.length === 0) {
                 bf.className = "pointer-events-auto bg-rose-600 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full animate-shake text-sm";
                 bf.innerHTML = `<span>Não encontrado</span>`;
-                setTimeout(() => { resetSistemicoTotal(false); }, 2000); return;
+                setTimeout(() => { forçarFechamentoSistemico(); }, 2000); return;
             }
 
             modoResgateManual = true; modoBuscaAtivo = false; 
             pixChaveIdentificadora = String(idDigitado).trim(); 
             cachePedidoOnlineOriginal = [...lines]; 
             
-            renderizarProdutos(); // Atualiza os botões + e - do painel principal para refletir o estado correto
+            renderizarProdutos(); 
 
             document.getElementById("titulo-checkout").innerText = "Resumo do Pedido"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             document.getElementById("id-pedido-cabecalho").innerText = `ID: ${idDigitado}`;
@@ -224,7 +223,7 @@
                 const statusRetirada = linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente";
                 let tagStatus = `<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>`;
                 if (statusRetirada === "retirado") {
-                    tagStatus = `<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Entregue";
+                    tagStatus = `<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
                     btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
                 }
                 lista.innerHTML += `
@@ -240,7 +239,7 @@
                 bf.innerHTML = `
                     <div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div>
                     <div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${idDigitado}</div>
-                    <div onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`;
+                    <div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`;
             } else { abrirOverlayCelular(); }
         }
 
@@ -251,8 +250,16 @@
         }
 
         function fecharOverlay() { 
-            if (modoResgateManual) resetSistemicoTotal(true); 
+            if (modoResgateManual) forçarFechamentoSistemico(true); 
             else { document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); }
+        }
+
+        // FUNÇÃO ADICIONADA: Força o overlay a sumir de imediato no telemóvel antes de limpar os dados
+        function forçarFechamentoSistemico(e) {
+            if(e) { e.stopPropagation(); e.preventDefault(); }
+            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
+            document.getElementById("painel-fechamento").classList.add("hidden");
+            resetSistemicoTotal(false);
         }
 
         function resetSistemicoTotal(forçarAtualizacaoHttp = true) {
@@ -265,8 +272,6 @@
             cachePedidoOnlineOriginal = [];
             
             document.getElementById("id-pedido-cabecalho").innerText = ""; 
-            
-            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; 
             document.getElementById("titulo-checkout").innerText = "Pagamento"; 
             document.getElementById("bloco-inferior-pagamento").className = "space-y-4 pt-1 border-t";
             
@@ -308,9 +313,9 @@
             pagamento: forma, 
             tipo_venda: "CAIXA", 
             status_retirada: "retirado", 
-            total_pedido_consolidado: parseFloat(totalAtual), 
+            total_pedido_consolidated: parseFloat(totalAtual), 
             transaction_amount: parseFloat(totalAtual), 
-            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
+            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
         });
 
         async function requisitarQrCodeReal() {
@@ -378,7 +383,7 @@
                 if (!resposta.ok) throw new Error();
 
                 alert("Pedido Entregue"); 
-                resetSistemicoTotal(true);
+                forçarFechamentoSistemico();
 
             } catch (e) { 
                 console.error(e);
@@ -396,7 +401,7 @@
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') });
                 const res = await r.json();
-                if (res.pago === true) { alert("Venda Finalizada!"); resetSistemicoTotal(true); } 
+                if (res.pago === true) { alert("Venda Finalizada!"); forçarFechamentoSistemico(); } 
                 else { alert("Pagamento pendente"); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
             } catch (e) { 
                 alert("Erro ao verificar pagamento."); 
@@ -410,7 +415,7 @@
             btn.disabled = true;
             try {
                 await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`, "DINHEIRO") });
-                alert("Venda Finalizada!"); resetSistemicoTotal(true);
+                alert("Venda Finalizada!"); forçarFechamentoSistemico();
             } catch (e) { 
                 alert("Erro ao salvar venda."); 
                 btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
