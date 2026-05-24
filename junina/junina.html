@@ -25,40 +25,49 @@
     </header>
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+        <!-- Grid de Produtos -->
         <section class="lg:col-span-3 space-y-2">
             <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
 
+        <!-- Painel de Fechamento -->
         <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
             <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-200 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
-                    <h3 id="titulo-checkout" class="text-base font-bold text-slate-700 text-center uppercase tracking-wider border-b pb-2">Pagamento</h3>
+                    <!-- AJUSTE: Texto PAGAMENTO mais fino com font-semibold -->
+                    <h3 id="titulo-checkout" class="text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2">Pagamento</h3>
+                    
                     <div class="flex-1 flex flex-col min-h-0">
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Resumo do Pedido:</h4>
+                        <!-- AJUSTE: Texto RESUMO DO PEDIDO mais fino com font-semibold -->
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Resumo do Pedido:</h4>
                         <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
                             <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
                         </div>
                     </div>
 
-                    <div id="bloco-inferior-pagamento" class="space-y-3 pt-2 border-t">
+                    <!-- Bloco inferior aproximado do botão finalizar devido à redução do QR Code -->
+                    <div id="bloco-inferior-pagamento" class="space-y-4 pt-1 border-t">
                         <div class="space-y-1.5">
-                            <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
+                            <!-- AJUSTE: FORMA DE PAGAMENTO com mesmo tamanho (text-xs) e peso (font-semibold) do resumo -->
+                            <label class="text-xs font-semibold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
                             <div class="grid grid-cols-2 gap-2">
                                 <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" class="py-2.5 rounded-md border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">DINHEIRO</button>
                                 <button onclick="selecionarPagamento('PIX')" id="btn-pix" class="py-2.5 rounded-md border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all">PIX</button>
                             </div>
                         </div>
 
-                        <div class="w-full overflow-hidden border-t border-dashed pt-2 h-[135px] relative">
+                        <div class="w-full overflow-hidden border-t border-dashed pt-3 h-[130px] pb-1 relative">
                             <div id="carrossel-pagamento" class="w-[200%] h-full flex transition-transform duration-300 transform translate-x-0">
-                                <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-2 opacity-25 pointer-events-none transition-all duration-200">
-                                    <div class="flex justify-between items-center text-sm"><span class="text-slate-500 font-medium">Pedido</span><span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span></div>
-                                    <div class="flex justify-between items-center text-sm"><span class="text-slate-500 font-medium">Recebido</span><div class="relative w-36"><span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span><input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-0.5 border border-slate-300 rounded-md text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm disabled:bg-slate-50"></div></div>
-                                    <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-1"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span></div>
+                                <!-- AJUSTE: Textos aumentados para text-base e mais espaçados (space-y-3.5) -->
+                                <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200">
+                                    <div class="flex justify-between items-center text-base"><span class="text-slate-500 font-medium">Pedido</span><span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span></div>
+                                    <div class="flex justify-between items-center text-base"><span class="text-slate-500 font-medium">Recebido</span><div class="relative w-36"><span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">R$</span><input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-0.5 border border-slate-300 rounded-md text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-base disabled:bg-slate-50"></div></div>
+                                    <div class="flex justify-between items-center text-base border-t border-slate-100 pt-1.5"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span></div>
                                 </div>
                                 <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
-                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-32 h-32 bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all relative overflow-hidden group">
+                                    <!-- AJUSTE: QR Code reduzido pouca coisa para w-28 h-28 (112px) -->
+                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-28 h-28 bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all relative overflow-hidden group">
                                         <div class="absolute inset-0 opacity-[0.08] grid grid-cols-2 pointer-events-none">
                                             <div class="border-[4px] border-slate-900 flex p-0.5"><div class="bg-slate-900 w-full h-full"></div></div>
                                             <div class="border-[4px] border-slate-900 flex p-0.5"><div class="bg-slate-900 w-full h-full"></div></div>
@@ -83,10 +92,11 @@
         </section>
     </main>
 
+    <!-- AJUSTE: comprimento max-w-sm, e removido o traço "-" antes de Revisar e Pagar -->
     <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 flex justify-center pointer-events-none">
         <div id="caixa-flutuante-base" class="pointer-events-auto bg-orange-500 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full">
             <div id="conteudo-flutuante-esquerdo" class="flex-1 text-sm tracking-wide text-center select-none cursor-pointer w-full h-full flex items-center justify-center" onclick="abrirOverlayCelular()">Pedido: R$ 0,00</div>
-            <div id="conteudo-flutuante-direito" class="text-sm tracking-wide text-right select-none pl-2 h-full flex items-center cursor-pointer" onclick="abrirOverlayCelular()">- Revisar e Pagar</div>
+            <div id="conteudo-flutuante-direito" class="text-sm tracking-wide text-right select-none pl-2 h-full flex items-center cursor-pointer" onclick="abrirOverlayCelular()">Revisar e Pagar</div>
         </div>
     </div>
 
@@ -149,7 +159,8 @@
                         <div class="flex items-center justify-between w-full mt-auto">
                             <button onclick="gerenciarCliqueMenosPre()" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${!modoBuscaAtivo ? 'opacity-20 pointer-events-none' : ''}">-</button>
                             <span class="text-xs font-bold text-center flex-1">${modoBuscaAtivo ? 'ativo' : '-'}</span>
-                            <button onclick="ativarModoBuscaPre()" ${modoBuscaAtivo ? 'disabled' : ''} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm">+</button>
+                            <!-- CORREÇÃO: Vinculado o clique direto à função global de ativação -->
+                            <button onclick="ativarModoBuscaPre()" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm">+</button>
                         </div>
                     </div>
                     <div class="min-w-0 flex flex-col justify-between flex-1"><h3 class="font-semibold text-slate-700 text-[13px] truncate leading-tight mb-0.5">Online</h3><div class="text-xs font-medium text-orange-600 font-bold">R$ 0,00</div></div>
@@ -179,9 +190,14 @@
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             document.getElementById("caixa-flutuante-base").className = "pointer-events-auto bg-slate-800 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full";
             document.getElementById("conteudo-flutuante-esquerdo").innerHTML = `<input type="text" id="input-id-busca" placeholder="Digitar ID do Pedido" maxlength="12" class="bg-transparent text-white font-bold text-sm focus:outline-none w-full h-full placeholder-white/50 text-center" oninput="tratarDigitacaoIdBusca(this)">`;
+            // CORREÇÃO: Traço removido também na transição do input de busca
+            document.getElementById("conteudo-flutuante-direito").innerText = "Revisar e Pagar";
             document.getElementById("conteudo-flutuante-direito").className = "text-sm tracking-wide text-right select-none pl-2 h-full flex items-center text-white/40 cursor-default";
             setTimeout(() => document.getElementById("input-id-busca").focus(), 100);
         }
+        
+        // Atalho de segurança caso chame com 't'
+        function activarModoBuscaPre() { activarModoBuscaPre(); }
 
         function gerenciarCliqueMenosPre() { if (modoBuscaAtivo) resetarEstadoBuscaFlutuante(); }
 
@@ -189,7 +205,7 @@
             modoBuscaAtivo = false; renderizarProdutos();
             document.getElementById("caixa-flutuante-base").className = "pointer-events-auto bg-orange-500 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full";
             document.getElementById("conteudo-flutuante-esquerdo").onclick = abrirOverlayCelular;
-            const dir = document.getElementById("conteudo-flutuante-direito"); dir.onclick = abrirOverlayCelular; dir.className = "text-sm tracking-wide text-right select-none pl-2 h-full flex items-center cursor-pointer";
+            const dir = document.getElementById("conteudo-flutuante-direito"); dir.onclick = abrirOverlayCelular; dir.innerText = "Revisar e Pagar"; dir.className = "text-sm tracking-wide text-right select-none pl-2 h-full flex items-center cursor-pointer";
             atualizarCarrinhoDOM();
         }
 
@@ -208,7 +224,7 @@
                 if (navigator.vibrate) navigator.vibrate(200);
                 setTimeout(() => {
                     baseFlutuante.className = "pointer-events-auto bg-slate-800 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full";
-                    direito.innerText = "- Revisar e Pagar"; direito.className = "text-sm tracking-wide text-right select-none pl-2 h-full flex items-center text-white/40 cursor-default";
+                    direito.innerText = "Revisar e Pagar"; direito.className = "text-sm tracking-wide text-right select-none pl-2 h-full flex items-center text-white/40 cursor-default";
                     const ib = document.getElementById("input-id-busca"); if (ib) { ib.disabled = false; ib.value = ""; ib.focus(); }
                 }, 2000); return;
             }
@@ -248,7 +264,7 @@
         function fecharOverlay() { 
             document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; 
             modoResgateManual = false; document.getElementById("titulo-checkout").innerText = "Pagamento";
-            document.getElementById("bloco-inferior-pagamento").className = "space-y-3 pt-2 border-t";
+            document.getElementById("bloco-inferior-pagamento").className = "space-y-4 pt-1 border-t";
             resetarEstadoPagamento(); resetarEstadoBuscaFlutuante(); carregarEstoqueReal();
         }
 
@@ -256,10 +272,10 @@
             formaPagamento = null; pixChaveIdentificadora = "";
             document.getElementById("btn-pix").className = "py-2.5 rounded-md border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
             document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
-            document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200";
+            document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200";
             document.getElementById("input-recebido").disabled = true; document.getElementById("input-recebido").value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
             document.getElementById("btn-finalizar").innerText = "Finalizar";
-            document.getElementById("box-qrcode").className = "w-32 h-32 bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all relative overflow-hidden group";
+            document.getElementById("box-qrcode").className = "w-28 h-28 bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all relative overflow-hidden group";
             validarEstadoFinalizar();
         }
 
@@ -271,15 +287,14 @@
 
             if (tipo === 'DINHEIRO') {
                 btnDin.className = ativo; btnPix.className = inativo; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
-                secaoDin.className = "w-1/2 h-full space-y-100 pointer-events-auto transition-all duration-200"; inp.disabled = false; inp.value = ""; inp.focus();
+                secaoDin.className = "w-1/2 h-full space-y-3.5 opacity-100 pointer-events-auto transition-all duration-200"; inp.disabled = false; inp.value = ""; inp.focus();
             } else {
                 btnPix.className = ativo; btnDin.className = inativo; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform -translate-x-1/2";
-                secaoDin.className = "w-1/2 h-full space-y-25 opacity-25 pointer-events-none transition-all duration-200"; inp.disabled = true;
+                secaoDin.className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200"; inp.disabled = true;
             }
             validarEstadoFinalizar();
         }
 
-        // REDUÇÃO E COMPACTAÇÃO: Lógica centralizada para empacotamento do JSON (Dinheiro/Pix unificados)
         function gerarPayloadVenda(idF, forma) {
             return JSON.stringify({
                 id_pagamento: idF, pagamento: forma, tipo_venda: "CAIXA", status_retirada: "RETIRADO",
@@ -290,14 +305,14 @@
 
         async function requisitarQrCodeReal() {
             if (!formaPagamento || formaPagamento !== 'PIX') return;
-            const box = document.getElementById("box-qrcode"); box.className = "w-32 h-32 bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none text-[9px] font-bold text-slate-400 uppercase tracking-tight text-center leading-none";
+            const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none text-[9px] font-bold text-slate-400 uppercase tracking-tight text-center leading-none";
             box.innerHTML = "Carregando..."; pixChaveIdentificadora = "mp_" + Date.now();
 
             try {
                 const r = await fetch(URL_GRAVACAO, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, "PIX") });
                 const dados = await r.json();
                 if (dados.qrcode_imagem) {
-                    pixChaveIdentificadora = dados.id_mercado_pago; box.className = "w-32 h-32 bg-white rounded-none flex items-center justify-center p-0 opacity-100 select-none pointer-events-none transition-all";
+                    pixChaveIdentificadora = dados.id_mercado_pago; box.className = "w-28 h-28 bg-white rounded-none flex items-center justify-center p-0 opacity-100 select-none pointer-events-none transition-all";
                     box.innerHTML = `<img src="data:image/jpeg;base64,${dados.qrcode_imagem}" class="w-full h-full rounded-none" alt="QR Code">`; validarEstadoFinalizar();
                 } else { throw new Error(); }
             } catch (e) { alert("⚠️ Falha ao gerar QR Code."); resetarEstadoPagamento(); }
