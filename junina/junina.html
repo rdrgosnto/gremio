@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caixa - Festa Junina</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Otimização 1: Adicionado defer para não bloquear a renderização da página -->
+    <script src="https://cdn.tailwindcss.com" defer></script>
     <style>
-        @import url('https://fonts.cdnfonts.com/css/aptos');
-        .font-aptos { font-family: 'Aptos', 'Segoe UI', Tahoma, sans-serif; }
+        /* Otimização 4: Pilha de fontes nativas para carregamento instantâneo de zero milissegundos */
+        .font-sistema { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         @keyframes shake {
@@ -18,10 +19,10 @@
         .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
     </style>
 </head>
-<body class="bg-slate-50 font-aptos min-h-screen flex flex-col antialiased text-slate-800">
+<body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800">
 
-    <header class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50 font-aptos">
-        <h1 class="text-xl font-semibold tracking-wide" style="font-family: 'Aptos', sans-serif;">Festa Junina</h1>
+    <header class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
+        <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
     </header>
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
@@ -72,9 +73,10 @@
         </section>
     </main>
 
+    <!-- AJUSTE: Botão flutuante com texto maior (text-base) e traço suavizado para font-semibold -->
     <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 flex justify-center pointer-events-none">
-        <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full cursor-pointer select-none">
-            <div id="conteudo-flutuante-unico" class="text-sm tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>
+        <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full cursor-pointer select-none">
+            <div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>
         </div>
     </div>
 
@@ -86,6 +88,15 @@
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "";
         let modoBuscaAtivo = false, modoResgateManual = false;
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
+
+        // Otimização 2: Carregamento SWR (Mostra cache instantâneo e valida no fundo)
+        function conferirCacheInicial() {
+            const cacheSalvo = localStorage.getItem("festa_junina_cardapio");
+            if (cacheSalvo) {
+                produtos = JSON.parse(cacheSalvo);
+                renderizarProdutos();
+            }
+        }
 
         async function carregarEstoqueReal(idParaBuscar = "") {
             try {
@@ -99,10 +110,15 @@
                         id: parseInt(l.ID), sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??", 
                         nome: l.PRODUTO, preco: parseFloat(l.PRECO), estoque: parseInt(l.ATUAL), critico: 5 
                     }));
+                    // Otimização 2: Alimenta o cache do navegador
+                    localStorage.setItem("festa_junina_cardapio", JSON.stringify(produtos));
                     renderizarProdutos();
                 }
                 if (idParaBuscar !== "" && combo && combo.pedido) processarResultadoBuscaPedido(combo.pedido, idParaBuscar);
-            } catch (e) { alert("⚠️ Erro ao carregar o cardápio real."); if (idParaBuscar !== "") resetSistemicoTotal(); }
+            } catch (e) { 
+                console.error(e);
+                if (idParaBuscar !== "") resetSistemicoTotal(false); 
+            }
         }
 
         function renderizarProdutos() {
@@ -158,6 +174,7 @@
                 lista.innerHTML += `<div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-md border border-slate-100"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate">${p.nome}</p><p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700">R$ ${formatarMoeda(sub)}</span></div>`;
             });
             if (tItens === 0) lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
+            // AJUSTE: Atualiza o texto combinado da pílula com o tamanho text-base e peso font-semibold
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; 
             validarEstadoFinalizar();
@@ -167,15 +184,15 @@
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             const bf = document.getElementById("caixa-flutuante-base");
-            bf.onclick = null; bf.className = "pointer-events-auto bg-slate-800 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full cursor-default";
+            bf.onclick = null; bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full cursor-default text-base";
             bf.innerHTML = `
-                <input type="text" id="input-id-busca" placeholder="Digitar ID do Pedido" maxlength="12" class="bg-transparent text-white font-bold text-sm focus:outline-none w-full h-full placeholder-white/50 text-center" oninput="tratarDigitacaoIdBusca(this)">
-                <div id="btn-cancelar-busca" onclick="resetSistemicoTotal()" class="text-xs font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none">Sair</div>
+                <input type="text" id="input-id-busca" placeholder="Digitar ID do Pedido" maxlength="12" class="bg-transparent text-white font-semibold text-base focus:outline-none w-full h-full placeholder-white/50 text-center animate-pulse" oninput="tratarDigitacaoIdBusca(this)">
+                <div id="btn-cancelar-busca" onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none">Sair</div>
             `;
             setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100);
         }
 
-        function gerenciarCliqueMenosPre() { if (modoBuscaAtivo) resetSistemicoTotal(); }
+        function gerenciarCliqueMenosPre() { if (modoBuscaAtivo) resetSistemicoTotal(false); }
 
         function tratarDigitacaoIdBusca(input) {
             input.value = input.value.replace(/\D/g, "");
@@ -183,14 +200,14 @@
         }
 
         function processarResultadoBuscaPedido(linhasVindasDoExcel, idDigitado) {
-            const bf = document.getElementById("caixa-flutuante-base");
+            const bf = document.getElementById("caixa-flutuante-base"); const direito = document.getElementById("conteudo-flutuante-unico");
             const linhasFiltradas = linhasVindasDoExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
 
             if (linhasFiltradas.length === 0) {
-                bf.className = "pointer-events-auto bg-rose-600 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full animate-shake";
-                bf.innerHTML = `<span class="text-sm">Pedido não encontrado</span>`;
+                bf.className = "pointer-events-auto bg-rose-600 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full animate-shake text-base";
+                bf.innerHTML = `<span>Pedido não encontrado</span>`;
                 if (navigator.vibrate) navigator.vibrate(200);
-                setTimeout(() => { resetSistemicoTotal(); }, 2000); return;
+                setTimeout(() => { resetSistemicoTotal(false); }, 2000); return;
             }
 
             modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = linhasFiltradas[0].ID_PAGAMENTO || ""; 
@@ -217,12 +234,11 @@
             });
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidado)}`;
             
-            // CORREÇÃO PC: Muda o botão da barra para o estado de "Sair" em vez de deixar travado em Buscando
             if (window.innerWidth >= 1024) {
-                bf.className = "pointer-events-auto bg-slate-800 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full cursor-default";
+                bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full cursor-default text-base";
                 bf.innerHTML = `
-                    <div class="bg-transparent text-white font-semibold text-sm w-full text-center select-none truncate px-1">ID: ${idDigitado}</div>
-                    <div onclick="resetSistemicoTotal()" class="text-xs font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none">Sair</div>
+                    <div class="bg-transparent text-white font-semibold text-base w-full text-center select-none truncate px-1">ID: ${idDigitado}</div>
+                    <div onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none">Sair</div>
                 `;
             } else {
                 abrirOverlayCelular();
@@ -235,9 +251,10 @@
             if (!modoResgateManual) resetarEstadoPagamento();
         }
 
-        function fecharOverlay() { resetSistemicoTotal(); }
+        function fecharOverlay() { resetSistemicoTotal(true); }
 
-        function resetSistemicoTotal() {
+        // Otimização 3: O parâmetro forçarAtualizacao HTTP só roda se houver de fato uma venda concluída
+        function resetSistemicoTotal(forçarAtualizacaoHttp = true) {
             modoResgateManual = false; modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; formaPagamento = null; pixChaveIdentificadora = "";
             document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; 
             document.getElementById("titulo-checkout").innerText = "Pagamento";
@@ -245,12 +262,13 @@
             
             const bf = document.getElementById("caixa-flutuante-base");
             bf.onclick = abrirOverlayCelular;
-            bf.className = "pointer-events-auto bg-orange-500 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full cursor-pointer select-none";
-            bf.innerHTML = `<div id="conteudo-flutuante-unico" class="text-sm tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>`;
+            bf.className = "pointer-events-auto bg-orange-500 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full cursor-pointer select-none text-base";
+            bf.innerHTML = `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>`;
             
             resetarEstadoPagamento();
             atualizarCarrinhoDOM();
-            carregarEstoqueReal();
+            
+            if (forçarAtualizacaoHttp) carregarEstoqueReal(); else renderizarProdutos();
         }
 
         function resetarEstadoPagamento() {
@@ -338,14 +356,14 @@
         function executingBaixaPedidoEntregue() {
             document.getElementById("btn-finalizar").innerText = "Processando Baixa...";
             alert("🔒 Fase Pronta! Próximo passo será criar o fluxo de dar baixa no Power Automate para carimbar RETIRADO.");
-            resetSistemicoTotal();
+            resetSistemicoTotal(true);
         }
 
         async function checarSegurancaMercadoPago() {
             try {
                 const r = await fetch(URL_VALIDA_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: pixChaveIdentificadora, pagamento: "PIX", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), tipo_venda: "CAIXA", status_retirada: "RETIRADO", itens: [] }) });
                 const res = await r.json();
-                if (res.pago === true) { alert("🎉 Venda Finalizada!"); resetSistemicoTotal(); } 
+                if (res.pago === true) { alert("🎉 Venda Finalizada!"); resetSistemicoTotal(true); } 
                 else { alert("⚠️ Pagamento pendente ⚠️"); }
             } catch (e) { alert("⚠️ Erro ao verificar pagamento."); }
         }
@@ -354,11 +372,13 @@
             let idF = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`;
             try {
                 await fetch(URL_GRAVACAO, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(idF, "DINHEIRO") });
-                alert("Venda Finalizada!"); resetSistemicoTotal();
+                alert("Venda Finalizada!"); resetSistemicoTotal(true);
             } catch (e) { alert("⚠️ Erro ao salvar venda."); }
         }
 
-        resetSistemicoTotal();
+        // Otimização 2: Inicializa puxando do cache instantâneo e dispara a checagem HTTP em segundo plano
+        conferirCacheInicial();
+        carregarEstoqueReal();
     </script>
 </body>
 </html>
