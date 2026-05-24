@@ -31,7 +31,10 @@
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
                     <h3 id="titulo-checkout" class="text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2">Pagamento</h3>
                     <div class="flex-1 flex flex-col min-h-0">
-                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Resumo do Pedido:</h4>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Resumo do Pedido:</h4>
+                            <span id="id-pedido-cabecalho" class="text-xs font-medium text-slate-400 font-sistema"></span>
+                        </div>
                         <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
                             <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
                         </div>
@@ -69,8 +72,8 @@
     </main>
 
     <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 flex justify-center pointer-events-none">
-        <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-base font-sistema">
-            <div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>
+        <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-lg  font-sistema">
+            <div id="conteudo-flutuante-unico" class="text-lg tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>
         </div>
     </div>
 
@@ -151,7 +154,7 @@
             const lista = document.getElementById("lista-carrinho"); totalAtual = 0; let tItens = 0; lista.innerHTML = "";
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id); const qtd = carrinho[id]; const sub = p.preco * qtd; totalAtual += sub; tItens += qtd;
-                // AJUSTADO: Altura reduzida para p-[6px], nome do produto em 14px e preços em 13px
+                // AJUSTADO: Altura reduzida para p-[6px], nome do produto em 14px e preço à direita destacado em 13px
                 lista.innerHTML += `<div class="flex justify-between items-center bg-slate-50 p-[6px] rounded-md border border-slate-100 font-sistema"><div class="max-w-[75%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${p.nome}</p><p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700 text-[13px] flex-shrink-0 pl-2">R$ ${formatarMoeda(sub)}</span></div>`;
             });
             if (tItens === 0) lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
@@ -191,7 +194,10 @@
             modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = lines[0].ID_PAGAMENTO || ""; 
             document.getElementById("titulo-checkout").innerText = "Resumo do Pedido"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             
-            // AJUSTADO: Botão Finalizar no modo PRE também recebe py-3.5 e font-semibold
+            // AJUSTADO: Injeta o número do pedido encontrado na linha do subcabeçalho
+            document.getElementById("id-pedido-cabecalho").innerText = `ID: ${idDigitado}`;
+
+            // AJUSTADO: Botão Finalizar no modo PRE configurado para py-3.5 e font-semibold
             const btnFinalizar = document.getElementById("btn-finalizar"); btnFinalizar.disabled = false; btnFinalizar.innerText = "Finalizar";
             btnFinalizar.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3.5 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95 font-sistema";
 
@@ -203,23 +209,23 @@
                 let tagStatus = `<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>`;
                 if (statusRetirada === "retirado") {
                     tagStatus = `<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[JÁ ENTREGUE ⚠️]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
-                    btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-bold py-3.5 rounded-md text-center text-sm cursor-not-allowed";
+                    btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-semibold py-3.5 rounded-md text-center text-sm cursor-not-allowed";
                 }
-                // AJUSTADO: Altura reduzida para p-[6px], nome do produto em 14px e preços em 13px no bloco do PRE
+                // AJUSTADO: p-[6px], nome do produto em 14px, preço unitário à esquerda em 13px e preço total à direita destacado em 15px bold
                 lista.innerHTML += `
                     <div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-200 shadow-sm font-sistema">
                         <div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO}</p><p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div>
-                        <div class="text-right flex-shrink-0 pl-2"><p class="font-bold text-slate-700 text-[13px]">R$ ${formatarMoeda(totalLinha)}</p>${tagStatus}</div>
+                        <div class="text-right flex-shrink-0 pl-2"><p class="font-bold text-slate-700 text-[15px]">R$ ${formatarMoeda(totalLinha)}</p>${tagStatus}</div>
                     </div>`;
             });
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidated)}`;
             
-            // AJUSTADO: Estrutura interna com justify-between faz o ID ficar flutuando exatamente centralizado no meio!
+            // CORRIGIDO: Removida a palavra 'text-' perdida. Agora exibe apenas o número do ID centralizado entre os blocos!
             if (window.innerWidth >= 1024) {
                 bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs w-full cursor-default text-base font-sistema";
                 bf.innerHTML = `
                     <div class="text-left font-medium text-base select-none whitespace-nowrap">ID do Pagamento:</div>
-                    <div class="font-medium text-base select-none truncate px-2 text-center flex-1">text-${idDigitado}</div>
+                    <div class="font-medium text-base select-none truncate px-2 text-center flex-1">${idDigitado}</div>
                     <div onclick="resetSistemicoTotal(false)" class="text-base font-medium text-white/60 hover:text-white cursor-pointer select-none font-sistema whitespace-nowrap transition-colors text-right">Sair</div>`;
             } else { abrirOverlayCelular(); }
         }
@@ -237,6 +243,7 @@
 
         function resetSistemicoTotal(forçarAtualizacaoHttp = true) {
             modoResgateManual = false; modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; formaPagamento = null; pixChaveIdentificadora = "";
+            document.getElementById("id-pedido-cabecalho").innerText = ""; // Limpa o ID fixo do cabeçalho
             document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; 
             document.getElementById("titulo-checkout").innerText = "Pagamento"; document.getElementById("bloco-inferior-pagamento").className = "space-y-4 pt-1 border-t";
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = abrirOverlayCelular;
