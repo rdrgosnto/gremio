@@ -16,7 +16,7 @@
         }
         .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
         
-        /* SOLUÇÃO DEFINITIVA: Estilo nativo puro para forçar a página a nascer 100% invisível */
+        /* Força a página a nascer invisível para evitar o flash preto e branco, revelando direto em soco após carregar */
         body { opacity: 0; transition: opacity 0.15s ease-in-out; }
     </style>
 </head>
@@ -27,11 +27,13 @@
     </header>
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+        <!-- Grid de Produtos -->
         <section class="lg:col-span-3 space-y-2">
             <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
 
+        <!-- Painel de Fechamento -->
         <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
             <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-200 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
@@ -54,7 +56,7 @@
 
                         <div class="w-full overflow-hidden border-t border-dashed pt-3 h-[130px] pb-1 relative">
                             <div id="carrossel-pagamento" class="w-[200%] h-full flex transition-transform duration-300 transform translate-x-0">
-                                <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200">
+                                <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200 font-sistema">
                                     <div class="flex justify-between items-center text-base"><span class="text-slate-500 font-medium">Pedido</span><span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span></div>
                                     <div class="flex justify-between items-center text-base"><span class="text-slate-500 font-medium">Recebido</span><div class="relative w-36"><span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">R$</span><input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-0.5 border border-slate-300 rounded-md text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-base disabled:bg-slate-50"></div></div>
                                     <div class="flex justify-between items-center text-base border-t border-slate-100 pt-1.5"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-emerald-600">R$ 0,00</span></div>
@@ -75,7 +77,7 @@
     </main>
 
     <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 flex justify-center pointer-events-none">
-        <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full cursor-pointer select-none text-base">
+        <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full cursor-pointer select-none text-base font-sistema">
             <div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>
         </div>
     </div>
@@ -99,7 +101,6 @@
         }
 
         function revelarPagina() {
-            // Modifica o estilo inline para dar o fade-in suave sem quebras de layout
             document.body.style.opacity = "1";
         }
 
@@ -185,7 +186,8 @@
             validarEstadoFinalizar();
         }
 
-        function activarModoBuscaPre(e) {
+        // CORREÇÃO VISUAL E ORTOGRÁFICA: Função unificada com escopo idêntico ao disparador HTML
+        function ativarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             const bf = document.getElementById("caixa-flutuante-base");
@@ -196,9 +198,6 @@
             `;
             setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100);
         }
-        
-        function activarModoBuscaPre() { activarModoBuscaPre(); }
-        function ativarModoBuscaPre(e) { activarModoBuscaPre(e); }
 
         function gerenciarCliqueMenosPre() { if (modoBuscaAtivo) resetSistemicoTotal(false); }
 
@@ -240,13 +239,13 @@
                         <div class="text-right"><p class="font-bold text-slate-700">R$ ${formatarMoeda(totalLinha)}</p>${tagStatus}</div>
                     </div>`;
             });
-            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidated || valorConsolidado)}`;
+            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidado)}`;
             
             if (window.innerWidth >= 1024) {
                 bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full cursor-default text-base font-sistema";
                 bf.innerHTML = `
                     <div class="bg-transparent text-white font-semibold text-base w-full text-center select-none truncate px-1">ID: ${idDigitado}</div>
-                    <div onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none">Sair</div>
+                    <div onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none font-sistema">Sair</div>
                 `;
             } else {
                 abrirOverlayCelular();
@@ -322,7 +321,7 @@
             return JSON.stringify({
                 id_pagamento: idF, pagamento: forma, tipo_venda: "CAIXA", status_retirada: "RETIRADO",
                 total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual),
-                itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantity: parseInt(carrinho[id]), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
+                itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
             });
         }
 
@@ -362,7 +361,6 @@
 
         function executingBaixaPedidoEntregue() {
             document.getElementById("btn-finalizar").innerText = "Processando Baixa...";
-            // GATILHO AMANHÃ: Essa função vai dar um fetch na nova URL_BAIXA do Power Automate
             alert("🔒 Fase Pronta! Próximo passo será criar o fluxo de dar baixa no Power Automate para carimbar RETIRADO.");
             resetSistemicoTotal(true);
         }
