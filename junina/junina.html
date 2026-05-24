@@ -150,15 +150,13 @@
             const lista = document.getElementById("lista-carrinho"); totalAtual = 0; let tItens = 0; lista.innerHTML = "";
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id); const qtd = carrinho[id]; const sub = p.preco * qtd; totalAtual += sub; tItens += qtd;
-                // AJUSTADO: Aumentado levemente o padding (p-3) e os textos internos de cada caixinha de item
-                lista.innerHTML += `<div class="flex justify-between items-center text-[13px] bg-slate-50 p-3 rounded-md border border-slate-100 font-sistema"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate">${p.nome}</p><p class="text-[11px] text-slate-400">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700 text-sm">R$ ${formatarMoeda(sub)}</span></div>`;
+                lista.innerHTML += `<div class="flex justify-between items-center text-[13px] bg-slate-50 p-3 rounded-md border border-slate-100 font-sistema"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate text-[15px]">${p.nome}</p><p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700 text-sm">R$ ${formatarMoeda(sub)}</span></div>`;
             });
             if (tItens === 0) lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
-        // AJUSTADO: Alinhamento rigoroso à esquerda (justify-start), mesma fonte/tamanho (text-base) e botão Sair ajustado
         function ativarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
@@ -196,7 +194,6 @@
 
             const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valorConsolidado = 0;
 
-            // AJUSTADO: Aumentado levemente o padding (p-3) e textos no card da listagem do PRE
             lines.forEach(linha => {
                 const qtd = parseInt(linha.QUANTIDADE) || 1; const totalLinha = parseFloat(linha.TOTAL) || 0; valorConsolidado += totalLinha; 
                 const statusRetirada = linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente";
@@ -205,15 +202,15 @@
                     tagStatus = `<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[JÁ ENTREGUE ⚠️]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
                     btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed";
                 }
+                // AJUSTADO: Lado esquerdo com text-[15px] no produto e text-[12px] nos detalhes, com pl-2/flex-shrink-0 de proteção à direita
                 lista.innerHTML += `
                     <div class="flex justify-between items-center text-[13px] bg-white p-3 rounded-md border border-slate-200 shadow-sm font-sistema">
-                        <div class="max-w-[70%]"><p class="font-semibold text-slate-700 truncate">${linha.PRODUTO}</p><p class="text-[11px] text-slate-400">${qtd}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div>
-                        <div class="text-right"><p class="font-bold text-slate-700 text-sm">R$ ${formatarMoeda(totalLinha)}</p>${tagStatus}</div>
+                        <div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[15px]">${linha.PRODUTO}</p><p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div>
+                        <div class="text-right flex-shrink-0 pl-2"><p class="font-bold text-slate-700 text-sm">R$ ${formatarMoeda(totalLinha)}</p>${tagStatus}</div>
                     </div>`;
             });
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidado)}`;
             
-            // AJUSTADO: Alinhamento e proporções pós-busca idênticos ao botão principal
             if (window.innerWidth >= 1024) {
                 bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-start min-w-[240px] max-w-xs w-full cursor-default text-base font-sistema";
                 bf.innerHTML = `<div class="bg-transparent text-white font-medium text-base flex-1 text-left select-none truncate">ID do Pagamento: ${idDigitado}</div><div onclick="resetSistemicoTotal(false)" class="text-base font-medium text-white/60 hover:text-white cursor-pointer pl-2 select-none font-sistema whitespace-nowrap transition-colors">Sair</div>`;
