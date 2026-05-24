@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caixa - Festa Junina</title>
-    <!-- Otimização 1: Adicionado defer para não bloquear a renderização da página -->
     <script src="https://cdn.tailwindcss.com" defer></script>
     <style>
-        /* Otimização 4: Pilha de fontes nativas para carregamento instantâneo de zero milissegundos */
         .font-sistema { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -19,7 +17,8 @@
         .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
     </style>
 </head>
-<body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800">
+<!-- AJUSTE CRUCIAL: opacity-0 e transition para revelar a tela apenas quando estiver estilizada -->
+<body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800 opacity-0 transition-opacity duration-200">
 
     <header class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
         <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
@@ -73,9 +72,8 @@
         </section>
     </main>
 
-    <!-- AJUSTE: Botão flutuante com texto maior (text-base) e traço suavizado para font-semibold -->
     <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 flex justify-center pointer-events-none">
-        <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full cursor-pointer select-none">
+        <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full cursor-pointer select-none text-base">
             <div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>
         </div>
     </div>
@@ -89,13 +87,17 @@
         let modoBuscaAtivo = false, modoResgateManual = false;
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
 
-        // Otimização 2: Carregamento SWR (Mostra cache instantâneo e valida no fundo)
         function conferirCacheInicial() {
             const cacheSalvo = localStorage.getItem("festa_junina_cardapio");
             if (cacheSalvo) {
                 produtos = JSON.parse(cacheSalvo);
                 renderizarProdutos();
+                revelarPagina();
             }
+        }
+
+        function revelarPagina() {
+            document.body.classList.remove('opacity-0');
         }
 
         async function carregarEstoqueReal(idParaBuscar = "") {
@@ -110,7 +112,6 @@
                         id: parseInt(l.ID), sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??", 
                         nome: l.PRODUTO, preco: parseFloat(l.PRECO), estoque: parseInt(l.ATUAL), critico: 5 
                     }));
-                    // Otimização 2: Alimenta o cache do navegador
                     localStorage.setItem("festa_junina_cardapio", JSON.stringify(produtos));
                     renderizarProdutos();
                 }
@@ -118,6 +119,8 @@
             } catch (e) { 
                 console.error(e);
                 if (idParaBuscar !== "") resetSistemicoTotal(false); 
+            } finally {
+                revelarPagina();
             }
         }
 
@@ -174,23 +177,25 @@
                 lista.innerHTML += `<div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-md border border-slate-100"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate">${p.nome}</p><p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700">R$ ${formatarMoeda(sub)}</span></div>`;
             });
             if (tItens === 0) lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
-            // AJUSTE: Atualiza o texto combinado da pílula com o tamanho text-base e peso font-semibold
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; 
             validarEstadoFinalizar();
         }
 
-        function ativarModoBuscaPre(e) {
+        function activarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             const bf = document.getElementById("caixa-flutuante-base");
             bf.onclick = null; bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full cursor-default text-base";
             bf.innerHTML = `
-                <input type="text" id="input-id-busca" placeholder="Digitar ID do Pedido" maxlength="12" class="bg-transparent text-white font-semibold text-base focus:outline-none w-full h-full placeholder-white/50 text-center animate-pulse" oninput="tratarDigitacaoIdBusca(this)">
+                <input type="text" id="input-id-busca" placeholder="Digitar ID do Pedido" maxlength="12" class="bg-transparent text-white font-semibold text-base focus:outline-none w-full h-full placeholder-white/50 text-center" oninput="tratarDigitacaoIdBusca(this)">
                 <div id="btn-cancelar-busca" onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none">Sair</div>
             `;
             setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100);
         }
+        
+        function activarModoBuscaPre() { activarModoBuscaPre(); }
+        function ativarModoBuscaPre(e) { activarModoBuscaPre(e); }
 
         function gerenciarCliqueMenosPre() { if (modoBuscaAtivo) resetSistemicoTotal(false); }
 
@@ -200,7 +205,7 @@
         }
 
         function processarResultadoBuscaPedido(linhasVindasDoExcel, idDigitado) {
-            const bf = document.getElementById("caixa-flutuante-base"); const direito = document.getElementById("conteudo-flutuante-unico");
+            const bf = document.getElementById("caixa-flutuante-base");
             const linhasFiltradas = linhasVindasDoExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
 
             if (linhasFiltradas.length === 0) {
@@ -253,7 +258,6 @@
 
         function fecharOverlay() { resetSistemicoTotal(true); }
 
-        // Otimização 3: O parâmetro forçarAtualizacao HTTP só roda se houver de fato uma venda concluída
         function resetSistemicoTotal(forçarAtualizacaoHttp = true) {
             modoResgateManual = false; modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; formaPagamento = null; pixChaveIdentificadora = "";
             document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; 
@@ -311,7 +315,7 @@
             validarEstadoFinalizar();
         }
 
-        function gerarPayloadVenda(idF, forma) {
+        UX: function gerarPayloadVenda(idF, forma) {
             return JSON.stringify({
                 id_pagamento: idF, pagamento: forma, tipo_venda: "CAIXA", status_retirada: "RETIRADO",
                 total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual),
@@ -376,7 +380,6 @@
             } catch (e) { alert("⚠️ Erro ao salvar venda."); }
         }
 
-        // Otimização 2: Inicializa puxando do cache instantâneo e dispara a checagem HTTP em segundo plano
         conferirCacheInicial();
         carregarEstoqueReal();
     </script>
