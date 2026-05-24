@@ -50,7 +50,8 @@
                             </div>
                         </div>
 
-                        <div class="w-full overflow-hidden border-t border-dashed pt-3 h-[110px] pb-1 relative">
+                        <!-- Carrossel de fechamento otimizado -->
+                        <div class="w-full overflow-hidden border-t border-dashed pt-2 h-[125px] pb-1 relative">
                             <div id="carrossel-pagamento" class="w-[200%] h-full flex transition-transform duration-300 transform translate-x-0">
                                 <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-2 opacity-25 pointer-events-none transition-all duration-200">
                                     <div class="flex justify-between items-center text-sm"><span class="text-slate-500 font-medium">Pedido</span><span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span></div>
@@ -58,7 +59,8 @@
                                     <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-1"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span></div>
                                 </div>
                                 <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
-                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-[100px] h-[100px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group">
+                                    <!-- AJUSTE VISUAL: QR Code ampliado até o limite superior da linha tracejada -->
+                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-[120px] h-[120px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group">
                                         <div class="absolute inset-0 opacity-[0.08] group-hover:opacity-[0.12] transition-opacity grid grid-cols-2 pointer-events-none">
                                             <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
                                             <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
@@ -189,7 +191,8 @@
             validarEstadoFinalizar();
         }
 
-        function activarModoBuscaPre() {
+        // CORREÇÃO: Alinhado o nome da função estritamente com a chamada do botão do PRE
+        function ativarModoBuscaPre() {
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             document.getElementById("caixa-flutuante-base").className = "pointer-events-auto bg-slate-800 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[320px] max-w-md w-full";
             document.getElementById("conteudo-flutuante-esquerdo").innerHTML = `<input type="text" id="input-id-busca" placeholder="Digitar ID do Pedido" maxlength="12" class="bg-transparent text-white font-bold text-sm focus:outline-none w-full h-full placeholder-white/50" oninput="tratarDigitacaoIdBusca(this)">`;
@@ -216,7 +219,7 @@
             const baseFlutuante = document.getElementById("caixa-flutuante-base");
             const direito = document.getElementById("conteudo-flutuante-direito");
             const inputBusca = document.getElementById("input-id-busca");
-            const linhasFiltradas = linhasVindasDoExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
+            const linhasFiltradas = linhasVindasDoExcel.filter(l => String(l.ID_PAGEMENTO || l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
 
             if (linhasFiltradas.length === 0) {
                 baseFlutuante.className = "pointer-events-auto bg-rose-600 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[320px] max-w-md w-full animate-shake";
@@ -283,7 +286,7 @@
             document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200";
             document.getElementById("input-recebido").disabled = true; document.getElementById("input-recebido").value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
             document.getElementById("btn-finalizar").innerText = "Finalizar";
-            document.getElementById("box-qrcode").className = "w-[100px] h-[100px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group";
+            document.getElementById("box-qrcode").className = "w-[120px] h-[120px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group";
             validarEstadoFinalizar();
         }
 
@@ -305,11 +308,12 @@
 
         async function requisitarQrCodeReal() {
             if (!formaPagamento || formaPagamento !== 'PIX') return;
-            const box = document.getElementById("box-qrcode"); box.className = "w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none";
+            const box = document.getElementById("box-qrcode"); box.className = "w-[120px] h-[120px] bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none";
             box.innerHTML = `<span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight text-center leading-none">Carregando...</span>`;
             pixChaveIdentificadora = "mp_" + Date.now();
 
             try {
+                // RESTAURAÇÃO: Mapeamento real dos itens para alimentar a API do Mercado Pago
                 const r = await fetch(URL_GRAVACAO, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -320,7 +324,7 @@
                 });
                 const dados = await r.json();
                 if (dados.qrcode_imagem) {
-                    pixChaveIdentificadora = dados.id_mercado_pago; box.className = "w-[100px] h-[100px] bg-white rounded-none flex items-center justify-center p-0 opacity-100 select-none pointer-events-none transition-all";
+                    pixChaveIdentificadora = dados.id_mercado_pago; box.className = "w-[120px] h-[120px] bg-white rounded-none flex items-center justify-center p-0 opacity-100 select-none pointer-events-none transition-all";
                     box.innerHTML = `<img src="data:image/jpeg;base64,${dados.qrcode_imagem}" class="w-full h-full rounded-none shadow-none" alt="QR Code">`;
                     validarEstadoFinalizar();
                 } else { throw new Error(); }
@@ -367,9 +371,13 @@
         async function executarGravacaoDinheiroDirecto() {
             let idF = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`;
             try {
+                // RESTAURAÇÃO: Enviando o mapeamento real dos itens selecionados para a gravação em DINHEIRO funcionar
                 await fetch(URL_GRAVACAO, {
                     method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ id_pagamento: idF, pagamento: "DINHEIRO", total_pedido_consolidado: parseFloat(totalAtual), tipo_venda: "CAIXA", status_retirada: "RETIRADO", itens: [] })
+                    body: JSON.stringify({ 
+                        id_pagamento: idF, pagamento: "DINHEIRO", total_pedido_consolidado: parseFloat(totalAtual), tipo_venda: "CAIXA", status_retirada: "RETIRADO", 
+                        itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
+                    })
                 });
                 alert("Venda Finalizada!"); fecharOverlay(); carrinho = {}; resetarEstadoPagamento(); atualizarCarrinhoDOM(); carregarEstoqueReal();
             } catch (e) { alert("⚠️ Erro ao salvar venda."); }
