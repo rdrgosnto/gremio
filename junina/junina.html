@@ -119,7 +119,7 @@
                 let status = `<span class="${esg || p.estoque <= 5 ? 'text-rose-500 font-semibold' : 'text-emerald-600 font-semibold'}">${p.estoque}</span>`;
                 if (esg) cEstilo = "bg-slate-100 text-slate-400 select-none pointer-events-none opacity-60";
                 if (qtd > 0 && !esg) boxEstilo = "bg-orange-50 border border-orange-200 text-orange-700";
-                if (modoBuscaAtivo) { cEstilo = "bg-slate-50 border-slate-200 text-slate-300 select-none pointer-events-none opacity-40"; bloq = "disabled"; }
+                if (modoBuscaAtivo || modoResgateManual) { cEstilo = "bg-slate-50 border-slate-200 text-slate-300 select-none pointer-events-none opacity-40"; bloq = "disabled"; }
 
                 grid.innerHTML += `
                     <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cEstilo}">
@@ -137,14 +137,23 @@
                         </div>
                     </div>`;
             });
+            
+            // CORREÇÃO DOS BOTÕES ONLINE (PRE)
+            let preBoxEstilo = "bg-slate-100 text-slate-600";
+            let preStatusTxt = "-";
+            if (modoBuscaAtivo || modoResgateManual) {
+                preBoxEstilo = "bg-slate-800 text-white";
+                preStatusTxt = "ativo";
+            }
+            
             grid.innerHTML += `
                 <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-200">
-                    <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${modoBuscaAtivo ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">
+                    <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${preBoxEstilo}">
                         <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">PRE</div>
                         <div class="flex items-center justify-between w-full mt-auto">
-                            <button onclick="resetSistemicoTotal(false)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${!modoBuscaAtivo ? 'opacity-20 pointer-events-none' : ''}">-</button>
-                            <span class="text-[13px] font-semibold text-center flex-1">${modoBuscaAtivo ? 'ativo' : '-'}</span>
-                            <button onclick="ativarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm">+</button>
+                            <button onclick="resetSistemicoTotal(false)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${!(modoBuscaAtivo || modoResgateManual) ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                            <span class="text-[13px] font-semibold text-center flex-1">${preStatusTxt}</span>
+                            <button onclick="ativarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${(modoBuscaAtivo || modoResgateManual) ? 'opacity-20 pointer-events-none' : ''}">+</button>
                         </div>
                     </div>
                     <div class="min-w-0 flex flex-col justify-between flex-1"><h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5">Online</h3><div class="text-[13px] font-semibold text-orange-600">R$ 0,00</div></div>
@@ -169,7 +178,7 @@
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
-        function activarModoBuscaPre(e) {
+        function ativarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = null;
@@ -199,6 +208,8 @@
             modoResgateManual = true; modoBuscaAtivo = false; 
             pixChaveIdentificadora = String(idDigitado).trim(); 
             cachePedidoOnlineOriginal = [...lines]; 
+            
+            renderizarProdutos(); // Atualiza os botões + e - do painel principal para refletir o estado correto
 
             document.getElementById("titulo-checkout").innerText = "Resumo do Pedido"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             document.getElementById("id-pedido-cabecalho").innerText = `ID: ${idDigitado}`;
@@ -267,7 +278,6 @@
             resetarEstadoPagamento(); 
             atualizarCarrinhoDOM(); 
             
-            // GARANTIA COMPLETA DE FECHAMENTO: Remove o painel escuro da tela do telemóvel ao sair
             document.getElementById("painel-fechamento").classList.add("hidden"); 
             
             if (forçarAtualizacaoHttp) carregarEstoqueReal(); else renderizarProdutos();
@@ -300,7 +310,7 @@
             status_retirada: "retirado", 
             total_pedido_consolidado: parseFloat(totalAtual), 
             transaction_amount: parseFloat(totalAtual), 
-            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
+            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
         });
 
         async function requisitarQrCodeReal() {
@@ -339,7 +349,6 @@
             btn.disabled = true;
             
             try {
-                // Injeta com segurança o ID do Pagamento em cada item, caso venha a precisar no fluxo
                 const itensPuxadosDaTabelaOriginal = cachePedidoOnlineOriginal.map(linha => ({
                     "ID_PAGAMENTO": String(pixChaveIdentificadora).trim(),
                     "SIGLA": linha.SIGLA ? String(linha.SIGLA).trim().toUpperCase() : "PRE",
