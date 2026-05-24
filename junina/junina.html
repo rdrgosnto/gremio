@@ -111,7 +111,7 @@
 
     <script>
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
-        const URL_GRAVACAO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
+        constURL_GRAVACAO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
         const URL_VALIDA_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fc8e0c1a405b4430b0f6390521bada48/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=1yfg6o-AMAAavobkG-AE22s_StAGlL_lkw0GqSfWk4g";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "";
@@ -185,6 +185,7 @@
                 const combo = await r.json();
                 
                 if (combo.estoque) {
+                    // Mapeando estritamente as chaves MAIÚSCULAS devolvidas pelo seu Excel
                     produtos = combo.estoque.map(l => ({ 
                         id: parseInt(l.ID), 
                         sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??", 
@@ -271,13 +272,6 @@
                 </div>`;
         }
 
-        function alterarQuantidade(id, d) {
-            const p = produtos.find(item => item.id === id); const nQtd = (carrinho[id] || 0) + d;
-            if (nQtd < 0) return; if (nQtd > p.estoque) { alert(`Ops! Só temos ${p.estoque} un. de ${p.nome}.`); return; }
-            if (nQtd === 0) delete carrinho[id]; else carrinho[id] = nQtd;
-            renderizarProdutos(); atualizarCarrinhoDOM();
-        }
-
         function atualizarCarrinhoDOM() {
             if (modoResgateManual) return;
 
@@ -298,7 +292,7 @@
             validarEstadoFinalizar();
         }
 
-        function activarModoBuscaPre() {
+        function ativarModoBuscaPre() {
             modoBuscaAtivo = true;
             carrinho = {}; 
             atualizarCarrinhoDOM();
@@ -402,14 +396,17 @@
             linhasEncontradas.forEach(linha => {
                 const qtd = parseInt(linha.QUANTIDADE) || 1;
                 const totalLinha = parseFloat(linha.TOTAL) || 0;
-                valorConsolidated = parseFloat(linha.TOTAL_PEDIDO_CONSOLIDADO) || totalLinha;
-                const statusRetirada = String(linha.STATUS_RETIRADA).trim().toUpperCase();
+                
+                valorConsolidado += totalLinha; 
+                
+                // Mapeia de acordo com o retorno maiúsculo RETIRADA da tabela do Excel
+                const statusRetirada = linha.RETIRADA ? String(linha.RETIRADA).trim().toUpperCase() : "PENDENTE";
                 
                 let tagStatus = `<span class="text-amber-600 font-bold">[PENDENTE]</span>`;
                 if (statusRetirada === "RETIRADO") {
                     tagStatus = `<span class="text-rose-500 font-bold">[JÁ ENTREGUE ⚠️]</span>`;
                     btnFinalizar.disabled = true;
-                    btnFinalizar.innerText = "Pedido Já EntregueAnteriormente";
+                    btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
                     btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed";
                 }
 
@@ -417,7 +414,7 @@
                     <div class="flex justify-between items-center text-xs bg-white p-2 rounded-md border border-slate-200 shadow-sm">
                         <div class="max-w-[70%]">
                             <p class="font-semibold text-slate-700 truncate">${linha.PRODUTO}</p>
-                            <p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p>
+                            <p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(parseFloat(linha["PREÇO"]) || 0)}</p>
                         </div>
                         <div class="text-right">
                             <p class="font-bold text-slate-700">R$ ${formatarMoeda(totalLinha)}</p>
@@ -426,7 +423,7 @@
                     </div>`;
             });
 
-            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidated)}`;
+            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidado)}`;
             abrirOverlayCelular();
         }
 
@@ -562,6 +559,7 @@
             btn.disabled = true; 
             btn.innerText = "Processando Baixa...";
 
+            // Interrupção programada antes do Passo 7
             alert("🔒 Fase Pronta! Próximo passo será criar o fluxo de dar baixa no Power Automate para carimbar RETIRADO.");
             
             modoResgateManual = false;
