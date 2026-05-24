@@ -160,7 +160,7 @@
             const mes = hoje.getMonth() + 1;
             const ano = hoje.getFullYear();
 
-            // Configurado para bloquear dinheiro apenas após 31/12/2026 (Liberado para testes hoje!)
+            // Liberado para testes em 2026. Bloqueia apenas no final de Dezembro.
             if (ano > 2026 || (ano === 2026 && mes === 12 && dia >= 31)) {
                 const btnDin = document.getElementById("btn-dinheiro");
                 if (btnDin) {
@@ -174,7 +174,6 @@
             if (verificarBloqueioPreVenda()) return;
 
             try {
-                // CORREÇÃO: Chamada via POST leve e limpa para evitar problemas de CORS
                 const r = await fetch(URL_LEITURA, {
                     method: "POST",
                     body: JSON.stringify({ id_pagamento: String(idParaBuscar).trim() })
@@ -196,7 +195,6 @@
                     checarTravaDinheiro();
                 }
 
-                // CORREÇÃO: Só aciona o processamento de busca se o operador tiver digitado algo de verdade
                 if (idParaBuscar !== "" && combo && combo.pedido) {
                     processarResultadoBuscaPedido(combo.pedido, idParaBuscar);
                 }
@@ -247,7 +245,6 @@
         }
 
         function renderizarItemEspecialPre(grid) {
-            // CORREÇÃO: PRE com o exato mesmo estilo visual, fundo e cores dos outros itens do menu
             let preEstilo = "bg-white border-slate-200 hover:border-slate-300";
             let boxPreEstilo = "bg-slate-100 text-slate-600";
             
@@ -266,7 +263,6 @@
                         </div>
                     </div>
                     <div class="min-w-0 flex flex-col justify-between flex-1">
-                        <!-- CORREÇÃO: Nome alterado de 'online - pré pedido' para 'Online' -->
                         <h3 class="font-semibold text-slate-700 text-[13px] truncate leading-tight mb-0.5" title="Online">Online</h3>
                         <div class="flex items-center justify-between text-[12px] font-medium w-full"><span class="text-orange-600 font-bold">R$ 0,00</span><div class="text-slate-400 font-semibold"><span class="text-slate-300 font-normal">E:</span> n/a</div></div>
                     </div>
@@ -361,10 +357,10 @@
             const direito = document.getElementById("conteudo-flutuante-direito");
             const inputBusca = document.getElementById("input-id-busca");
 
-            // CORREÇÃO: Filtra cirurgicamente na listagem apenas as linhas que pertencem EXATAMENTE ao ID digitado
-            const linhasFiltradas doPedido = linhasVindasDoExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
+            // CORREÇÃO: Variável corrigida para evitar quebra de leitura do script
+            const linhasFiltradas = linhasVindasDoExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
 
-            if (linhasFiltradas doPedido.length === 0) {
+            if (linhasFiltradas.length === 0) {
                 baseFlutuante.classList.remove("bg-slate-800");
                 baseFlutuante.classList.add("bg-rose-600", "animate-shake");
                 direito.innerText = "não encontrado";
@@ -390,9 +386,8 @@
 
             modoResgateManual = true; 
             modoBuscaAtivo = false;
-            pixChaveIdentificadora = linhasFiltradas doPedido[0].ID_PAGAMENTO || ""; 
+            pixChaveIdentificadora = linhasFiltradas[0].ID_PAGAMENTO || ""; 
             
-            // CORREÇÃO: Mantido o título e a estrutura padrão de RESUMO DO PEDIDO que você pediu
             document.getElementById("titulo-checkout").innerText = "Resumo do Pedido";
             document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             
@@ -405,14 +400,13 @@
             lista.innerHTML = "";
             let valorConsolidado = 0;
 
-            linhasFiltradas doPedido.forEach(linha => {
+            linhasFiltradas.forEach(linha => {
                 const qtd = parseInt(linha.QUANTIDADE) || 1;
                 const totalLinha = parseFloat(linha.TOTAL) || 0;
                 valorConsolidado += totalLinha; 
                 
                 const statusRetirada = linha.RETIRADA ? String(linha.RETIRADA).trim().toUpperCase() : "PENDENTE";
                 
-                // CORREÇÃO: Exibição exata da tag de status [PENDENTE] ou [JÁ ENTREGUE] embaixo do valor
                 let tagStatus = `<span class="text-amber-600 font-bold text-[11px] block mt-0.5">[PENDENTE]</span>`;
                 if (statusRetirada === "RETIRADO") {
                     tagStatus = `<span class="text-rose-500 font-bold text-[11px] block mt-0.5">[JÁ ENTREGUE ⚠️]</span>`;
@@ -515,6 +509,7 @@
                 total_pedido_consolidado: parseFloat(totalAtual),
                 tipo_venda: configVenda.tipo,
                 status_retirada: configVenda.status,
+                // CORREÇÃO: Restaurada a palavra quantidade (estava como bandwidth)
                 itens: Object.keys(carrinho).map(id => {
                     const p = produtos.find(item => item.id == id);
                     return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) };
@@ -592,7 +587,7 @@
                 status_retirada: configVenda.status,
                 itens: Object.keys(carrinho).map(id => { 
                     const p = produtos.find(item => item.id == id); 
-                    return { sigla: p.sigla, produto: p.nome, bandwidth: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
+                    return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
                 })
             };
 
