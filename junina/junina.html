@@ -16,7 +16,7 @@
         }
         .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
         
-        /* Força a página a nascer invisível para evitar o flash preto e branco, revelando direto em soco após carregar */
+        /* Força a página a nascer invisível para evitar o flash preto e branco, revelando direto após carregar */
         body { opacity: 0; transition: opacity 0.15s ease-in-out; }
     </style>
 </head>
@@ -158,7 +158,7 @@
                     <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${modoBuscaAtivo ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">
                         <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none font-sistema">PRE</div>
                         <div class="flex items-center justify-between w-full mt-auto">
-                            <button onclick="gerenciarCliqueMenosPre()" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${!modoBuscaAtivo ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                            <button onclick="gerenciarCliqueMenosPre()" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm">-</button>
                             <span class="text-xs font-bold text-center flex-1">${modoBuscaAtivo ? 'ativo' : '-'}</span>
                             <button onclick="ativarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm">+</button>
                         </div>
@@ -186,20 +186,26 @@
             validarEstadoFinalizar();
         }
 
-        // CORREÇÃO VISUAL E ORTOGRÁFICA: Função unificada com escopo idêntico ao disparador HTML
-        function ativarModoBuscaPre(e) {
+        // AJUSTE: Texto explicativo fixo à esquerda e cursor na frente dentro do input
+        function activarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             const bf = document.getElementById("caixa-flutuante-base");
             bf.onclick = null; bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full cursor-default text-base font-sistema";
             bf.innerHTML = `
-                <input type="text" id="input-id-busca" placeholder="Digitar ID do Pedido" maxlength="12" class="bg-transparent text-white font-semibold text-base focus:outline-none w-full h-full placeholder-white/50 text-center font-sistema" oninput="tratarDigitacaoIdBusca(this)">
+                <div class="flex items-center flex-1 h-full pl-1">
+                    <span class="text-white text-sm font-semibold whitespace-nowrap mr-1 select-none">ID do Pedido:</span>
+                    <input type="text" id="input-id-busca" maxlength="12" class="bg-transparent text-white font-semibold text-base focus:outline-none w-full h-full placeholder-white/30" oninput="tratarDigitacaoIdBusca(this)">
+                </div>
                 <div id="btn-cancelar-busca" onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none font-sistema">Sair</div>
             `;
             setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100);
         }
+        
+        function ativarModoBuscaPre(e) { activarModoBuscaPre(e); }
 
-        function gerenciarCliqueMenosPre() { if (modoBuscaAtivo) resetSistemicoTotal(false); }
+        // AJUSTE: O menos do PRE agora funciona em qualquer cenário, limpando e restaurando o caixa normal
+        function gerenciarCliqueMenosPre() { resetSistemicoTotal(false); }
 
         function tratarDigitacaoIdBusca(input) {
             input.value = input.value.replace(/\D/g, "");
@@ -258,7 +264,15 @@
             if (!modoResgateManual) resetarEstadoPagamento();
         }
 
-        function fecharOverlay() { resetSistemicoTotal(true); }
+        // AJUSTE: Voltar ao pedido preserva os itens do carrinho e remove apenas estados voláteis de pagamento
+        function fecharOverlay() { 
+            if (modoResgateManual) {
+                resetSistemicoTotal(true); 
+            } else {
+                document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; 
+                resetarEstadoPagamento();
+            }
+        }
 
         function resetSistemicoTotal(forçarAtualizacaoHttp = true) {
             modoResgateManual = false; modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; formaPagamento = null; pixChaveIdentificadora = "";
@@ -374,13 +388,15 @@
             } catch (e) { alert("⚠️ Erro ao verificar pagamento."); }
         }
 
-        async function executarGravacaoDinheiroDirecto() {
+        async function executorsGravacaoDinheiroDirecto() {
             let idF = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`;
             try {
                 await fetch(URL_GRAVACAO, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(idF, "DINHEIRO") });
                 alert("Venda Finalizada!"); resetSistemicoTotal(true);
             } catch (e) { alert("⚠️ Erro ao salvar venda."); }
         }
+        
+        function executarGravacaoDinheiroDirecto() { executorsGravacaoDinheiroDirecto(); }
 
         conferirCacheInicial();
         carregarEstoqueReal();
