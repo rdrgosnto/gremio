@@ -25,13 +25,11 @@
     </header>
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
-        <!-- Grid de Produtos -->
         <section class="lg:col-span-3 space-y-2">
             <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
 
-        <!-- Painel de Fechamento -->
         <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
             <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-200 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
@@ -52,7 +50,6 @@
                             </div>
                         </div>
 
-                        <!-- Área do carrossel limpa e ampliada para o QR Code ocupar tudo -->
                         <div class="w-full overflow-hidden border-t border-dashed pt-2 h-[135px] relative">
                             <div id="carrossel-pagamento" class="w-[200%] h-full flex transition-transform duration-300 transform translate-x-0">
                                 <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-2 opacity-25 pointer-events-none transition-all duration-200">
@@ -61,7 +58,6 @@
                                     <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-1"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span></div>
                                 </div>
                                 <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
-                                    <!-- QR CODE MAXIMIZADO: w-32 h-32 ocupa o espaço útil total até as linhas tracejadas -->
                                     <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-32 h-32 bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all relative overflow-hidden group">
                                         <div class="absolute inset-0 opacity-[0.08] grid grid-cols-2 pointer-events-none">
                                             <div class="border-[4px] border-slate-900 flex p-0.5"><div class="bg-slate-900 w-full h-full"></div></div>
@@ -81,22 +77,16 @@
                 </div>
                 <div class="flex flex-col items-center gap-1.5 mt-2 pt-2 border-t w-full">
                     <button onclick="processarCliqueFinalizar()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed transition-all">Finalizar</button>
-                    <!-- Link Voltar exclusivo para Celular/Tablet via classes Tailwind -->
                     <button onclick="fecharOverlay()" class="lg:hidden text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1">Voltar ao pedido</button>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- BARRA FLUTUANTE ENCURTADA, SEM TRAÇO E CENTRALIZADA -->
     <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 flex justify-center pointer-events-none">
         <div id="caixa-flutuante-base" class="pointer-events-auto bg-orange-500 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full">
-            <div id="conteudo-flutuante-esquerdo" class="flex-1 text-sm tracking-wide text-center select-none cursor-pointer w-full h-full flex items-center justify-center" onclick="abrirOverlayCelular()">
-                Pedido: R$ 0,00
-            </div>
-            <div id="conteudo-flutuante-direito" class="text-sm tracking-wide text-right select-none pl-2 h-full flex items-center cursor-pointer" onclick="abrirOverlayCelular()">
-                - Revisar e Pagar
-            </div>
+            <div id="conteudo-flutuante-esquerdo" class="flex-1 text-sm tracking-wide text-center select-none cursor-pointer w-full h-full flex items-center justify-center" onclick="abrirOverlayCelular()">Pedido: R$ 0,00</div>
+            <div id="conteudo-flutuante-direito" class="text-sm tracking-wide text-right select-none pl-2 h-full flex items-center cursor-pointer" onclick="abrirOverlayCelular()">- Revisar e Pagar</div>
         </div>
     </div>
 
@@ -115,9 +105,7 @@
                     method: "POST", headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ id_pagamento: String(idParaBuscar).trim() })
                 });
-                if (!r.ok) throw new Error();
                 const combo = await r.json();
-                
                 if (combo && combo.estoque) {
                     produtos = combo.estoque.map(l => ({ 
                         id: parseInt(l.ID), sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??", 
@@ -125,57 +113,46 @@
                     }));
                     renderizarProdutos();
                 }
-                if (idParaBuscar !== "" && combo && combo.pedido) {
-                    processarResultadoBuscaPedido(combo.pedido, idParaBuscar);
-                }
-            } catch (e) { 
-                console.error(e); alert("⚠️ Erro ao carregar o cardápio real do Excel."); 
-                if (idParaBuscar !== "") resetarEstadoBuscaFlutuante();
-            }
+                if (idParaBuscar !== "" && combo && combo.pedido) processarResultadoBuscaPedido(combo.pedido, idParaBuscar);
+            } catch (e) { alert("⚠️ Erro ao carregar o cardápio real."); if (idParaBuscar !== "") resetarEstadoBuscaFlutuante(); }
         }
 
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos"); grid.innerHTML = "";
             produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
-                const qtd = carrinho[p.id] || 0; let status = `<span class="text-emerald-600 font-semibold">${p.estoque}</span>`;
-                let cEstilo = "bg-white border-slate-200 hover:border-slate-300", boxEstilo = "bg-slate-100 text-slate-600", bloq = "", esg = p.estoque === 0;
-                
-                if (esg) {
-                    status = `<span class="text-rose-500 font-semibold text-[11px]">0</span>`; cEstilo = "bg-slate-100 border-slate-200 text-slate-400 select-none pointer-events-none opacity-60"; boxEstilo = "bg-slate-200 text-slate-400"; bloq = "disabled";
-                } else if (p.estoque <= p.critico) { status = `<span class="text-rose-500 font-bold">${p.estoque}</span>`; }
+                const qtd = carrinho[p.id] || 0; let cEstilo = "bg-white border-slate-200 hover:border-slate-300", boxEstilo = "bg-slate-100 text-slate-600", bloq = "", esg = p.estoque === 0;
+                let status = `<span class="${esg || p.estoque <= 5 ? 'text-rose-500 font-bold' : 'text-emerald-600 font-semibold'}">${p.estoque}</span>`;
+                if (esg) cEstilo = "bg-slate-100 text-slate-400 select-none pointer-events-none opacity-60";
                 if (qtd > 0 && !esg) boxEstilo = "bg-orange-50 border border-orange-200 text-orange-700";
                 if (modoBuscaAtivo) { cEstilo = "bg-slate-50 border-slate-200 text-slate-300 select-none pointer-events-none opacity-40"; bloq = "disabled"; }
 
                 grid.innerHTML += `
                     <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cEstilo}">
                         <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${boxEstilo}">
-                            <div class="text-center font-bold text-xl tracking-wide mt-2.5 flex items-center justify-center w-full flex-1 select-none">${p.sigla}</div>
+                            <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">${p.sigla}</div>
                             <div class="flex items-center justify-between w-full mt-auto">
-                                <button onclick="alterarQuantidade(${p.id}, -1)" ${bloq} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center ${qtd === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button>
-                                <span class="text-xs font-bold select-none text-center flex-1">${qtd > 0 ? `<span class="text-orange-600 font-bold text-base">${qtd}</span>` : '<span class="text-slate-300 font-normal">-</span>'}</span>
-                                <button onclick="alterarQuantidade(${p.id}, 1)" ${bloq} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center ${esg ? 'opacity-20' : ''}">+</button>
+                                <button onclick="alterarQuantidade(${p.id}, -1)" ${bloq} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${qtd === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                                <span class="text-xs font-bold text-center flex-1">${qtd > 0 ? `<span class="text-orange-600 text-base">${qtd}</span>` : '-'}</span>
+                                <button onclick="alterarQuantidade(${p.id}, 1)" ${bloq} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${esg ? 'opacity-20' : ''}">+</button>
                             </div>
                         </div>
                         <div class="min-w-0 flex flex-col justify-between flex-1">
-                            <h3 class="font-semibold text-slate-700 text-[13px] truncate leading-tight mb-0.5" title="${p.nome}">${p.nome}</h3>
-                            <div class="flex items-center justify-between text-[12px] font-medium w-full"><span class="text-orange-600 font-bold">R$ ${formatarMoeda(p.preco)}</span><div class="text-slate-500 font-semibold"><span class="text-slate-300 font-normal">E:</span> ${status}</div></div>
+                            <h3 class="font-semibold text-slate-700 text-[13px] truncate leading-tight mb-0.5">${p.nome}</h3>
+                            <div class="flex items-center justify-between text-[12px] font-medium w-full"><span class="text-orange-600 font-bold">R$ ${formatarMoeda(p.preco)}</span><div>E: ${status}</div></div>
                         </div>
                     </div>`;
             });
             grid.innerHTML += `
-                <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-200 hover:border-slate-300">
+                <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-200">
                     <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${modoBuscaAtivo ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">
-                        <div class="text-center font-bold text-xl tracking-wide mt-2.5 flex items-center justify-center w-full flex-1 select-none">PRE</div>
+                        <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">PRE</div>
                         <div class="flex items-center justify-between w-full mt-auto">
-                            <button onclick="gerenciarCliqueMenosPre()" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center ${!modoBuscaAtivo ? 'opacity-20 pointer-events-none' : ''}">-</button>
-                            <span class="text-xs font-bold select-none text-center flex-1">${modoBuscaAtivo ? '<span class="text-slate-400 font-normal text-xs">ativo</span>' : '<span class="text-slate-300 font-normal">-</span>'}</span>
-                            <button onclick="ativarModoBuscaPre()" ${modoBuscaAtivo ? 'disabled' : ''} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center">+</button>
+                            <button onclick="gerenciarCliqueMenosPre()" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${!modoBuscaAtivo ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                            <span class="text-xs font-bold text-center flex-1">${modoBuscaAtivo ? 'ativo' : '-'}</span>
+                            <button onclick="ativarModoBuscaPre()" ${modoBuscaAtivo ? 'disabled' : ''} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm">+</button>
                         </div>
                     </div>
-                    <div class="min-w-0 flex flex-col justify-between flex-1">
-                        <h3 class="font-semibold text-slate-700 text-[13px] truncate leading-tight mb-0.5" title="Online">Online</h3>
-                        <div class="flex items-center justify-between text-[12px] font-medium w-full"><span class="text-orange-600 font-bold">R$ 0,00</span><div class="text-slate-400 font-semibold"><span class="text-slate-300 font-normal">E:</span> n/a</div></div>
-                    </div>
+                    <div class="min-w-0 flex flex-col justify-between flex-1"><h3 class="font-semibold text-slate-700 text-[13px] truncate leading-tight mb-0.5">Online</h3><div class="text-xs font-medium text-orange-600 font-bold">R$ 0,00</div></div>
                 </div>`;
         }
 
@@ -202,7 +179,7 @@
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             document.getElementById("caixa-flutuante-base").className = "pointer-events-auto bg-slate-800 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full";
             document.getElementById("conteudo-flutuante-esquerdo").innerHTML = `<input type="text" id="input-id-busca" placeholder="Digitar ID do Pedido" maxlength="12" class="bg-transparent text-white font-bold text-sm focus:outline-none w-full h-full placeholder-white/50 text-center" oninput="tratarDigitacaoIdBusca(this)">`;
-            const dir = document.getElementById("conteudo-flutuante-direito"); dir.innerText = "- Revisar e Pagar"; dir.className = "text-sm tracking-wide text-right select-none pl-2 h-full flex items-center text-white/40 cursor-default";
+            document.getElementById("conteudo-flutuante-direito").className = "text-sm tracking-wide text-right select-none pl-2 h-full flex items-center text-white/40 cursor-default";
             setTimeout(() => document.getElementById("input-id-busca").focus(), 100);
         }
 
@@ -222,10 +199,8 @@
         }
 
         function processarResultadoBuscaPedido(linhasVindasDoExcel, idDigitado) {
-            const baseFlutuante = document.getElementById("caixa-flutuante-base");
-            const direito = document.getElementById("conteudo-flutuante-direito");
-            const inputBusca = document.getElementById("input-id-busca");
-            const linhasFiltradas = linhasVindasDoExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
+            const baseFlutuante = document.getElementById("caixa-flutuante-base"); const direito = document.getElementById("conteudo-flutuante-direito");
+            const linhasFiltradas = linhasVindasDoExcel.filter(l => String(l.ID_PAGAMENTO || l.ID_PAGEMENTO).trim() === String(idDigitado).trim());
 
             if (linhasFiltradas.length === 0) {
                 baseFlutuante.className = "pointer-events-auto bg-rose-600 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full animate-shake";
@@ -234,19 +209,15 @@
                 setTimeout(() => {
                     baseFlutuante.className = "pointer-events-auto bg-slate-800 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full";
                     direito.innerText = "- Revisar e Pagar"; direito.className = "text-sm tracking-wide text-right select-none pl-2 h-full flex items-center text-white/40 cursor-default";
-                    if (inputBusca) { inputBusca.disabled = false; inputBusca.value = ""; inputBusca.focus(); }
-                }, 2000);
-                return;
+                    const ib = document.getElementById("input-id-busca"); if (ib) { ib.disabled = false; ib.value = ""; ib.focus(); }
+                }, 2000); return;
             }
 
-            modoResgateManual = true; modoBuscaAtivo = false;
-            pixChaveIdentificadora = linhasFiltradas[0].ID_PAGAMENTO || ""; 
-            document.getElementById("titulo-checkout").innerText = "Resumo do Pedido";
-            document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
+            modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = linhasFiltradas[0].ID_PAGAMENTO || ""; 
+            document.getElementById("titulo-checkout").innerText = "Resumo do Pedido"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             
-            const btnFinalizar = document.getElementById("btn-finalizar"); btnFinalizar.disabled = false;
-            btnFinalizar.innerText = "Confirmar Entrega (Dar Baixa)";
-            btnFinalizar.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95";
+            const btnFinalizar = document.getElementById("btn-finalizar"); btnFinalizar.disabled = false; btnFinalizar.innerText = "Confirmar Entrega (Dar Baixa)";
+            btnFinalizar.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-md text-center text-sm shadow cursor-pointer transition-all active:scale-95";
 
             const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valorConsolidado = 0;
 
@@ -254,13 +225,10 @@
                 const qtd = parseInt(linha.QUANTIDADE) || 1; const totalLinha = parseFloat(linha.TOTAL) || 0; valorConsolidado += totalLinha; 
                 const statusRetirada = linha.RETIRADA ? String(linha.RETIRADA).trim().toUpperCase() : "PENDENTE";
                 let tagStatus = `<span class="text-amber-600 font-bold text-[11px] block mt-0.5">[PENDENTE]</span>`;
-                
                 if (statusRetirada === "RETIRADO") {
-                    tagStatus = `<span class="text-rose-500 font-bold text-[11px] block mt-0.5">[JÁ ENTREGUE ⚠️]</span>`;
-                    btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
+                    tagStatus = `<span class="text-rose-500 font-bold text-[11px] block mt-0.5">[JÁ ENTREGUE ⚠️]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
                     btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed";
                 }
-
                 lista.innerHTML += `
                     <div class="flex justify-between items-center text-xs bg-white p-2 rounded-md border border-slate-200 shadow-sm">
                         <div class="max-w-[70%]"><p class="font-semibold text-slate-700 truncate">${linha.PRODUTO}</p><p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(parseFloat(linha["PREÇO"]) || 0)}</p></div>
@@ -268,13 +236,10 @@
                     </div>`;
             });
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidado)}`;
-            
-            // INTELIGÊNCIA DE TELA: Se for Computador (largura >= 1024px), não abre o overlay, apenas atualiza a lateral fixa!
             if (window.innerWidth < 1024) abrirOverlayCelular();
         }
 
         function abrirOverlayCelular() {
-            // Se estiver no PC e não for resgate manual, não abre pop-up redundante
             if (window.innerWidth >= 1024 && !modoResgateManual) return;
             document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; 
             if (!modoResgateManual) resetarEstadoPagamento();
@@ -282,14 +247,9 @@
 
         function fecharOverlay() { 
             document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; 
-            
-            // CORREÇÃO: Força o reset absoluto e imediato do botão PRE ao fechar ou cancelar o resgate
-            modoResgateManual = false; 
-            document.getElementById("titulo-checkout").innerText = "Pagamento";
+            modoResgateManual = false; document.getElementById("titulo-checkout").innerText = "Pagamento";
             document.getElementById("bloco-inferior-pagamento").className = "space-y-3 pt-2 border-t";
-            resetarEstadoPagamento(); 
-            resetarEstadoBuscaFlutuante();
-            carregarEstoqueReal();
+            resetarEstadoPagamento(); resetarEstadoBuscaFlutuante(); carregarEstoqueReal();
         }
 
         function resetarEstadoPagamento() {
@@ -299,7 +259,7 @@
             document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200";
             document.getElementById("input-recebido").disabled = true; document.getElementById("input-recebido").value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
             document.getElementById("btn-finalizar").innerText = "Finalizar";
-            document.getElementById("box-qrcode").className = "w-32 h-32 bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group";
+            document.getElementById("box-qrcode").className = "w-32 h-32 bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all relative overflow-hidden group";
             validarEstadoFinalizar();
         }
 
@@ -311,33 +271,34 @@
 
             if (tipo === 'DINHEIRO') {
                 btnDin.className = ativo; btnPix.className = inativo; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
-                secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-100 pointer-events-auto transition-all duration-200"; inp.disabled = false; inp.value = ""; inp.focus();
+                secaoDin.className = "w-1/2 h-full space-y-100 pointer-events-auto transition-all duration-200"; inp.disabled = false; inp.value = ""; inp.focus();
             } else {
                 btnPix.className = ativo; btnDin.className = inativo; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform -translate-x-1/2";
-                secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200"; inp.disabled = true;
+                secaoDin.className = "w-1/2 h-full space-y-25 opacity-25 pointer-events-none transition-all duration-200"; inp.disabled = true;
             }
             validarEstadoFinalizar();
         }
 
+        // REDUÇÃO E COMPACTAÇÃO: Lógica centralizada para empacotamento do JSON (Dinheiro/Pix unificados)
+        function gerarPayloadVenda(idF, forma) {
+            return JSON.stringify({
+                id_pagamento: idF, pagamento: forma, tipo_venda: "CAIXA", status_retirada: "RETIRADO",
+                total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual),
+                itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
+            });
+        }
+
         async function requisitarQrCodeReal() {
             if (!formaPagamento || formaPagamento !== 'PIX') return;
-            const box = document.getElementById("box-qrcode"); box.className = "w-32 h-32 bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none";
-            box.innerHTML = `<span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight text-center leading-none">Carregando...</span>`;
-            pixChaveIdentificadora = "mp_" + Date.now();
+            const box = document.getElementById("box-qrcode"); box.className = "w-32 h-32 bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none text-[9px] font-bold text-slate-400 uppercase tracking-tight text-center leading-none";
+            box.innerHTML = "Carregando..."; pixChaveIdentificadora = "mp_" + Date.now();
 
             try {
-                const r = await fetch(URL_GRAVACAO, {
-                    method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        id_pagamento: pixChaveIdentificadora, pagamento: "PIX", total_pedido_consolidado: parseFloat(totalAtual), tipo_venda: "CAIXA", status_retirada: "RETIRADO",
-                        itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
-                    })
-                });
+                const r = await fetch(URL_GRAVACAO, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, "PIX") });
                 const dados = await r.json();
                 if (dados.qrcode_imagem) {
                     pixChaveIdentificadora = dados.id_mercado_pago; box.className = "w-32 h-32 bg-white rounded-none flex items-center justify-center p-0 opacity-100 select-none pointer-events-none transition-all";
-                    box.innerHTML = `<img src="data:image/jpeg;base64,${dados.qrcode_imagem}" class="w-full h-full rounded-none shadow-none" alt="QR Code">`;
-                    validarEstadoFinalizar();
+                    box.innerHTML = `<img src="data:image/jpeg;base64,${dados.qrcode_imagem}" class="w-full h-full rounded-none" alt="QR Code">`; validarEstadoFinalizar();
                 } else { throw new Error(); }
             } catch (e) { alert("⚠️ Falha ao gerar QR Code."); resetarEstadoPagamento(); }
         }
@@ -369,12 +330,9 @@
 
         async function checarSegurancaMercadoPago() {
             try {
-                const r = await fetch(URL_VALIDA_PIX, {
-                    method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ id_pagamento: pixChaveIdentificadora, pagamento: "PIX", total_pedido_consolidado: parseFloat(totalAtual), tipo_venda: "CAIXA", status_retirada: "RETIRADO", itens: [] })
-                });
+                const r = await fetch(URL_VALIDA_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: pixChaveIdentificadora, pagamento: "PIX", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), tipo_venda: "CAIXA", status_retirada: "RETIRADO", itens: [] }) });
                 const res = await r.json();
-                if (res.pago === true) { alert("🎉 Venda Finalizada com Sucesso!"); fecharOverlay(); carrinho = {}; resetarEstadoPagamento(); atualizarCarrinhoDOM(); carregarEstoqueReal(); } 
+                if (res.pago === true) { alert("🎉 Venda Finalizada!"); fecharOverlay(); carrinho = {}; resetarEstadoPagamento(); atualizarCarrinhoDOM(); carregarEstoqueReal(); } 
                 else { alert("⚠️ Pagamento pendente ⚠️"); }
             } catch (e) { alert("⚠️ Erro ao verificar pagamento."); }
         }
@@ -382,13 +340,7 @@
         async function executarGravacaoDinheiroDirecto() {
             let idF = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`;
             try {
-                await fetch(URL_GRAVACAO, {
-                    method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
-                        id_pagamento: idF, pagamento: "DINHEIRO", total_pedido_consolidated: parseFloat(totalAtual), tipo_venda: "CAIXA", status_retirada: "RETIRADO", 
-                        itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
-                    })
-                });
+                await fetch(URL_GRAVACAO, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(idF, "DINHEIRO") });
                 alert("Venda Finalizada!"); fecharOverlay(); carrinho = {}; resetarEstadoPagamento(); atualizarCarrinhoDOM(); carregarEstoqueReal();
             } catch (e) { alert("⚠️ Erro ao salvar venda."); }
         }
