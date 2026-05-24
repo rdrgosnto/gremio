@@ -84,8 +84,10 @@
 
     <script>
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
-        const URL_GRAVACAO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
-        const URL_VALIDA_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fc8e0c1a405b4430b0f6390521bada48/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=1yfg6o-AMAAavobkG-AE22s_StAGlL_lkw0GqSfWk4g";
+        
+        // UNIFICAÇÃO: Todas as URLs de gravação apontando agora para a URL mãe do seu novo fluxo
+        const URL_GRAVACAO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/06f981a846ca45bc8bfe51c97c480d96/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n-3ys5toEStLZNzQS6q0bETlCP8-NuAjwWn-fAOqjOs";
+        const URL_VALIDA_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/06f981a846ca45bc8bfe51c97c480d96/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n-3ys5toEStLZNzQS6q0bETlCP8-NuAjwWn-fAOqjOs";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "";
         let modoBuscaAtivo = false, modoResgateManual = false;
@@ -186,7 +188,6 @@
             validarEstadoFinalizar();
         }
 
-        // AJUSTE: Texto explicativo fixo à esquerda e cursor na frente dentro do input
         function activarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
@@ -203,8 +204,6 @@
         }
         
         function ativarModoBuscaPre(e) { activarModoBuscaPre(e); }
-
-        // AJUSTE: O menos do PRE agora funciona em qualquer cenário, limpando e restaurando o caixa normal
         function gerenciarCliqueMenosPre() { resetSistemicoTotal(false); }
 
         function tratarDigitacaoIdBusca(input) {
@@ -214,24 +213,25 @@
 
         function processarResultadoBuscaPedido(linhasVindasDoExcel, idDigitado) {
             const bf = document.getElementById("caixa-flutuante-base");
-            const linhasFiltradas = linhasVindasDoExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
+            const lines = linhasVindasDoExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
 
-            if (linhasFiltradas.length === 0) {
+            if (lines.length === 0) {
                 bf.className = "pointer-events-auto bg-rose-600 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full animate-shake text-base font-sistema";
                 bf.innerHTML = `<span>Pedido não encontrado</span>`;
                 if (navigator.vibrate) navigator.vibrate(200);
                 setTimeout(() => { resetSistemicoTotal(false); }, 2000); return;
             }
 
-            modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = linhasFiltradas[0].ID_PAGAMENTO || ""; 
+            modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = lines[0].ID_PAGAMENTO || ""; 
             document.getElementById("titulo-checkout").innerText = "Resumo do Pedido"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             
-            const btnFinalizar = document.getElementById("btn-finalizar"); btnFinalizar.disabled = false; btnFinalizar.innerText = "Confirmar Entrega (Dar Baixa)";
-            btnFinalizar.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-md text-center text-sm shadow cursor-pointer transition-all active:scale-95";
+            // AJUSTE VISUAL: Botão de confirmação de baixa do PRE agora é Laranja e se chama "Finalizar"
+            const btnFinalizar = document.getElementById("btn-finalizar"); btnFinalizar.disabled = false; btnFinalizar.innerText = "Finalizar";
+            btnFinalizar.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95 font-sistema";
 
             const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valorConsolidado = 0;
 
-            linhasFiltradas.forEach(linha => {
+            lines.forEach(linha => {
                 const qtd = parseInt(linha.QUANTIDADE) || 1; const totalLinha = parseFloat(linha.TOTAL) || 0; valorConsolidado += totalLinha; 
                 const statusRetirada = linha.RETIRADA ? String(linha.RETIRADA).trim().toUpperCase() : "PENDENTE";
                 let tagStatus = `<span class="text-amber-600 font-bold text-[11px] block mt-0.5">[PENDENTE]</span>`;
@@ -264,7 +264,6 @@
             if (!modoResgateManual) resetarEstadoPagamento();
         }
 
-        // AJUSTE: Voltar ao pedido preserva os itens do carrinho e remove apenas estados voláteis de pagamento
         function fecharOverlay() { 
             if (modoResgateManual) {
                 resetSistemicoTotal(true); 
@@ -339,6 +338,7 @@
             });
         }
 
+        // INTEGRAÇÃO: Aciona o novo fluxo para compras locais em PIX
         async function requisitarQrCodeReal() {
             if (!formaPagamento || formaPagamento !== 'PIX') return;
             const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none text-[9px] font-bold text-slate-400 uppercase tracking-tight text-center leading-none font-sistema";
@@ -373,10 +373,26 @@
 
         function processarCliqueFinalizar() { if (modoResgateManual) executingBaixaPedidoEntregue(); else if (formaPagamento === 'DINHEIRO') executarGravacaoDinheiroDirecto(); else checarSegurancaMercadoPago(); }
 
-        function executingBaixaPedidoEntregue() {
+        // INTEGRAÇÃO: Aciona o novo fluxo para dar baixa no pedido Online (PRE)
+        async function executingBaixaPedidoEntregue() {
             document.getElementById("btn-finalizar").innerText = "Processando Baixa...";
-            alert("🔒 Fase Pronta! Próximo passo será criar o fluxo de dar baixa no Power Automate para carimbar RETIRADO.");
-            resetSistemicoTotal(true);
+            try {
+                const payload = JSON.stringify({
+                    id_pagamento: String(pixChaveIdentificadora).trim(),
+                    pagamento: "ONLINE",
+                    tipo_venda: "PRE",
+                    status_retirada: "RETIRADO",
+                    total_pedido_consolidado: 0,
+                    transaction_amount: 0,
+                    itens: []
+                });
+                await fetch(URL_GRAVACAO, { method: "POST", headers: { "Content-Type": "application/json" }, body: payload });
+                alert("🎉 Baixa Confirmada com Sucesso!");
+                resetSistemicoTotal(true);
+            } catch (e) {
+                alert("⚠️ Erro ao processar baixa online.");
+                document.getElementById("btn-finalizar").innerText = "Finalizar";
+            }
         }
 
         async function checarSegurancaMercadoPago() {
@@ -388,6 +404,7 @@
             } catch (e) { alert("⚠️ Erro ao verificar pagamento."); }
         }
 
+        // INTEGRAÇÃO: Aciona o novo fluxo para compras locais em DINHEIRO
         async function executorsGravacaoDinheiroDirecto() {
             let idF = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`;
             try {
