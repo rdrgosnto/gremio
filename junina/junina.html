@@ -89,7 +89,7 @@
         const CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs w-full text-sm";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", modoBuscaAtivo = false, modoResgateManual = false;
-        let cachePedidoOnlineOriginal = []; // Guarda com total segurança os dados vindos diretamente do Excel
+        let cachePedidoOnlineOriginal = [];
 
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
         const revelarPagina = () => document.body.style.opacity = "1";
@@ -169,7 +169,7 @@
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
-        function ativarModoBuscaPre(e) {
+        function activarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = null;
@@ -198,7 +198,7 @@
 
             modoResgateManual = true; modoBuscaAtivo = false; 
             pixChaveIdentificadora = String(idDigitado).trim(); 
-            cachePedidoOnlineOriginal = [...lines]; // SALVAGUARDA DE DADOS: Guardamos a lista pura vinda do Excel para usar na finalização
+            cachePedidoOnlineOriginal = [...lines]; 
 
             document.getElementById("titulo-checkout").innerText = "Resumo do Pedido"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             document.getElementById("id-pedido-cabecalho").innerText = `ID: ${idDigitado}`;
@@ -245,14 +245,32 @@
         }
 
         function resetSistemicoTotal(forçarAtualizacaoHttp = true) {
-            modoResgateManual = false; modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; formaPagamento = null; pixChaveIdentificadora = ""; cachePedidoOnlineOriginal = [];
+            modoResgateManual = false; 
+            modoBuscaAtivo = false; 
+            carrinho = {}; 
+            totalAtual = 0; 
+            formaPagamento = null; 
+            pixChaveIdentificadora = ""; 
+            cachePedidoOnlineOriginal = [];
+            
             document.getElementById("id-pedido-cabecalho").innerText = ""; 
+            
             document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; 
-            document.getElementById("titulo-checkout").innerText = "Pagamento"; document.getElementById("bloco-inferior-pagamento").className = "space-y-4 pt-1 border-t";
-            const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = abrirOverlayCelular;
+            document.getElementById("titulo-checkout").innerText = "Pagamento"; 
+            document.getElementById("bloco-inferior-pagamento").className = "space-y-4 pt-1 border-t";
+            
+            const bf = document.getElementById("caixa-flutuante-base"); 
+            bf.onclick = abrirOverlayCelular;
             bf.className = "pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-sm";
             bf.innerHTML = `<div id="conteudo-flutuante-unico" class="text-sm tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>`;
-            resetarEstadoPagamento(); atualizarCarrinhoDOM(); if (forçarAtualizacaoHttp) carregarEstoqueReal(); else renderizarProdutos();
+            
+            resetarEstadoPagamento(); 
+            atualizarCarrinhoDOM(); 
+            
+            // GARANTIA COMPLETA DE FECHAMENTO: Remove o painel escuro da tela do telemóvel ao sair
+            document.getElementById("painel-fechamento").classList.add("hidden"); 
+            
+            if (forçarAtualizacaoHttp) carregarEstoqueReal(); else renderizarProdutos();
         }
 
         function resetarEstadoPagamento() {
@@ -321,9 +339,9 @@
             btn.disabled = true;
             
             try {
-                // ABORDAGEM MATADORA: Em vez de caçar elementos visuais que quebram na leitura da tela,
-                // nós mapeamos a lista original estável vinda do Excel que guardamos em memória!
+                // Injeta com segurança o ID do Pagamento em cada item, caso venha a precisar no fluxo
                 const itensPuxadosDaTabelaOriginal = cachePedidoOnlineOriginal.map(linha => ({
+                    "ID_PAGAMENTO": String(pixChaveIdentificadora).trim(),
                     "SIGLA": linha.SIGLA ? String(linha.SIGLA).trim().toUpperCase() : "PRE",
                     "PRODUTO": String(linha.PRODUTO).trim(),
                     "QUANTIDADE": String(linha.QUANTIDADE).trim(),
@@ -334,7 +352,6 @@
                 const valorTxt = document.getElementById("valor-pedido-txt").innerText;
                 const valorConsolidado = parseFloat(valorTxt.replace("R$", "").replace(".", "").replace(",", ".").trim()) || 0;
 
-                // Dispara o pacote JSON perfeito para a URL do Power Automate
                 const resposta = await fetch(URL_MÃE, { 
                     method: "POST", 
                     headers: { "Content-Type": "application/json" }, 
