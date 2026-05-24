@@ -100,12 +100,12 @@
             } catch (e) { console.error(e); if (idParaBuscar !== "") resetSistemicoTotal(false); } finally { revelarPagina(); }
         }
 
-        // Fontes dos textos internos dos produtos ampliadas (text-[14px], text-[13px] font-bold) sem alterar o tamanho do card
+        // AJUSTADO: Mudado de font-bold/font-black para font-semibold (semi-bold) nos textos internos sem mudar tamanho dos cards
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos"); grid.innerHTML = "";
             produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
                 const qtd = carrinho[p.id] || 0; let cEstilo = "bg-white border-slate-200 hover:border-slate-300", boxEstilo = "bg-slate-100 text-slate-600", bloq = "", esg = p.estoque === 0;
-                let status = `<span class="${esg || p.estoque <= 5 ? 'text-rose-500 font-black' : 'text-emerald-600 font-bold'}">${p.estoque}</span>`;
+                let status = `<span class="${esg || p.estoque <= 5 ? 'text-rose-500 font-semibold' : 'text-emerald-600 font-semibold'}">${p.estoque}</span>`;
                 if (esg) cEstilo = "bg-slate-100 text-slate-400 select-none pointer-events-none opacity-60";
                 if (qtd > 0 && !esg) boxEstilo = "bg-orange-50 border border-orange-200 text-orange-700";
                 if (modoBuscaAtivo) { cEstilo = "bg-slate-50 border-slate-200 text-slate-300 select-none pointer-events-none opacity-40"; bloq = "disabled"; }
@@ -116,13 +116,13 @@
                             <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none font-sistema">${p.sigla}</div>
                             <div class="flex items-center justify-between w-full mt-auto">
                                 <button onclick="alterarQuantidade(${p.id}, -1)" ${bloq} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${qtd === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button>
-                                <span class="text-xs font-bold text-center flex-1">${qtd > 0 ? `<span class="text-orange-600 text-base font-black">${qtd}</span>` : '-'}</span>
+                                <span class="text-xs font-bold text-center flex-1">${qtd > 0 ? `<span class="text-orange-600 text-base font-semibold">${qtd}</span>` : '-'}</span>
                                 <button onclick="alterarQuantidade(${p.id}, 1)" ${bloq} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${esg ? 'opacity-20' : ''}">+</button>
                             </div>
                         </div>
                         <div class="min-w-0 flex flex-col justify-between flex-1">
-                            <h3 class="font-bold text-slate-800 text-[14px] truncate leading-tight mb-0.5">${p.nome}</h3>
-                            <div class="flex items-center justify-between text-[13px] font-bold w-full"><span class="text-orange-600 font-extrabold">R$ ${formatarMoeda(p.preco)}</span><div>E: ${status}</div></div>
+                            <h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5">${p.nome}</h3>
+                            <div class="flex items-center justify-between text-[13px] font-medium w-full"><span class="text-orange-600 font-semibold">R$ ${formatarMoeda(p.preco)}</span><div>E: ${status}</div></div>
                         </div>
                     </div>`;
             });
@@ -136,7 +136,7 @@
                             <button onclick="ativarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm">+</button>
                         </div>
                     </div>
-                    <div class="min-w-0 flex flex-col justify-between flex-1"><h3 class="font-bold text-slate-800 text-[14px] truncate leading-tight mb-0.5">Online</h3><div class="text-[13px] font-bold text-orange-600">R$ 0,00</div></div>
+                    <div class="min-w-0 flex flex-col justify-between flex-1"><h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5">Online</h3><div class="text-[13px] font-semibold text-orange-600">R$ 0,00</div></div>
                 </div>`;
         }
 
@@ -158,8 +158,8 @@
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
-        // ADICIONADO: O texto "ID do Pagamento:" no rótulo e como placeholder da busca
-        function activarModoBuscaPre(e) {
+        // AJUSTADO: Função unificada e limpa para evitar colisões de escopo. O botão "+" agora dispara perfeitamente.
+        function ativarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = null;
@@ -172,8 +172,6 @@
                 <div onclick="resetSistemicoTotal(false)" class="text-xs font-bold text-white/50 hover:text-white cursor-pointer pl-1 select-none font-sistema whitespace-nowrap">Sair</div>`;
             setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100);
         }
-        function activarModoBuscaPre(e) { activarModoBuscaPre(e); }
-        function ativarModoBuscaPre(e) { activarModoBuscaPre(e); }
 
         function tratarDigitacaoIdBusca(input) {
             input.value = input.value.replace(/\D/g, "");
@@ -200,10 +198,9 @@
 
             lines.forEach(linha => {
                 const qtd = parseInt(linha.QUANTIDADE) || 1; const totalLinha = parseFloat(linha.TOTAL) || 0; valorConsolidado += totalLinha; 
-                const statusRetirada = inline => linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente";
-                const statusRetiradaText = statusRetirada(linha);
+                const statusRetirada = linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente";
                 let tagStatus = `<span class="text-amber-600 font-bold text-[11px] block mt-0.5">[PENDENTE]</span>`;
-                if (statusRetiradaText === "retirado") {
+                if (statusRetirada === "retirado") {
                     tagStatus = `<span class="text-rose-500 font-bold text-[11px] block mt-0.5">[JÁ ENTREGUE ⚠️]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
                     btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed";
                 }
@@ -216,7 +213,7 @@
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidado)}`;
             if (window.innerWidth >= 1024) {
                 bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs w-full cursor-default text-sm font-sistema";
-                bf.innerHTML = `<div class="bg-transparent text-white font-bold text-sm w-full text-center select-none truncate px-1">ID: ${idDigitado}</div><div onclick="resetSistemicoTotal(false)" class="text-xs font-bold text-white/50 hover:text-white cursor-pointer pl-2 select-none font-sistema">Sair</div>`;
+                bf.innerHTML = `<div class="bg-transparent text-white font-bold text-sm w-full text-center select-none truncate px-1">ID do Pagamento: ${idDigitado}</div><div onclick="resetSistemicoTotal(false)" class="text-xs font-bold text-white/50 hover:text-white cursor-pointer pl-2 select-none font-sistema whitespace-nowrap">Sair</div>`;
             } else { abrirOverlayCelular(); }
         }
 
@@ -262,7 +259,6 @@
             validarEstadoFinalizar();
         }
 
-        // Payload do PIX limpo e fixo conforme solicitado (Decisões de colunas movidas para o Power Automate)
         const gerarPayloadVenda = (idF, forma) => JSON.stringify({ 
             id_pagamento: idF, 
             pagamento: forma, 
