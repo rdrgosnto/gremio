@@ -32,7 +32,7 @@
                     <h3 id="titulo-checkout" class="text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2">Pagamento</h3>
                     <div class="flex-1 flex flex-col min-h-0">
                         <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Resumo do Pedido:</h4>
-                        <div id="lista-carrinho" class="space-y-2 overflow-y-auto pr-1 no-scrollbar flex-1">
+                        <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
                             <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
                         </div>
                     </div>
@@ -61,7 +61,7 @@
                     </div>
                 </div>
                 <div class="flex flex-col items-center gap-1.5 mt-2 pt-2 border-t w-full">
-                    <button onclick="processarCliqueFinalizar()" id="btn-finalizar" disabled class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95 font-sistema">Finalizar</button>
+                    <button onclick="processarCliqueFinalizar()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-semibold py-3.5 rounded-md text-center text-sm cursor-not-allowed transition-all">Finalizar</button>
                     <button onclick="fecharOverlay()" class="lg:hidden text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1">Voltar ao pedido</button>
                 </div>
             </div>
@@ -125,13 +125,14 @@
                         </div>
                     </div>`;
             });
+            // AJUSTADO: Card do PRE com texto 'ativo' em font-semibold e tamanho text-[13px]
             grid.innerHTML += `
                 <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-200">
                     <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${modoBuscaAtivo ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">
                         <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none font-sistema">PRE</div>
                         <div class="flex items-center justify-between w-full mt-auto">
                             <button onclick="resetSistemicoTotal(false)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm">-</button>
-                            <span class="text-xs font-bold text-center flex-1">${modoBuscaAtivo ? 'ativo' : '-'}</span>
+                            <span class="text-[13px] font-semibold text-center flex-1">${modoBuscaAtivo ? 'ativo' : '-'}</span>
                             <button onclick="ativarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm">+</button>
                         </div>
                     </div>
@@ -150,8 +151,8 @@
             const lista = document.getElementById("lista-carrinho"); totalAtual = 0; let tItens = 0; lista.innerHTML = "";
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id); const qtd = carrinho[id]; const sub = p.preco * qtd; totalAtual += sub; tItens += qtd;
-                // MUDADO MANUALMENTE PARA p-2 (reduzindo mais a altura da caixa do carrinho)
-                lista.innerHTML += `<div class="flex justify-between items-center text-[13px] bg-slate-50 p-2 rounded-md border border-slate-100 font-sistema"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate text-[15px]">${p.nome}</p><p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700 text-sm">R$ ${formatarMoeda(sub)}</span></div>`;
+                // AJUSTADO: Altura reduzida para p-[6px], nome do produto em 14px e preços em 13px
+                lista.innerHTML += `<div class="flex justify-between items-center bg-slate-50 p-[6px] rounded-md border border-slate-100 font-sistema"><div class="max-w-[75%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${p.nome}</p><p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700 text-[13px] flex-shrink-0 pl-2">R$ ${formatarMoeda(sub)}</span></div>`;
             });
             if (tItens === 0) lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
@@ -190,8 +191,9 @@
             modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = lines[0].ID_PAGAMENTO || ""; 
             document.getElementById("titulo-checkout").innerText = "Resumo do Pedido"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             
+            // AJUSTADO: Botão Finalizar no modo PRE também recebe py-3.5 e font-semibold
             const btnFinalizar = document.getElementById("btn-finalizar"); btnFinalizar.disabled = false; btnFinalizar.innerText = "Finalizar";
-            btnFinalizar.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95 font-sistema";
+            btnFinalizar.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3.5 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95 font-sistema";
 
             const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valorConsolidated = 0;
 
@@ -201,24 +203,27 @@
                 let tagStatus = `<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>`;
                 if (statusRetirada === "retirado") {
                     tagStatus = `<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[JÁ ENTREGUE ⚠️]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
-                    btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed";
+                    btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-bold py-3.5 rounded-md text-center text-sm cursor-not-allowed";
                 }
-                // MUDADO MANUALMENTE PARA p-2 (reduzindo mais a altura da caixa na busca do PRE)
+                // AJUSTADO: Altura reduzida para p-[6px], nome do produto em 14px e preços em 13px no bloco do PRE
                 lista.innerHTML += `
-                    <div class="flex justify-between items-center text-[13px] bg-white p-2 rounded-md border border-slate-200 shadow-sm font-sistema">
-                        <div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[15px]">${linha.PRODUTO}</p><p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div>
-                        <div class="text-right flex-shrink-0 pl-2"><p class="font-bold text-slate-700 text-sm">R$ ${formatarMoeda(totalLinha)}</p>${tagStatus}</div>
+                    <div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-200 shadow-sm font-sistema">
+                        <div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO}</p><p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div>
+                        <div class="text-right flex-shrink-0 pl-2"><p class="font-bold text-slate-700 text-[13px]">R$ ${formatarMoeda(totalLinha)}</p>${tagStatus}</div>
                     </div>`;
             });
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidated)}`;
             
+            // AJUSTADO: Estrutura interna com justify-between faz o ID ficar flutuando exatamente centralizado no meio!
             if (window.innerWidth >= 1024) {
-                bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-start min-w-[240px] max-w-xs w-full cursor-default text-base font-sistema";
-                bf.innerHTML = `<div class="bg-transparent text-white font-medium text-base flex-1 text-left select-none truncate">ID do Pagamento: ${idDigitado}</div><div onclick="resetSistemicoTotal(false)" class="text-base font-medium text-white/60 hover:text-white cursor-pointer pl-2 select-none font-sistema whitespace-nowrap transition-colors">Sair</div>`;
+                bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs w-full cursor-default text-base font-sistema";
+                bf.innerHTML = `
+                    <div class="text-left font-medium text-base select-none whitespace-nowrap">ID do Pagamento:</div>
+                    <div class="font-medium text-base select-none truncate px-2 text-center flex-1">text-${idDigitado}</div>
+                    <div onclick="resetSistemicoTotal(false)" class="text-base font-medium text-white/60 hover:text-white cursor-pointer select-none font-sistema whitespace-nowrap transition-colors text-right">Sair</div>`;
             } else { abrirOverlayCelular(); }
         }
 
-        /* Restante das funções de controle do sistema mantidas idênticas */
         function abrirOverlayCelular() {
             if (window.innerWidth >= 1024 && !modoResgateManual) return;
             document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; 
@@ -295,8 +300,8 @@
             if (modoResgateManual) return;
             const btn = document.getElementById("btn-finalizar"), rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0;
             if (Object.keys(carrinho).length > 0 && formaPagamento && (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" || formaPagamento === 'DINHEIRO' && rec >= totalAtual)) {
-                btn.disabled = false; btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95 font-sistema";
-            } else { btn.disabled = true; btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed font-sistema"; }
+                btn.disabled = false; btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3.5 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95 font-sistema";
+            } else { btn.disabled = true; btn.className = "w-full bg-slate-200 text-slate-400 font-semibold py-3.5 rounded-md text-center text-sm cursor-not-allowed font-sistema"; }
         }
 
         const processarCliqueFinalizar = () => modoResgateManual ? executingBaixaPedidoEntregue() : (formaPagamento === 'DINHEIRO' ? executarGravacaoDinheiroDirecto() : checarSegurancaMercadoPago());
