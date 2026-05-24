@@ -91,7 +91,7 @@
 
                 <div class="flex flex-col items-center gap-1.5 mt-2 pt-2 border-t w-full">
                     <button onclick="processarCliqueFinalizar()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed transition-all">Finalizar</button>
-                    <button onclick="fecharOverlay()" class="lg:hidden text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1">Voltar ao pedido</button>
+                    <button onclick="fecharOverlay()" class="text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1">Voltar ao pedido</button>
                 </div>
             </div>
         </section>
@@ -111,14 +111,13 @@
 
     <script>
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
-        constURL_GRAVACAO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
+        const URL_GRAVACAO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
         const URL_VALIDA_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fc8e0c1a405b4430b0f6390521bada48/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=1yfg6o-AMAAavobkG-AE22s_StAGlL_lkw0GqSfWk4g";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "";
         let modoBuscaAtivo = false, modoResgateManual = false;
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
 
-        // Passo 5: Trava automática para os dias 25 e 26 de junho de 2026
         function verificarBloqueioPreVenda() {
             const hoje = new Date();
             const dia = hoje.getDate();
@@ -161,8 +160,8 @@
             const mes = hoje.getMonth() + 1;
             const ano = hoje.getFullYear();
 
-            // Modificar para 27/06/2026 quando o sistema for publicado oficialmente
-            if (ano < 2026 || (ano === 2026 && mes < 12) || (ano === 2026 && mes === 12 && dia < 31)) {
+            // Configurado para bloquear dinheiro apenas após 31/12/2026 (Liberado para testes hoje!)
+            if (ano > 2026 || (ano === 2026 && mes === 12 && dia >= 31)) {
                 const btnDin = document.getElementById("btn-dinheiro");
                 if (btnDin) {
                     btnDin.disabled = true;
@@ -175,17 +174,16 @@
             if (verificarBloqueioPreVenda()) return;
 
             try {
+                // CORREÇÃO: Chamada via POST leve e limpa para evitar problemas de CORS
                 const r = await fetch(URL_LEITURA, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ id_pagamento: String(idParaBuscar) })
+                    body: JSON.stringify({ id_pagamento: String(idParaBuscar).trim() })
                 });
                 if (!r.ok) throw new Error();
                 
                 const combo = await r.json();
                 
-                if (combo.estoque) {
-                    // Mapeando estritamente as chaves MAIÚSCULAS devolvidas pelo seu Excel
+                if (combo && combo.estoque) {
                     produtos = combo.estoque.map(l => ({ 
                         id: parseInt(l.ID), 
                         sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??", 
@@ -198,12 +196,13 @@
                     checarTravaDinheiro();
                 }
 
-                if (idParaBuscar !== "") {
-                    processarResultadoBuscaPedido(combo.pedido);
+                // CORREÇÃO: Só aciona o processamento de busca se o operador tiver digitado algo de verdade
+                if (idParaBuscar !== "" && combo && combo.pedido) {
+                    processarResultadoBuscaPedido(combo.pedido, idParaBuscar);
                 }
 
             } catch (e) { 
-                console.error(e);
+                console.error("Erro na requisição:", e);
                 alert("⚠️ Erro ao carregar o cardápio real do Excel."); 
                 if (idParaBuscar !== "") resetarEstadoBuscaFlutuante();
             }
@@ -248,8 +247,9 @@
         }
 
         function renderizarItemEspecialPre(grid) {
+            // CORREÇÃO: PRE com o exato mesmo estilo visual, fundo e cores dos outros itens do menu
             let preEstilo = "bg-white border-slate-200 hover:border-slate-300";
-            let boxPreEstilo = "bg-blue-50 text-blue-700 border border-blue-100";
+            let boxPreEstilo = "bg-slate-100 text-slate-600";
             
             if (modoBuscaAtivo) {
                 boxPreEstilo = "bg-slate-800 text-white border border-slate-900";
@@ -266,10 +266,18 @@
                         </div>
                     </div>
                     <div class="min-w-0 flex flex-col justify-between flex-1">
-                        <h3 class="font-semibold text-slate-700 text-[13px] truncate leading-tight mb-0.5" title="online - pré pedido">online - pré pedido</h3>
+                        <!-- CORREÇÃO: Nome alterado de 'online - pré pedido' para 'Online' -->
+                        <h3 class="font-semibold text-slate-700 text-[13px] truncate leading-tight mb-0.5" title="Online">Online</h3>
                         <div class="flex items-center justify-between text-[12px] font-medium w-full"><span class="text-orange-600 font-bold">R$ 0,00</span><div class="text-slate-400 font-semibold"><span class="text-slate-300 font-normal">E:</span> n/a</div></div>
                     </div>
                 </div>`;
+        }
+
+        function alterarQuantidade(id, d) {
+            const p = produtos.find(item => item.id === id); const nQtd = (carrinho[id] || 0) + d;
+            if (nQtd < 0) return; if (nQtd > p.estoque) { alert(`Ops! Só temos ${p.estoque} un. de ${p.nome}.`); return; }
+            if (nQtd === 0) delete carrinho[id]; else carrinho[id] = nQtd;
+            renderizarProdutos(); atualizarCarrinhoDOM();
         }
 
         function atualizarCarrinhoDOM() {
@@ -348,12 +356,15 @@
             }
         }
 
-        function processarResultadoBuscaPedido(linhasEncontradas) {
+        function processarResultadoBuscaPedido(linhasVindasDoExcel, idDigitado) {
             const baseFlutuante = document.getElementById("caixa-flutuante-base");
             const direito = document.getElementById("conteudo-flutuante-direito");
             const inputBusca = document.getElementById("input-id-busca");
 
-            if (!linhasEncontradas || linhasEncontradas.length === 0) {
+            // CORREÇÃO: Filtra cirurgicamente na listagem apenas as linhas que pertencem EXATAMENTE ao ID digitado
+            const linhasFiltradas doPedido = linhasVindasDoExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
+
+            if (linhasFiltradas doPedido.length === 0) {
                 baseFlutuante.classList.remove("bg-slate-800");
                 baseFlutuante.classList.add("bg-rose-600", "animate-shake");
                 direito.innerText = "não encontrado";
@@ -379,9 +390,10 @@
 
             modoResgateManual = true; 
             modoBuscaAtivo = false;
-            pixChaveIdentificadora = linhasEncontradas[0].ID_PAGAMENTO || ""; 
+            pixChaveIdentificadora = linhasFiltradas doPedido[0].ID_PAGAMENTO || ""; 
             
-            document.getElementById("titulo-checkout").innerText = "Resgatar Entrega";
+            // CORREÇÃO: Mantido o título e a estrutura padrão de RESUMO DO PEDIDO que você pediu
+            document.getElementById("titulo-checkout").innerText = "Resumo do Pedido";
             document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             
             const btnFinalizar = document.getElementById("btn-finalizar");
@@ -393,18 +405,17 @@
             lista.innerHTML = "";
             let valorConsolidado = 0;
 
-            linhasEncontradas.forEach(linha => {
+            linhasFiltradas doPedido.forEach(linha => {
                 const qtd = parseInt(linha.QUANTIDADE) || 1;
                 const totalLinha = parseFloat(linha.TOTAL) || 0;
-                
                 valorConsolidado += totalLinha; 
                 
-                // Mapeia de acordo com o retorno maiúsculo RETIRADA da tabela do Excel
                 const statusRetirada = linha.RETIRADA ? String(linha.RETIRADA).trim().toUpperCase() : "PENDENTE";
                 
-                let tagStatus = `<span class="text-amber-600 font-bold">[PENDENTE]</span>`;
+                // CORREÇÃO: Exibição exata da tag de status [PENDENTE] ou [JÁ ENTREGUE] embaixo do valor
+                let tagStatus = `<span class="text-amber-600 font-bold text-[11px] block mt-0.5">[PENDENTE]</span>`;
                 if (statusRetirada === "RETIRADO") {
-                    tagStatus = `<span class="text-rose-500 font-bold">[JÁ ENTREGUE ⚠️]</span>`;
+                    tagStatus = `<span class="text-rose-500 font-bold text-[11px] block mt-0.5">[JÁ ENTREGUE ⚠️]</span>`;
                     btnFinalizar.disabled = true;
                     btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
                     btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed";
@@ -418,7 +429,7 @@
                         </div>
                         <div class="text-right">
                             <p class="font-bold text-slate-700">R$ ${formatarMoeda(totalLinha)}</p>
-                            <p class="text-[9px] mt-0.5">${tagStatus}</p>
+                            ${tagStatus}
                         </div>
                     </div>`;
             });
@@ -559,7 +570,6 @@
             btn.disabled = true; 
             btn.innerText = "Processando Baixa...";
 
-            // Interrupção programada antes do Passo 7
             alert("🔒 Fase Pronta! Próximo passo será criar o fluxo de dar baixa no Power Automate para carimbar RETIRADO.");
             
             modoResgateManual = false;
@@ -582,7 +592,7 @@
                 status_retirada: configVenda.status,
                 itens: Object.keys(carrinho).map(id => { 
                     const p = produtos.find(item => item.id == id); 
-                    return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
+                    return { sigla: p.sigla, produto: p.nome, bandwidth: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
                 })
             };
 
