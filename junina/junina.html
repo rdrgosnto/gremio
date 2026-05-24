@@ -224,7 +224,7 @@
                 const statusRetirada = linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente";
                 let tagStatus = `<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>`;
                 if (statusRetirada === "retirado") {
-                    tagStatus = `<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
+                    tagStatus = `<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Entregue";
                     btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
                 }
                 lista.innerHTML += `
