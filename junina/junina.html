@@ -32,7 +32,7 @@
                     <h3 id="titulo-checkout" class="text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2">Pagamento</h3>
                     <div class="flex-1 flex flex-col min-h-0">
                         <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Resumo do Pedido:</h4>
-                        <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
+                        <div id="lista-carrinho" class="space-y-2 overflow-y-auto pr-1 no-scrollbar flex-1">
                             <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
                         </div>
                     </div>
@@ -70,7 +70,7 @@
 
     <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 flex justify-center pointer-events-none">
         <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-base font-sistema">
-            <div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center">Pedido R$ 0,00 - Revisar</div>
+            <div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>
         </div>
     </div>
 
@@ -100,7 +100,6 @@
             } catch (e) { console.error(e); if (idParaBuscar !== "") resetSistemicoTotal(false); } finally { revelarPagina(); }
         }
 
-        // AJUSTADO: Mudado de font-bold/font-black para font-semibold (semi-bold) nos textos internos sem mudar tamanho dos cards
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos"); grid.innerHTML = "";
             produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
@@ -151,25 +150,26 @@
             const lista = document.getElementById("lista-carrinho"); totalAtual = 0; let tItens = 0; lista.innerHTML = "";
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id); const qtd = carrinho[id]; const sub = p.preco * qtd; totalAtual += sub; tItens += qtd;
-                lista.innerHTML += `<div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-md border border-slate-100 font-sistema"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate">${p.nome}</p><p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700">R$ ${formatarMoeda(sub)}</span></div>`;
+                // AJUSTADO: Aumentado levemente o padding (p-3) e os textos internos de cada caixinha de item
+                lista.innerHTML += `<div class="flex justify-between items-center text-[13px] bg-slate-50 p-3 rounded-md border border-slate-100 font-sistema"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate">${p.nome}</p><p class="text-[11px] text-slate-400">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700 text-sm">R$ ${formatarMoeda(sub)}</span></div>`;
             });
             if (tItens === 0) lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
-            if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar`;
+            if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
-        // AJUSTADO: Função unificada e limpa para evitar colisões de escopo. O botão "+" agora dispara perfeitamente.
+        // AJUSTADO: Alinhamento rigoroso à esquerda (justify-start), mesma fonte/tamanho (text-base) e botão Sair ajustado
         function ativarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = null;
-            bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-10 px-3 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs w-full cursor-default text-sm font-sistema";
+            bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-start min-w-[240px] max-w-xs w-full cursor-default text-base font-sistema";
             bf.innerHTML = `
-                <div class="flex items-center flex-1 h-full min-w-0 pr-1">
-                    <span class="text-white text-xs font-bold whitespace-nowrap mr-1 select-none">ID do Pagamento:</span>
-                    <input type="text" id="input-id-busca" placeholder="ID do Pagamento:" class="bg-transparent text-white font-semibold text-xs focus:outline-none w-full h-full placeholder-white/30 min-w-0" maxlength="12" oninput="tratarDigitacaoIdBusca(this)">
+                <div class="flex items-center justify-start flex-1 h-full min-w-0">
+                    <span class="text-white text-base font-medium whitespace-nowrap mr-1 select-none">ID do Pagamento:</span>
+                    <input type="text" id="input-id-busca" placeholder="ID do Pagamento:" class="bg-transparent text-white font-medium text-base focus:outline-none w-full h-full placeholder-white/30 min-w-0 text-left" maxlength="12" oninput="tratarDigitacaoIdBusca(this)">
                 </div>
-                <div onclick="resetSistemicoTotal(false)" class="text-xs font-bold text-white/50 hover:text-white cursor-pointer pl-1 select-none font-sistema whitespace-nowrap">Sair</div>`;
+                <div onclick="resetSistemicoTotal(false)" class="text-base font-medium text-white/60 hover:text-white cursor-pointer pl-2 select-none font-sistema whitespace-nowrap transition-colors">Sair</div>`;
             setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100);
         }
 
@@ -183,7 +183,7 @@
             const lines = linhasExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
 
             if (lines.length === 0) {
-                bf.className = "pointer-events-auto bg-rose-600 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full animate-shake text-sm font-sistema";
+                bf.className = "pointer-events-auto bg-rose-600 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full animate-shake text-base font-sistema";
                 bf.innerHTML = `<span>Não encontrado</span>`;
                 setTimeout(() => { resetSistemicoTotal(false); }, 2000); return;
             }
@@ -196,24 +196,27 @@
 
             const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valorConsolidado = 0;
 
+            // AJUSTADO: Aumentado levemente o padding (p-3) e textos no card da listagem do PRE
             lines.forEach(linha => {
                 const qtd = parseInt(linha.QUANTIDADE) || 1; const totalLinha = parseFloat(linha.TOTAL) || 0; valorConsolidado += totalLinha; 
                 const statusRetirada = linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente";
-                let tagStatus = `<span class="text-amber-600 font-bold text-[11px] block mt-0.5">[PENDENTE]</span>`;
+                let tagStatus = `<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>`;
                 if (statusRetirada === "retirado") {
-                    tagStatus = `<span class="text-rose-500 font-bold text-[11px] block mt-0.5">[JÁ ENTREGUE ⚠️]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
+                    tagStatus = `<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[JÁ ENTREGUE ⚠️]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
                     btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed";
                 }
                 lista.innerHTML += `
-                    <div class="flex justify-between items-center text-xs bg-white p-2 rounded-md border border-slate-200 shadow-sm font-sistema">
-                        <div class="max-w-[70%]"><p class="font-semibold text-slate-700 truncate">${linha.PRODUTO}</p><p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div>
-                        <div class="text-right"><p class="font-bold text-slate-700">R$ ${formatarMoeda(totalLinha)}</p>${tagStatus}</div>
+                    <div class="flex justify-between items-center text-[13px] bg-white p-3 rounded-md border border-slate-200 shadow-sm font-sistema">
+                        <div class="max-w-[70%]"><p class="font-semibold text-slate-700 truncate">${linha.PRODUTO}</p><p class="text-[11px] text-slate-400">${qtd}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div>
+                        <div class="text-right"><p class="font-bold text-slate-700 text-sm">R$ ${formatarMoeda(totalLinha)}</p>${tagStatus}</div>
                     </div>`;
             });
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidado)}`;
+            
+            // AJUSTADO: Alinhamento e proporções pós-busca idênticos ao botão principal
             if (window.innerWidth >= 1024) {
-                bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs w-full cursor-default text-sm font-sistema";
-                bf.innerHTML = `<div class="bg-transparent text-white font-bold text-sm w-full text-center select-none truncate px-1">ID do Pagamento: ${idDigitado}</div><div onclick="resetSistemicoTotal(false)" class="text-xs font-bold text-white/50 hover:text-white cursor-pointer pl-2 select-none font-sistema whitespace-nowrap">Sair</div>`;
+                bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-start min-w-[240px] max-w-xs w-full cursor-default text-base font-sistema";
+                bf.innerHTML = `<div class="bg-transparent text-white font-medium text-base flex-1 text-left select-none truncate">ID do Pagamento: ${idDigitado}</div><div onclick="resetSistemicoTotal(false)" class="text-base font-medium text-white/60 hover:text-white cursor-pointer pl-2 select-none font-sistema whitespace-nowrap transition-colors">Sair</div>`;
             } else { abrirOverlayCelular(); }
         }
 
@@ -234,7 +237,7 @@
             document.getElementById("titulo-checkout").innerText = "Pagamento"; document.getElementById("bloco-inferior-pagamento").className = "space-y-4 pt-1 border-t";
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = abrirOverlayCelular;
             bf.className = "pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-base font-sistema";
-            bf.innerHTML = `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center">Pedido R$ 0,00 - Revisar</div>`;
+            bf.innerHTML = `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>`;
             resetarEstadoPagamento(); atualizarCarrinhoDOM(); if (forçarAtualizacaoHttp) carregarEstoqueReal(); else renderizarProdutos();
         }
 
