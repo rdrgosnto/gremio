@@ -140,7 +140,7 @@
                     <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${modoBuscaAtivo ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">
                         <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">PRE</div>
                         <div class="flex items-center justify-between w-full mt-auto">
-                            <button onclick="resetSistemicoTotal(false)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm">-</button>
+                            <button onclick="resetSistemicoTotal(false)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${!modoBuscaAtivo ? 'opacity-20 pointer-events-none' : ''}">-</button>
                             <span class="text-[13px] font-semibold text-center flex-1">${modoBuscaAtivo ? 'ativo' : '-'}</span>
                             <button onclick="ativarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm">+</button>
                         </div>
@@ -167,7 +167,7 @@
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
-        function activarModoBuscaPre(e) {
+        function ativarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = null;
@@ -346,7 +346,7 @@
                     headers: { "Content-Type": "application/json" }, 
                     body: JSON.stringify({ 
                         id_pagamento: String(pixChaveIdentificadora).trim(), 
-                        pagamento: "PIX", 
+                        payment: "PIX", 
                         tipo_venda: "ONLINE", 
                         status_retirada: "retirado", 
                         total_pedido_consolidado: valorConsolidado, 
