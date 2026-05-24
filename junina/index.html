@@ -15,13 +15,15 @@
             40%, 80% { transform: translateX(6px); }
         }
         .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
+        
+        /* SOLUÇÃO DEFINITIVA: Estilo nativo puro para forçar a página a nascer 100% invisível */
+        body { opacity: 0; transition: opacity 0.15s ease-in-out; }
     </style>
 </head>
-<!-- AJUSTE CRUCIAL: opacity-0 e transition para revelar a tela apenas quando estiver estilizada -->
-<body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800 opacity-0 transition-opacity duration-200">
+<body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800">
 
     <header class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
-        <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
+        <h1 class="text-xl font-semibold tracking-wide font-sistema">Festa Junina</h1>
     </header>
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
@@ -97,7 +99,8 @@
         }
 
         function revelarPagina() {
-            document.body.classList.remove('opacity-0');
+            // Modifica o estilo inline para dar o fade-in suave sem quebras de layout
+            document.body.style.opacity = "1";
         }
 
         async function carregarEstoqueReal(idParaBuscar = "") {
@@ -136,7 +139,7 @@
                 grid.innerHTML += `
                     <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cEstilo}">
                         <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${boxEstilo}">
-                            <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">${p.sigla}</div>
+                            <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none font-sistema">${p.sigla}</div>
                             <div class="flex items-center justify-between w-full mt-auto">
                                 <button onclick="alterarQuantidade(${p.id}, -1)" ${bloq} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${qtd === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button>
                                 <span class="text-xs font-bold text-center flex-1">${qtd > 0 ? `<span class="text-orange-600 text-base">${qtd}</span>` : '-'}</span>
@@ -152,7 +155,7 @@
             grid.innerHTML += `
                 <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-200">
                     <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${modoBuscaAtivo ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">
-                        <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">PRE</div>
+                        <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none font-sistema">PRE</div>
                         <div class="flex items-center justify-between w-full mt-auto">
                             <button onclick="gerenciarCliqueMenosPre()" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${!modoBuscaAtivo ? 'opacity-20 pointer-events-none' : ''}">-</button>
                             <span class="text-xs font-bold text-center flex-1">${modoBuscaAtivo ? 'ativo' : '-'}</span>
@@ -174,7 +177,7 @@
             const lista = document.getElementById("lista-carrinho"); totalAtual = 0; let tItens = 0; lista.innerHTML = "";
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id); const qtd = carrinho[id]; const sub = p.preco * qtd; totalAtual += sub; tItens += qtd;
-                lista.innerHTML += `<div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-md border border-slate-100"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate">${p.nome}</p><p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700">R$ ${formatarMoeda(sub)}</span></div>`;
+                lista.innerHTML += `<div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-md border border-slate-100 font-sistema"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate">${p.nome}</p><p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700">R$ ${formatarMoeda(sub)}</span></div>`;
             });
             if (tItens === 0) lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
@@ -186,10 +189,10 @@
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             const bf = document.getElementById("caixa-flutuante-base");
-            bf.onclick = null; bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full cursor-default text-base";
+            bf.onclick = null; bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full cursor-default text-base font-sistema";
             bf.innerHTML = `
-                <input type="text" id="input-id-busca" placeholder="Digitar ID do Pedido" maxlength="12" class="bg-transparent text-white font-semibold text-base focus:outline-none w-full h-full placeholder-white/50 text-center" oninput="tratarDigitacaoIdBusca(this)">
-                <div id="btn-cancelar-busca" onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none">Sair</div>
+                <input type="text" id="input-id-busca" placeholder="Digitar ID do Pedido" maxlength="12" class="bg-transparent text-white font-semibold text-base focus:outline-none w-full h-full placeholder-white/50 text-center font-sistema" oninput="tratarDigitacaoIdBusca(this)">
+                <div id="btn-cancelar-busca" onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none font-sistema">Sair</div>
             `;
             setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100);
         }
@@ -209,7 +212,7 @@
             const linhasFiltradas = linhasVindasDoExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
 
             if (linhasFiltradas.length === 0) {
-                bf.className = "pointer-events-auto bg-rose-600 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full animate-shake text-base";
+                bf.className = "pointer-events-auto bg-rose-600 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full animate-shake text-base font-sistema";
                 bf.innerHTML = `<span>Pedido não encontrado</span>`;
                 if (navigator.vibrate) navigator.vibrate(200);
                 setTimeout(() => { resetSistemicoTotal(false); }, 2000); return;
@@ -232,15 +235,15 @@
                     btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed";
                 }
                 lista.innerHTML += `
-                    <div class="flex justify-between items-center text-xs bg-white p-2 rounded-md border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center text-xs bg-white p-2 rounded-md border border-slate-200 shadow-sm font-sistema">
                         <div class="max-w-[70%]"><p class="font-semibold text-slate-700 truncate">${linha.PRODUTO}</p><p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(parseFloat(linha["PREÇO"]) || 0)}</p></div>
                         <div class="text-right"><p class="font-bold text-slate-700">R$ ${formatarMoeda(totalLinha)}</p>${tagStatus}</div>
                     </div>`;
             });
-            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidado)}`;
+            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidated || valorConsolidado)}`;
             
             if (window.innerWidth >= 1024) {
-                bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full cursor-default text-base";
+                bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full cursor-default text-base font-sistema";
                 bf.innerHTML = `
                     <div class="bg-transparent text-white font-semibold text-base w-full text-center select-none truncate px-1">ID: ${idDigitado}</div>
                     <div onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none">Sair</div>
@@ -266,7 +269,7 @@
             
             const bf = document.getElementById("caixa-flutuante-base");
             bf.onclick = abrirOverlayCelular;
-            bf.className = "pointer-events-auto bg-orange-500 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full cursor-pointer select-none text-base";
+            bf.className = "pointer-events-auto bg-orange-500 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full cursor-pointer select-none text-base font-sistema";
             bf.innerHTML = `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>`;
             
             resetarEstadoPagamento();
@@ -277,10 +280,10 @@
 
         function resetarEstadoPagamento() {
             formaPagamento = null; pixChaveIdentificadora = "";
-            document.getElementById("btn-pix").className = "py-2.5 rounded-md border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
-            document.getElementById("btn-dinheiro").className = "py-2.5 rounded-md border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
+            document.getElementById("btn-pix").className = "py-2.5 rounded-md border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all font-sistema";
+            document.getElementById("btn-dinheiro").className = "py-2.5 rounded-md border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all font-sistema";
             document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
-            document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200";
+            document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200 font-sistema";
             document.getElementById("input-recebido").disabled = true; document.getElementById("input-recebido").value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
             document.getElementById("btn-finalizar").innerText = "Finalizar";
             
@@ -292,7 +295,7 @@
                     <div class="flex justify-between items-end w-full h-6"><div class="border-[3px] border-slate-900 w-6 h-6"></div><div class="flex flex-wrap gap-0.5 w-6 h-6 justify-center items-center"><div class="w-1 h-1 bg-slate-900"></div><div class="w-1 h-1 bg-slate-900"></div><div class="w-1 h-1 bg-slate-900"></div><div class="w-1 h-1 bg-slate-900"></div></div></div>
                 </div>
                 <div class="absolute w-full h-0.5 bg-orange-400/40 top-1/2 animate-bounce"></div>
-                <div class="relative z-10 flex flex-col items-center text-center p-1">
+                <div class="relative z-10 flex flex-col items-center text-center p-1 font-sistema">
                     <svg class="w-5 h-5 text-slate-400 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg>
                     <span class="text-[9px] font-bold text-slate-500 uppercase tracking-tight leading-none">Gerar<br>QRCODE</span>
                 </div>`;
@@ -302,30 +305,30 @@
         function selecionarPagamento(tipo) {
             formaPagamento = tipo; const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro");
             const secaoDin = document.getElementById("secao-valores-dinheiro"), carr = document.getElementById("carrossel-pagamento"), inp = document.getElementById("input-recebido");
-            const ativo = "py-2.5 rounded-md border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm text-center shadow-sm transition-all";
-            const inativo = "py-2.5 rounded-md border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
+            const ativo = "py-2.5 rounded-md border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm text-center shadow-sm transition-all font-sistema";
+            const inativo = "py-2.5 rounded-md border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all font-sistema";
 
             if (tipo === 'DINHEIRO') {
                 btnDin.className = ativo; btnPix.className = inativo; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
-                secaoDin.className = "w-1/2 h-full space-y-3.5 opacity-100 pointer-events-auto transition-all duration-200"; inp.disabled = false; inp.value = ""; inp.focus();
+                secaoDin.className = "w-1/2 h-full space-y-3.5 opacity-100 pointer-events-auto transition-all duration-200 font-sistema"; inp.disabled = false; inp.value = ""; inp.focus();
             } else {
                 btnPix.className = ativo; btnDin.className = inativo; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform -translate-x-1/2";
-                secaoDin.className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200"; inp.disabled = true;
+                secaoDin.className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200 font-sistema"; inp.disabled = true;
             }
             validarEstadoFinalizar();
         }
 
-        UX: function gerarPayloadVenda(idF, forma) {
+        function gerarPayloadVenda(idF, forma) {
             return JSON.stringify({
                 id_pagamento: idF, pagamento: forma, tipo_venda: "CAIXA", status_retirada: "RETIRADO",
                 total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual),
-                itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
+                itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantity: parseInt(carrinho[id]), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
             });
         }
 
         async function requisitarQrCodeReal() {
             if (!formaPagamento || formaPagamento !== 'PIX') return;
-            const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none text-[9px] font-bold text-slate-400 uppercase tracking-tight text-center leading-none";
+            const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none text-[9px] font-bold text-slate-400 uppercase tracking-tight text-center leading-none font-sistema";
             box.innerHTML = "Carregando..."; pixChaveIdentificadora = "mp_" + Date.now();
 
             try {
@@ -351,14 +354,15 @@
             if (modoResgateManual) return;
             const btn = document.getElementById("btn-finalizar"); const rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0;
             if (Object.keys(carrinho).length > 0 && formaPagamento && (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" || formaPagamento === 'DINHEIRO' && rec >= totalAtual)) {
-                btn.disabled = false; btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95";
-            } else { btn.disabled = true; btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed"; }
+                btn.disabled = false; btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95 font-sistema";
+            } else { btn.disabled = true; btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed font-sistema"; }
         }
 
         function processarCliqueFinalizar() { if (modoResgateManual) executingBaixaPedidoEntregue(); else if (formaPagamento === 'DINHEIRO') executarGravacaoDinheiroDirecto(); else checarSegurancaMercadoPago(); }
 
         function executingBaixaPedidoEntregue() {
             document.getElementById("btn-finalizar").innerText = "Processando Baixa...";
+            // GATILHO AMANHÃ: Essa função vai dar um fetch na nova URL_BAIXA do Power Automate
             alert("🔒 Fase Pronta! Próximo passo será criar o fluxo de dar baixa no Power Automate para carimbar RETIRADO.");
             resetSistemicoTotal(true);
         }
