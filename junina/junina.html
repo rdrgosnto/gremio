@@ -4,14 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caixa - Festa Junina</title>
-    <script src="https://cdn.tailwindcss.com" defer></script>
+    <!-- REMOVIDO o 'defer' para forçar o Tailwind a ser processado o quanto antes -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .font-sistema { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
         .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
-        body { opacity: 0; transition: opacity 0.15s ease-in-out; }
+        /* A página nasce invisível para banir o flash branco e elementos desalinhados */
+        body { opacity: 0; transition: opacity 0.2s ease-in-out; }
     </style>
 </head>
 <body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800">
@@ -82,10 +84,12 @@
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
         const revelarPagina = () => document.body.style.opacity = "1";
 
-        function conferirCacheInicial() {
+        // Trava de segurança: Só mostra a tela quando o Tailwind CSS estiver pronto e os produtos renderizados
+        window.addEventListener('DOMContentLoaded', () => {
             const cache = localStorage.getItem("festa_junina_cardapio");
-            if (cache) { produtos = JSON.parse(cache); renderizarProdutos(); revelarPagina(); }
-        }
+            if (cache) { produtos = JSON.parse(cache); renderizarProdutos(); }
+            carregarEstoqueReal();
+        });
 
         async function carregarEstoqueReal(idParaBuscar = "") {
             try {
@@ -169,7 +173,6 @@
                 <div onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none font-sistema">Sair</div>`;
             setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100);
         }
-        function activarModoBuscaPre(e) { activarModoBuscaPre(e); }
         function ativarModoBuscaPre(e) { activarModoBuscaPre(e); }
 
         function tratarDigitacaoIdBusca(input) {
@@ -196,7 +199,7 @@
             const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valorConsolidado = 0;
 
             lines.forEach(linha => {
-                const qtd = parseInt(linha.QUANTIDADE) || 1; const totalLinha = parseFloat(linha.TOTAL) || 0; valorConsolidated = valorConsolidado += totalLinha; 
+                const qtd = parseInt(linha.QUANTIDADE) || 1; const totalLinha = parseFloat(linha.TOTAL) || 0; valorConsolidado += totalLinha; 
                 const statusRetirada = linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente";
                 let tagStatus = `<span class="text-amber-600 font-bold text-[11px] block mt-0.5">[PENDENTE]</span>`;
                 if (statusRetirada === "retirado") {
@@ -209,7 +212,7 @@
                         <div class="text-right"><p class="font-bold text-slate-700">R$ ${formatarMoeda(totalLinha)}</p>${tagStatus}</div>
                     </div>`;
             });
-            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidado)}`;
+            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidated)}`;
             if (window.innerWidth >= 1024) {
                 bf.className = "pointer-events-auto bg-slate-800 text-white font-semibold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full cursor-default text-base font-sistema";
                 bf.innerHTML = `<div class="bg-transparent text-white font-semibold text-base w-full text-center select-none truncate px-1">ID: ${idDigitado}</div><div onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none font-sistema">Sair</div>`;
@@ -312,8 +315,6 @@
                 alert("Venda Finalizada!"); resetSistemicoTotal(true);
             } catch (e) { alert("⚠️ Erro ao salvar venda."); }
         }
-
-        conferirCacheInicial(); carregarEstoqueReal();
     </script>
 </body>
 </html>
