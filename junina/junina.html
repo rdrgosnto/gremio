@@ -11,7 +11,6 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
         .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
-        /* Trava estrita contra o efeito de piscar antes do carregamento do Tailwind */
         html, body { visibility: hidden; opacity: 0; background-color: #f8fafc; }
     </style>
 </head>
@@ -92,7 +91,6 @@
 
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
         
-        // Libera a página apenas quando o Tailwind e a estrutura estiverem prontos
         function liberarExibicaoSegura() {
             document.documentElement.style.visibility = document.body.style.visibility = "visible";
             document.documentElement.style.opacity = document.body.style.opacity = "1";
@@ -175,6 +173,14 @@
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
+        function abrirOverlayCelular() {
+            if (window.innerWidth >= 1024 && !modoResgateManual) return;
+            document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; 
+            if (!modoResgateManual) resetarEstadoPagamento();
+        }
+
+        function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
+
         function ativarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
@@ -228,19 +234,12 @@
             } else { abrirOverlayCelular(); }
         }
 
-        function abrirOverlayCelular() {
-            if (window.innerWidth >= 1024 && !modoResgateManual) return;
-            document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; 
-            if (!modoResgateManual) resetarEstadoPagamento();
-        }
-
-        function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
-
+        // CORREÇÃO AQUI: Mudado para true para forçar o recarregamento do estoque nas vendas normais
         function forçarFechamentoSistemico(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
             document.getElementById("painel-fechamento").classList.add("hidden");
-            resetSistemicoTotal(false);
+            resetSistemicoTotal(true);
         }
 
         function resetSistemicoTotal(forçarAtualizacaoHttp = true) {
@@ -282,7 +281,7 @@
             const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-50 border border-slate-200 text-[9px] font-bold text-slate-400 uppercase text-center flex items-center justify-center p-2 pointer-events-none"; box.innerHTML = "Carregando..."; pixChaveIdentificadora = "mp_" + Date.now();
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
-                if (d.qrcode_imagem) { pixChaveIdentificadora = d.id_mercado_pago; box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-all"; box.innerHTML = `<img src="data:image/jpeg;base64,${d.qrcode_imagem}" class="w-full h-full">`; validarEstadoFinalizar(); } else throw new Error();
+                if (d.qrcode_imagem) { pixChaveIdentificadora = d.id_mercado_pago; box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-all"; box.innerHTML = `<img src="data:image/jpeg;base64,${d.qrcode_imagem}">`; validarEstadoFinalizar(); } else throw new Error();
             } catch (e) { alert("Falha ao gerar QR Code."); resetarEstadoPagamento(); }
         }
 
