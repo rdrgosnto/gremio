@@ -97,7 +97,7 @@
                     localStorage.setItem("festa_junina_cardapio", JSON.stringify(produtos)); renderizarProdutos();
                 }
                 if (idParaBuscar !== "" && combo && combo.pedido) processarResultadoBuscaPedido(combo.pedido, idParaBuscar);
-            } catch (e) { console.error(e); if (idParaBuscar !== "") resetSistem Total(false); } finally { revelarPagina(); }
+            } catch (e) { console.error(e); if (idParaBuscar !== "") resetSistemicoTotal(false); } finally { revelarPagina(); }
         }
 
         function renderizarProdutos() {
@@ -170,7 +170,7 @@
                 <div onclick="resetSistemicoTotal(false)" class="text-sm font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none font-sistema">Sair</div>`;
             setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100);
         }
-        function ativarModoBuscaPre(e) { activarModoBuscaPre(e); }
+        function atualizarModoBuscaPre(e) { activarModoBuscaPre(e); }
 
         function tratarDigitacaoIdBusca(input) {
             input.value = input.value.replace(/\D/g, "");
@@ -258,14 +258,28 @@
             validarEstadoFinalizar();
         }
 
-        const gerarPayloadVenda = (idF, forma) => JSON.stringify({ id_pagamento: idF, pagamento: forma, tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) });
+        // REGRA DO COMPORTAMENTO DO PIX ANTES DA FESTA (ONLINE E PENDENTE):
+        const gerarPayloadVenda = (idF, forma) => {
+            // Se hoje for antes de 27/06/2026 E for um pagamento via PIX, classifica automaticamente como venda ONLINE / PENDENTE
+            const isPreVendaPix = (new Date() < new Date('2026-06-27T00:00:00') && forma === 'PIX');
+            
+            return JSON.stringify({ 
+                id_pagamento: idF, 
+                pagamento: forma, 
+                tipo_venda: isPreVendaPix ? "PRE" : "CAIXA", 
+                status_retirada: isPreVendaPix ? "pendente" : "retirado", 
+                total_pedido_consolidado: parseFloat(totalAtual), 
+                transaction_amount: parseFloat(totalAtual), 
+                itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
+            });
+        };
 
         async function requisitarQrCodeReal() {
             if (!formaPagamento || formaPagamento !== 'PIX') return;
             const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-50 border border-slate-200 text-[9px] font-bold text-slate-400 uppercase text-center flex items-center justify-center p-2 pointer-events-none font-sistema";
             box.innerHTML = "Carregando..."; pixChaveIdentificadora = "mp_" + Date.now();
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, "PIX") });
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') });
                 const d = await r.json();
                 if (d.qrcode_imagem) { pixChaveIdentificadora = d.id_mercado_pago; box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-all"; box.innerHTML = `<img src="data:image/jpeg;base64,${d.qrcode_imagem}" class="w-full h-full" alt="QR Code">`; validarEstadoFinalizar(); } else throw new Error();
             } catch (e) { alert("⚠️ Falha ao gerar QR Code."); resetarEstadoPagamento(); }
