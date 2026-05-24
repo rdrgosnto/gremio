@@ -110,7 +110,6 @@
     </div>
 
     <script>
-        // URL unificada de leitura (traz estoque e busca pedidos)
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_GRAVACAO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/842eb1386d994855bf6aab1e7a648280/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2K4QnR3G67WP2hxS4v3yPJfK53LGIUdvr8-p2cWs-Zc";
         const URL_VALIDA_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fc8e0c1a405b4430b0f6390521bada48/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=1yfg6o-AMAAavobkG-AE22s_StAGlL_lkw0GqSfWk4g";
@@ -176,35 +175,34 @@
             if (verificarBloqueioPreVenda()) return;
 
             try {
-                // Envia o id_pagamento no corpo (se houver) para o Super Fluxo de Leitura
                 const r = await fetch(URL_LEITURA, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ id_pagamento: idParaBuscar })
+                    body: JSON.stringify({ id_pagamento: String(idParaBuscar) })
                 });
                 if (!r.ok) throw new Error();
                 
                 const combo = await r.json();
                 
-                // Processa a gaveta do estoque
-                produtos = combo.estoque.map(l => ({ 
-                    id: parseInt(l.ID), 
-                    sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??", 
-                    nome: l.PRODUTO, 
-                    preco: parseFloat(l.PRECO), 
-                    estoque: parseInt(l.ATUAL), 
-                    critico: 5 
-                }));
-                
-                renderizarProdutos();
-                checarTravaDinheiro();
+                if (combo.estoque) {
+                    produtos = combo.estoque.map(l => ({ 
+                        id: parseInt(l.ID), 
+                        sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??", 
+                        nome: l.PRODUTO, 
+                        preco: parseFloat(l.PRECO), 
+                        estoque: parseInt(l.ATUAL), 
+                        critico: 5 
+                    }));
+                    renderizarProdutos();
+                    checarTravaDinheiro();
+                }
 
-                // Se houver uma tentativa de busca de ID, processa a gaveta de pedidos
                 if (idParaBuscar !== "") {
                     processarResultadoBuscaPedido(combo.pedido);
                 }
 
             } catch (e) { 
+                console.error(e);
                 alert("⚠️ Erro ao carregar o cardápio real do Excel."); 
                 if (idParaBuscar !== "") resetarEstadoBuscaFlutuante();
             }
@@ -223,7 +221,6 @@
                 } else if (p.estoque <= p.critico) { status = `<span class="text-rose-500 font-bold">${p.estoque}</span>`; }
                 if (qtd > 0 && !esg) boxEstilo = "bg-orange-50 border border-orange-200 text-orange-700";
                 
-                // Se o modo busca estiver ativo, desabilita visualmente todos os produtos normais
                 if (modoBuscaAtivo) {
                     cEstilo = "bg-slate-50 border-slate-200 text-slate-300 select-none pointer-events-none opacity-40";
                     bloq = "disabled";
@@ -246,7 +243,6 @@
                     </div>`;
             });
 
-            // INJEÇÃO DO PRODUTO ESPECIAL "PRE" NO FINAL DO MENU
             renderizarItemEspecialPre(grid);
         }
 
@@ -254,7 +250,6 @@
             let preEstilo = "bg-white border-slate-200 hover:border-slate-300";
             let boxPreEstilo = "bg-blue-50 text-blue-700 border border-blue-100";
             
-            // Se o modo busca estiver ativo, o item PRE muda de destaque para guiar o operador
             if (modoBuscaAtivo) {
                 boxPreEstilo = "bg-slate-800 text-white border border-slate-900";
             }
@@ -284,7 +279,7 @@
         }
 
         function atualizarCarrinhoDOM() {
-            if (modoResgateManual) return; // Trava o DOM do carrinho se for um resgate automático
+            if (modoResgateManual) return;
 
             const lista = document.getElementById("lista-carrinho"); totalAtual = 0; let tItens = 0; lista.innerHTML = "";
             Object.keys(carrinho).forEach(id => {
@@ -296,7 +291,6 @@
                 if (!modoBuscaAtivo) fecharOverlay(); 
             }
             
-            // Atualiza o texto padrão da caixa flutuante se não estiver em modo de busca
             if (!modoBuscaAtivo) {
                 document.getElementById("conteudo-flutuante-esquerdo").innerText = `Pedido: R$ ${formatarMoeda(totalAtual)}`;
             }
@@ -304,21 +298,18 @@
             validarEstadoFinalizar();
         }
 
-        // LÓGICA DE TRANSFORMAÇÃO DA CAIXA FLUTUANTE (PASSO 6)
         function activarModoBuscaPre() {
             modoBuscaAtivo = true;
-            carrinho = {}; // Limpa o carrinho atual para dar espaço ao resgate
+            carrinho = {}; 
             atualizarCarrinhoDOM();
-            renderizarProdutos(); // Reaplica o efeito cinza nos outros itens
+            renderizarProdutos(); 
 
             const baseFlutuante = document.getElementById("caixa-flutuante-base");
             const esquerdo = document.getElementById("conteudo-flutuante-esquerdo");
             const direito = document.getElementById("conteudo-flutuante-direito");
 
-            // Transforma a barra em cinza escuro
             baseFlutuante.className = "pointer-events-auto bg-slate-800 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[320px] max-w-md w-full";
             
-            // Substitui o texto do valor por um input invisível e limpo
             esquerdo.innerHTML = `
                 <input type="text" id="input-id-busca" placeholder="Digitar ID do Pedido" maxlength="12" 
                 class="bg-transparent text-white font-bold text-sm focus:outline-none w-full h-full placeholder-white/50" 
@@ -328,7 +319,6 @@
             direito.innerText = "- Revisar e Pagar";
             direito.className = "text-sm tracking-wide text-right select-none pl-4 border-l border-white/20 h-full flex items-center text-white/40 cursor-default";
             
-            // Joga o cursor piscando direto no campo de texto
             setTimeout(() => { document.getElementById("input-id-busca").focus(); }, 100);
         }
 
@@ -344,7 +334,6 @@
             const esquerdo = document.getElementById("conteudo-flutuante-esquerdo");
             const direito = document.getElementById("conteudo-flutuante-direito");
 
-            // Retorna para a cor laranja original
             baseFlutuante.className = "pointer-events-auto bg-orange-500 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[320px] max-w-md w-full";
             
             esquerdo.onclick = abrirOverlayCelular;
@@ -355,10 +344,8 @@
         }
 
         function tratarDigitacaoIdBusca(input) {
-            // Remove qualquer caractere que não seja número
             input.value = input.value.replace(/\D/g, "");
             
-            // Dispara a busca automática apenas se atingir os 12 dígitos exatos do ID
             if (input.value.length === 12) {
                 const idParaPesquisa = input.value;
                 input.disabled = true;
@@ -372,19 +359,15 @@
             const direito = document.getElementById("conteudo-flutuante-direito");
             const inputBusca = document.getElementById("input-id-busca");
 
-            // CENÁRIO A: ID não foi localizada no Excel (Vazio)
             if (!linhasEncontradas || linhasEncontradas.length === 0) {
-                // Altera para vermelho e exibe a mensagem
                 baseFlutuante.classList.remove("bg-slate-800");
                 baseFlutuante.classList.add("bg-rose-600", "animate-shake");
                 direito.innerText = "não encontrado";
                 direito.classList.remove("text-white/40");
                 direito.classList.add("text-white");
 
-                // Ativa o motor de vibração física do aparelho celular/tablet
                 if (navigator.vibrate) navigator.vibrate(200);
 
-                // Retém o erro por 2 segundos e depois restaura o campo para nova tentativa
                 setTimeout(() => {
                     baseFlutuante.classList.remove("bg-rose-600", "animate-shake");
                     baseFlutuante.classList.add("bg-slate-800");
@@ -400,21 +383,18 @@
                 return;
             }
 
-            // CENÁRIO B: Pedido localizado! Abre a tela de checkout montando o resumo dinamicamente
             modoResgateManual = true; 
             modoBuscaAtivo = false;
             pixChaveIdentificadora = linhasEncontradas[0].ID_PAGAMENTO || ""; 
             
-            // Adapta o layout da janela lateral de fechamento para o "Modo Resgate/Entrega"
             document.getElementById("titulo-checkout").innerText = "Resgatar Entrega";
-            document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; // Oculta a área de escolher pagamento
+            document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             
             const btnFinalizar = document.getElementById("btn-finalizar");
             btnFinalizar.disabled = false;
             btnFinalizar.innerText = "Confirmar Entrega (Dar Baixa)";
             btnFinalizar.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95";
 
-            // Loop para listar as linhas encontradas no painel lateral
             const lista = document.getElementById("lista-carrinho");
             lista.innerHTML = "";
             let valorConsolidado = 0;
@@ -422,7 +402,7 @@
             linhasEncontradas.forEach(linha => {
                 const qtd = parseInt(linha.QUANTIDADE) || 1;
                 const totalLinha = parseFloat(linha.TOTAL) || 0;
-                valorConsolidado = parseFloat(linha.TOTAL_PEDIDO_CONSOLIDADO) || totalLinha;
+                valorConsolidated = parseFloat(linha.TOTAL_PEDIDO_CONSOLIDADO) || totalLinha;
                 const statusRetirada = String(linha.STATUS_RETIRADA).trim().toUpperCase();
                 
                 let tagStatus = `<span class="text-amber-600 font-bold">[PENDENTE]</span>`;
@@ -446,7 +426,7 @@
                     </div>`;
             });
 
-            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidado)}`;
+            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidated)}`;
             abrirOverlayCelular();
         }
 
@@ -459,7 +439,6 @@
         function fecharOverlay() { 
             document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; 
             if (modoResgateManual) {
-                // Se fechar a janela de resgate, limpa o estado e volta o caixa ao normal
                 modoResgateManual = false;
                 document.getElementById("titulo-checkout").innerText = "Pagamento";
                 document.getElementById("bloco-inferior-pagamento").className = "space-y-3 pt-2 border-t";
@@ -562,7 +541,7 @@
         }
 
         function validarEstadoFinalizar() {
-            if (modoResgateManual) return; // Ignora se estiver na tela de dar baixa
+            if (modoResgateManual) return; 
 
             const btn = document.getElementById("btn-finalizar"); const rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0;
             if (Object.keys(carrinho).length > 0 && formaPagamento && (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" || formaPagamento === 'DINHEIRO' && rec >= totalAtual)) {
@@ -578,16 +557,13 @@
             }
         }
 
-        // NOVO FLUXO: Executa a gravação de dar baixa (Disparado pelo botão Confirmar Entrega)
         async function executarBaixaPedidoEntregue() {
             const btn = document.getElementById("btn-finalizar"); 
             btn.disabled = true; 
             btn.innerText = "Processando Baixa...";
 
-            // Breve spoiler: Aqui faremos o envio para o fluxo de dar baixa do Power Automate
             alert("🔒 Fase Pronta! Próximo passo será criar o fluxo de dar baixa no Power Automate para carimbar RETIRADO.");
             
-            // Simula o fechamento e reset do sistema pós-baixa
             modoResgateManual = false;
             document.getElementById("titulo-checkout").innerText = "Pagamento";
             document.getElementById("bloco-inferior-pagamento").className = "space-y-3 pt-2 border-t";
@@ -654,7 +630,6 @@
             }
         }
 
-        // Inicialização primária do sistema
         carregarEstoqueReal();
     </script>
 </body>
