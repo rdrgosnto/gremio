@@ -25,13 +25,11 @@
     </header>
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
-        <!-- Grid de Produtos -->
         <section class="lg:col-span-3 space-y-2">
             <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
 
-        <!-- Painel de Fechamento -->
         <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
             <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-200 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
@@ -60,9 +58,7 @@
                                     <div class="flex justify-between items-center text-base border-t border-slate-100 pt-1.5"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-emerald-600">R$ 0,00</span></div>
                                 </div>
                                 <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
-                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-28 h-28 bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all relative overflow-hidden group">
-                                        <!-- Renderizado dinamicamente -->
-                                    </div>
+                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-28 h-28 bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all relative overflow-hidden group"></div>
                                 </div>
                             </div>
                         </div>
@@ -187,21 +183,17 @@
         }
 
         function processarResultadoBuscaPedido(linhasVindasDoExcel, idDigitado) {
-            const bf = document.getElementById("caixa-flutuante-base"); const direito = document.getElementById("conteudo-flutuante-unico");
-            // CORREÇÃO: Alinhado estritamente com as chaves reais ID_PAGAMENTO
+            const bf = document.getElementById("caixa-flutuante-base");
             const linhasFiltradas = linhasVindasDoExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
 
             if (linhasFiltradas.length === 0) {
                 bf.className = "pointer-events-auto bg-rose-600 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[280px] max-w-sm w-full animate-shake";
-                if (direito) direito.innerText = "Pedido não encontrado";
+                bf.innerHTML = `<span class="text-sm">Pedido não encontrado</span>`;
                 if (navigator.vibrate) navigator.vibrate(200);
                 setTimeout(() => { resetSistemicoTotal(); }, 2000); return;
             }
 
-            modoResgateManual = true; modoBuscaAtivo = false; 
-            // CORREÇÃO: Ajustada a leitura correta de linhasFiltradas (sem misturar com linesFiltradas)
-            pixChaveIdentificadora = linhasFiltradas[0].ID_PAGAMENTO || ""; 
-            
+            modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = linhasFiltradas[0].ID_PAGAMENTO || ""; 
             document.getElementById("titulo-checkout").innerText = "Resumo do Pedido"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             
             const btnFinalizar = document.getElementById("btn-finalizar"); btnFinalizar.disabled = false; btnFinalizar.innerText = "Confirmar Entrega (Dar Baixa)";
@@ -224,7 +216,17 @@
                     </div>`;
             });
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidado)}`;
-            if (window.innerWidth < 1024) abrirOverlayCelular();
+            
+            // CORREÇÃO PC: Muda o botão da barra para o estado de "Sair" em vez de deixar travado em Buscando
+            if (window.innerWidth >= 1024) {
+                bf.className = "pointer-events-auto bg-slate-800 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[280px] max-w-sm w-full cursor-default";
+                bf.innerHTML = `
+                    <div class="bg-transparent text-white font-semibold text-sm w-full text-center select-none truncate px-1">ID: ${idDigitado}</div>
+                    <div onclick="resetSistemicoTotal()" class="text-xs font-medium text-white/50 hover:text-white cursor-pointer pl-2 select-none">Sair</div>
+                `;
+            } else {
+                abrirOverlayCelular();
+            }
         }
 
         function abrirOverlayCelular() {
