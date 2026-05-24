@@ -150,14 +150,15 @@
             const lista = document.getElementById("lista-carrinho"); totalAtual = 0; let tItens = 0; lista.innerHTML = "";
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id); const qtd = carrinho[id]; const sub = p.preco * qtd; totalAtual += sub; tItens += qtd;
-                lista.innerHTML += `<div class="flex justify-between items-center text-[13px] bg-slate-50 p-3 rounded-md border border-slate-100 font-sistema"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate text-[15px]">${p.nome}</p><p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700 text-sm">R$ ${formatarMoeda(sub)}</span></div>`;
+                // AJUSTADO MANUALMENTE: Mudado o padding de p-3 para p-2.5 para reduzir a altura da caixa proporcionalmente
+                lista.innerHTML += `<div class="flex justify-between items-center text-[13px] bg-slate-50 p-2.5 rounded-md border border-slate-100 font-sistema"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate text-[15px]">${p.nome}</p><p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700 text-sm">R$ ${formatarMoeda(sub)}</span></div>`;
             });
             if (tItens === 0) lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
-        function ativarModoBuscaPre(e) {
+        function activarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = null;
@@ -170,6 +171,7 @@
                 <div onclick="resetSistemicoTotal(false)" class="text-base font-medium text-white/60 hover:text-white cursor-pointer pl-2 select-none font-sistema whitespace-nowrap transition-colors">Sair</div>`;
             setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100);
         }
+        function ativarModoBuscaPre(e) { activarModoBuscaPre(e); }
 
         function tratarDigitacaoIdBusca(input) {
             input.value = input.value.replace(/\D/g, "");
@@ -202,9 +204,9 @@
                     tagStatus = `<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[JÁ ENTREGUE ⚠️]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
                     btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed";
                 }
-                // AJUSTADO: Lado esquerdo com text-[15px] no produto e text-[12px] nos detalhes, com pl-2/flex-shrink-0 de proteção à direita
+                // AJUSTADO MANUALMENTE: Reduzido o padding de p-3 para p-2.5 na listagem do PRE para manter simetria de altura
                 lista.innerHTML += `
-                    <div class="flex justify-between items-center text-[13px] bg-white p-3 rounded-md border border-slate-200 shadow-sm font-sistema">
+                    <div class="flex justify-between items-center text-[13px] bg-white p-2.5 rounded-md border border-slate-200 shadow-sm font-sistema">
                         <div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[15px]">${linha.PRODUTO}</p><p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div>
                         <div class="text-right flex-shrink-0 pl-2"><p class="font-bold text-slate-700 text-sm">R$ ${formatarMoeda(totalLinha)}</p>${tagStatus}</div>
                     </div>`;
