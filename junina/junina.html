@@ -208,7 +208,7 @@
                 const statusRetirada = linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente";
                 let tagStatus = `<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>`;
                 if (statusRetirada === "retirado") {
-                    tagStatus = `<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Entregue Anteriormente";
+                    tagStatus = `<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>`; btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
                     btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
                 }
                 lista.innerHTML += `
@@ -277,7 +277,7 @@
             status_retirada: "retirado", 
             total_pedido_consolidado: parseFloat(totalAtual), 
             transaction_amount: parseFloat(totalAtual), 
-            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
+            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
         });
 
         async function requisitarQrCodeReal() {
@@ -346,7 +346,7 @@
                     headers: { "Content-Type": "application/json" }, 
                     body: JSON.stringify({ 
                         id_pagamento: String(pixChaveIdentificadora).trim(), 
-                        payment: "PIX", 
+                        pagamento: "PIX", 
                         tipo_venda: "ONLINE", 
                         status_retirada: "retirado", 
                         total_pedido_consolidado: valorConsolidado, 
