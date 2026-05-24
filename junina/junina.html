@@ -10,8 +10,6 @@
         .font-aptos { font-family: 'Aptos', 'Segoe UI', Tahoma, sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Animação de tremer o botão em caso de erro */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             20%, 60% { transform: translateX(-6px); }
@@ -27,19 +25,15 @@
     </header>
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
-        <!-- Grid de Produtos -->
         <section class="lg:col-span-3 space-y-2">
             <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
 
-        <!-- Painel de Fechamento -->
         <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
             <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-200 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
                     <h3 id="titulo-checkout" class="text-base font-bold text-slate-700 text-center uppercase tracking-wider border-b pb-2">Pagamento</h3>
-                    
-                    <!-- 1. Resumo do Pedido -->
                     <div class="flex-1 flex flex-col min-h-0">
                         <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Resumo do Pedido:</h4>
                         <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
@@ -47,9 +41,7 @@
                         </div>
                     </div>
 
-                    <!-- BLOCO INFERIOR DE FECHAMENTO -->
                     <div id="bloco-inferior-pagamento" class="space-y-3 pt-2 border-t">
-                        <!-- 2. Formas de Pagamento -->
                         <div class="space-y-1.5">
                             <label class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
                             <div class="grid grid-cols-2 gap-2">
@@ -58,26 +50,21 @@
                             </div>
                         </div>
 
-                        <!-- 3. Carrossel Horizontal com Altura Calibrada -->
                         <div class="w-full overflow-hidden border-t border-dashed pt-3 h-[110px] pb-1 relative">
                             <div id="carrossel-pagamento" class="w-[200%] h-full flex transition-transform duration-300 transform translate-x-0">
-                                <!-- BLOCO A: Valores Dinheiro -->
                                 <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-2 opacity-25 pointer-events-none transition-all duration-200">
                                     <div class="flex justify-between items-center text-sm"><span class="text-slate-500 font-medium">Pedido</span><span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span></div>
                                     <div class="flex justify-between items-center text-sm"><span class="text-slate-500 font-medium">Recebido</span><div class="relative w-36"><span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">R$</span><input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-0.5 border border-slate-300 rounded-md text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-sm disabled:bg-slate-50"></div></div>
                                     <div class="flex justify-between items-center text-sm border-t border-slate-100 pt-1"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-slate-400">R$ 0,00</span></div>
                                 </div>
-                                <!-- BLOCO B: Área do PIX -->
                                 <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
                                     <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-[100px] h-[100px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group">
-                                        
                                         <div class="absolute inset-0 opacity-[0.08] group-hover:opacity-[0.12] transition-opacity grid grid-cols-2 pointer-events-none">
                                             <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
                                             <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
                                             <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
                                             <div class="flex flex-wrap gap-1 p-1 justify-center items-center"><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div></div>
                                         </div>
-
                                         <div class="relative z-10 flex flex-col items-center justify-center text-center p-1">
                                             <svg class="w-5 h-5 text-slate-400 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg>
                                             <span id="txt-qrcode-box" class="text-[9px] font-bold text-slate-500 uppercase tracking-tight leading-none">Gerar<br>QRCODE</span>
@@ -88,7 +75,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="flex flex-col items-center gap-1.5 mt-2 pt-2 border-t w-full">
                     <button onclick="processarCliqueFinalizar()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed transition-all">Finalizar</button>
                     <button onclick="fecharOverlay()" class="text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1">Voltar ao pedido</button>
@@ -97,15 +83,10 @@
         </section>
     </main>
 
-    <!-- CONTAINER DA CAIXA FLUTUANTE (Unificado para PC, Celular e Tablet) -->
     <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 flex justify-center pointer-events-none">
         <div id="caixa-flutuante-base" class="pointer-events-auto bg-orange-500 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[320px] max-w-md w-full">
-            <div id="conteudo-flutuante-esquerdo" class="flex-1 text-sm tracking-wide text-left select-none cursor-pointer w-full h-full flex items-center" onclick="abrirOverlayCelular()">
-                Pedido: R$ 0,00
-            </div>
-            <div id="conteudo-flutuante-direito" class="text-sm tracking-wide text-right select-none pl-4 border-l border-white/20 h-full flex items-center cursor-pointer" onclick="abrirOverlayCelular()">
-                - Revisar e Pagar
-            </div>
+            <div id="conteudo-flutuante-esquerdo" class="flex-1 text-sm tracking-wide text-left select-none cursor-pointer w-full h-full flex items-center" onclick="abrirOverlayCelular()">Pedido: R$ 0,00</div>
+            <div id="conteudo-flutuante-direito" class="text-sm tracking-wide text-right select-none pl-4 border-l border-white/20 h-full flex items-center cursor-pointer" onclick="abrirOverlayCelular()">- Revisar e Pagar</div>
         </div>
     </div>
 
@@ -118,111 +99,43 @@
         let modoBuscaAtivo = false, modoResgateManual = false;
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
 
-        function verificarBloqueioPreVenda() {
-            const hoje = new Date();
-            const dia = hoje.getDate();
-            const mes = hoje.getMonth() + 1;
-            const ano = hoje.getFullYear();
-
-            if (ano === 2026 && mes === 6 && (dia === 25 || dia === 26)) {
-                document.body.innerHTML = `
-                    <div class="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-                        <div class="bg-white p-8 rounded-md shadow-md border border-slate-200 max-w-md w-full">
-                            <span class="text-4xl">🍿</span>
-                            <h1 class="text-xl font-bold text-slate-800 mt-4 uppercase tracking-wider">Pré-Venda Pausada!</h1>
-                            <p class="text-slate-500 text-sm mt-2">Os pedidos antecipados pelo site foram encerrados para organização da cozinha.</p>
-                            <div class="mt-6 text-xs text-orange-500 font-bold bg-orange-50 py-3 px-4 rounded border border-orange-100">
-                                Nos vemos na Festa Junina dia 27/06/2026! Os caixas estarão abertos no local. 🎉
-                            </div>
-                        </div>
-                    </div>`;
-                return true;
-            }
-            return false;
-        }
-
-        function obterConfiguracaoVenda() {
-            const hoje = new Date();
-            const dia = hoje.getDate();
-            const mes = hoje.getMonth() + 1;
-            const ano = hoje.getFullYear();
-
-            if (ano < 2026 || (ano === 2026 && mes < 6) || (ano === 2026 && mes === 6 && dia < 25)) {
-                return { tipo: "ONLINE", status: "PENDENTE" };
-            } else {
-                return { tipo: "CAIXA", status: "RETIRADO" };
-            }
-        }
-
-        function checarTravaDinheiro() {
-            const hoje = new Date();
-            const dia = hoje.getDate();
-            const mes = hoje.getMonth() + 1;
-            const ano = hoje.getFullYear();
-
-            // Liberado para testes em 2026. Bloqueia apenas no final de Dezembro.
-            if (ano > 2026 || (ano === 2026 && mes === 12 && dia >= 31)) {
-                const btnDin = document.getElementById("btn-dinheiro");
-                if (btnDin) {
-                    btnDin.disabled = true;
-                    btnDin.className = "py-2.5 rounded-md border border-slate-200 font-semibold text-sm text-center bg-slate-100 text-slate-300 cursor-not-allowed transition-all opacity-50";
-                }
-            }
-        }
-
         async function carregarEstoqueReal(idParaBuscar = "") {
-            if (verificarBloqueioPreVenda()) return;
-
             try {
                 const r = await fetch(URL_LEITURA, {
                     method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ id_pagamento: String(idParaBuscar).trim() })
                 });
                 if (!r.ok) throw new Error();
-                
                 const combo = await r.json();
                 
                 if (combo && combo.estoque) {
                     produtos = combo.estoque.map(l => ({ 
-                        id: parseInt(l.ID), 
-                        sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??", 
-                        nome: l.PRODUTO, 
-                        preco: parseFloat(l.PRECO), 
-                        estoque: parseInt(l.ATUAL), 
-                        critico: 5 
+                        id: parseInt(l.ID), sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??", 
+                        nome: l.PRODUTO, preco: parseFloat(l.PRECO), estoque: parseInt(l.ATUAL), critico: 5 
                     }));
                     renderizarProdutos();
-                    checarTravaDinheiro();
                 }
-
                 if (idParaBuscar !== "" && combo && combo.pedido) {
                     processarResultadoBuscaPedido(combo.pedido, idParaBuscar);
                 }
-
             } catch (e) { 
-                console.error("Erro na requisição:", e);
-                alert("⚠️ Erro ao carregar o cardápio real do Excel."); 
+                console.error(e); alert("⚠️ Erro ao carregar o cardápio real do Excel."); 
                 if (idParaBuscar !== "") resetarEstadoBuscaFlutuante();
             }
         }
 
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos"); grid.innerHTML = "";
-            produtos.sort((a, b) => a.nome.localeCompare(b.nome));
-            
-            produtos.forEach(p => {
+            produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
                 const qtd = carrinho[p.id] || 0; let status = `<span class="text-emerald-600 font-semibold">${p.estoque}</span>`;
-                let cEstilo = "bg-white border-slate-200 hover:border-slate-300", boxEstilo = "bg-slate-100 text-slate-600", bloq = "", esg = false;
+                let cEstilo = "bg-white border-slate-200 hover:border-slate-300", boxEstilo = "bg-slate-100 text-slate-600", bloq = "", esg = p.estoque === 0;
                 
-                if (p.estoque === 0) {
-                    status = `<span class="text-rose-500 font-semibold text-[11px]">0</span>`; cEstilo = "bg-slate-100 border-slate-200 text-slate-400 select-none pointer-events-none opacity-60"; boxEstilo = "bg-slate-200 text-slate-400"; bloq = "disabled"; esg = true;
+                if (esg) {
+                    status = `<span class="text-rose-500 font-semibold text-[11px]">0</span>`; cEstilo = "bg-slate-100 border-slate-200 text-slate-400 select-none pointer-events-none opacity-60"; boxEstilo = "bg-slate-200 text-slate-400"; bloq = "disabled";
                 } else if (p.estoque <= p.critico) { status = `<span class="text-rose-500 font-bold">${p.estoque}</span>`; }
                 if (qtd > 0 && !esg) boxEstilo = "bg-orange-50 border border-orange-200 text-orange-700";
-                
-                if (modoBuscaAtivo) {
-                    cEstilo = "bg-slate-50 border-slate-200 text-slate-300 select-none pointer-events-none opacity-40";
-                    bloq = "disabled";
-                }
+                if (modoBuscaAtivo) { cEstilo = "bg-slate-50 border-slate-200 text-slate-300 select-none pointer-events-none opacity-40"; bloq = "disabled"; }
 
                 grid.innerHTML += `
                     <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cEstilo}">
@@ -240,26 +153,14 @@
                         </div>
                     </div>`;
             });
-
-            renderizarItemEspecialPre(grid);
-        }
-
-        function renderizarItemEspecialPre(grid) {
-            let preEstilo = "bg-white border-slate-200 hover:border-slate-300";
-            let boxPreEstilo = "bg-slate-100 text-slate-600";
-            
-            if (modoBuscaAtivo) {
-                boxPreEstilo = "bg-slate-800 text-white border border-slate-900";
-            }
-
             grid.innerHTML += `
-                <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${preEstilo}">
-                    <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${boxPreEstilo}">
+                <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-200 hover:border-slate-300">
+                    <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${modoBuscaAtivo ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">
                         <div class="text-center font-bold text-xl tracking-wide mt-2.5 flex items-center justify-center w-full flex-1 select-none">PRE</div>
                         <div class="flex items-center justify-between w-full mt-auto">
                             <button onclick="gerenciarCliqueMenosPre()" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center ${!modoBuscaAtivo ? 'opacity-20 pointer-events-none' : ''}">-</button>
                             <span class="text-xs font-bold select-none text-center flex-1">${modoBuscaAtivo ? '<span class="text-slate-400 font-normal text-xs">ativo</span>' : '<span class="text-slate-300 font-normal">-</span>'}</span>
-                            <button onclick="ativarModoBuscaPre()" ${modoBuscaAtivo ? 'disabled' : ''} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center ${modoBuscaAtivo ? 'opacity-20 cursor-not-allowed' : ''}">+</button>
+                            <button onclick="ativarModoBuscaPre()" ${modoBuscaAtivo ? 'disabled' : ''} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm flex items-center justify-center">+</button>
                         </div>
                     </div>
                     <div class="min-w-0 flex flex-col justify-between flex-1">
@@ -271,163 +172,92 @@
 
         function alterarQuantidade(id, d) {
             const p = produtos.find(item => item.id === id); const nQtd = (carrinho[id] || 0) + d;
-            if (nQtd < 0) return; if (nQtd > p.estoque) { alert(`Ops! Só temos ${p.estoque} un. de ${p.nome}.`); return; }
             if (nQtd === 0) delete carrinho[id]; else carrinho[id] = nQtd;
             renderizarProdutos(); atualizarCarrinhoDOM();
         }
 
         function atualizarCarrinhoDOM() {
             if (modoResgateManual) return;
-
             const lista = document.getElementById("lista-carrinho"); totalAtual = 0; let tItens = 0; lista.innerHTML = "";
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id); const qtd = carrinho[id]; const sub = p.preco * qtd; totalAtual += sub; tItens += qtd;
                 lista.innerHTML += `<div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-md border border-slate-100"><div class="max-w-[75%]"><p class="font-semibold text-slate-700 truncate">${p.nome}</p><p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-bold text-slate-700">R$ ${formatarMoeda(sub)}</span></div>`;
             });
-            if (tItens === 0) { 
-                lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`; 
-                if (!modoBuscaAtivo) fecharOverlay(); 
-            }
-            
-            if (!modoBuscaAtivo) {
-                document.getElementById("conteudo-flutuante-esquerdo").innerText = `Pedido: R$ ${formatarMoeda(totalAtual)}`;
-            }
+            if (tItens === 0) lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
+            if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-esquerdo").innerText = `Pedido: R$ ${formatarMoeda(totalAtual)}`;
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; 
             validarEstadoFinalizar();
         }
 
-        function ativarModoBuscaPre() {
-            modoBuscaAtivo = true;
-            carrinho = {}; 
-            atualizarCarrinhoDOM();
-            renderizarProdutos(); 
-
-            const baseFlutuante = document.getElementById("caixa-flutuante-base");
-            const esquerdo = document.getElementById("conteudo-flutuante-esquerdo");
-            const direito = document.getElementById("conteudo-flutuante-direito");
-
-            baseFlutuante.className = "pointer-events-auto bg-slate-800 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[320px] max-w-md w-full";
-            
-            esquerdo.innerHTML = `
-                <input type="text" id="input-id-busca" placeholder="Digitar ID do Pedido" maxlength="12" 
-                class="bg-transparent text-white font-bold text-sm focus:outline-none w-full h-full placeholder-white/50" 
-                oninput="tratarDigitacaoIdBusca(this)">
-            `;
-            
-            direito.innerText = "- Revisar e Pagar";
-            direito.className = "text-sm tracking-wide text-right select-none pl-4 border-l border-white/20 h-full flex items-center text-white/40 cursor-default";
-            
-            setTimeout(() => { document.getElementById("input-id-busca").focus(); }, 100);
+        function activarModoBuscaPre() {
+            modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
+            document.getElementById("caixa-flutuante-base").className = "pointer-events-auto bg-slate-800 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[320px] max-w-md w-full";
+            document.getElementById("conteudo-flutuante-esquerdo").innerHTML = `<input type="text" id="input-id-busca" placeholder="Digitar ID do Pedido" maxlength="12" class="bg-transparent text-white font-bold text-sm focus:outline-none w-full h-full placeholder-white/50" oninput="tratarDigitacaoIdBusca(this)">`;
+            const dir = document.getElementById("conteudo-flutuante-direito"); dir.innerText = "- Revisar e Pagar"; dir.className = "text-sm tracking-wide text-right select-none pl-4 border-l border-white/20 h-full flex items-center text-white/40 cursor-default";
+            setTimeout(() => document.getElementById("input-id-busca").focus(), 100);
         }
 
-        function gerenciarCliqueMenosPre() {
-            if (modoBuscaAtivo) resetarEstadoBuscaFlutuante();
-        }
+        function gerenciarCliqueMenosPre() { if (modoBuscaAtivo) resetarEstadoBuscaFlutuante(); }
 
         function resetarEstadoBuscaFlutuante() {
-            modoBuscaAtivo = false;
-            renderizarProdutos();
-
-            const baseFlutuante = document.getElementById("caixa-flutuante-base");
-            const esquerdo = document.getElementById("conteudo-flutuante-esquerdo");
-            const direito = document.getElementById("conteudo-flutuante-direito");
-
-            baseFlutuante.className = "pointer-events-auto bg-orange-500 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[320px] max-w-md w-full";
-            
-            esquerdo.onclick = abrirOverlayCelular;
-            direito.onclick = abrirOverlayCelular;
-            direito.className = "text-sm tracking-wide text-right select-none pl-4 border-l border-white/20 h-full flex items-center cursor-pointer";
-            
+            modoBuscaAtivo = false; renderizarProdutos();
+            document.getElementById("caixa-flutuante-base").className = "pointer-events-auto bg-orange-500 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[320px] max-w-md w-full";
+            document.getElementById("conteudo-flutuante-esquerdo").onclick = abrirOverlayCelular;
+            const dir = document.getElementById("conteudo-flutuante-direito"); dir.onclick = abrirOverlayCelular; dir.className = "text-sm tracking-wide text-right select-none pl-4 border-l border-white/20 h-full flex items-center cursor-pointer";
             atualizarCarrinhoDOM();
         }
 
         function tratarDigitacaoIdBusca(input) {
             input.value = input.value.replace(/\D/g, "");
-            
-            if (input.value.length === 12) {
-                const idParaPesquisa = input.value;
-                input.disabled = true;
-                document.getElementById("conteudo-flutuante-direito").innerText = "Buscando...";
-                carregarEstoqueReal(idParaPesquisa);
-            }
+            if (input.value.length === 12) { input.disabled = true; document.getElementById("conteudo-flutuante-direito").innerText = "Buscando..."; carregarEstoqueReal(input.value); }
         }
 
         function processarResultadoBuscaPedido(linhasVindasDoExcel, idDigitado) {
             const baseFlutuante = document.getElementById("caixa-flutuante-base");
             const direito = document.getElementById("conteudo-flutuante-direito");
             const inputBusca = document.getElementById("input-id-busca");
-
-            // CORREÇÃO: Variável corrigida para evitar quebra de leitura do script
             const linhasFiltradas = linhasVindasDoExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
 
             if (linhasFiltradas.length === 0) {
-                baseFlutuante.classList.remove("bg-slate-800");
-                baseFlutuante.classList.add("bg-rose-600", "animate-shake");
-                direito.innerText = "não encontrado";
-                direito.classList.remove("text-white/40");
-                direito.classList.add("text-white");
-
+                baseFlutuante.className = "pointer-events-auto bg-rose-600 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[320px] max-w-md w-full animate-shake";
+                direito.innerText = "não encontrado"; direito.className = "text-sm tracking-wide text-right select-none pl-4 border-l border-white/20 h-full flex items-center text-white";
                 if (navigator.vibrate) navigator.vibrate(200);
-
                 setTimeout(() => {
-                    baseFlutuante.classList.remove("bg-rose-600", "animate-shake");
-                    baseFlutuante.classList.add("bg-slate-800");
-                    direito.innerText = "- Revisar e Pagar";
-                    direito.classList.remove("text-white");
-                    direito.classList.add("text-white/40");
-                    if (inputBusca) {
-                        inputBusca.disabled = false;
-                        inputBusca.value = "";
-                        inputBusca.focus();
-                    }
+                    baseFlutuante.className = "pointer-events-auto bg-slate-800 text-white font-bold h-12 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[320px] max-w-md w-full";
+                    direito.innerText = "- Revisar e Pagar"; direito.className = "text-sm tracking-wide text-right select-none pl-4 border-l border-white/20 h-full flex items-center text-white/40 cursor-default";
+                    if (inputBusca) { inputBusca.disabled = false; inputBusca.value = ""; inputBusca.focus(); }
                 }, 2000);
                 return;
             }
 
-            modoResgateManual = true; 
-            modoBuscaAtivo = false;
+            modoResgateManual = true; modoBuscaAtivo = false;
             pixChaveIdentificadora = linhasFiltradas[0].ID_PAGAMENTO || ""; 
-            
             document.getElementById("titulo-checkout").innerText = "Resumo do Pedido";
             document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             
-            const btnFinalizar = document.getElementById("btn-finalizar");
-            btnFinalizar.disabled = false;
+            const btnFinalizar = document.getElementById("btn-finalizar"); btnFinalizar.disabled = false;
             btnFinalizar.innerText = "Confirmar Entrega (Dar Baixa)";
             btnFinalizar.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95";
 
-            const lista = document.getElementById("lista-carrinho");
-            lista.innerHTML = "";
-            let valorConsolidado = 0;
+            const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valorConsolidado = 0;
 
             linhasFiltradas.forEach(linha => {
-                const qtd = parseInt(linha.QUANTIDADE) || 1;
-                const totalLinha = parseFloat(linha.TOTAL) || 0;
-                valorConsolidado += totalLinha; 
-                
+                const qtd = parseInt(linha.QUANTIDADE) || 1; const totalLinha = parseFloat(linha.TOTAL) || 0; valorConsolidado += totalLinha; 
                 const statusRetirada = linha.RETIRADA ? String(linha.RETIRADA).trim().toUpperCase() : "PENDENTE";
-                
                 let tagStatus = `<span class="text-amber-600 font-bold text-[11px] block mt-0.5">[PENDENTE]</span>`;
+                
                 if (statusRetirada === "RETIRADO") {
                     tagStatus = `<span class="text-rose-500 font-bold text-[11px] block mt-0.5">[JÁ ENTREGUE ⚠️]</span>`;
-                    btnFinalizar.disabled = true;
-                    btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
+                    btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente";
                     btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed";
                 }
 
                 lista.innerHTML += `
                     <div class="flex justify-between items-center text-xs bg-white p-2 rounded-md border border-slate-200 shadow-sm">
-                        <div class="max-w-[70%]">
-                            <p class="font-semibold text-slate-700 truncate">${linha.PRODUTO}</p>
-                            <p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(parseFloat(linha["PREÇO"]) || 0)}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-bold text-slate-700">R$ ${formatarMoeda(totalLinha)}</p>
-                            ${tagStatus}
-                        </div>
+                        <div class="max-w-[70%]"><p class="font-semibold text-slate-700 truncate">${linha.PRODUTO}</p><p class="text-[10px] text-slate-400">${qtd}x R$ ${formatarMoeda(parseFloat(linha["PREÇO"]) || 0)}</p></div>
+                        <div class="text-right"><p class="font-bold text-slate-700">R$ ${formatarMoeda(totalLinha)}</p>${tagStatus}</div>
                     </div>`;
             });
-
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidado)}`;
             abrirOverlayCelular();
         }
@@ -435,17 +265,14 @@
         function abrirOverlayCelular() {
             document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; 
             if (!modoResgateManual) resetarEstadoPagamento();
-            setTimeout(() => { document.getElementById("card-checkout").scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 100);
         }
 
         function fecharOverlay() { 
             document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; 
             if (modoResgateManual) {
-                modoResgateManual = false;
-                document.getElementById("titulo-checkout").innerText = "Pagamento";
+                modoResgateManual = false; document.getElementById("titulo-checkout").innerText = "Pagamento";
                 document.getElementById("bloco-inferior-pagamento").className = "space-y-3 pt-2 border-t";
-                resetarEstadoPagamento();
-                carregarEstoqueReal();
+                resetarEstadoPagamento(); carregarEstoqueReal();
             }
         }
 
@@ -455,23 +282,8 @@
             document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
             document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200";
             document.getElementById("input-recebido").disabled = true; document.getElementById("input-recebido").value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
-            
             document.getElementById("btn-finalizar").innerText = "Finalizar";
-            
-            checarTravaDinheiro();
-
-            const box = document.getElementById("box-qrcode"); box.className = "w-[100px] h-[100px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group";
-            box.innerHTML = `
-                <div class="absolute inset-0 opacity-[0.07] group-hover:opacity-[0.11] transition-opacity grid grid-cols-2 pointer-events-none">
-                    <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
-                    <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
-                    <div class="border-[4px] border-slate-900 rounded-none flex p-0.5"><div class="bg-slate-900 w-full h-full rounded-none"></div></div>
-                    <div class="flex flex-wrap gap-1 p-1 justify-center items-center"><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div><div class="bg-slate-900 w-2 h-2"></div></div>
-                </div>
-                <div class="relative z-10 flex flex-col items-center justify-center text-center p-1">
-                    <svg class="w-5 h-5 text-slate-400 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M5.94 5.94l.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg>
-                    <span id="txt-qrcode-box" class="text-[9px] font-bold text-slate-500 uppercase tracking-tight leading-none">Gerar<br>QRCODE</span>
-                </div>`;
+            document.getElementById("box-qrcode").className = "w-[100px] h-[100px] bg-slate-50 rounded-none flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all select-none relative overflow-hidden group";
             validarEstadoFinalizar();
         }
 
@@ -483,10 +295,9 @@
 
             if (tipo === 'DINHEIRO') {
                 btnDin.className = ativo; btnPix.className = inativo; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
-                secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-100 pointer-events-auto transition-all duration-200";
-                inp.disabled = false; inp.value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00"; inp.focus();
+                secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-100 pointer-events-auto transition-all duration-200"; inp.disabled = false; inp.value = ""; inp.focus();
             } else {
-                btnPix.className = ativo; checarTravaDinheiro(); carr.className = "w-[200%] h-full flex transition-transform duration-300 transform -translate-x-1/2";
+                btnPix.className = ativo; btnDin.className = inativo; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform -translate-x-1/2";
                 secaoDin.className = "w-1/2 h-full space-y-2.5 opacity-25 pointer-events-none transition-all duration-200"; inp.disabled = true;
             }
             validarEstadoFinalizar();
@@ -494,48 +305,30 @@
 
         async function requisitarQrCodeReal() {
             if (!formaPagamento || formaPagamento !== 'PIX') return;
-            const box = document.getElementById("box-qrcode");
-            
-            box.className = "w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none";
+            const box = document.getElementById("box-qrcode"); box.className = "w-[100px] h-[100px] bg-slate-50 border border-slate-200 rounded-none flex flex-col items-center justify-center p-2 select-none pointer-events-none";
             box.innerHTML = `<span class="text-[9px] font-bold text-slate-400 uppercase tracking-tight text-center leading-none">Carregando...</span>`;
-
-            pixChaveIdentificadora = "mp_" + Date.now(); 
-
-            const configVenda = obterConfiguracaoVenda();
-
-            const payload = {
-                id_pagamento: pixChaveIdentificadora,
-                pagamento: "PIX",
-                total_pedido_consolidado: parseFloat(totalAtual),
-                tipo_venda: configVenda.tipo,
-                status_retirada: configVenda.status,
-                // CORREÇÃO: Restaurada a palavra quantidade (estava como bandwidth)
-                itens: Object.keys(carrinho).map(id => {
-                    const p = produtos.find(item => item.id == id);
-                    return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) };
-                })
-            };
+            pixChaveIdentificadora = "mp_" + Date.now();
 
             try {
-                const r = await fetch(URL_GRAVACAO, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-                if (!r.ok) throw new Error();
+                const r = await fetch(URL_GRAVACAO, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        id_pagamento: pixChaveIdentificadora, pagamento: "PIX", total_pedido_consolidado: parseFloat(totalAtual), tipo_venda: "CAIXA", status_retirada: "RETIRADO",
+                        itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
+                    })
+                });
                 const dados = await r.json();
-
                 if (dados.qrcode_imagem) {
-                    pixChaveIdentificadora = dados.id_mercado_pago;
-
-                    box.className = "w-[100px] h-[100px] bg-white rounded-none flex items-center justify-center p-0 opacity-100 select-none pointer-events-none transition-all";
+                    pixChaveIdentificadora = dados.id_mercado_pago; box.className = "w-[100px] h-[100px] bg-white rounded-none flex items-center justify-center p-0 opacity-100 select-none pointer-events-none transition-all";
                     box.innerHTML = `<img src="data:image/jpeg;base64,${dados.qrcode_imagem}" class="w-full h-full rounded-none shadow-none" alt="QR Code">`;
                     validarEstadoFinalizar();
                 } else { throw new Error(); }
-            } catch (e) {
-                alert("⚠️ Falha ao gerar QR Code na API do Mercado Pago.");
-                resetarEstadoPagamento();
-            }
+            } catch (e) { alert("⚠️ Falha ao gerar QR Code."); resetarEstadoPagamento(); }
         }
 
         function tratarMascaraDinheiro(inp) {
-            let val = inp.value.replace(/\D/g, ""); if (val === "") { inp.value = ""; validarEstadoFinalizar(); return; }
+            let val = inp.value.replace(/\D/g, ""); if (val === "") return;
             let num = parseFloat(val) / 100; inp.value = num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             const txtT = document.getElementById("valor-troco-txt");
             if (num < totalAtual) { txtT.innerText = "Valor Insuficiente"; txtT.className = "font-bold text-rose-500 text-xs"; } 
@@ -544,93 +337,42 @@
         }
 
         function validarEstadoFinalizar() {
-            if (modoResgateManual) return; 
-
+            if (modoResgateManual) return;
             const btn = document.getElementById("btn-finalizar"); const rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0;
             if (Object.keys(carrinho).length > 0 && formaPagamento && (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" || formaPagamento === 'DINHEIRO' && rec >= totalAtual)) {
                 btn.disabled = false; btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-md text-center text-sm shadow cursor-pointer transition-all transform active:scale-95";
             } else { btn.disabled = true; btn.className = "w-full bg-slate-200 text-slate-400 font-bold py-3 rounded-md text-center text-sm cursor-not-allowed"; }
         }
 
-        function processarCliqueFinalizar() { 
-            if (modoResgateManual) {
-                executarBaixaPedidoEntregue();
-            } else {
-                if (formaPagamento === 'DINHEIRO') executarGravacaoDinheiroDirecto(); else checarSegurancaMercadoPago(); 
-            }
-        }
+        function processarCliqueFinalizar() { if (modoResgateManual) executarBaixaPedidoEntregue(); else if (formaPagamento === 'DINHEIRO') executarGravacaoDinheiroDirecto(); else checarSegurancaMercadoPago(); }
 
         async function executarBaixaPedidoEntregue() {
-            const btn = document.getElementById("btn-finalizar"); 
-            btn.disabled = true; 
-            btn.innerText = "Processando Baixa...";
-
+            document.getElementById("btn-finalizar").innerText = "Processando Baixa...";
             alert("🔒 Fase Pronta! Próximo passo será criar o fluxo de dar baixa no Power Automate para carimbar RETIRADO.");
-            
-            modoResgateManual = false;
-            document.getElementById("titulo-checkout").innerText = "Pagamento";
-            document.getElementById("bloco-inferior-pagamento").className = "space-y-3 pt-2 border-t";
-            fecharOverlay();
-            resetarEstadoBuscaFlutuante();
-            carregarEstoqueReal();
+            fecharOverlay(); resetarEstadoBuscaFlutuante();
         }
 
         async function checarSegurancaMercadoPago() {
-            const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando...";
-            const configVenda = obterConfiguracaoVenda();
-
-            const payloadValidacao = {
-                id_pagamento: pixChaveIdentificadora,
-                pagamento: "PIX",
-                total_pedido_consolidado: parseFloat(totalAtual),
-                tipo_venda: configVenda.tipo,
-                status_retirada: configVenda.status,
-                itens: Object.keys(carrinho).map(id => { 
-                    const p = produtos.find(item => item.id == id); 
-                    return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
-                })
-            };
-
             try {
-                const r = await fetch(URL_VALIDA_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payloadValidacao) });
-                if (!r.ok) throw new Error(); const res = await r.json();
-                
-                if (res.pago === true) {
-                    alert("🎉 Venda Finalizada com Sucesso!"); 
-                    fecharOverlay(); carrinho = {}; resetarEstadoPagamento(); atualizarCarrinhoDOM(); carregarEstoqueReal();
-                } else { 
-                    alert("⚠️ Pagamento pendente ⚠️"); 
-                }
-            } catch (e) { 
-                alert("⚠️ Erro ao verificar pagamento. Tente novamente."); 
-            } finally {
-                btn.innerText = "Finalizar"; 
-                validarEstadoFinalizar();
-            }
+                const r = await fetch(URL_VALIDA_PIX, {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id_pagamento: pixChaveIdentificadora, pagamento: "PIX", total_pedido_consolidado: parseFloat(totalAtual), tipo_venda: "CAIXA", status_retirada: "RETIRADO", itens: [] })
+                });
+                const res = await r.json();
+                if (res.pago === true) { alert("🎉 Venda Finalizada com Sucesso!"); fecharOverlay(); carrinho = {}; resetarEstadoPagamento(); atualizarCarrinhoDOM(); carregarEstoqueReal(); } 
+                else { alert("⚠️ Pagamento pendente ⚠️"); }
+            } catch (e) { alert("⚠️ Erro ao verificar pagamento."); }
         }
 
         async function executarGravacaoDinheiroDirecto() {
-            const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando...";
-            let idF = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}${String(new Date().getSeconds()).padStart(2,'0')}`;
-            const configVenda = obterConfiguracaoVenda();
-
-            const payload = {
-                id_pagamento: idF,
-                pagamento: "DINHEIRO",
-                total_pedido_consolidado: parseFloat(totalAtual),
-                tipo_venda: configVenda.tipo,
-                status_retirada: configVenda.status,
-                itens: Object.keys(carrinho).map(id => { const p = produtos.find(item => item.id == id); return { sigla: p.sigla, produto: p.nome, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; })
-            };
+            let idF = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`;
             try {
-                const r = await fetch(URL_GRAVACAO, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); if (!r.ok) throw new Error();
+                await fetch(URL_GRAVACAO, {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id_pagamento: idF, pagamento: "DINHEIRO", total_pedido_consolidado: parseFloat(totalAtual), tipo_venda: "CAIXA", status_retirada: "RETIRADO", itens: [] })
+                });
                 alert("Venda Finalizada!"); fecharOverlay(); carrinho = {}; resetarEstadoPagamento(); atualizarCarrinhoDOM(); carregarEstoqueReal();
-            } catch (e) { 
-                alert("⚠️ Erro de rede ao tentar gravar na planilha."); 
-            } finally {
-                btn.innerText = "Finalizar"; 
-                validarEstadoFinalizar();
-            }
+            } catch (e) { alert("⚠️ Erro ao salvar venda."); }
         }
 
         carregarEstoqueReal();
