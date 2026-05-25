@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Festa Junina - R$ 0,01</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 50px; background-color: #f7f9fc; color: #333; }
+        .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: inline-block; max-width: 400px; width: 100%; }
+        h2 { color: #1e3a8a; margin-top: 0; }
+        .price { font-size: 24px; color: #00a650; font-weight: bold; margin: 15px 0; }
+        button { background-color: #00a650; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.2s; }
+        button:hover { background-color: #008f45; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        #qrcodeArea { margin-top: 25px; display: none; }
+        #status { margin-top: 20px; font-weight: 600; color: #666; }
+        input b { display: block; margin-top: 10px; }
+        .copia-cola-box { width: 100%; padding: 10px; text-align: center; border: 1px solid #ddd; border-radius: 4px; background: #fafafa; box-sizing: border-box; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Ingresso Festa Junina</h2>
+    <p>Ambiente de Teste em Produção</p>
+    <div class="price">R$ 0,01</div>
+    
+    <button id="btnComprar" onclick="solicitarPix()">Gerar QR Code Pix</button>
+    
+    <div id="qrcodeArea">
+        <p><strong>Escaneie o QR Code abaixo:</strong></p>
+        <img id="qrImage" src="" alt="QR Code Pix" width="220" height="220">
+        
+        <p><small>Ou use o Pix Copia e Cola:</small></p>
+        <input type="text" id="copiaCola" class="copia-cola-box" readonly onclick="this.select();">
+    </div>
+
+    <div id="status"></div>
+</div>
+
+<script>
+    // IMPORTANTE: Cole aqui a sua URL do TinyURL (ou a URL direta do Power Automate se preferir)
+    const URL_FLUXO_DINAMICO = "https://tinyurl.com/SUA_URL_ENCURTADA";
+
+    async function solicitarPix() {
+        const btn = document.getElementById("btnComprar");
+        const statusDiv = document.getElementById("status");
+        
+        statusDiv.innerText = "Conectando ao Power Automate...";
+        btn.disabled = true;
+
+        try {
+            // Disparando para o fluxo único. Como NÃO enviamos "action", o fluxo executará o POST
+            const resposta = await fetch(URL_FLUXO_DINAMICO, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ origem: "site_html" }) 
+            });
+
+            if (!resposta.ok) throw new Error("Erro na resposta do fluxo");
+
+            // O Power Automate precisa retornar o JSON do Mercado Pago contendo o qr_code
+            const dadosMercadoPago = await resposta.json();
+            
+            // Extrai o texto do Copia e Cola vindo da resposta do bloco HTTP do Mercado Pago
+            const textoPix = dadosMercadoPago.point_of_interaction.transaction_data.qr_code;
+            
+            // Renderiza o QR Code usando uma API pública de imagem
+            document.getElementById("qrImage").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(textoPix)}`;
+            document.getElementById("copiaCola").value = textoPix;
+            
+            // Exibe a área do QR Code e atualiza o status
+            document.getElementById("qrcodeArea").style.display = "block";
+            statusDiv.innerHTML = "<span style='color: #00a650;'>Aguardando pagamento...</span><br><small>O Webhook atualizará sua planilha automaticamente assim que pagar!</small>";
+
+        } catch (erro) {
+            console.error(erro);
+            statusDiv.innerHTML = "<span style='color: #cc0000;'>Erro ao gerar Pix. Verifique os logs do Power Automate.</span>";
+            btn.disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>
