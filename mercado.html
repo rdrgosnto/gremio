@@ -14,7 +14,7 @@
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         #qrcodeArea { margin-top: 25px; display: none; }
         #status { margin-top: 20px; font-weight: 600; color: #666; }
-        .copia-cola-box { width: 100%; padding: 10px; text-align: center; border: 1px solid #ddd; border-radius: 4px; background: #fafafa; box-sizing: border-box; font-size: 12px; margin-top: 10px; }
+        .copia-cola-box { width: 100%; padding: 10px; text-align: center; border: 1px solid #ddd; border-radius: 4px; background: #fafafa; box-sizing: border-box; font-size: 12px; margin-top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -30,19 +30,19 @@
         <p><strong>Escaneie o QR Code abaixo:</strong></p>
         <img id="qrImage" src="" alt="QR Code Pix" width="220" height="220">
         
-        <p><small>Ou use o Pix Copia e Cola:</small></p>
-        <input type="text" id="copiaCola" class="copia-cola-box" readonly onclick="this.select();">
+        <p><small>Clique abaixo para copiar o Pix Copia e Cola:</small></p>
+        <input type="text" id="copiaCola" class="copia-cola-box" readonly onclick="copiarTexto()">
     </div>
 
     <div id="status"></div>
 </div>
 
 <script>
-    // URL do seu TinyURL configurada
-    const URL_FLUXO_DINAMICO = "https://tinyurl.com/4zw2kw7w";
+    // URL do fluxo atualizada
+    const URL_FLUXO_DINAMICO = "https://i3q6wc.s.gy/LX5QWm";
     
     // ⚠️ COLE SEU TOKEN DE PRODUÇÃO AQUI PARA O HTML CONSULTAR O MERCADO PAGO
-    const TOKEN_MERCADO_PAGO = "APP_USR-SEU_TOKEN_REAL_AQUI"; 
+    const TOKEN_MERCADO_PAGO = "APP_USR-1411402861384213-052510-49927f3b7b3ad2f9000177e389a0a765-2391822607"; 
 
     let ID_PAGAMENTO = "";
 
@@ -108,6 +108,25 @@
                 console.error("Erro ao verificar status no Mercado Pago:", erro);
             }
         }, 10000); 
+    }
+
+    function copiarTexto() {
+        const inputCopiaCola = document.getElementById("copiaCola");
+        inputCopiaCola.select();
+        inputCopiaCola.setSelectionRange(0, 99999); // Suporte para dispositivos móveis
+
+        navigator.clipboard.writeText(inputCopiaCola.value).then(() => {
+            const valorOriginal = inputCopiaCola.value;
+            inputCopiaCola.value = "Copiado com sucesso!";
+            inputCopiaCola.style.color = "#00a650";
+            
+            setTimeout(() => {
+                inputCopiaCola.value = valorOriginal;
+                inputCopiaCola.style.color = "#333";
+            }, 2000);
+        }).catch(err => {
+            console.error("Erro ao copiar o código Pix: ", err);
+        });
     }
 </script>
 
