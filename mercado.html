@@ -38,8 +38,13 @@
 </div>
 
 <script>
-    // URL do seu TinyURL configurada e pronta para o teste
+    // URL do seu TinyURL configurada
     const URL_FLUXO_DINAMICO = "https://tinyurl.com/4zw2kw7w";
+    
+    // ⚠️ COLE SEU TOKEN DE PRODUÇÃO AQUI PARA O HTML CONSULTAR O MERCADO PAGO
+    const TOKEN_MERCADO_PAGO = "APP_USR-SEU_TOKEN_REAL_AQUI"; 
+
+    let ID_PAGAMENTO = "";
 
     async function solicitarPix() {
         const btn = document.getElementById("btnComprar");
@@ -49,8 +54,6 @@
         btn.disabled = true;
 
         try {
-            // Disparando para o fluxo único usando o TinyURL. 
-            // Como NÃO enviamos "action", a expressão do seu fluxo mudará automaticamente para POST
             const resposta = await fetch(URL_FLUXO_DINAMICO, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -59,25 +62,52 @@
 
             if (!resposta.ok) throw new Error("Erro na resposta do fluxo");
 
-            // O Power Automate retorna todo o JSON gerado pelo Mercado Pago
             const dadosMercadoPago = await resposta.json();
             
-            // Extrai o texto da chave Copia e Cola gerada na API do Mercado Pago
+            // Guarda o ID globalmente para a função de checagem usar depois
+            ID_PAGAMENTO = dadosMercadoPago.id;
+            
+            // Extrai o texto da chave Copia e Cola
             const textoPix = dadosMercadoPago.point_of_interaction.transaction_data.qr_code;
             
-            // Gera a imagem do QR Code em tempo real na tela do cliente
+            // Gera a imagem do QR Code
             document.getElementById("qrImage").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(textoPix)}`;
             document.getElementById("copiaCola").value = textoPix;
             
-            // Mostra os elementos ocultos e avisa que o fluxo de verificação automática está rodando
             document.getElementById("qrcodeArea").style.display = "block";
-            statusDiv.innerHTML = "<span style='color: #00a650;'>Aguardando pagamento...</span><br><small>O Webhook atualizará o sistema automaticamente assim que você pagar!</small>";
+            statusDiv.innerHTML = "<span style='color: #00a650;'>Aguardando pagamento...</span><br><small>Verificando status a cada 10 segundos automaticamente.</small>";
+
+            // Inicia o monitoramento direto no Mercado Pago
+            verificarStatusAutomatico();
 
         } catch (erro) {
             console.error(erro);
             statusDiv.innerHTML = "<span style='color: #cc0000;'>Erro ao gerar Pix. Verifique os logs do seu Power Automate.</span>";
             btn.disabled = false;
         }
+    }
+
+    function verificarStatusAutomatico() {
+        // Roda em loop a cada 10000 milissegundos (10 segundos)
+        const intervalo = setInterval(async () => {
+            try {
+                const resposta = await fetch(`https://api.mercadopago.com/v1/payments/${ID_PAGAMENTO}`, {
+                    method: "GET",
+                    headers: { "Authorization": `Bearer ${TOKEN_MERCADO_PAGO}` }
+                });
+
+                const dadosPagamento = await resposta.json();
+
+                // Se o status no Mercado Pago mudar para aprovado, atualiza a tela do cliente
+                if (dadosPagamento.status === "approved") {
+                    clearInterval(intervalo); // Para o loop de 10 segundos
+                    document.getElementById("qrcodeArea").style.display = "none"; // Some com o QR Code da tela
+                    document.getElementById("status").innerHTML = "<h3 style='color: #00a650;'>🎉 Pagamento Confirmado! Seu ingresso foi gerado.</h3>";
+                }
+            } catch (erro) {
+                console.error("Erro ao verificar status no Mercado Pago:", erro);
+            }
+        }, 10000); 
     }
 </script>
 
