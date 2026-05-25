@@ -32,8 +32,8 @@
                     <h3 id="titulo-checkout" class="text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2">Pagamento</h3>
                     <div class="flex-1 flex flex-col min-h-0">
                         <div class="flex justify-between items-center mb-1.5 w-full px-0.5">
-                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Resumo do Pedido:</h4>
-                            <span id="id-pedido-cabecalho" class="text-xs font-medium text-slate-400 tracking-wide ml-auto text-right"></span>
+                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Resumo:</h4>
+                            <span id="id-pedido-cabecalho" class="text-xs font-medium text-slate-400 tracking-wide ml-auto"></span>
                         </div>
                         <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
                             <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
@@ -78,16 +78,23 @@
     </div>
 
     <script>
+        // ==========================================
+        // ⚠️ CONFIGURAÇÕES DO SISTEMA (ALTERAR AQUI)
+        // ==========================================
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/06f981a846ca45bc8bfe51c97c480d96/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n-3ys5toEStLZNzQS6q0bETlCP8-NuAjwWn-fAOqjOs";
+        const TOKEN_MERCADO_PAGO = "APP_USR-1411402861384213-052510-49927f3b7b3ad2f9000177e389a0a765-2391822607";
+        const TEMPO_CHECK_PIX = 6000; // Tempo de varredura (6 segundos)
 
+        // Estilos CSS Reutilizáveis
         const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm text-center shadow-sm transition-all";
         const CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-200 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
         const CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95";
         const CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
         const CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs w-full text-sm";
 
-        let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [];
+        // Variáveis de Controle Global
+        let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null;
 
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
         
@@ -96,6 +103,9 @@
             document.documentElement.style.opacity = document.body.style.opacity = "1";
         }
 
+        // ==========================================
+        // FASE 1: INICIALIZAÇÃO E PRODUTOS (A-Z)
+        // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
             const cache = localStorage.getItem("festa_junina_cardapio");
             if (cache) { produtos = JSON.parse(cache); renderizarProdutos(); }
@@ -155,6 +165,9 @@
                 </div>`;
         }
 
+        // ==========================================
+        // FASE 2: MANIPULAÇÃO DO CARRINHO
+        // ==========================================
         function alterarQuantidade(id, d) {
             const nQtd = (carrinho[id] || 0) + d;
             if (nQtd <= 0) delete carrinho[id]; else carrinho[id] = nQtd;
@@ -173,14 +186,176 @@
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
-        function abrirOverlayCelular() {
-            if (window.innerWidth >= 1024 && !modoResgateManual) return;
-            document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; 
-            if (!modoResgateManual) resetarEstadoPagamento();
+        // CONTROLADOR DO CLIQUE: Decide qual fluxo acionar com base na escolha do operador
+        const processarCliqueFinalizar = () => {
+            if (modoResgateManual) return executingBaixaPedidoEntregue();
+            if (formaPagamento === 'DINHEIRO') return executarGravacaoDinheiroDirecto();
+            if (formaPagamento === 'PIX') return executarCliqueContingenciaManualPix();
+        };
+
+        function selecionarPagamento(tipo) {
+            formaPagamento = tipo; const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro"), secaoDin = document.getElementById("secao-valores-dinheiro"), carr = document.getElementById("carrossel-pagamento"), inp = document.getElementById("input-recebido");
+            if (tipo === 'DINHEIRO') { 
+                if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
+                btnDin.className = CSS_BTN_ATIVO; btnPix.className = CSS_BTN_INATIVO; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0"; secaoDin.className = "w-1/2 h-full space-y-3.5 opacity-100 pointer-events-auto transition-all duration-200"; inp.disabled = false; inp.value = ""; inp.focus(); 
+            } 
+            else { btnPix.className = CSS_BTN_ATIVO; btnDin.className = CSS_BTN_INATIVO; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform -translate-x-1/2"; secaoDin.className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200"; inp.disabled = true; }
+            validarEstadoFinalizar();
         }
 
-        function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
+        function validarEstadoFinalizar() {
+            if (modoResgateManual) return;
+            const btn = document.getElementById("btn-finalizar"), rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0;
+            
+            if (formaPagamento === 'PIX') {
+                btn.disabled = !(pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_"));
+                btn.className = btn.disabled ? CSS_FINALIZAR_DESABILITADO : CSS_FINALIZAR_HABILITADO; 
+            } else {
+                btn.disabled = !(Object.keys(carrinho).length > 0 && formaPagamento && formaPagamento === 'DINHEIRO' && rec >= totalAtual);
+                btn.className = btn.disabled ? CSS_FINALIZAR_DESABILITADO : CSS_FINALIZAR_HABILITADO;
+            }
+        }
 
+        const gerarPayloadVenda = (idF, forma) => JSON.stringify({ 
+            id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
+            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
+        });
+
+        // ==========================================
+        // FASE 3: FLUXO DE DINHEIRO
+        // ==========================================
+        function tratarMascaraDinheiro(inp) {
+            let val = inp.value.replace(/\D/g, ""); if (val === "") return;
+            let num = parseFloat(val) / 100; inp.value = num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const txtT = document.getElementById("valor-troco-txt");
+            if (num < totalAtual) { txtT.innerText = "Valor Insuficiente"; txtT.className = "font-bold text-rose-500 text-xs"; } 
+            else { txtT.innerText = `R$ ${formatarMoeda(num - totalAtual)}`; txtT.className = "font-bold text-emerald-600 text-base"; }
+            validarEstadoFinalizar();
+        }
+
+        async function executarGravacaoDinheiroDirecto() {
+            const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando"; btn.disabled = true;
+            try {
+                await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`, "DINHEIRO") });
+                alert("Venda Finalizada!"); forçarFechamentoSistemico();
+            } catch (e) { alert("Erro ao salvar venda."); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
+        }
+
+        // ==========================================
+        // FASE 4: FLUXO DE PIX (GERAÇÃO E LAYOUT)
+        // ==========================================
+        async function requisitarQrCodeReal() {
+            if (!formaPagamento || formaPagamento !== 'PIX') return;
+            const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-50 border border-slate-200 text-[9px] font-bold text-slate-400 uppercase text-center flex items-center justify-center p-2 pointer-events-none"; box.innerHTML = "Carregando..."; pixChaveIdentificadora = "mp_" + Date.now();
+            try {
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
+                if (d.qrcode_imagem) { 
+                    pixChaveIdentificadora = d.id_mercado_pago; 
+                    box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-all rounded-none"; 
+                    box.innerHTML = `<img src="data:image/jpeg;base64,${d.qrcode_imagem}" class="w-full h-full object-contain rounded-none">`; 
+                    
+                    validarEstadoFinalizar(); 
+                    iniciarMonitoramentoPixAutomatico();
+                } else throw new Error();
+            } catch (e) { alert("Falha ao gerar QR Code."); resetarEstadoPagamento(); }
+        }
+
+        function aplicarLayoutSucessoPix() {
+            const box = document.getElementById("box-qrcode");
+            box.className = "w-28 h-28 bg-emerald-500 border-none flex items-center justify-center rounded-none text-4xl select-none pointer-events-none";
+            box.innerHTML = "✅";
+            
+            const btn = document.getElementById("btn-finalizar");
+            btn.disabled = true;
+            btn.className = CSS_FINALIZAR_DESABILITADO;
+        }
+
+        function aplicarLayoutFalhaPix() {
+            const box = document.getElementById("box-qrcode");
+            box.className = "w-28 h-28 bg-rose-600 border-none flex items-center justify-center rounded-none text-4xl select-none pointer-events-none animate-shake";
+            box.innerHTML = "❌";
+            
+            setTimeout(() => {
+                if (formaPagamento === 'PIX' && pixChaveIdentificadora && !pixChaveIdentificadora.startsWith("mp_") && box.innerHTML === "❌") {
+                    box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-all rounded-none";
+                    box.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=112x112&data=${encodeURIComponent(pixChaveIdentificadora)}" class="w-full h-full object-contain rounded-none">`;
+                }
+            }, 3000);
+        }
+
+        // ==========================================
+        // FASE 5: MONITORAMENTO AUTOMÁTICO DO PIX
+        // ==========================================
+        function iniciarMonitoramentoPixAutomatico() {
+            if (intervaloPix) clearInterval(intervaloPix);
+            intervaloPix = setInterval(async () => {
+                const pago = await consultarStatusMercadoPagoDireto();
+                if (pago) {
+                    clearInterval(intervaloPix);
+                    intervaloPix = null;
+                    aplicarLayoutSucessoPix();
+                    executarGravacaoPixAprovadoNasNuvens();
+                }
+            }, TEMPO_CHECK_PIX);
+        }
+
+        async function consultarStatusMercadoPagoDireto() {
+            if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return false;
+            try {
+                const r = await fetch(`https://api.mercadopago.com/v1/payments/${pixChaveIdentificadora}`, {
+                    method: "GET", headers: { "Authorization": `Bearer ${TOKEN_MERCADO_PAGO}` }
+                });
+                if (!r.ok) return false;
+                const dados = await r.json();
+                return dados.status === "approved";
+            } catch (erro) {
+                return false;
+            }
+        }
+
+        async function executarGravacaoPixAprovadoNasNuvens() {
+            try {
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const res = await r.json();
+                if (res.pago === true) { 
+                    alert("Venda via Pix salva com sucesso!"); 
+                    forçarFechamentoSistemico(); 
+                } else {
+                    alert("Aviso: O pagamento existe, mas houve falha na gravação do Excel.");
+                }
+            } catch (e) { 
+                alert("Erro ao conectar com as nuvens para registrar a venda."); 
+            }
+        }
+
+        // ==========================================
+        // FASE 6: CONTINGÊNCIA MANUAL DO PIX (BOTÃO LARANJA)
+        // ==========================================
+        async function executarCliqueContingenciaManualPix() {
+            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
+            
+            const btn = document.getElementById("btn-finalizar");
+            btn.innerText = "Verificando...";
+            btn.disabled = true;
+
+            const pago = await consultarStatusMercadoPagoDireto();
+
+            if (pago) {
+                btn.innerText = "Finalizar";
+                aplicarLayoutSucessoPix();
+                await executarGravacaoPixAprovadoNasNuvens();
+            } else {
+                alert("Este Pix ainda NÃO consta como pago.");
+                btn.innerText = "Finalizar";
+                btn.disabled = false; 
+                btn.className = CSS_FINALIZAR_HABILITADO; // Restaura a cor laranja viva e estado ativo
+                aplicarLayoutFalhaPix();
+                iniciarMonitoramentoPixAutomatico(); 
+            }
+        }
+
+        // ==========================================
+        // MODO PRE: RETIRADA E BUSCA DE PEDIDOS ONLINE
+        // ==========================================
         function ativarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
@@ -234,75 +409,6 @@
             } else { abrirOverlayCelular(); }
         }
 
-        // CORREÇÃO AQUI: Mudado para true para forçar o recarregamento do estoque nas vendas normais
-        function forçarFechamentoSistemico(e) {
-            if(e) { e.stopPropagation(); e.preventDefault(); }
-            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
-            document.getElementById("painel-fechamento").classList.add("hidden");
-            resetSistemicoTotal(true);
-        }
-
-        function resetSistemicoTotal(forçarAtualizacaoHttp = true) {
-            modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; formaPagamento = null; pixChaveIdentificadora = ""; cachePedidoOnlineOriginal = [];
-            document.getElementById("id-pedido-cabecalho").innerText = ""; document.getElementById("titulo-checkout").innerText = "Pagamento"; document.getElementById("bloco-inferior-pagamento").className = "space-y-4 pt-1 border-t";
-            const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = abrirOverlayCelular;
-            bf.className = "pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-sm";
-            bf.innerHTML = `<div id="conteudo-flutuante-unico" class="text-sm tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>`;
-            resetarEstadoPagamento(); atualizarCarrinhoDOM(); document.getElementById("painel-fechamento").classList.add("hidden"); 
-            if (forçarAtualizacaoHttp) carregarEstoqueReal(); else renderizarProdutos();
-        }
-
-        function resetarEstadoPagamento() {
-            formaPagamento = null; pixChaveIdentificadora = "";
-            document.getElementById("btn-pix").className = document.getElementById("btn-dinheiro").className = CSS_BTN_INATIVO;
-            document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
-            document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200";
-            document.getElementById("input-recebido").disabled = true; document.getElementById("input-recebido").value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
-            document.getElementById("btn-finalizar").innerText = "Finalizar";
-            const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-50 border border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all relative overflow-hidden group";
-            box.innerHTML = `<div class="absolute inset-0 opacity-[0.12] flex flex-col justify-between p-2 pointer-events-none bg-gradient-to-br from-slate-900 via-slate-700 to-slate-900"><div class="flex justify-between w-full h-6"><div class="border-[3px] border-slate-900 w-6 h-6"></div><div class="border-[3px] border-slate-900 w-6 h-6"></div></div><div class="flex justify-between items-end w-full h-6"><div class="border-[3px] border-slate-900 w-6 h-6"></div><div class="flex flex-wrap gap-0.5 w-6 h-6 justify-center items-center"><div class="w-1 h-1 bg-slate-900"></div><div class="w-1 h-1 bg-slate-900"></div><div class="w-1 h-1 bg-slate-900"></div><div class="w-1 h-1 bg-slate-900"></div></div></div></div><div class="absolute w-full h-0.5 bg-orange-400/40 top-1/2 animate-bounce"></div><div class="relative z-10 flex flex-col items-center text-center p-1"><svg class="w-5 h-5 text-slate-400 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg><span class="text-[9px] font-bold text-slate-500 uppercase tracking-tight leading-none">Gerar<br>QRCODE</span></div>`;
-            validarEstadoFinalizar();
-        }
-
-        function selecionarPagamento(tipo) {
-            formaPagamento = tipo; const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro"), secaoDin = document.getElementById("secao-valores-dinheiro"), carr = document.getElementById("carrossel-pagamento"), inp = document.getElementById("input-recebido");
-            if (tipo === 'DINHEIRO') { btnDin.className = CSS_BTN_ATIVO; btnPix.className = CSS_BTN_INATIVO; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0"; secaoDin.className = "w-1/2 h-full space-y-3.5 opacity-100 pointer-events-auto transition-all duration-200"; inp.disabled = false; inp.value = ""; inp.focus(); } 
-            else { btnPix.className = CSS_BTN_ATIVO; btnDin.className = CSS_BTN_INATIVO; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform -translate-x-1/2"; secaoDin.className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200"; inp.disabled = true; }
-            validarEstadoFinalizar();
-        }
-
-        const gerarPayloadVenda = (idF, forma) => JSON.stringify({ 
-            id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
-            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
-        });
-
-        async function requisitarQrCodeReal() {
-            if (!formaPagamento || formaPagamento !== 'PIX') return;
-            const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-50 border border-slate-200 text-[9px] font-bold text-slate-400 uppercase text-center flex items-center justify-center p-2 pointer-events-none"; box.innerHTML = "Carregando..."; pixChaveIdentificadora = "mp_" + Date.now();
-            try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
-                if (d.qrcode_imagem) { pixChaveIdentificadora = d.id_mercado_pago; box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-all"; box.innerHTML = `<img src="data:image/jpeg;base64,${d.qrcode_imagem}">`; validarEstadoFinalizar(); } else throw new Error();
-            } catch (e) { alert("Falha ao gerar QR Code."); resetarEstadoPagamento(); }
-        }
-
-        function tratarMascaraDinheiro(inp) {
-            let val = inp.value.replace(/\D/g, ""); if (val === "") return;
-            let num = parseFloat(val) / 100; inp.value = num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            const txtT = document.getElementById("valor-troco-txt");
-            if (num < totalAtual) { txtT.innerText = "Valor Insuficiente"; txtT.className = "font-bold text-rose-500 text-xs"; } 
-            else { txtT.innerText = `R$ ${formatarMoeda(num - totalAtual)}`; txtT.className = "font-bold text-emerald-600 text-base"; }
-            validarEstadoFinalizar();
-        }
-
-        function validarEstadoFinalizar() {
-            if (modoResgateManual) return;
-            const btn = document.getElementById("btn-finalizar"), rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0;
-            btn.disabled = !(Object.keys(carrinho).length > 0 && formaPagamento && (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" || formaPagamento === 'DINHEIRO' && rec >= totalAtual));
-            btn.className = btn.disabled ? CSS_FINALIZAR_DESABILITADO : CSS_FINALIZAR_HABILITADO;
-        }
-
-        const processarCliqueFinalizar = () => modoResgateManual ? executingBaixaPedidoEntregue() : (formaPagamento === 'DINHEIRO' ? executarGravacaoDinheiroDirecto() : checarSegurancaMercadoPago());
-
         async function executingBaixaPedidoEntregue() {
             const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando"; btn.disabled = true;
             try {
@@ -319,21 +425,52 @@
             } catch (e) { alert("Erro ao processar baixa online. O botão foi destravado."); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
         }
 
-        async function checarSegurancaMercadoPago() {
-            const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando"; btn.disabled = true;
-            try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const res = await r.json();
-                if (res.pago === true) { alert("Venda Finalizada!"); forçarFechamentoSistemico(); } 
-                else { alert("Pagamento pendente"); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
-            } catch (e) { alert("Erro ao verificar pagamento."); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
+        // ==========================================
+        // FECHAMENTOS E COMPORTAMENTO RESPONSIVO
+        // ==========================================
+        function abrirOverlayCelular() {
+            if (window.innerWidth >= 1024 && !modoResgateManual) return;
+            document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; 
+            if (!modoResgateManual) resetarEstadoPagamento();
         }
 
-        async function executarGravacaoDinheiroDirecto() {
-            const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando"; btn.disabled = true;
-            try {
-                await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`, "DINHEIRO") });
-                alert("Venda Finalizada!"); forçarFechamentoSistemico();
-            } catch (e) { alert("Erro ao salvar venda."); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
+        function fecharOverlay() { 
+            if (modoResgateManual) forçarFechamentoSistemico(); 
+            else { 
+                document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; 
+                resetarEstadoPagamento(); 
+            } 
+        }
+
+        function forçarFechamentoSistemico(e) {
+            if(e) { e.stopPropagation(); e.preventDefault(); }
+            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
+            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
+            document.getElementById("painel-fechamento").classList.add("hidden");
+            resetSistemicoTotal(true);
+        }
+
+        function resetSistemicoTotal(forçarAtualizacaoHttp = true) {
+            modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; formaPagamento = null; pixChaveIdentificadora = ""; cachePedidoOnlineOriginal = [];
+            document.getElementById("id-pedido-cabecalho").innerText = ""; document.getElementById("titulo-checkout").innerText = "Pagamento"; document.getElementById("bloco-inferior-pagamento").className = "space-y-4 pt-1 border-t";
+            const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = abrirOverlayCelular;
+            bf.className = "pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-sm";
+            bf.innerHTML = `<div id="conteudo-flutuante-unico" class="text-sm tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>`;
+            resetarEstadoPagamento(); atualizarCarrinhoDOM(); document.getElementById("painel-fechamento").classList.add("hidden"); 
+            if (forçarAtualizacaoHttp) carregarEstoqueReal(); else renderizarProdutos();
+        }
+
+        function resetarEstadoPagamento() {
+            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
+            formaPagamento = null; pixChaveIdentificadora = "";
+            document.getElementById("btn-pix").className = document.getElementById("btn-dinheiro").className = CSS_BTN_INATIVO;
+            document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
+            document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200";
+            document.getElementById("input-recebido").disabled = true; document.getElementById("input-recebido").value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
+            document.getElementById("btn-finalizar").innerText = "Finalizar";
+            const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-50 border border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all relative overflow-hidden group";
+            box.innerHTML = `<div class="absolute inset-0 opacity-[0.12] flex flex-col justify-between p-2 pointer-events-none bg-gradient-to-br from-slate-900 via-slate-700 to-slate-900"><div class="flex justify-between w-full h-6"><div class="border-[3px] border-slate-900 w-6 h-6"></div><div class="border-[3px] border-slate-900 w-6 h-6"></div></div><div class="flex justify-between items-end w-full h-6"><div class="border-[3px] border-slate-900 w-6 h-6"></div><div class="flex flex-wrap gap-0.5 w-6 h-6 justify-center items-center"><div class="w-1 h-1 bg-slate-900"></div><div class="w-1 h-1 bg-slate-900"></div><div class="w-1 h-1 bg-slate-900"></div><div class="w-1 h-1 bg-slate-900"></div></div></div></div><div class="absolute w-full h-0.5 bg-orange-400/40 top-1/2 animate-bounce"></div><div class="relative z-10 flex flex-col items-center text-center p-1"><svg class="w-5 h-5 text-slate-400 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h.01M5.94 18.06l.01-.01M19.06 18.06l-.01-.01M12 12h.01M12 7a5 5 0 110 10 5 5 0 010-10z"></path></svg><span class="text-[9px] font-bold text-slate-500 uppercase tracking-tight leading-none">Gerar<br>QRCODE</span></div>`;
+            validarEstadoFinalizar();
         }
     </script>
 </body>
