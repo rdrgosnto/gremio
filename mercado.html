@@ -14,8 +14,7 @@
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         #qrcodeArea { margin-top: 25px; display: none; }
         #status { margin-top: 20px; font-weight: 600; color: #666; }
-        input b { display: block; margin-top: 10px; }
-        .copia-cola-box { width: 100%; padding: 10px; text-align: center; border: 1px solid #ddd; border-radius: 4px; background: #fafafa; box-sizing: border-box; font-size: 12px; }
+        .copia-cola-box { width: 100%; padding: 10px; text-align: center; border: 1px solid #ddd; border-radius: 4px; background: #fafafa; box-sizing: border-box; font-size: 12px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -39,8 +38,8 @@
 </div>
 
 <script>
-    // IMPORTANTE: Cole aqui a sua URL do TinyURL (ou a URL direta do Power Automate se preferir)
-    const URL_FLUXO_DINAMICO = "https://tinyurl.com/SUA_URL_ENCURTADA";
+    // URL do seu TinyURL configurada e pronta para o teste
+    const URL_FLUXO_DINAMICO = "https://tinyurl.com/4zw2kw7w";
 
     async function solicitarPix() {
         const btn = document.getElementById("btnComprar");
@@ -50,7 +49,8 @@
         btn.disabled = true;
 
         try {
-            // Disparando para o fluxo único. Como NÃO enviamos "action", o fluxo executará o POST
+            // Disparando para o fluxo único usando o TinyURL. 
+            // Como NÃO enviamos "action", a expressão do seu fluxo mudará automaticamente para POST
             const resposta = await fetch(URL_FLUXO_DINAMICO, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -59,23 +59,23 @@
 
             if (!resposta.ok) throw new Error("Erro na resposta do fluxo");
 
-            // O Power Automate precisa retornar o JSON do Mercado Pago contendo o qr_code
+            // O Power Automate retorna todo o JSON gerado pelo Mercado Pago
             const dadosMercadoPago = await resposta.json();
             
-            // Extrai o texto do Copia e Cola vindo da resposta do bloco HTTP do Mercado Pago
+            // Extrai o texto da chave Copia e Cola gerada na API do Mercado Pago
             const textoPix = dadosMercadoPago.point_of_interaction.transaction_data.qr_code;
             
-            // Renderiza o QR Code usando uma API pública de imagem
+            // Gera a imagem do QR Code em tempo real na tela do cliente
             document.getElementById("qrImage").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(textoPix)}`;
             document.getElementById("copiaCola").value = textoPix;
             
-            // Exibe a área do QR Code e atualiza o status
+            // Mostra os elementos ocultos e avisa que o fluxo de verificação automática está rodando
             document.getElementById("qrcodeArea").style.display = "block";
-            statusDiv.innerHTML = "<span style='color: #00a650;'>Aguardando pagamento...</span><br><small>O Webhook atualizará sua planilha automaticamente assim que pagar!</small>";
+            statusDiv.innerHTML = "<span style='color: #00a650;'>Aguardando pagamento...</span><br><small>O Webhook atualizará o sistema automaticamente assim que você pagar!</small>";
 
         } catch (erro) {
             console.error(erro);
-            statusDiv.innerHTML = "<span style='color: #cc0000;'>Erro ao gerar Pix. Verifique os logs do Power Automate.</span>";
+            statusDiv.innerHTML = "<span style='color: #cc0000;'>Erro ao gerar Pix. Verifique os logs do seu Power Automate.</span>";
             btn.disabled = false;
         }
     }
