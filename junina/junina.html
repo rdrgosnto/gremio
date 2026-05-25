@@ -317,7 +317,7 @@
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const res = await r.json();
                 if (res.pago === true) { 
-                    alert("Venda via Pix salva com sucesso!"); 
+                    alert("Venda Finalizada!"); 
                     forçarFechamentoSistemico(); 
                 } else {
                     alert("Aviso: O pagamento existe, mas houve falha na gravação do Excel.");
