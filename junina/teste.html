@@ -3,44 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste PIX via Power Automate</title>
+    <title>Grêmio | Festa Junina (Laboratório PIX)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .font-sistema { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+        .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
+    </style>
 </head>
-<body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col items-center justify-center p-4">
+<body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800">
 
-    <div class="bg-slate-800 p-6 rounded-lg shadow-xl max-w-md w-full text-center space-y-6 border border-slate-700">
-        <h1 class="text-xl font-bold text-orange-500 uppercase tracking-wider">Laboratório PIX R$ 0,01</h1>
-        <p class="text-xs text-slate-400">Geração via Power Automate / Checagem Direta no MP</p>
+    <header class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
+        <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
+    </header>
 
-        <button onclick="gerarPix()" id="btn-gerar" class="w-full bg-orange-500 hover:bg-orange-600 py-3 rounded font-bold transition-all">
-            Gerar PIX de R$ 0,01
-        </button>
-
-        <div id="area-qrcode" class="hidden flex flex-col items-center space-y-4">
-            <div id="box-status" class="bg-amber-500 text-slate-950 text-xs font-bold px-3 py-1 rounded shadow animate-pulse">
-                AGUARDANDO PAGAMENTO...
+    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+        <section class="lg:col-span-3 space-y-2">
+            <div class="border-b border-slate-200 pb-1">
+                <h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2>
             </div>
-            <div class="bg-white p-3 rounded">
-                <img id="img-qrcode" src="" class="w-48 h-48">
+            <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2">
+                <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-300">
+                    <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 bg-slate-100 text-slate-600">
+                        <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">PIX</div>
+                        <div class="flex items-center justify-between w-full mt-auto">
+                            <button class="w-7 h-7 rounded-md bg-black/5 font-bold text-sm opacity-20 pointer-events-none">-</button>
+                            <span class="text-xs font-bold text-center flex-1"><span class="text-orange-600 text-base font-semibold">1</span></span>
+                            <button class="w-7 h-7 rounded-md bg-black/5 font-bold text-sm opacity-20 pointer-events-none">+</button>
+                        </div>
+                    </div>
+                    <div class="min-w-0 flex flex-col justify-between flex-1">
+                        <h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5">Festa Junina Lab</h3>
+                        <div class="flex items-center justify-between text-[13px] font-medium w-full">
+                            <span class="text-orange-600 font-semibold">R$ 0,01</span>
+                            <div>E: <span class="text-emerald-600 font-semibold">999</span></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <p class="text-xs text-slate-400">ID no Mercado Pago: <span id="txt-id" class="font-mono text-white"></span></p>
+        </section>
+
+        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
+            <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
+                
+                <div class="space-y-4 flex-1 flex flex-col min-h-0">
+                    <h3 id="titulo-checkout" class="text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2">PAGAMENTO</h3>
+                    
+                    <div class="flex-1 flex flex-col min-h-0">
+                        <div class="flex justify-between items-center mb-1.5 w-full px-0.5">
+                            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Resumo:</h4>
+                            <span id="id-pedido-cabecalho" class="text-xs font-medium text-slate-400 tracking-wide ml-auto"></span>
+                        </div>
+                        <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1">
+                            <div class="flex justify-between items-center bg-slate-50 p-[6px] rounded-md border border-slate-100">
+                                <div class="max-w-[75%] min-w-0">
+                                    <p class="font-semibold text-slate-700 truncate text-[14px]">Teste de Conexão PIX</p>
+                                    <p class="text-[12px] text-slate-400 mt-0.5">1x R$ 0,01</p>
+                                </div>
+                                <span class="font-semibold text-slate-700 text-[16px] flex-shrink-0 pl-2">R$ 0,01</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="bloco-inferior-pagamento" class="space-y-4 pt-1 border-t">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
+                            <div class="grid grid-cols-1 gap-2">
+                                <div class="py-2.5 rounded-md border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm text-center shadow-sm">PIX SELECIONADO</div>
+                            </div>
+                        </div>
+
+                        <div class="w-full overflow-hidden border-t border-dashed pt-3 h-[140px] pb-1 relative">
+                            <div id="carrossel-pagamento" class="w-full h-full flex items-center justify-center">
+                                <div id="secao-valores-pix" class="w-full h-full flex flex-col items-center justify-center space-y-1">
+                                    
+                                    <div id="box-status" class="hidden text-[10px] font-bold px-2 py-0.5 rounded shadow mb-1">
+                                        AGUARDANDO PAGAMENTO...
+                                    </div>
+
+                                    <div id="box-qrcode" class="w-24 h-24 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-default select-none text-center p-2">
+                                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider leading-tight">Aguardando<br>Comando</span>
+                                    </div>
+
+                                    <p class="text-[10px] text-slate-400 mt-1">ID MP: <span id="txt-id" class="font-mono text-slate-600">-</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center gap-1.5 mt-2 pt-2 border-t w-full">
+                    <button onclick="gerarPix()" id="btn-gerar" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95">
+                        Gerar PIX de R$ 0,01
+                    </button>
+                    <button onclick="fecharOverlay()" class="lg:hidden text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1">Voltar ao pedido</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 flex justify-center pointer-events-none lg:hidden">
+        <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-sm">
+            <div id="conteudo-flutuante-unico" class="text-sm tracking-wide text-center">Pedido R$ 0,01 - Pagar</div>
         </div>
     </div>
 
     <script>
-        const TOKEN_MERCADO_PAGO = "APP_USR-8730603782812226-051221-bb8bc8394547cbf915d358d537067a9f-2391822607";
+        // ==========================================
+        // ⚠️ CONFIGURAÇÕES MANTIDAS DO SEGUNDO CÓDIGO
+        // ==========================================
+        const TOKEN_MERCADO_PAGO = "APP_USR-8730603782812226-051221-bb8bc8394547cbf915d3587537067a9f-2391822607";
         const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/9c2bdc7f501e47cc8950268b3d407c63/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=qQc7Fuby3E3ZcjTqvBUYLN-ODz2_oVST7-49B6G_qB4";
         
         let idPagamento = "";
         let intervaloCheck = null;
 
+        // Executado exclusivamente pelas ações do Segundo Código
         async function gerarPix() {
             const btn = document.getElementById("btn-gerar");
+            const boxQr = document.getElementById("box-qrcode");
+            const boxStatus = document.getElementById("box-status");
+
             btn.innerText = "Chamando Power Automate...";
             btn.disabled = true;
+            btn.className = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
+
+            boxQr.innerHTML = `<span class="text-[10px] font-bold text-slate-400 uppercase">Carregando...</span>`;
 
             try {
-                // Chama o Power Automate para criar o PIX com segurança no servidor
                 const r = await fetch(URL_MÃE, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -53,12 +145,16 @@
                 idPagamento = String(dados.id_mercado_pago).trim();
                 const qrCodeBase64 = dados.qrcode_imagem;
 
-                document.getElementById("img-qrcode").src = `data:image/jpeg;base64,${qrCodeBase64}`;
+                // Modifica o box-qrcode para exibir a imagem respeitando os limites estéticos originais
+                boxQr.className = "w-24 h-24 bg-white flex items-center justify-center p-0 border border-slate-300";
+                boxQr.innerHTML = `<img id="img-qrcode" src="data:image/jpeg;base64,${qrCodeBase64}" class="w-full h-full object-contain">`;
+                
                 document.getElementById("txt-id").innerText = idPagamento;
-                btn.classList.add("hidden");
-                document.getElementById("area-qrcode").classList.remove("hidden");
+                
+                // Exibe e anima a barra de status herdada do segundo código
+                boxStatus.className = "block bg-amber-500 text-slate-950 text-[10px] font-bold px-3 py-0.5 rounded shadow animate-pulse uppercase tracking-wider";
+                boxStatus.innerText = "AGUARDANDO PAGAMENTO...";
 
-                // Inicia o monitoramento de 5 em 5 segundos DIRETO no Mercado Pago
                 iniciarMonitoramento();
 
             } catch (e) {
@@ -66,13 +162,16 @@
                 console.error(e);
                 btn.innerText = "Gerar PIX de R$ 0,01";
                 btn.disabled = false;
+                btn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all";
+                boxQr.innerHTML = `<span class="text-[11px] font-bold text-rose-500 uppercase">Erro</span>`;
             }
         }
 
         function iniciarMonitoramento() {
+            if (intervaloCheck) clearInterval(intervaloCheck);
+            
             intervaloCheck = setInterval(async () => {
                 try {
-                    // O GET de consulta geralmente não barra CORS no Mercado Pago
                     const r = await fetch(`https://api.mercadopago.com/v1/payments/${idPagamento}`, {
                         method: "GET",
                         headers: {
@@ -95,9 +194,25 @@
 
         function sucessoPagamento() {
             const statusBox = document.getElementById("box-status");
-            statusBox.className = "bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded shadow";
+            const boxQr = document.getElementById("box-qrcode");
+
+            statusBox.className = "block bg-emerald-500 text-white text-[10px] font-bold px-3 py-0.5 rounded shadow tracking-wider";
             statusBox.innerText = "PAGAMENTO CONFIRMADO!";
+            statusBox.style.animation = "none";
+
+            boxQr.className = "w-24 h-24 bg-white border border-slate-300 flex items-center justify-center p-1 select-none pointer-events-none";
+            boxQr.innerHTML = `<div class="w-full h-full bg-emerald-700 text-white font-medium text-[10px] text-center flex items-center justify-center tracking-wider uppercase">PAGO</div>`;
+
             alert("Mágica realizada! O Mercado Pago avisou o HTML e o pagamento foi compensado automaticamente na tela.");
+        }
+
+        // Funções essenciais para garantir que o layout abra/feche no Mobile de forma fluida
+        function abrirOverlayCelular() {
+            document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; 
+        }
+
+        function fecharOverlay() { 
+            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; 
         }
     </script>
 </body>
