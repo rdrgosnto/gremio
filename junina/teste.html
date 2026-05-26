@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste PIX Direto Mercado Pago</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="bg-slate-800 p-6 rounded-lg shadow-xl max-w-md w-full text-center space-y-6 border border-slate-700">
+        <h1 class="text-xl font-bold text-orange-500 uppercase tracking-wider">Laboratório PIX R$ 0,01</h1>
+        <p class="text-xs text-slate-400">Ambiente de teste isolado para checagem direta de API</p>
+
+        <button onclick="criarPixTeste()" id="btn-gerar" class="w-full bg-orange-500 hover:bg-orange-600 py-3 rounded font-bold transition-all">
+            Gerar PIX de R$ 0,01
+        </button>
+
+        <div id="area-qrcode" class="hidden flex flex-col items-center space-y-4">
+            <div id="box-status" class="bg-amber-500 text-slate-950 text-xs font-bold px-3 py-1 rounded shadow animate-pulse">
+                AGUARDANDO PAGAMENTO...
+            </div>
+            <div class="bg-white p-3 rounded">
+                <img id="img-qrcode" src="" class="w-48 h-48">
+            </div>
+            <p class="text-xs text-slate-400">ID no Mercado Pago: <span id="txt-id" class="font-mono text-white"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // =======================================================
+        // CONFIGURAÇÕES (Insira seus dados reais aqui para o teste)
+        // =======================================================
+        const TOKEN_MERCADO_PAGO = "APP_USR-8730603782812226-051221-bb8bc8394547cbf915d3587537067a9f-2391822607";
+        const URL_MÃE = "COLE_AQUI_A_SUA_URL_COMPLETA_DO_POWER_AUTOMATE";
+        
+        let idPagamento = "";
+        let intervaloCheck = null;
+
+        // 1. GERA O PIX DIRETO NA API DO MERCADO PAGO
+        async function criarPixTeste() {
+            const btn = document.getElementById("btn-gerar");
+            btn.innerText = "Criando PIX no MP...";
+            btn.disabled = true;
+
+            const payload = {
+                transaction_amount: 0.01,
+                description: "Teste Isolado R$ 0,01",
+                payment_method_id: "pix",
+                payer: {
+                    email: "teste@provedor.com"
+                }
+            };
+
+            try {
+                const r = await fetch("https://api.mercadopago.com/v1/payments", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${TOKEN_MERCADO_PAGO}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!r.ok) throw new Error(`Erro API: ${r.status}`);
+                const dados = await r.json();
+
+                // Pega os dados do QR Code gerados pelo MP
+                idPagamento = dados.id;
+                const qrCodeBase64 = dados.point_of_interaction.transaction_data.qr_code_base64;
+
+                // Atualiza a Tela
+                document.getElementById("img-qrcode").src = `data:image/jpeg;base64,${qrCodeBase64}`;
+                document.getElementById("txt-id").innerText = idPagamento;
+                btn.classList.add("hidden");
+                document.getElementById("area-qrcode").classList.remove("hidden");
+
+                // Inicia o monitoramento de 5 em 5 segundos (mais rápido para o teste)
+                iniciarMonitoramento();
+
+            } catch (e) {
+                alert("Falha ao gerar PIX direto no MP. Veja o console.");
+                console.error(e);
+                btn.innerText = "Gerar PIX de R$ 0,01";
+                btn.disabled = false;
+            }
+        }
+
+        // 2. MONITORAMENTO AUTOMÁTICO INDEPENDENTE
+        function iniciarMonitoramento() {
+            intervaloCheck = setInterval(async () => {
+                try {
+                    const r = await fetch(`https://api.mercadopago.com/v1/payments/${idPagamento}`, {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${TOKEN_MERCADO_PAGO}`
+                        }
+                    });
+
+                    if (r.ok) {
+                        const dados = await r.json();
+                        if (dados.status === "approved") {
+                            clearInterval(intervaloCheck);
+                            sucessoPagamento();
+                        }
+                    }
+                } catch (erro) {
+                    console.error("Erro na checagem temporária:", erro);
+                }
+            }, 5000);
+        }
+
+        // 3. PAGAMENTO CONFIRMADO: ACIONA O POWER AUTOMATE APENAS PARA REGISTRO
+        async function sucessoPagamento() {
+            const statusBox = document.getElementById("box-status");
+            statusBox.className = "bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded shadow";
+            statusBox.innerText = "PAGAMENTO CONFIRMADO!";
+
+            alert("PIX de 1 centavo aprovado no Mercado Pago! Avisando o Power Automate...");
+
+            try {
+                // Envia para o Power Automate salvar na planilha
+                await fetch(URL_MÃE, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        id_pagamento: String(idPagamento),
+                        status: "APROVADO_TESTE",
+                        valor: 0.01
+                    })
+                });
+                alert("Power Automate respondido com sucesso!");
+            } catch (e) {
+                alert("O PIX foi pago, mas seu Power Automate deu erro ou recusou a requisição.");
+            }
+        }
+    </script>
+</body>
+</html>
