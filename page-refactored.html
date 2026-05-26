@@ -74,6 +74,8 @@
             border: 1px solid #eee;
             background: white;
             padding: 10px;
+            max-width: 220px;
+            height: auto;
         }
         .loading {
             color: #00a650;
@@ -92,6 +94,7 @@
             font-size: 11px;
             word-break: break-all;
             resize: none;
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -133,12 +136,12 @@
 
     <script>
         // COLE AQUI A URL GERADA NO SEU GATILHO DO POWER AUTOMATE
-        const URL_POWER_AUTOMATE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/ce9fc436c70f4504bc7b2409b89e175b/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Me9iIsBqKQu0gvrEf8oIrTICXZuIiQNTFMN3iehNQ_c";
+        const URL_POWER_AUTOMATE = "SUA_URL_DO_WEBHOOK_AQUI";
 
         document.getElementById('payment-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const cpf = document.getElementById('cpf').value.replace(/\D/g, ''); // Remove pontos e traços se o usuário digitar
+            const cpf = document.getElementById('cpf').value.replace(/\D/g, ''); // Remove pontos e traços
             const quantidade = document.getElementById('quantidade').value;
             const btnGerar = document.getElementById('btn-gerar');
             const txtLoading = document.getElementById('txt-loading');
@@ -172,8 +175,16 @@
                     throw new Error("Resposta inválida recebida do fluxo.");
                 }
 
-                // Insere a imagem gerada pelo Mercado Pago direto na tela
-                qrcodeDiv.innerHTML = `<img src="${dados.pix_image}" alt="QR Code Pix Mercado Pago" width="200" height="200" />`;
+                // CORREÇÃO DA IMAGEM: Remove espaços brancos, quebras de linha reais ou textuais (\n e \r) que corrompem o Base64
+                const imagemLimpa = dados.pix_image
+                    .replace(/\s/g, '')
+                    .replace(/\\n/g, '')
+                    .replace(/\\r/g, '')
+                    .replace(/\n/g, '')
+                    .replace(/\r/g, '');
+
+                // Insere a imagem corrigida direto na tela
+                qrcodeDiv.innerHTML = `<img src="${imagemLimpa}" alt="QR Code Pix Mercado Pago" width="200" height="200" />`;
                 
                 // Insere o código Copia e Cola na caixinha de texto
                 txtCopiaCola.value = dados.pix_code;
@@ -182,7 +193,7 @@
                 qrcodeContainer.style.display = "block";
 
             } catch (error) {
-                alert("Erro ao processar o pagamento. Verifique se o CPF é válido e tente novamente.");
+                alert("Erro ao processar o pagamento. Verifique o fluxo no Power Automate e tente novamente.");
                 console.error(error);
             } finally {
                 txtLoading.style.display = "none";
