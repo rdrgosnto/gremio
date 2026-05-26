@@ -22,7 +22,7 @@
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
         <section class="lg:col-span-3 space-y-2">
-            <div class="border-b border-slate-300 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
+            <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
 
@@ -57,7 +57,9 @@
                                     <div class="flex justify-between items-center text-base border-t border-slate-100 pt-1.5"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-emerald-600">R$ 0,00</span></div>
                                 </div>
                                 <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
-                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-28 h-28 bg-slate-50 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 active:scale-95 transition-all relative overflow-hidden group"></div>
+                                    <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 transition-all select-none text-center p-2">
+                                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -240,7 +242,7 @@
             if (!formaPagamento || formaPagamento !== 'PIX') return;
             const box = document.getElementById("box-qrcode"); 
             box.className = "w-28 h-28 bg-white border border-slate-300 text-[10px] font-bold text-slate-400 uppercase text-center flex flex-col items-center justify-center p-2 pointer-events-none"; 
-            box.innerHTML = `<svg class="w-6 h-6 text-orange-500 animate-spin mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18"></path></svg><span>Carregando...</span>`; 
+            box.innerHTML = `<span>Carregando...</span>`; 
             
             pixChaveIdentificadora = "mp_" + Date.now();
             
@@ -255,7 +257,7 @@
                     pixChaveIdentificadora = String(d.id_mercado_pago).trim(); 
                     stringQrCodeBase64Salva = d.qrcode_imagem;
                     
-                    box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-all rounded-none border border-slate-300"; 
+                    box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-none rounded-none border border-slate-300"; 
                     box.innerHTML = `<img src="data:image/jpeg;base64,${stringQrCodeBase64Salva}" class="w-full h-full object-contain rounded-none">`; 
                     
                     setTimeout(() => {
@@ -277,7 +279,7 @@
             box.innerHTML = "Pagamento<br>Confirmado";
             
             const titulo = document.getElementById("titulo-checkout");
-            titulo.innerText = "PAagamento Confirmado";
+            titulo.innerText = "Pagamento Confirmado";
             titulo.className = "text-base font-bold text-emerald-600 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200";
 
             const btn = document.getElementById("btn-finalizar");
@@ -287,7 +289,7 @@
 
         function aplicarLayoutFalhaPix() {
             const box = document.getElementById("box-qrcode");
-            box.className = "w-28 h-28 bg-rose-700 text-white font-bold text-sm text-center flex items-center justify-center p-2 rounded-none select-none pointer-events-none tracking-wider uppercase animate-shake";
+            box.className = "w-28 h-28 bg-rose-700 text-white font-bold text-sm text-center flex items-center justify-center p-2 rounded-none select-none pointer-events-none tracking-wider uppercase";
             box.innerHTML = "Pagamento<br>Pendente";
             
             const titulo = document.getElementById("titulo-checkout");
@@ -296,8 +298,8 @@
 
             setTimeout(() => {
                 if (formaPagamento === 'PIX' && pixChaveIdentificadora && !pixChaveIdentificadora.startsWith("mp_") && stringQrCodeBase64Salva !== "") {
-                    if (box.innerHTML.includes("pendente")) {
-                        box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-all rounded-none border border-slate-300";
+                    if (box.innerHTML.includes("Pendente")) {
+                        box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-none rounded-none border border-slate-300";
                         box.innerHTML = `<img src="data:image/jpeg;base64,${stringQrCodeBase64Salva}" class="w-full h-full object-contain rounded-none">`;
                         
                         titulo.innerText = "Pagamento";
@@ -428,138 +430,10 @@
             document.getElementById("input-recebido").disabled = true; document.getElementById("input-recebido").value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
             
             const box = document.getElementById("box-qrcode"); 
-            box.className = "w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 transition-all select-none text-center p-2";
+            box.className = "w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 transition-none select-none text-center p-2";
             box.innerHTML = `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>`;
             
             validarEstadoFinalizar();
-        }
-
-        function abrirOverlayCelular() {
-            if (window.innerWidth >= 1024 && !modoResgateManual) return;
-            document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; 
-            if (!modoResgateManual) resetarEstadoPagamento();
-        }
-
-        function fecharOverlay() { 
-            if (modoResgateManual) forçarFechamentoSistemico(); 
-            else { 
-                document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; 
-                resetarEstadoPagamento(); 
-            } 
-        }
-
-        function forçarFechamentoSistemico(e) {
-            if(e) { e.stopPropagation(); e.preventDefault(); }
-            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
-            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
-            document.getElementById("painel-fechamento").classList.add("hidden");
-            resetSistemicoTotal(true);
-        }
-
-        function resetSistemicoTotal(forçarAtualizacaoHttp = true) {
-            modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; formaPagamento = null; pixChaveIdentificadora = ""; stringQrCodeBase64Salva = ""; cachePedidoOnlineOriginal = [];
-            
-            const titulo = document.getElementById("titulo-checkout");
-            titulo.innerText = "Pagamento";
-            titulo.className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200";
-
-            document.getElementById("id-pedido-cabecalho").innerText = ""; document.getElementById("bloco-inferior-pagamento").className = "space-y-4 pt-1 border-t";
-            const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = abrirOverlayCelular;
-            bf.className = "pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-sm";
-            bf.innerHTML = `<div id="conteudo-flutuante-unico" class="text-sm tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>`;
-            resetarEstadoPagamento(); atualizarCarrinhoDOM(); document.getElementById("painel-fechamento").classList.add("hidden"); 
-            if (forçarAtualizacaoHttp) carregarEstoqueReal(); else renderizarProdutos();
-        }
-
-        function resetarEstadoPagamento() {
-            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
-            formaPagamento = null; pixChaveIdentificadora = ""; stringQrCodeBase64Salva = "";
-            
-            const btn = document.getElementById("btn-finalizar");
-            btn.removeAttribute("data-trava-tempo");
-            btn.innerText = "Finalizar";
-            btn.disabled = true;
-            btn.className = CSS_FINALIZAR_DESABILITADO;
-
-            document.getElementById("btn-pix").className = document.getElementById("btn-dinheiro").className = CSS_BTN_INATIVO;
-            document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
-            document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200";
-            document.getElementById("input-recebido").disabled = true; document.getElementById("input-recebido").value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
-            
-            const box = document.getElementById("box-qrcode"); 
-            box.className = "w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 transition-all select-none text-center p-2";
-            box.innerHTML = `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>`;
-            
-            validarEstadoFinalizar();
-        }
-
-        function ativarModoBuscaPre(e) {
-            if(e) { e.stopPropagation(); e.preventDefault(); }
-            modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
-            const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = null;
-            bf.className = "bg-slate-800 " + CSS_BASE_FLUTUANTE + " cursor-default";
-            bf.innerHTML = `
-                <div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div>
-                <input type="text" id="input-id-busca" placeholder="000000000000" class="bg-transparent text-white font-medium text-sm focus:outline-none flex-1 h-full px-2 text-center placeholder-white/30 min-w-0" maxlength="12" oninput="tratarDigitacaoIdBusca(this)">
-                <div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`;
-            setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100);
-        }
-
-        function tratarDigitacaoIdBusca(input) {
-            input.value = input.value.replace(/\D/g, "");
-            if (input.value.length === 12) { input.disabled = true; carregarEstoqueReal(input.value); }
-        }
-
-        function processarResultadoBuscaPedido(linhasExcel, idDigitado) {
-            const bf = document.getElementById("caixa-flutuante-base");
-            const lines = linhasExcel.filter(l => String(l.ID_PAGAMENTO).trim() === String(idDigitado).trim());
-
-            if (lines.length === 0) {
-                bf.className = "pointer-events-auto bg-rose-600 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full animate-shake text-sm";
-                bf.innerHTML = `<span>Não encontrado</span>`;
-                setTimeout(() => { forçarFechamentoSistemico(); }, 2000); return;
-            }
-
-            modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(idDigitado).trim(); cachePedidoOnlineOriginal = [...lines]; 
-            renderizarProdutos();
-
-            document.getElementById("titulo-checkout").innerText = "Resumo do Pedido"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
-            document.getElementById("id-pedido-cabecalho").innerText = `ID: ${idDigitado}`;
-
-            const btnFinalizar = document.getElementById("btn-finalizar"); btnFinalizar.disabled = false; btnFinalizar.innerText = "Finalizar"; btnFinalizar.className = CSS_FINALIZAR_HABILITADO;
-            const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valorConsolidated = 0;
-
-            lines.forEach(linha => {
-                const totalLinha = parseFloat(linha.TOTAL) || 0; valorConsolidated += totalLinha; 
-                let entregue = (linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente") === "retirado";
-                if (entregue) { btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Entregue"; btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; }
-                lista.innerHTML += `
-                    <div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-300 shadow-sm font-sistema">
-                        <div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(linha.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div>
-                        <div class="text-right flex-shrink-0 pl-2"><p class="font-semibold text-slate-700 text-[16px]">R$ ${formatarMoeda(totalLinha)}</p>${entregue ? '<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>' : '<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>'}</div>
-                    </div>`;
-            });
-            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidated)}`;
-            if (window.innerWidth >= 1024) {
-                bf.className = "bg-slate-800 " + CSS_BASE_FLUTUANTE + " cursor-default";
-                bf.innerHTML = `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${idDigitado}</div><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`;
-            } else { abrirOverlayCelular(); }
-        }
-
-        async function executingBaixaPedidoEntregue() {
-            const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando"; btn.disabled = true;
-            try {
-                const valorConsolidado = parseFloat(document.getElementById("valor-pedido-txt").innerText.replace("R$", "").replace(".", "").replace(",", ".").trim()) || 0;
-                const resposta = await fetch(URL_MÃE, { 
-                    method: "POST", headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify({ 
-                        id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "ONLINE", status_retirada: "retirado", total_pedido_consolidado: valorConsolidado, transaction_amount: valorConsolidado, 
-                        itens: cachePedidoOnlineOriginal.map(l => ({ "ID_PAGAMENTO": String(pixChaveIdentificadora).trim(), "SIGLA": l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", "PRODUTO": String(l.PRODUTO).trim(), "QUANTIDADE": String(l.QUANTIDADE).trim(), "PRECO": String(l.PRECO).trim(), "TOTAL": String(l.TOTAL).trim() }))
-                    }) 
-                });
-                if (!resposta.ok) throw new Error();
-                alert("Pedido Entregue"); forçarFechamentoSistemico();
-            } catch (e) { alert("Erro"); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
         }
     </script>
 </body>
