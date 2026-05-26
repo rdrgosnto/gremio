@@ -124,7 +124,7 @@
                 <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()"></button>
             </div>
 
-            <button id="btn-validar" type="button" class="btn-principal">Verificar Pagamento</button>
+            <button id="btn-validar" type="button">Verificar Pagamento</button>
             <div id="status-verificacao" class="status-msg"></div>
         </div>
     </div>
@@ -247,7 +247,7 @@
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             const btn = document.getElementById("btn-validar"), msg = document.getElementById("status-verificacao");
             
-            btn.disabled = true; btn.className = CSS_GRAY;
+            btn.disabled = true; btn.className = CSS_GRAY + " pointer-events-none";
             if (await efetuarChamadaValidacaoAPI()) {
                 aplicarLayoutSucessoDefinitivo();
             } else {
@@ -295,9 +295,8 @@
                     idPagamentoAtual = data.pagamento_id; timestampCriacaoPix = Date.now();
                     document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
                     document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
-                    document.getElementById("btn-copiar").innerText = MSGS.copy_padrao || MSGS.copiar_padrao;
+                    document.getElementById("btn-copiar").innerText = MSGS.copiar_padrao;
                     document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(data.variavel).toFixed(2).replace('.', ',')}`;
-                    document.getElementById("carregando-qr").innerText = MSGS.processando;
 
                     document.getElementById("sessao-formulario").style.display = "none";
                     document.getElementById("timer-expiracao").style.display = "block";
@@ -307,7 +306,7 @@
 
                     const btnValidar = document.getElementById("btn-validar");
                     
-                    // CORREÇÃO DOS CLIQUES NO OVERLAY: O botão começa AZUL, mas desabilitado com pointer-events desativados para bloquear cliques
+                    // FASE 1: Botão começa azul fixo no overlay, mas totalmente travado contra cliques do mouse
                     btnValidar.disabled = true; 
                     btnValidar.className = CSS_BLUE + " pointer-events-none"; 
 
@@ -322,12 +321,12 @@
                             overlayPagamento.style.display = "none";
                             btnValidar.style.zIndex = "1"; 
 
-                            // CORREÇÃO APÓS OVERLAY: Passa a ficar CINZA e continua com cliques bloqueados
+                            // FASE 2: O overlay saiu da tela. O botão passa a ficar cinza e continua bloqueado
                             btnValidar.className = CSS_GRAY + " pointer-events-none";
 
                             setTimeout(() => {
                                 if (idPagamentoAtual && !document.getElementById('sessao-qr').classList.contains('sessao-bloqueada')) {
-                                    // LIBERAÇÃO COMPLETA: Volta a ser AZUL e os cliques voltam a funcionar
+                                    // FASE 3: Passaram os 12 segundos. O botão volta a ser azul e os cliques são liberados
                                     btnValidar.disabled = false;
                                     btnValidar.className = CSS_BLUE; 
                                 }
@@ -382,7 +381,6 @@
         });
         selectQtde.dispatchEvent(new Event('change'));
 
-        // Delegação de Eventos para os CPFs (Enxuga o código eliminando listeners manuais repetitivos)
         camposExtras.addEventListener("input", e => { if (e.target.classList.contains("cpf-validar")) maskCPF(e); });
         camposExtras.addEventListener("blur", e => { if (e.target.classList.contains("cpf-validar")) validateCPFBlur(e); }, true);
         document.getElementById("cpf-comprador").addEventListener("input", maskCPF);
