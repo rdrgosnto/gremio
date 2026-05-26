@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste PIX Direto Mercado Pago</title>
+    <title>Teste PIX via Power Automate</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col items-center justify-center p-4">
 
     <div class="bg-slate-800 p-6 rounded-lg shadow-xl max-w-md w-full text-center space-y-6 border border-slate-700">
         <h1 class="text-xl font-bold text-orange-500 uppercase tracking-wider">Laboratório PIX R$ 0,01</h1>
-        <p class="text-xs text-slate-400">Ambiente de teste isolado para checagem direta de API</p>
+        <p class="text-xs text-slate-400">Geração via Power Automate / Checagem Direta no MP</p>
 
-        <button onclick="criarPixTeste()" id="btn-gerar" class="w-full bg-orange-500 hover:bg-orange-600 py-3 rounded font-bold transition-all">
+        <button onclick="gerarPix()" id="btn-gerar" class="w-full bg-orange-500 hover:bg-orange-600 py-3 rounded font-bold transition-all">
             Gerar PIX de R$ 0,01
         </button>
 
@@ -28,71 +28,52 @@
     </div>
 
     <script>
-        // =======================================================
-        // CONFIGURAÇÕES (Insira seus dados reais aqui para o teste)
-        // =======================================================
         const TOKEN_MERCADO_PAGO = "APP_USR-8730603782812226-051221-bb8bc8394547cbf915d3587537067a9f-2391822607";
-        const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/9c2bdc7f501e47cc8950268b3d407c63/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=qQc7Fuby3E3ZcjTqvBUYLN-ODz2_oVST7-49B6G_qB4";
+        const URL_MÃE = "COLE_AQUI_A_SUA_URL_COMPLETA_DO_POWER_AUTOMATE";
         
         let idPagamento = "";
         let intervaloCheck = null;
 
-        // 1. GERA O PIX DIRETO NA API DO MERCADO PAGO (VIA PROXY)
-        async function criarPixTeste() {
+        async function gerarPix() {
             const btn = document.getElementById("btn-gerar");
-            btn.innerText = "Criando PIX no MP...";
+            btn.innerText = "Chamando Power Automate...";
             btn.disabled = true;
 
-            const payload = {
-                transaction_amount: 0.01,
-                description: "Teste Isolado R$ 0,01",
-                payment_method_id: "pix",
-                payer: {
-                    email: "teste@provedor.com"
-                }
-            };
-
             try {
-                // Utilizando o proxy público para burlar o bloqueio de CORS do navegador
-                const r = await fetch("https://cors-anywhere.herokuapp.com/https://api.mercadopago.com/v1/payments", {
+                // Chama o Power Automate para criar o PIX com segurança no servidor
+                const r = await fetch(URL_MÃE, {
                     method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${TOKEN_MERCADO_PAGO}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({})
                 });
 
-                if (!r.ok) throw new Error(`Erro API: ${r.status}`);
+                if (!r.ok) throw new Error("Erro ao chamar o Power Automate");
                 const dados = await r.json();
 
-                // Pega os dados do QR Code gerados pelo MP
-                idPagamento = dados.id;
-                const qrCodeBase64 = dados.point_of_interaction.transaction_data.qr_code_base64;
+                idPagamento = String(dados.id_mercado_pago).trim();
+                const qrCodeBase64 = dados.qrcode_imagem;
 
-                // Atualiza a Tela
                 document.getElementById("img-qrcode").src = `data:image/jpeg;base64,${qrCodeBase64}`;
                 document.getElementById("txt-id").innerText = idPagamento;
                 btn.classList.add("hidden");
                 document.getElementById("area-qrcode").classList.remove("hidden");
 
-                // Inicia o monitoramento de 5 em 5 segundos
+                // Inicia o monitoramento de 5 em 5 segundos DIRETO no Mercado Pago
                 iniciarMonitoramento();
 
             } catch (e) {
-                alert("Falha ao gerar PIX direto no MP. Garanta que ativou o link do cors-anywhere e veja o console (F12).");
+                alert("Erro no processo. Veja o console.");
                 console.error(e);
                 btn.innerText = "Gerar PIX de R$ 0,01";
                 btn.disabled = false;
             }
         }
 
-        // 2. MONITORAMENTO AUTOMÁTICO INDEPENDENTE
         function iniciarMonitoramento() {
             intervaloCheck = setInterval(async () => {
                 try {
-                    // Consulta também passa pelo proxy para evitar CORS no método GET
-                    const r = await fetch("https://cors-anywhere.herokuapp.com/https://api.mercadopago.com/v1/payments/" + idPagamento, {
+                    // O GET de consulta geralmente não barra CORS no Mercado Pago
+                    const r = await fetch(`https://api.mercadopago.com/v1/payments/${idPagamento}`, {
                         method: "GET",
                         headers: {
                             "Authorization": `Bearer ${TOKEN_MERCADO_PAGO}`
@@ -107,34 +88,16 @@
                         }
                     }
                 } catch (erro) {
-                    console.error("Erro na checagem temporária:", erro);
+                    console.error("Erro na checagem:", erro);
                 }
             }, 5000);
         }
 
-        // 3. PAGAMENTO CONFIRMADO: ACIONA O POWER AUTOMATE APENAS PARA REGISTRO
-        async function sucessoPagamento() {
+        function sucessoPagamento() {
             const statusBox = document.getElementById("box-status");
             statusBox.className = "bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded shadow";
             statusBox.innerText = "PAGAMENTO CONFIRMADO!";
-
-            alert("PIX de 1 centavo aprovado no Mercado Pago! Avisando o Power Automate...");
-
-            try {
-                // Envia para o Power Automate salvar/testar a chegada do sinal
-                await fetch(URL_MÃE, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        id_pagamento: String(idPagamento),
-                        status: "APROVADO_TESTE",
-                        valor: 0.01
-                    })
-                });
-                alert("Power Automate respondido com sucesso!");
-            } catch (e) {
-                alert("O PIX foi pago, mas seu Power Automate deu erro ou recusou a requisição.");
-            }
+            alert("Mágica realizada! O Mercado Pago avisou o HTML e o pagamento foi compensado automaticamente na tela.");
         }
     </script>
 </body>
