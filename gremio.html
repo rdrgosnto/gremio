@@ -23,7 +23,6 @@
             background-size: 40px 40px; 
             background-position: 0 0, 20px 20px; 
         }
-
         .container { 
             background-color: #fffdf7; 
             padding: 30px 25px; 
@@ -36,10 +35,8 @@
             border: 3px dashed #d84315; 
             margin: auto 0; 
         }
-
         h1 { margin-top: 10px; font-family: 'Amatic SC', cursive; font-size: 48px; color: #bf360c; }
         label { font-weight: 600; margin-top: 15px; display: block; text-align: left; font-size: 14px; }
-        
         input, select { 
             width: 100%; 
             padding: 10px; 
@@ -47,156 +44,34 @@
             border: 2px dashed #bcaaa4; 
             font-size: 14px; 
             box-sizing: border-box; 
-            text-transform: none;
             transition: all 0.3s;
         }
-
         .input-erro { border: 2px solid #ff1744 !important; background-color: #fff5f5; }
         .input-sucesso { border: 2px solid #2e7d32 !important; background-color: #f1f8e9; }
         .msg-erro-cpf { color: #ff1744; font-size: 11px; display: block; text-align: left; margin-top: 2px; font-weight: 400; }
-
         .ingresso-extra { background: #fdf2e9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #ebba95; }
         .qr-container { display: none; margin-top: 10px; padding: 15px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; transition: all 0.3s ease; }
         .qr-container img { width: 100%; max-width: 180px; }
         .valor { font-weight: bold; color: #bf360c; margin-top: 10px; font-size: 1.2em; }
         .pix-box { margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
-        
-        .btn-principal { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; background-color: #2e7d32; color: white; cursor: pointer; border: none; box-shadow: 0 6px 0 #1b5e20; transition: 0.2s; }
-        .btn-principal:active:not(:disabled) { box-shadow: 0 2px 0 #1b5e20; transform: translateY(4px); }
-        
-        .btn-validar { 
-            position: relative;
-            background-color: #1565c0; 
-            box-shadow: 0 6px 0 #0d47a1; 
-            margin-top: 15px; 
-            z-index: 1; 
-            transition: background-color 0.2s, box-shadow 0.2s;
-        }
-        .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font-size: 12px; background-color: #616161; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-principal { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; color: white; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-principal:active:not(:disabled) { transform: translateY(4px); }
         .status-msg { margin-top: 15px; font-size: 15px; font-weight: bold; color: #bf360c; }
-        
         .msg-confirmacao { font-family: 'Poppins', sans-serif; color: #2e7d32; line-height: 1.3; }
         .msg-confirmacao h2 { font-size: 26px; margin: 10px 0; font-weight: 700; color: #2e7d32; }
         .msg-confirmacao p { font-size: 20px; margin: 5px 0; font-weight: 700; color: #4a3b32; }
         .msg-confirmacao .subtext { font-family: 'Amatic SC', cursive; font-size: 42px; color: #2e7d32; margin-top: 10px; }
         .icon-grande { font-size: 80px; display: block; margin-bottom: 15px; color: #2e7d32; }
-        
-        button:disabled { cursor: not-allowed; opacity: 0.7; }
-
-        .texto-expiracao {
-            display: none;
-            color: #ff1744;
-            font-size: 13px; 
-            font-weight: 600;
-            margin-bottom: 5px; 
-            margin-top: 5px;
-            white-space: nowrap; 
-            overflow: hidden;
-        }
-
-        /* POP-UP RESPONSIVO */
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        .popup-conteudo {
-            position: relative;
-            max-width: 75vw; 
-            max-height: 75vh; 
-        }
-
-        .popup-imagem {
-            max-width: 100%;
-            max-height: 75vh; 
-            object-fit: contain; 
-            border-radius: 8px;
-            display: block;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-
-        .btn-fechar-popup {
-            display: none;
-            position: absolute;
-            bottom: -55px; 
-            left: 50%;
-            transform: translateX(-50%); 
-            padding: 10px 20px;
-            background-color: #616161;
-            color: #ffffff;
-            border: none;
-            border-radius: 6px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-            white-space: nowrap;
-        }
+        .texto-expiracao { display: none; color: #ff1744; font-size: 13px; font-weight: 600; margin-bottom: 5px; margin-top: 5px; white-space: nowrap; overflow: hidden; }
+        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .popup-conteudo { position: relative; max-width: 75vw; max-height: 75vh; }
+        .popup-imagem { max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 8px; display: block; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .btn-fechar-popup { display: none; position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background-color: #616161; color: #ffffff; border: none; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
         .btn-fechar-popup:hover { background-color: #424242; }
-
-        .btn-x-popup {
-            display: none;
-            position: absolute;
-            top: -12px;
-            right: -12px;
-            width: 30px;
-            height: 30px;
-            background-color: #ff1744;
-            color: #ffffff;
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            line-height: 26px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            z-index: 10000;
-        }
-
-        /* OVERLAY DE ESMAECIMENTO */
-        .pagamento-overlay {
-            display: none; 
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.82);
-            z-index: 5000; 
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-            transition: opacity 0.4s ease;
-        }
-
-        .pagamento-overlay-texto {
-            color: #ffffff;
-            font-family: 'Poppins', sans-serif;
-            font-size: 18px;
-            font-weight: 600;
-            text-align: center;
-            max-width: 340px;
-            line-height: 1.5;
-        }
-
-        /* Classe de congelamento por expiração */
-        .sessao-bloqueada {
-            opacity: 0.35 !important;
-            filter: grayscale(100%);
-            pointer-events: none !important;
-            select: none;
-        }
+        .btn-x-popup { display: none; position: absolute; top: -12px; right: -12px; width: 30px; height: 30px; background-color: #ff1744; color: #ffffff; border: 2px solid #ffffff; border-radius: 50%; font-size: 15px; font-weight: bold; cursor: pointer; line-height: 26px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 10000; }
+        .pagamento-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.82); z-index: 5000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; transition: opacity 0.4s ease; }
+        .pagamento-overlay-texto { color: #ffffff; font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; text-align: center; max-width: 340px; line-height: 1.5; }
+        .sessao-bloqueada { opacity: 0.35 !important; filter: grayscale(100%); pointer-events: none !important; }
     </style>
 </head>
 <body>
@@ -210,9 +85,7 @@
     </div>
 
     <div class="pagamento-overlay" id="pagamentoOverlay">
-        <div class="pagamento-overlay-texto">
-            Não se esqueça de clicar no botão abaixo ao finalizar o seu pagamento.
-        </div>
+        <div class="pagamento-overlay-texto" id="txtOverlay"></div>
     </div>
 
     <div class="container">
@@ -236,112 +109,97 @@
             </select>
 
             <div id="campos-extras"></div>
-            <button type="submit" id="btn-generar" class="btn-principal">Gerar QR Code</button>
+            <button type="submit" id="btn-gerar" class="btn-principal bg-[#2e7d32] shadow-[0_6px_0_#1b5e20]">Gerar QR Code</button>
         </form>
 
-        <div class="texto-expiracao" id="timer-expiracao">O código a seguir expira em 10:00.</div>
+        <div class="texto-expiracao" id="timer-expiracao"></div>
 
         <div class="qr-container" id="sessao-qr">
-            <div id="carregando-qr">Processando pagamento e discounts...</div>
+            <div id="carregando-qr"></div>
             <img src="" id="img-qr" alt="QR Code Pix" style="display:none;">
-            <div class="valor" id="exibir-total">Total: Calculando...</div>
+            <div class="valor" id="exibir-total"></div>
             
             <div class="pix-box">
                 <input id="pix-codigo" readonly style="font-size: 9px; width: 100%; text-align: center; border: 1px solid #ccc; background: #fff;">
-                <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()">Copiar Código Pix</button>
+                <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()"></button>
             </div>
 
-            <button id="btn-validar" type="button" class="btn-principal btn-validar">Verificar Pagamento</button>
+            <button id="btn-validar" type="button" class="btn-principal">Verificar Pagamento</button>
             <div id="status-verificacao" class="status-msg"></div>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // ⚠️ CONFIGURAÇÕES DO SISTEMA
-        // ==========================================
         const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2ad0529973d74605bffbb1f1dd89c063/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9cFG_dFkGjSMngbCZU7Rj7MW02aldXs66m7z14mS89c";
         const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
         
         const TEMPO_CHECK_PIX = 6000;          
         const TRAVA_MANUAL_PIX = 12000;        
-        const LIMITE_EXPIRACAO_PIX = 29000;    // Tempo de teste (29s)
+        const LIMITE_EXPIRACAO_PIX = 29000;    
         const TEMPO_TRAVA_TIMEOUT = 9000;      
 
-        let idPagamentoAtual = null;
-        let intervaloPix = null;
-        let loopEmExecucao = false;
-        let timestampCriacaoPix = 0;
-        let cronometroRegressivo = null;
+        const CSS_BLUE = "btn-principal bg-[#1565c0] shadow-[0_6px_0_#0d47a1]";
+        const CSS_GRAY = "btn-principal bg-[#9e9e9e] shadow-[0_6px_0_#616161]";
+
+        const MSGS = {
+            dados_invalidos: "Preencha os dados corretamente",
+            cpf_comprador_duplicado: "Atenção: O CPF do Comprador só pode constar em 1 campo dos ingressos",
+            cpf_convidado_duplicado: "Atenção: CPF duplicados na lista de convidados",
+            cpf_invalido_tag: "CPF Inválido",
+            erro_processamento: "Erro ao processar. Tente novamente.",
+            erro_conexao: "Erro de conexão com o servidor.",
+            aguarde: "Por favor, aguarde...",
+            processando: "Processando",
+            verificando: "Verificando...",
+            copiado: "Copiado!",
+            copiar_padrao: "Copiar Código Pix",
+            overlay_texto: "Não se esqueça de clicar no botão abaixo ao finalizar o seu pagamento.",
+            sucesso_h2: "PAGAMENTO CONFIRMADO!",
+            sucesso_p1: "NOS ENCONTRAMOS NA FESTA!",
+            sucesso_sub: "ETA TREM BÃO!",
+            negativo_status: "<span class='icon-grande' style='font-size: 60px; color: #bf360c; margin-bottom: 5px; display: inline-block;'>❌</span><br>Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!",
+            timeout: "Tempo Limite"
+        };
+
+        let idPagamentoAtual = null, intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0, cronometroRegressivo = null;
 
         setTimeout(() => {
             document.getElementById('btnFecharPopup').style.display = 'block';
             document.getElementById('btnXPopup').style.display = 'block';
         }, 3000);
 
-        function fecharPopup() {
-            document.getElementById('popupOverlay').style.display = 'none';
-        }
+        function fecharPopup() { document.getElementById('popupOverlay').style.display = 'none'; }
 
-        // ==========================================
-        // ⏱️ GESTÃO DO CRONÔMETRO E TIMEOUT
-        // ==========================================
         function iniciarCronometro() {
             if (cronometroRegressivo) clearInterval(cronometroRegressivo);
-            
             let tempoRestante = Math.floor(LIMITE_EXPIRACAO_PIX / 1000);
             const elementoTimer = document.getElementById('timer-expiracao');
-
             cronometroRegressivo = setInterval(() => {
-                let minutes = Math.floor(tempoRestante / 60);
-                let segundos = tempoRestante % 60;
-
-                minutes = minutes < 10 ? '0' + minutes : minutes;
-                segundos = segundos < 10 ? '0' + segundos : segundos;
-
-                elementoTimer.innerText = `O código a seguir expira em ${minutes}:${segundos}.`;
-
-                if (tempoRestante <= 0) {
-                    clearInterval(cronometroRegressivo);
-                    executarFluxoTimeoutEstrito();
-                }
-
+                let min = Math.floor(tempoRestante / 60), seg = tempoRestante % 60;
+                elementoTimer.innerText = `O código a seguir expira em ${min < 10 ? '0'+min : min}:${seg < 10 ? '0'+seg : seg}.`;
+                if (tempoRestante <= 0) { clearInterval(cronometroRegressivo); executarFluxoTimeoutEstrito(); }
                 tempoRestante--;
             }, 1000);
         }
 
         function executarFluxoTimeoutEstrito() {
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
+            document.getElementById('timer-expiracao').innerText = MSGS.timeout;
+            document.getElementById('status-verificacao').innerHTML = ""; 
+            document.getElementById('sessao-qr').classList.add("sessao-bloqueada");
             
-            const elementoTimer = document.getElementById('timer-expiracao');
-            const sessaoQr = document.getElementById('sessao-qr');
-            const btnValidar = document.getElementById('btn-validar');
-            const btnCopiar = document.getElementById('btn-copiar');
-            const msgStatus = document.getElementById('status-verificacao');
-
-            elementoTimer.innerText = "Tempo Limite";
-            msgStatus.innerHTML = ""; 
-            
-            sessaoQr.classList.add("sessao-bloqueada");
-            btnValidar.disabled = true;
-            btnValidar.style.backgroundColor = "#9e9e9e";
-            btnValidar.style.boxShadow = "0 6px 0 #616161";
-            btnCopiar.disabled = true;
-
-            setTimeout(() => {
-                resetSistemicoTotal();
-            }, TEMPO_TRAVA_TIMEOUT);
+            const btn = document.getElementById('btn-validar');
+            btn.disabled = true;
+            btn.className = CSS_GRAY;
+            document.getElementById('btn-copiar').disabled = true;
+            setTimeout(() => { resetSistemicoTotal(); }, TEMPO_TRAVA_TIMEOUT);
         }
 
         function resetSistemicoTotal() {
             if (intervaloPix) clearInterval(intervaloPix);
             if (cronometroRegressivo) clearInterval(cronometroRegressivo);
-            
-            intervaloPix = null;
-            cronometroRegressivo = null;
-            idPagamentoAtual = null;
-            loopEmExecucao = false;
-            timestampCriacaoPix = 0;
+            intervaloPix = cronometroRegressivo = idPagamentoAtual = null;
+            loopEmExecucao = timestampCriacaoPix = 0;
 
             const sessaoQr = document.getElementById('sessao-qr');
             sessaoQr.classList.remove("sessao-bloqueada");
@@ -352,96 +210,49 @@
             document.getElementById('timer-expiracao').style.display = "none";
             document.getElementById('btn-copiar').disabled = false;
 
-            const btnGerar = document.getElementById("btn-generar");
-            btnGerar.disabled = false;
-            btnGerar.innerText = "Gerar QR Code";
+            const btnGerar = document.getElementById("btn-gerar");
+            btnGerar.disabled = false; btnGerar.innerText = "Gerar QR Code";
 
             const formulario = document.getElementById("sessao-formulario");
             formulario.reset();
-            document.getElementById("comprador").classList.remove("input-erro", "input-sucesso");
-            document.getElementById("cpf-comprador").classList.remove("input-erro", "input-sucesso");
-            document.getElementById("telefone").classList.remove("input-erro", "input-sucesso");
-            
+            document.getElementById("comprador").className = document.getElementById("cpf-comprador").className = document.getElementById("telefone").className = "";
             document.querySelectorAll('.msg-erro-cpf').forEach(el => el.remove());
-            
             document.getElementById("quantidade").value = "1";
             document.getElementById("campos-extras").innerHTML = "";
             document.getElementById("quantidade").dispatchEvent(new Event('change'));
-            
             formulario.style.display = "block";
         }
 
-        // ==========================================
-        // 🔍 MOTORES DE VERIFICAÇÃO
-        // ==========================================
         function iniciarMonitoramentoPixAutomatico() {
             if (intervaloPix) clearInterval(intervaloPix);
             loopEmExecucao = false;
-
             intervaloPix = setInterval(async () => {
                 if (loopEmExecucao || !idPagamentoAtual) return;
-
-                if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) {
-                    clearInterval(intervaloPix);
-                    intervaloPix = null;
-                    return;
-                }
-
+                if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) { clearInterval(intervaloPix); intervaloPix = null; return; }
                 loopEmExecucao = true;
-                const confirmado = await efetuarChamadaValidacaoAPI();
-                
-                if (confirmado) {
-                    clearInterval(intervaloPix);
-                    intervaloPix = null;
-                    aplicarLayoutSucessoDefinitivo();
-                }
-                
+                if (await efetuarChamadaValidacaoAPI()) { clearInterval(intervaloPix); intervaloPix = null; aplicarLayoutSucessoDefinitivo(); }
                 loopEmExecucao = false;
             }, TEMPO_CHECK_PIX);
         }
 
         async function efetuarChamadaValidacaoAPI() {
             try {
-                const response = await fetch(URL_VALIDAR_PAGAMENTO, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ "id": String(idPagamentoAtual) })
-                });
-                if (!response.ok) return false;
-                const resultado = await response.text();
-                return resultado.includes("Sucesso");
-            } catch (e) {
-                return false;
-            }
+                const r = await fetch(URL_VALIDAR_PAGAMENTO, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ "id": String(idPagamentoAtual) }) });
+                return r.ok && (await r.text()).includes("Sucesso");
+            } catch (e) { return false; }
         }
 
         async function executarCliqueValidacaoManual() {
             if (!idPagamentoAtual) return;
-
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
-
-            const btn = document.getElementById("btn-validar");
-            const msg = document.getElementById("status-verificacao");
-
-            btn.disabled = true;
-            btn.style.backgroundColor = "#9e9e9e";
-            btn.style.boxShadow = "0 6px 0 #616161";
-
-            const verificado = await efetuarChamadaValidacaoAPI();
-
-            if (verificado) {
+            const btn = document.getElementById("btn-validar"), msg = document.getElementById("status-verificacao");
+            
+            btn.disabled = true; btn.className = CSS_GRAY;
+            if (await efetuarChamadaValidacaoAPI()) {
                 aplicarLayoutSucessoDefinitivo();
             } else {
-                msg.innerHTML = `
-                    <span class="icon-grande" style="font-size: 60px; color: #bf360c; margin-bottom: 5px; display: inline-block;">❌</span>
-                    <br>Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!
-                `;
-                
-                // Retorno automático para habilitado e Azul em caso de erro
-                btn.disabled = false; 
-                btn.style.backgroundColor = "#1565c0";
-                btn.style.boxShadow = "0 6px 0 #0d47a1";
-                
+                msg.innerHTML = MSGS.negativo_status;
+                btn.disabled = false; btn.className = CSS_BLUE;
                 iniciarMonitoramentoPixAutomatico(); 
             }
         }
@@ -449,112 +260,44 @@
         function aplicarLayoutSucessoDefinitivo() {
             if (cronometroRegressivo) clearInterval(cronometroRegressivo);
             if (intervaloPix) clearInterval(intervaloPix);
-            
             document.getElementById("timer-expiracao").style.display = "none";
-            document.getElementById("sessao-qr").innerHTML = `
-                <div class="msg-confirmacao">
-                    <span class="icon-grande">✅</span>
-                    <h2>PAGAMENTO CONFIRMADO!</h2>
-                    <p>NOS ENCONTRAMOS NA FESTA!</p>
-                    <p class="subtext">ETA TREM BÃO!</p>
-                </div>
-            `;
+            document.getElementById("sessao-qr").innerHTML = `<div class="msg-confirmacao"><span class="icon-grande">✅</span><h2>${MSGS.sucesso_h2}</h2><p>${MSGS.sucesso_p1}</p><p class="subtext">${MSGS.sucesso_sub}</p></div>`;
         }
 
-        // ==========================================
-        // 📝 FORMULÁRIO E DISPARO
-        // ==========================================
         async function processarEnvioFormulario(e) {
             e.preventDefault(); 
-
-            const btn = document.getElementById("btn-generar");
-            const comprador = document.getElementById("comprador").value.trim();
-            const cpfComprador = document.getElementById("cpf-comprador").value.trim();
-            const telefone = document.getElementById("telefone").value.trim();
+            const btn = document.getElementById("btn-gerar"), comprador = document.getElementById("comprador").value.trim(), cpfComprador = document.getElementById("cpf-comprador").value.trim(), telefone = document.getElementById("telefone").value.trim();
             
-            if (!comprador || !validarCPF(cpfComprador) || telefone.length < 14) { 
-                alert("Por favor, preencha o nome, CPF do comprador e o telefone corretamente."); 
-                document.getElementById("cpf-comprador").classList.add("input-erro");
-                return; 
-            }
+            if (!comprador || !validarCPF(cpfComprador) || telefone.length < 14) { alert(MSGS.dados_invalidos); document.getElementById("cpf-comprador").classList.add("input-erro"); return; }
 
-            const inputsNomes = document.querySelectorAll(".nome-ing");
-            const inputsCpfs = document.querySelectorAll(".cpf-ing");
-            let listaIngressos = [];
-            let cpfsConvidados = [];
-            let contadorCpfComprador = 0;
-            let erroValidacao = false;
+            const inputsNomes = document.querySelectorAll(".nome-ing"), inputsCpfs = document.querySelectorAll(".cpf-ing");
+            let listaIngressos = [], cpfsConvidados = [], contadorCpfComprador = 0, erroValidacao = false;
 
             inputsCpfs.forEach((input, i) => {
-                const cpfVal = input.value.trim();
-                const nomeVal = inputsNomes[i].value.trim();
-
-                if (!nomeVal || !validarCPF(cpfVal)) {
-                    erroValidacao = true;
-                    input.classList.add("input-erro");
-                } else {
-                    input.classList.remove("input-erro");
-                }
-                
-                if (cpfVal === cpfComprador) {
-                    contadorCpfComprador++;
-                } else {
-                    cpfsConvidados.push(cpfVal);
-                }
-                
+                const cpfVal = input.value.trim(), nomeVal = inputsNomes[i].value.trim();
+                if (!nomeVal || !validarCPF(cpfVal)) { erroValidacao = true; input.classList.add("input-erro"); } else { input.classList.remove("input-erro"); }
+                if (cpfVal === cpfComprador) contadorCpfComprador++; else cpfsConvidados.push(cpfVal);
                 listaIngressos.push({ "NOME_INGRESSO": nomeVal, "CPF_INGRESSO": cpfVal });
             });
 
-            if (erroValidacao) {
-                alert("Existem nomes vazios ou CPFs inválidos nos convidados. Verifique os campos em vermelho.");
-                return;
-            }
+            if (erroValidacao) { alert(MSGS.dados_invalidos); return; }
+            if (contadorCpfComprador > 1) { alert(MSGS.cpf_comprador_duplicado); return; }
+            if (new Set(cpfsConvidados).size !== cpfsConvidados.length) { alert(MSGS.cpf_convidado_duplicado); return; }
 
-            if (contadorCpfComprador > 1) {
-                alert("Atenção: O comprador só pode incluir o seu próprio CPF uma única vez nos ingressos.");
-                return;
-            }
-
-            const convidadosUnicos = new Set(cpfsConvidados);
-            if (convidadosUnicos.size !== cpfsConvidados.length) {
-                alert("Atenção: Existem CPFs duplicados na lista de convidados.");
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "Por favor, aguarde...";
-
-            const payload = {
-                "COMPRADOR": comprador,
-                "CPF_COMPRADOR": cpfComprador,
-                "TELEFONE": telefone,
-                "QUANTIDADE": document.getElementById("quantidade").value,
-                "INGRESSOS": listaIngressos
-            };
+            btn.disabled = true; btn.innerText = MSGS.aguarde;
 
             try {
-                const response = await fetch(URL_GERAR_PIX, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-
+                const response = await fetch(URL_GERAR_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ "COMPRADOR": comprador, "CPF_COMPRADOR": cpfComprador, "TELEFONE": telefone, "QUANTIDADE": document.getElementById("quantidade").value, "INGRESSOS": listaIngressos }) });
                 if (response.ok) {
                     const data = await response.json();
+                    if (data.status === "bloqueado") { alert("⚠️ BLOQUEIO: " + data.mensagem); btn.disabled = false; btn.innerText = "Gerar QR Code"; return; }
                     
-                    if (data.status === "bloqueado") {
-                        alert("⚠️ BLOQUEIO: " + data.mensagem);
-                        btn.disabled = false;
-                        btn.innerText = "Gerar QR Code";
-                        return;
-                    }
-                    
-                    idPagamentoAtual = data.pagamento_id;
-                    timestampCriacaoPix = Date.now();
-
+                    idPagamentoAtual = data.pagamento_id; timestampCriacaoPix = Date.now();
                     document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
                     document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
+                    document.getElementById("btn-copiar").innerText = MSGS.copy_padrao || MSGS.copiar_padrao;
                     document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(data.variavel).toFixed(2).replace('.', ',')}`;
+                    document.getElementById("carregando-qr").innerText = MSGS.processando;
 
                     document.getElementById("sessao-formulario").style.display = "none";
                     document.getElementById("timer-expiracao").style.display = "block";
@@ -562,37 +305,31 @@
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
 
-                    // 1. O botão Verificar Pagamento começa DESABILITADO, mas em AZUL destacado pelo overlay
                     const btnValidar = document.getElementById("btn-validar");
+                    
+                    // CORREÇÃO DOS CLIQUES NO OVERLAY: O botão começa AZUL, mas desabilitado com pointer-events desativados para bloquear cliques
                     btnValidar.disabled = true; 
-                    btnValidar.style.backgroundColor = "#1565c0"; 
-                    btnValidar.style.boxShadow = "0 6px 0 #0d47a1";
+                    btnValidar.className = CSS_BLUE + " pointer-events-none"; 
 
-                    // Chamada do Overlay Escuro de Destaque
+                    document.getElementById("txtOverlay").innerText = MSGS.overlay_texto;
                     const overlayPagamento = document.getElementById("pagamentoOverlay");
                     overlayPagamento.style.display = "flex";
                     btnValidar.style.zIndex = "6000";
 
-                    // 2. Controla a saída do overlay (6s fixo + 4s de transição de fade out = 10s totais)
                     setTimeout(() => {
                         overlayPagamento.style.opacity = "0";
-                        
                         setTimeout(() => {
                             overlayPagamento.style.display = "none";
                             btnValidar.style.zIndex = "1"; 
 
-                            // O overlay sumiu: O botão passa a ficar CINZA e continua travado
-                            btnValidar.style.backgroundColor = "#9e9e9e";
-                            btnValidar.style.boxShadow = "0 6px 0 #616161";
+                            // CORREÇÃO APÓS OVERLAY: Passa a ficar CINZA e continua com cliques bloqueados
+                            btnValidar.className = CSS_GRAY + " pointer-events-none";
 
-                            // 3. O encadeamento dos 12 segundos cinza começa a contar agora
                             setTimeout(() => {
-                                // Libera o botão após 12 segundos do encerramento do overlay, se não houver expirado
                                 if (idPagamentoAtual && !document.getElementById('sessao-qr').classList.contains('sessao-bloqueada')) {
+                                    // LIBERAÇÃO COMPLETA: Volta a ser AZUL e os cliques voltam a funcionar
                                     btnValidar.disabled = false;
-                                    // Retorna a ser azul definitivo
-                                    btnValidar.style.backgroundColor = "#1565c0";
-                                    btnValidar.style.boxShadow = "0 6px 0 #0d47a1";
+                                    btnValidar.className = CSS_BLUE; 
                                 }
                             }, TRAVA_MANUAL_PIX);
 
@@ -601,112 +338,55 @@
 
                     iniciarCronometro();
                     iniciarMonitoramentoPixAutomatico();
-
-                } else {
-                    alert("Erro ao processar. Tente novamente.");
-                    btn.disabled = false;
-                    btn.innerText = "Gerar QR Code";
-                }
-            } catch (e) {
-                alert("Erro de conexão com o servidor.");
-                btn.disabled = false;
-                btn.innerText = "Gerar QR Code";
-            }
+                } else { alert(MSGS.erro_processamento); btn.disabled = false; btn.innerText = "Gerar QR Code"; }
+            } catch (e) { alert(MSGS.erro_conexao); btn.disabled = false; btn.innerText = "Gerar QR Code"; }
         }
 
         document.getElementById("btn-validar").addEventListener("click", executarCliqueValidacaoManual);
 
-        // ==========================================
-        // 🔧 UTILITÁRIOS, MÁSCARAS E VALIDAÇÕES
-        // ==========================================
-        const selectQtde = document.getElementById("quantidade");
-        const camposExtras = document.getElementById("campos-extras");
+        const selectQtde = document.getElementById("quantidade"), camposExtras = document.getElementById("campos-extras");
 
         function validarCPF(cpf) {
             cpf = cpf.replace(/[^\d]+/g, '');
             if (cpf == '' || cpf.length != 11 || /^(\d)\1{10}$/.test(cpf)) return false;
-            let add = 0;
-            for (let i = 0; i < 9; i++) add += parseInt(cpf.charAt(i)) * (10 - i);
-            let rev = 11 - (add % 11);
-            if (rev == 10 || rev == 11) rev = 0;
-            if (rev != parseInt(cpf.charAt(9))) return false;
-            add = 0;
-            for (let i = 0; i < 10; i++) add += parseInt(cpf.charAt(i)) * (11 - i);
-            rev = 11 - (add % 11);
-            if (rev == 10 || rev == 11) rev = 0;
-            if (rev != parseInt(cpf.charAt(10))) return false;
-            return true;
+            let add = 0; for (let i = 0; i < 9; i++) add += parseInt(cpf.charAt(i)) * (10 - i);
+            let rev = 11 - (add % 11); if (rev == 10 || rev == 11) rev = 0; if (rev != parseInt(cpf.charAt(9))) return false;
+            add = 0; for (let i = 0; i < 10; i++) add += parseInt(cpf.charAt(i)) * (11 - i);
+            rev = 11 - (add % 11); if (rev == 10 || rev == 11) rev = 0; return rev == parseInt(cpf.charAt(10));
         }
 
         function formatarNomeProprio(nome) {
-            const preposicoes = ["da", "das", "de", "do", "dos"];
-            return nome.toLowerCase().split(' ').map(palavra => {
-                if (preposicoes.includes(palavra)) return palavra;
-                if (palavra === "") return "";
-                return palavra.charAt(0).toUpperCase() + palavra.slice(1);
-            }).join(' ');
+            const prep = ["da", "das", "de", "do", "dos"];
+            return nome.toLowerCase().split(' ').map(p => prep.includes(p) || p === "" ? p : p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
         }
 
         function copiarPix() {
-            const pix = document.getElementById("pix-codigo");
-            pix.select();
-            navigator.clipboard.writeText(pix.value);
-            document.getElementById("btn-copiar").innerText = "✓ Copiado!";
-            setTimeout(() => { document.getElementById("btn-copiar").innerText = "Copiar Código Pix"; }, 2000);
+            const pix = document.getElementById("pix-codigo"); pix.select(); navigator.clipboard.writeText(pix.value);
+            document.getElementById("btn-copiar").innerText = MSGS.copiado;
+            setTimeout(() => { document.getElementById("btn-copiar").innerText = MSGS.copiar_padrao; }, 2000);
         }
 
-        document.getElementById('comprador').addEventListener('blur', function (e) {
-            if (e.target.value.trim() !== "") {
-                e.target.value = formatarNomeProprio(e.target.value);
-            }
-        });
+        document.getElementById('comprador').addEventListener('blur', e => { if (e.target.value.trim() !== "") e.target.value = formatarNomeProprio(e.target.value); });
 
         selectQtde.addEventListener("change", () => {
-            const qtde = parseInt(selectQtde.value);
-            camposExtras.innerHTML = "";
-            for(let i = 1; i <= qtde; i++) {
-                const div = document.createElement("div");
-                div.className = "ingresso-extra";
-                div.innerHTML = `
-                    <label>Nome no Ingresso ${i}</label>
+            camposExtras.innerHTML = Array.from({ length: parseInt(selectQtde.value) }, (_, i) => `
+                <div class="ingresso-extra">
+                    <label>Nome no Ingresso ${i+1}</label>
                     <input class="nome-ing" required placeholder="Nome do convidado">
-                    <label>CPF Convidado ${i}</label>
+                    <label>CPF Convidado ${i+1}</label>
                     <input class="cpf-ing cpf-validar" required placeholder="000.000.000-00">
-                `;
-                camposExtras.appendChild(div);
-            }
-            aplicarMascaras();
+                </div>
+            `).join('');
             
-            document.querySelectorAll(".nome-ing").forEach(el => {
-                el.addEventListener('blur', function(e) {
-                    if (e.target.value.trim() !== "") {
-                        e.target.value = formatarNomeProprio(e.target.value);
-                    }
-                });
-            });
+            document.querySelectorAll(".nome-ing").forEach(el => { el.addEventListener('blur', e => { if (e.target.value.trim() !== "") e.target.value = formatarNomeProprio(e.target.value); }); });
         });
         selectQtde.dispatchEvent(new Event('change'));
 
-        function aplicarMascaras() {
-            document.querySelectorAll(".cpf-validar").forEach(el => {
-                el.removeEventListener("input", maskCPF);
-                el.addEventListener("input", maskCPF);
-                el.removeEventListener("blur", validateCPFBlur);
-                el.addEventListener("blur", validateCPFBlur);
-            });
-
-            const telInput = document.getElementById("telefone");
-            if(telInput) {
-                telInput.addEventListener("input", e => {
-                    let v = e.target.value.replace(/\D/g, "").slice(0, 11);
-                    if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
-                    else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
-                    else if (v.length > 2) v = v.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
-                    else if (v.length > 0) v = v.replace(/^(\d{0,2})/, "($1");
-                    e.target.value = v;
-                });
-            }
-        }
+        // Delegação de Eventos para os CPFs (Enxuga o código eliminando listeners manuais repetitivos)
+        camposExtras.addEventListener("input", e => { if (e.target.classList.contains("cpf-validar")) maskCPF(e); });
+        camposExtras.addEventListener("blur", e => { if (e.target.classList.contains("cpf-validar")) validateCPFBlur(e); }, true);
+        document.getElementById("cpf-comprador").addEventListener("input", maskCPF);
+        document.getElementById("cpf-comprador").addEventListener("blur", validateCPFBlur);
 
         function maskCPF(e) {
             let v = e.target.value.replace(/\D/g, "").slice(0, 11);
@@ -717,30 +397,13 @@
         }
 
         function validateCPFBlur(e) {
-            const val = e.target.value;
-            const erroExistente = e.target.nextElementSibling;
-            if (erroExistente && erroExistente.classList.contains('msg-erro-cpf')) {
-                erroExistente.remove();
-            }
-
+            const val = e.target.value, err = e.target.nextElementSibling;
+            if (err && err.classList.contains('msg-erro-cpf')) err.remove();
             if (val.length > 0) {
-                if (validarCPF(val)) {
-                    e.target.classList.remove("input-erro");
-                    e.target.classList.add("input-sucesso");
-                } else {
-                    e.target.classList.remove("input-sucesso");
-                    e.target.classList.add("input-erro");
-                    const span = document.createElement("span");
-                    span.className = "msg-erro-cpf";
-                    span.innerText = "CPF Inválido";
-                    e.target.after(span);
-                }
-            } else {
-                e.target.classList.remove("input-erro", "input-sucesso");
-            }
+                if (validarCPF(val)) { e.target.className = "input-sucesso"; } 
+                else { e.target.className = "input-erro"; const s = document.createElement("span"); s.className = "msg-erro-cpf"; s.innerText = MSGS.cpf_invalido_tag; e.target.after(s); }
+            } else { e.target.className = ""; }
         }
-
-        aplicarMascaras();
     </script>
 </body>
 </html>
