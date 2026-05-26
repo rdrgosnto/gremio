@@ -311,7 +311,7 @@
                 if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) {
                     clearInterval(intervaloPix);
                     intervaloPix = null;
-                    alert("Tempo limite esgotado. Se o pagamento já foi feito, a compensação acontecerá no Excel.");
+                    alert("Tempo limite");
                     forçarFechamentoSistemico();
                     return;
                 }
