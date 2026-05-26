@@ -81,7 +81,7 @@
 
     <script>
         // ==========================================
-        // ⚠️ CONFIGURAÇÕES DO SISTEMA (USE A URI COMPLETA DA URL_MÃE AQUI)
+        // ⚠️ CONFIGURAÇÕES DO SISTEMA
         // ==========================================
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/06f981a846ca45bc8bfe51c97c480d96/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n-3ys5toEStLZNzQS6q0bETlCP8-NuAjwWn-fAOqjOs";
@@ -311,7 +311,8 @@
                 if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) {
                     clearInterval(intervaloPix);
                     intervaloPix = null;
-                    alert("Tempo limite esgotado. Se o pagamento já foi feito, use a finalização manual.");
+                    alert("Tempo limite esgotado. Se o pagamento já foi feito, a compensação acontecerá no Excel.");
+                    forçarFechamentoSistemico();
                     return;
                 }
 
@@ -328,47 +329,42 @@
             }, TEMPO_CHECK_PIX);
         }
 
-        // ==========================================
-        // 🔄 MUDANÇA DA CONSULTA: DIRETO NO MERCADO PAGO
-        // ==========================================
         async function consultarStatusMercadoPagoDireto() {
             if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return false;
             try {
-                const r = await fetch(`https://api.mercadopago.com/v1/payments/${pixChaveIdentificadora}`, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${TOKEN_MERCADO_PAGO}`,
-                        "Content-Type": "application/json"
-                    }
+                const r = await fetch(URL_MÃE, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        id_pagamento: String(pixChaveIdentificadora).trim(),
+                        pagamento: "PIX",
+                        tipo_venda: "CAIXA",
+                        total_pedido_consolidado: parseFloat(totalAtual)
+                    })
                 });
                 if (!r.ok) return false;
                 const dados = await r.json();
-                return dados.status === "approved";
-            } catch (erro) { 
-                console.error("Erro na checagem direta do MP:", erro);
-                return false; 
-            }
+                return dados.pago === true;
+            } catch (erro) { return false; }
         }
 
         async function executarGravacaoPixAprovadoNasNuvens() {
             try {
-                await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); 
-                alert("Venda Finalizada!"); 
-                forçarFechamentoSistemico(); 
-            } catch (e) { 
-                alert("Aviso: Pago no Mercado Pago, erro ao registrar na planilha. Pode liberar a mercadoria."); 
-                forçarFechamentoSistemico();
-            }
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const res = await r.json();
+                if (res.pago === true) { 
+                    alert("Venda Finalizada!"); 
+                    forçarFechamentoSistemico(); 
+                } else {
+                    alert("Aviso: Pagamento recebido, mas não registrado no Excel.");
+                }
+            } catch (e) { alert("Erro"); }
         }
 
-        // ==========================================
-        // 🛠️ BOTÃO FINALIZAR: RESPONSÁVEL PELA CONTINGÊNCIA (POWER AUTOMATE)
-        // ==========================================
         async function executarCliqueContingenciaManualPix() {
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
             
             const btn = document.getElementById("btn-finalizar");
-            btn.innerText = "Verificando...";
+            btn.innerText = "Processando...";
             btn.disabled = true;
 
             const pago = await consultarStatusMercadoPagoDireto();
@@ -378,33 +374,12 @@
                 aplicarLayoutSucessoPix();
                 await executarGravacaoPixAprovadoNasNuvens();
             } else {
-                const respostaConfirmacao = confirm("Pagamento pendente no Mercado Pago. Deseja FORÇAR o encerramento do pedido e registrar no Excel por contingência?");
-                
-                if (respostaConfirmacao) {
-                    btn.innerText = "Forçando...";
-                    try {
-                        await fetch(URL_MÃE, { 
-                            method: "POST", 
-                            headers: { "Content-Type": "application/json" }, 
-                            body: gerarPayloadVenda(pixChaveIdentificadora + "-CONTINGENCIA", 'PIX') 
-                        });
-                        alert("Pedido finalizado com sucesso por contingência manual.");
-                        forçarFechamentoSistemico();
-                    } catch (e) { 
-                        alert("Erro ao acionar contingência do Power Automate."); 
-                        btn.innerText = "Finalizar";
-                        btn.disabled = false; 
-                        btn.className = CSS_FINALIZAR_HABILITADO;
-                        aplicarLayoutFalhaPix();
-                        iniciarMonitoramentoPixAutomatico(); 
-                    }
-                } else {
-                    btn.innerText = "Finalizar";
-                    btn.disabled = false; 
-                    btn.className = CSS_FINALIZAR_HABILITADO;
-                    aplicarLayoutFalhaPix();
-                    iniciarMonitoramentoPixAutomatico(); 
-                }
+                alert("Pagamento Pendente");
+                btn.innerText = "Finalizar";
+                btn.disabled = false; 
+                btn.className = CSS_FINALIZAR_HABILITADO;
+                aplicarLayoutFalhaPix();
+                iniciarMonitoramentoPixAutomatico(); 
             }
         }
 
