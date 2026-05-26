@@ -235,7 +235,7 @@
             </select>
 
             <div id="campos-extras"></div>
-            <button type="submit" id="btn-gerar" class="btn-principal">Gerar QR Code</button>
+            <button type="submit" id="btn-generar" class="btn-principal">Gerar QR Code</button>
         </form>
 
         <div class="texto-expiracao" id="timer-expiracao">O código a seguir expira em 10:00.</div>
@@ -257,24 +257,22 @@
 
     <script>
         // ==========================================
-        // ⚠️ CONFIGURAÇÕES DO SISTEMA (Manutenção Básica)
+        // ⚠️ CONFIGURAÇÕES DO SISTEMA
         // ==========================================
         const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2ad0529973d74605bffbb1f1dd89c063/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9cFG_dFkGjSMngbCZU7Rj7MW02aldXs66m7z14mS89c";
         const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
         
-        const TEMPO_CHECK_PIX = 6000;          // Intervalo de checagem automática (6 segundos)
-        const TRAVA_MANUAL_PIX = 12000;        // Tempo para habilitar o botão azul (12 segundos)
-        const LIMITE_EXPIRACAO_PIX = 29000;    // Tempo para testes: 29 segundos (Mudar para 600000 para 10 minutos)
-        const TEMPO_TRAVA_TIMEOUT = 9000;      // Tempo de congelamento pós-timeout (9 segundos)
+        const TEMPO_CHECK_PIX = 6000;          
+        const TRAVA_MANUAL_PIX = 12000;        
+        const LIMITE_EXPIRACAO_PIX = 29000;    // Tempo de teste (29s)
+        const TEMPO_TRAVA_TIMEOUT = 9000;      
 
-        // Variáveis de Controle de Fluxo Global
         let idPagamentoAtual = null;
         let intervaloPix = null;
         let loopEmExecucao = false;
         let timestampCriacaoPix = 0;
         let cronometroRegressivo = null;
 
-        // Configuração Inicial do Pop-up de Aviso
         setTimeout(() => {
             document.getElementById('btnFecharPopup').style.display = 'block';
             document.getElementById('btnXPopup').style.display = 'block';
@@ -311,8 +309,7 @@
             }, 1000);
         }
 
-        function executarFluxoTimeoutEstrito() {
-            // Fase 1: Interrupção e Congelamento em Cinza
+        function ejecutarFluxoTimeoutEstrito() {
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             
             const elementoTimer = document.getElementById('timer-expiracao');
@@ -324,12 +321,10 @@
             elementoTimer.innerText = "Tempo Limite";
             msgStatus.innerHTML = ""; 
             
-            // Aplica layout cinza e bloqueia cliques completamente
             sessaoQr.classList.add("sessao-bloqueada");
             btnValidar.disabled = true;
             btnCopiar.disabled = true;
 
-            // Fase 2 e 3: Aguarda 9 segundos e retorna à tela inicial limpa
             setTimeout(() => {
                 resetSistemicoTotal();
             }, TEMPO_TRAVA_TIMEOUT);
@@ -345,7 +340,6 @@
             loopEmExecucao = false;
             timestampCriacaoPix = 0;
 
-            // Limpa elementos de status e reseta propriedades do QR Code
             const sessaoQr = document.getElementById('sessao-qr');
             sessaoQr.classList.remove("sessao-bloqueada");
             sessaoQr.style.display = "none";
@@ -355,19 +349,16 @@
             document.getElementById('timer-expiracao').style.display = "none";
             document.getElementById('btn-copiar').disabled = false;
 
-            // Restaura o botão Gerar QR Code original
             const btnGerar = document.getElementById("btn-gerar");
             btnGerar.disabled = false;
             btnGerar.innerText = "Gerar QR Code";
 
-            // Reseta e reexibe o formulário inicial limpo
             const formulario = document.getElementById("sessao-formulario");
             formulario.reset();
             document.getElementById("comprador").classList.remove("input-erro", "input-sucesso");
             document.getElementById("cpf-comprador").classList.remove("input-erro", "input-sucesso");
             document.getElementById("telefone").classList.remove("input-erro", "input-sucesso");
             
-            // Remove mensagens antigas de erro de CPF se houverem
             document.querySelectorAll('.msg-erro-cpf').forEach(el => el.remove());
             
             document.getElementById("quantidade").value = "1";
@@ -378,7 +369,7 @@
         }
 
         // ==========================================
-        // 🔍 MOTOres DE VERIFICAÇÃO (AUTOMÁTICA E MANUAL)
+        // 🔍 MOTORES DE VERIFICAÇÃO
         // ==========================================
         function iniciarMonitoramentoPixAutomatico() {
             if (intervaloPix) clearInterval(intervaloPix);
@@ -387,7 +378,6 @@
             intervaloPix = setInterval(async () => {
                 if (loopEmExecucao || !idPagamentoAtual) return;
 
-                // Segurança contra estouro do limite de tempo global
                 if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) {
                     clearInterval(intervaloPix);
                     intervaloPix = null;
@@ -425,7 +415,6 @@
         async function executarCliqueValidacaoManual() {
             if (!idPagamentoAtual) return;
 
-            // Pausa temporária do loop automático para evitar conflitos concorrentes
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
 
             const btn = document.getElementById("btn-validar");
@@ -438,14 +427,13 @@
             if (verificado) {
                 aplicarLayoutSucessoDefinitivo();
             } else {
-                // Renderização estruturada do status negativo ❌
                 msg.innerHTML = `
                     <span class="icon-grande" style="font-size: 60px; color: #bf360c; margin-bottom: 5px; display: inline-block;">❌</span>
                     <br>Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!
                 `;
                 
-                btn.disabled = false; // Reabilita mantendo o nome estático intacto
-                iniciarMonitoramentoPixAutomatico(); // Retoma o ciclo automático padrão
+                btn.disabled = false; 
+                iniciarMonitoramentoPixAutomatico(); 
             }
         }
 
@@ -465,12 +453,12 @@
         }
 
         // ==========================================
-        // 📝 FORMULÁRIO, COMPORTAMENTOS E DISPARO
+        // 📝 FORMULÁRIO E DISPARO
         // ==========================================
         async function processarEnvioFormulario(e) {
             e.preventDefault(); 
 
-            const btn = document.getElementById("btn-gerar");
+            const btn = document.getElementById("btn-generar");
             const comprador = document.getElementById("comprador").value.trim();
             const cpfComprador = document.getElementById("cpf-comprador").value.trim();
             const telefone = document.getElementById("telefone").value.trim();
@@ -524,7 +512,6 @@
                 return;
             }
 
-            // Trancamento e feedback do botão principal
             btn.disabled = true;
             btn.innerText = "Por favor, aguarde...";
 
@@ -556,43 +543,44 @@
                     idPagamentoAtual = data.pagamento_id;
                     timestampCriacaoPix = Date.now();
 
-                    // Alimentação de dados da transação na tela
                     document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
                     document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
                     document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(data.variavel).toFixed(2).replace('.', ',')}`;
 
-                    // Transição das seções visuais
                     document.getElementById("sessao-formulario").style.display = "none";
                     document.getElementById("timer-expiracao").style.display = "block";
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
 
-                    // Regra de Trava Visual Estática para o Botão Azul
+                    // 1. O botão azul Verificar Pagamento começa DESABILITADO com destaque do overlay
                     const btnValidar = document.getElementById("btn-validar");
                     btnValidar.disabled = true; 
 
-                    setTimeout(() => {
-                        // Desabilita a propriedade preservando o nome original de forma sutil
-                        if (idPagamentoAtual && !document.getElementById('sessao-qr').classList.contains('sessao-bloqueada')) {
-                            btnValidar.disabled = false;
-                        }
-                    }, TRAVA_MANUAL_PIX);
-
-                    // Gestão dos Overlays informativos
+                    // Chamada do Overlay Escuro de Destaque
                     const overlayPagamento = document.getElementById("pagamentoOverlay");
                     overlayPagamento.style.display = "flex";
                     btnValidar.style.zIndex = "6000";
 
+                    // 2. Controla a saída do overlay (6s fixo + 4s de transição de fade out = 10s totais)
                     setTimeout(() => {
                         overlayPagamento.style.opacity = "0";
+                        
                         setTimeout(() => {
                             overlayPagamento.style.display = "none";
                             btnValidar.style.zIndex = "1"; 
-                        }, 4000);
-                    }, 6000);
 
-                    // Inicialização dos Motores de Tempo e Monitoria
+                            // 3. ENCADEAMENTO CORRETO: Só AGORA que o overlay saiu totalmente que a contagem de 12 segundos inicia
+                            setTimeout(() => {
+                                // Libera o botão após 12 segundos do encerramento do overlay, se não houver expirado
+                                if (idPagamentoAtual && !document.getElementById('sessao-qr').classList.contains('sessao-bloqueada')) {
+                                    btnValidar.disabled = false;
+                                }
+                            }, TRAVA_MANUAL_PIX);
+
+                        }, 4000); // 4 segundos para sumir o overlay
+                    }, 6000); // 6 segundos exibindo o texto do overlay
+
                     iniciarCronometro();
                     iniciarMonitoramentoPixAutomatico();
 
@@ -608,7 +596,6 @@
             }
         }
 
-        // Atribuição isolada de evento de verificação manual
         document.getElementById("btn-validar").addEventListener("click", executarCliqueValidacaoManual);
 
         // ==========================================
