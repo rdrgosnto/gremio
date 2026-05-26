@@ -360,6 +360,9 @@
             } catch (e) { alert("Erro"); }
         }
 
+        // ==========================================
+        // 🛠️ BOTÃO FINALIZAR: CHAMADA AO POWER AUTOMATE (CONVERGE LOGIC)
+        // ==========================================
         async function executarCliqueContingenciaManualPix() {
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
             
@@ -367,6 +370,7 @@
             btn.innerText = "Processando...";
             btn.disabled = true;
 
+            // Consulta o status via Power Automate para verificar se já houve compensação
             const pago = await consultarStatusMercadoPagoDireto();
 
             if (pago) {
@@ -374,12 +378,35 @@
                 aplicarLayoutSucessoPix();
                 await executarGravacaoPixAprovadoNasNuvens();
             } else {
-                alert("Pagamento Pendente");
-                btn.innerText = "Finalizar";
-                btn.disabled = false; 
-                btn.className = CSS_FINALIZAR_HABILITADO;
-                aplicarLayoutFalhaPix();
-                iniciarMonitoramentoPixAutomatico(); 
+                // Se o Power Automate retornar falso, oferece a gravação forçada por contingência manual
+                const respostaConfirmacao = confirm("Pagamento ainda consta como Pendente. Deseja FORÇAR o encerramento do pedido e registrar no Excel via contingência?");
+                
+                if (respostaConfirmacao) {
+                    btn.innerText = "Forçando...";
+                    try {
+                        const r = await fetch(URL_MÃE, { 
+                            method: "POST", 
+                            headers: { "Content-Type": "application/json" }, 
+                            body: gerarPayloadVenda(pixChaveIdentificadora + "-CONTINGENCIA", 'PIX') 
+                        });
+                        const res = await r.json();
+                        alert("Pedido finalizado por contingência manual.");
+                        forçarFechamentoSistemico();
+                    } catch (e) { 
+                        alert("Erro ao acionar a contingência no Power Automate."); 
+                        btn.innerText = "Finalizar";
+                        btn.disabled = false; 
+                        btn.className = CSS_FINALIZAR_HABILITADO;
+                        aplicarLayoutFalhaPix();
+                        iniciarMonitoramentoPixAutomatico(); 
+                    }
+                } else {
+                    btn.innerText = "Finalizar";
+                    btn.disabled = false; 
+                    btn.className = CSS_FINALIZAR_HABILITADO;
+                    aplicarLayoutFalhaPix();
+                    iniciarMonitoramentoPixAutomatico(); 
+                }
             }
         }
 
