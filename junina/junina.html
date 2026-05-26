@@ -254,6 +254,7 @@
             btn.setAttribute("data-trava-tempo", "true");
 
             try {
+                // Geração inicial do QR Code chama o Power Automate normalmente
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
                 if (d.id_mercado_pago) { 
                     pixChaveIdentificadora = String(d.id_mercado_pago).trim(); 
@@ -329,39 +330,42 @@
             }, TEMPO_CHECK_PIX);
         }
 
+        // ==========================================
+        // 🔄 MONITORAMENTO: AGORA DIRETO NO MERCADO PAGO
+        // ==========================================
         async function consultarStatusMercadoPagoDireto() {
             if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return false;
             try {
-                const r = await fetch(URL_MÃE, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        id_pagamento: String(pixChaveIdentificadora).trim(),
-                        pagamento: "PIX",
-                        tipo_venda: "CAIXA",
-                        total_pedido_consolidado: parseFloat(totalAtual)
-                    })
+                const r = await fetch(`https://api.mercadopago.com/v1/payments/${pixChaveIdentificadora}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${TOKEN_MERCADO_PAGO}`,
+                        "Content-Type": "application/json"
+                    }
                 });
                 if (!r.ok) return false;
                 const dados = await r.json();
-                return dados.pago === true;
-            } catch (erro) { return false; }
+                return dados.status === "approved";
+            } catch (erro) { 
+                console.error("Erro na consulta automática direta ao MP:", erro);
+                return false; 
+            }
         }
 
         async function executarGravacaoPixAprovadoNasNuvens() {
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const res = await r.json();
-                if (res.pago === true) { 
-                    alert("Venda Finalizada!"); 
-                    forçarFechamentoSistemico(); 
-                } else {
-                    alert("Aviso: Pagamento recebido, mas não registrado no Excel.");
-                }
-            } catch (e) { alert("Erro"); }
+                // Avisa o Power Automate para fazer a gravação normal pós-aprovação
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); 
+                alert("Venda Finalizada!"); 
+                forçarFechamentoSistemico(); 
+            } catch (e) { 
+                alert("Aviso: Pago no Mercado Pago, mas houve erro ao registrar no Excel. Pode liberar a mercadoria.");
+                forçarFechamentoSistemico();
+            }
         }
 
         // ==========================================
-        // 🛠️ BOTÃO FINALIZAR: CHAMADA AO POWER AUTOMATE (CONVERGE LOGIC)
+        // 🛠️ BOTÃO FINALIZAR: SEMPRE ACIONA O POWER AUTOMATE
         // ==========================================
         async function executarCliqueContingenciaManualPix() {
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
@@ -370,7 +374,7 @@
             btn.innerText = "Processando...";
             btn.disabled = true;
 
-            // Consulta o status via Power Automate para verificar se já houve compensação
+            // Faz a última checagem chamando a API direta do Mercado Pago
             const pago = await consultarStatusMercadoPagoDireto();
 
             if (pago) {
@@ -378,18 +382,18 @@
                 aplicarLayoutSucessoPix();
                 await executarGravacaoPixAprovadoNasNuvens();
             } else {
-                // Se o Power Automate retornar falso, oferece a gravação forçada por contingência manual
-                const respostaConfirmacao = confirm("Pagamento ainda consta como Pendente. Deseja FORÇAR o encerramento do pedido e registrar no Excel via contingência?");
+                // Se continuar pendente, oferece o encerramento forçado via Power Automate
+                const respostaConfirmacao = confirm("Pagamento pendente no Mercado Pago. Deseja FORÇAR o encerramento do pedido e registrar no Excel por contingência manual?");
                 
                 if (respostaConfirmacao) {
                     btn.innerText = "Forçando...";
                     try {
-                        const r = await fetch(URL_MÃE, { 
+                        // Envia com a flag de contingência direto para a URL_MÃE salvar
+                        await fetch(URL_MÃE, { 
                             method: "POST", 
                             headers: { "Content-Type": "application/json" }, 
                             body: gerarPayloadVenda(pixChaveIdentificadora + "-CONTINGENCIA", 'PIX') 
                         });
-                        const res = await r.json();
                         alert("Pedido finalizado por contingência manual.");
                         forçarFechamentoSistemico();
                     } catch (e) { 
