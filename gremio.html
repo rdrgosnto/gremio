@@ -223,9 +223,8 @@
             if (intervaloPix) clearInterval(intervaloPix);
             loopEmExecucao = false;
             intervaloPix = setInterval(async () => {
-                if (loopEmExecucao || !idPagamentoAtual) return;
+                if (loopEmExecucao) return;
                 
-                // CORREÇÃO AQUI: Mede o tempo decorrido de forma correta e síncrona com o cronômetro
                 if (Date.now() - timestampCriacaoPix >= LIMITE_EXPIRACAO_PIX) { 
                     clearInterval(intervaloPix); 
                     intervaloPix = null; 
@@ -240,13 +239,18 @@
 
         async function efetuarChamadaValidacaoAPI() {
             try {
-                const r = await fetch(URL_VALIDAR_PAGAMENTO, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ "id": String(idPagamentoAtual) }) });
+                // Força o envio do ID limpando espaços vazios
+                const idParaValidar = idPagamentoAtual ? String(idPagamentoAtual).trim() : "";
+                const r = await fetch(URL_VALIDAR_PAGAMENTO, { 
+                    method: "POST", 
+                    headers: { "Content-Type": "application/json" }, 
+                    body: JSON.stringify({ "id": idParaValidar }) 
+                });
                 return r.ok && (await r.text()).includes("Sucesso");
             } catch (e) { return false; }
         }
 
         async function executarCliqueValidacaoManual() {
-            if (!idPagamentoAtual) return;
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             const btn = document.getElementById("btn-validar"), msg = document.getElementById("status-verificacao");
             
@@ -298,7 +302,10 @@
                     const data = await response.json();
                     if (data.status === "bloqueado") { alert("⚠️ BLOQUEIO: " + data.mensagem); btn.disabled = false; btn.innerText = "Gerar QR Code"; return; }
                     
-                    idPagamentoAtual = data.pagamento_id; timestampCriacaoPix = Date.now();
+                    // Blindagem de ID: Captura independente de como o Power Automate nomeie o campo de ID
+                    idPagamentoAtual = data.pagamento_id || data.id || data.id_pagamento || ""; 
+                    timestampCriacaoPix = Date.now();
+                    
                     document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
                     document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
                     document.getElementById("btn-copiar").innerText = MSGS.copiar_padrao;
@@ -310,7 +317,7 @@
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
 
-                    // CORREÇÃO DO BOTÃO: Sempre ativo, azul e clicável desde o início
+                    // Força o botão azul a iniciar totalmente liberado e funcional
                     const btnValidar = document.getElementById("btn-validar");
                     btnValidar.disabled = false;
                     btnValidar.className = "btn-principal bg-[#1565c0] shadow-[0_6px_0_#0d47a1]";
