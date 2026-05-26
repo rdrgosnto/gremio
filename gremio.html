@@ -72,6 +72,11 @@
         .pagamento-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.82); z-index: 5000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; transition: opacity 0.4s ease; }
         .pagamento-overlay-texto { color: #ffffff; font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; text-align: center; max-width: 340px; line-height: 1.5; }
         .sessao-bloqueada { opacity: 0.35 !important; filter: grayscale(100%); pointer-events: none !important; }
+        
+        /* ESTILOS INJETADOS ESTÁTICOS PARA EVITAR QUEBRA DO TAILWIND */
+        .btn-azul-estilo { background-color: #1565c0 !important; box-shadow: 0 6px 0 #0d47a1 !important; pointer-events: auto; }
+        .btn-cinza-estilo { background-color: #9e9e9e !important; box-shadow: 0 6px 0 #616161 !important; pointer-events: none !important; }
+        .btn-trava-overlay { background-color: #1565c0 !important; box-shadow: 0 6px 0 #0d47a1 !important; pointer-events: none !important; }
     </style>
 </head>
 <body>
@@ -124,7 +129,7 @@
                 <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()"></button>
             </div>
 
-            <button id="btn-validar" type="button" class="btn-principal bg-[#1565c0] shadow-[0_6px_0_#0d47a1]">Verificar Pagamento</button>
+            <button id="btn-validar" type="button" class="btn-principal">Verificar Pagamento</button>
             <div id="status-verificacao" class="status-msg"></div>
         </div>
     </div>
@@ -134,12 +139,13 @@
         const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
         
         const TEMPO_CHECK_PIX = 6000;          
+        const TRAVA_MANUAL_PIX = 12000;        
         const LIMITE_EXPIRACAO_PIX = 29000;    
         const TEMPO_TRAVA_TIMEOUT = 9000;      
 
         const MSGS = {
             dados_invalidos: "Preencha os dados corretamente",
-            cpf_comprador_duplicado: "Atenção: O CPF do Comprador só pode constar em 1 campo dos ingressos",
+            cpf_comprador_duplicado: "Atenção: O CPF do Comprador só pode constar in 1 campo dos ingressos",
             cpf_convidado_duplicado: "Atenção: CPF duplicados na lista de convidados",
             cpf_invalido_tag: "CPF Inválido",
             erro_processamento: "Erro ao processar. Tente novamente.",
@@ -186,7 +192,7 @@
             
             const btn = document.getElementById('btn-validar');
             btn.disabled = true;
-            btn.className = "btn-principal bg-[#9e9e9e] shadow-[0_6px_0_#616161]";
+            btn.className = "btn-principal btn-cinza-estilo";
             document.getElementById('btn-copiar').disabled = true;
             setTimeout(() => { resetSistemicoTotal(); }, TEMPO_TRAVA_TIMEOUT);
         }
@@ -223,14 +229,8 @@
             if (intervaloPix) clearInterval(intervaloPix);
             loopEmExecucao = false;
             intervaloPix = setInterval(async () => {
-                if (loopEmExecucao) return;
-                
-                if (Date.now() - timestampCriacaoPix >= LIMITE_EXPIRACAO_PIX) { 
-                    clearInterval(intervaloPix); 
-                    intervaloPix = null; 
-                    return; 
-                }
-                
+                if (loopEmExecucao || !idPagamentoAtual) return;
+                if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) { clearInterval(intervaloPix); intervaloPix = null; return; }
                 loopEmExecucao = true;
                 if (await efetuarChamadaValidacaoAPI()) { clearInterval(intervaloPix); intervaloPix = null; aplicarLayoutSucessoDefinitivo(); }
                 loopEmExecucao = false;
@@ -239,30 +239,24 @@
 
         async function efetuarChamadaValidacaoAPI() {
             try {
-                // Força o envio do ID limpando espaços vazios
-                const idParaValidar = idPagamentoAtual ? String(idPagamentoAtual).trim() : "";
-                const r = await fetch(URL_VALIDAR_PAGAMENTO, { 
-                    method: "POST", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify({ "id": idParaValidar }) 
-                });
+                const r = await fetch(URL_VALIDAR_PAGAMENTO, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ "id": String(idPagamentoAtual) }) });
                 return r.ok && (await r.text()).includes("Sucesso");
             } catch (e) { return false; }
         }
 
         async function executarCliqueValidacaoManual() {
+            if (!idPagamentoAtual) return;
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             const btn = document.getElementById("btn-validar"), msg = document.getElementById("status-verificacao");
             
-            btn.disabled = true;
-            btn.innerText = MSGS.verificando;
-            
+            btn.disabled = true; 
+            btn.className = "btn-principal btn-cinza-estilo";
             if (await efetuarChamadaValidacaoAPI()) {
                 aplicarLayoutSucessoDefinitivo();
             } else {
                 msg.innerHTML = MSGS.negativo_status;
-                btn.disabled = false;
-                btn.innerText = "Verificar Pagamento";
+                btn.disabled = false; 
+                btn.className = "btn-principal btn-azul-estilo";
                 iniciarMonitoramentoPixAutomatico(); 
             }
         }
@@ -302,10 +296,7 @@
                     const data = await response.json();
                     if (data.status === "bloqueado") { alert("⚠️ BLOQUEIO: " + data.mensagem); btn.disabled = false; btn.innerText = "Gerar QR Code"; return; }
                     
-                    // Blindagem de ID: Captura independente de como o Power Automate nomeie o campo de ID
-                    idPagamentoAtual = data.pagamento_id || data.id || data.id_pagamento || ""; 
-                    timestampCriacaoPix = Date.now();
-                    
+                    idPagamentoAtual = data.pagamento_id; timestampCriacaoPix = Date.now();
                     document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
                     document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
                     document.getElementById("btn-copiar").innerText = MSGS.copiar_padrao;
@@ -317,10 +308,12 @@
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
 
-                    // Força o botão azul a iniciar totalmente liberado e funcional
                     const btnValidar = document.getElementById("btn-validar");
-                    btnValidar.disabled = false;
-                    btnValidar.className = "btn-principal bg-[#1565c0] shadow-[0_6px_0_#0d47a1]";
+                    
+                    // 1. CORREÇÃO DE CLIQUE: Botão desativado nativamente e z-index em 1 (FICA ATRÁS do overlay preto)
+                    btnValidar.disabled = true; 
+                    btnValidar.className = "btn-principal btn-trava-overlay"; 
+                    btnValidar.style.zIndex = "1"; 
 
                     document.getElementById("txtOverlay").innerText = MSGS.overlay_texto;
                     const overlayPagamento = document.getElementById("pagamentoOverlay");
@@ -330,6 +323,18 @@
                         overlayPagamento.style.opacity = "0";
                         setTimeout(() => {
                             overlayPagamento.style.display = "none";
+
+                            // 2. CORREÇÃO DE COR: O overlay sumiu. Forçamos o CSS estático cinza e bloqueamos cliques do mouse
+                            btnValidar.className = "btn-principal btn-cinza-estilo";
+
+                            setTimeout(() => {
+                                if (idPagamentoAtual && !document.getElementById('sessao-qr').classList.contains('sessao-bloqueada')) {
+                                    // 3. LIBERAÇÃO: Passaram os 12 segundos, forçamos o CSS azul estático e habilitamos o clique
+                                    btnValidar.disabled = false;
+                                    btnValidar.className = "btn-principal btn-azul-estilo"; 
+                                }
+                            }, TRAVA_MANUAL_PIX);
+
                         }, 4000); 
                     }, 6000); 
 
@@ -339,7 +344,7 @@
             } catch (e) { alert(MSGS.erro_conexao); btn.disabled = false; btn.innerText = "Gerar QR Code"; }
         }
 
-        document.getElementById("btn-validar").addEventListener("click", executing => executarCliqueValidacaoManual());
+        document.getElementById("btn-validar").addEventListener("click", executarCliqueValidacaoManual);
 
         const selectQtde = document.getElementById("quantidade"), camposExtras = document.getElementById("campos-extras");
 
@@ -360,7 +365,7 @@
         function copiarPix() {
             const pix = document.getElementById("pix-codigo"); pix.select(); navigator.clipboard.writeText(pix.value);
             document.getElementById("btn-copiar").innerText = MSGS.copiado;
-            setTimeout(() => { document.getElementById("btn-copiar").innerText = MSGS.copiar_padrao; }, 2000);
+            setTimeout(() => { document.getElementById("btn-copiar").innerText = MSGS.copy_padrao || MSGS.copiar_padrao; }, 2000);
         }
 
         document.getElementById('comprador').addEventListener('blur', e => { if (e.target.value.trim() !== "") e.target.value = formatarNomeProprio(e.target.value); });
