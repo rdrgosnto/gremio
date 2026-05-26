@@ -246,7 +246,7 @@
             box.innerHTML = `<span>Carregando...</span>`; 
             
             pixChaveIdentificadora = "mp_" + Date.now();
-            timestampCriacaoPix = Date.now(); // Armazena o momento da criação do Pix
+            timestampCriacaoPix = Date.now();
             
             const btn = document.getElementById("btn-finalizar");
             btn.disabled = true;
@@ -255,7 +255,7 @@
 
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
-                if (d.qrcode_imagem) { 
+                if (d.id_mercado_pago) { 
                     pixChaveIdentificadora = String(d.id_mercado_pago).trim(); 
                     stringQrCodeBase64Salva = d.qrcode_imagem;
                     
@@ -308,7 +308,6 @@
                 if (loopEmExecucao) return; 
                 if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return;
                 
-                // Valida se o Pix passou do tempo limite silencioso de 2 minutos
                 if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) {
                     clearInterval(intervaloPix);
                     intervaloPix = null;
@@ -333,12 +332,19 @@
         async function consultarStatusMercadoPagoDireto() {
             if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return false;
             try {
-                const r = await fetch(`https://api.mercadopago.com/v1/payments/${pixChaveIdentificadora}`, {
-                    method: "GET", headers: { "Authorization": `Bearer ${TOKEN_MERCADO_PAGO}` }
+                const r = await fetch(URL_MÃE, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        id_pagamento: String(pixChaveIdentificadora).trim(),
+                        pagamento: "PIX",
+                        tipo_venda: "CAIXA",
+                        total_pedido_consolidado: parseFloat(totalAtual)
+                    })
                 });
                 if (!r.ok) return false;
                 const dados = await r.json();
-                return dados.status === "approved";
+                return dados.pago === true;
             } catch (erro) { return false; }
         }
 
