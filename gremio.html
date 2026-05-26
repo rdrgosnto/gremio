@@ -121,7 +121,7 @@
             
             <div class="pix-box">
                 <input id="pix-codigo" readonly style="font-size: 9px; width: 100%; text-align: center; border: 1px solid #ccc; background: #fff;">
-                <button type="button" class="btn-copiar" id="btn-copiar" onclick="copyPix()"></button>
+                <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()"></button>
             </div>
 
             <button id="btn-validar" type="button" class="btn-principal bg-[#1565c0] shadow-[0_6px_0_#0d47a1]">Verificar Pagamento</button>
@@ -224,7 +224,14 @@
             loopEmExecucao = false;
             intervaloPix = setInterval(async () => {
                 if (loopEmExecucao || !idPagamentoAtual) return;
-                if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) { clearInterval(intervaloPix); intervaloPix = null; return; }
+                
+                // CORREÇÃO AQUI: Mede o tempo decorrido de forma correta e síncrona com o cronômetro
+                if (Date.now() - timestampCriacaoPix >= LIMITE_EXPIRACAO_PIX) { 
+                    clearInterval(intervaloPix); 
+                    intervaloPix = null; 
+                    return; 
+                }
+                
                 loopEmExecucao = true;
                 if (await efetuarChamadaValidacaoAPI()) { clearInterval(intervaloPix); intervaloPix = null; aplicarLayoutSucessoDefinitivo(); }
                 loopEmExecucao = false;
@@ -302,6 +309,11 @@
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
+
+                    // CORREÇÃO DO BOTÃO: Sempre ativo, azul e clicável desde o início
+                    const btnValidar = document.getElementById("btn-validar");
+                    btnValidar.disabled = false;
+                    btnValidar.className = "btn-principal bg-[#1565c0] shadow-[0_6px_0_#0d47a1]";
 
                     document.getElementById("txtOverlay").innerText = MSGS.overlay_texto;
                     const overlayPagamento = document.getElementById("pagamentoOverlay");
