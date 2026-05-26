@@ -37,7 +37,7 @@
         let idPagamento = "";
         let intervaloCheck = null;
 
-        // 1. GERA O PIX DIRETO NA API DO MERCADO PAGO
+        // 1. GERA O PIX DIRETO NA API DO MERCADO PAGO (VIA PROXY)
         async function criarPixTeste() {
             const btn = document.getElementById("btn-gerar");
             btn.innerText = "Criando PIX no MP...";
@@ -53,7 +53,8 @@
             };
 
             try {
-                const r = await fetch("https://api.mercadopago.com/v1/payments", {
+                // Utilizando o proxy público para burlar o bloqueio de CORS do navegador
+                const r = await fetch("https://cors-anywhere.herokuapp.com/https://api.mercadopago.com/v1/payments", {
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${TOKEN_MERCADO_PAGO}`,
@@ -75,11 +76,11 @@
                 btn.classList.add("hidden");
                 document.getElementById("area-qrcode").classList.remove("hidden");
 
-                // Inicia o monitoramento de 5 em 5 segundos (mais rápido para o teste)
+                // Inicia o monitoramento de 5 em 5 segundos
                 iniciarMonitoramento();
 
             } catch (e) {
-                alert("Falha ao gerar PIX direto no MP. Veja o console.");
+                alert("Falha ao gerar PIX direto no MP. Garanta que ativou o link do cors-anywhere e veja o console (F12).");
                 console.error(e);
                 btn.innerText = "Gerar PIX de R$ 0,01";
                 btn.disabled = false;
@@ -90,7 +91,8 @@
         function iniciarMonitoramento() {
             intervaloCheck = setInterval(async () => {
                 try {
-                    const r = await fetch(`https://api.mercadopago.com/v1/payments/${idPagamento}`, {
+                    // Consulta também passa pelo proxy para evitar CORS no método GET
+                    const r = await fetch("https://cors-anywhere.herokuapp.com/https://api.mercadopago.com/v1/payments/" + idPagamento, {
                         method: "GET",
                         headers: {
                             "Authorization": `Bearer ${TOKEN_MERCADO_PAGO}`
@@ -119,7 +121,7 @@
             alert("PIX de 1 centavo aprovado no Mercado Pago! Avisando o Power Automate...");
 
             try {
-                // Envia para o Power Automate salvar na planilha
+                // Envia para o Power Automate salvar/testar a chegada do sinal
                 await fetch(URL_MÃE, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
