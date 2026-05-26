@@ -8,13 +8,45 @@
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { 
-            font-family: 'Poppins', sans-serif; margin: 0; padding: 40px 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; min-height: 100dvh; box-sizing: border-box; color: #4a3b32; background-color: #e65100; 
-            background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%), linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%); background-size: 40px 40px; background-position: 0 0, 20px 20px; 
+            font-family: 'Poppins', sans-serif; 
+            margin: 0; 
+            padding: 40px 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            min-height: 100dvh; 
+            box-sizing: border-box;
+            color: #4a3b32; 
+            background-color: #e65100; 
+            background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%), linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%); 
+            background-size: 40px 40px; 
+            background-position: 0 0, 20px 20px; 
         }
-        .container { background-color: #fffdf7; padding: 30px 25px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); text-align: center; box-sizing: border-box; border: 3px dashed #d84315; margin: auto 0; }
+        .container { 
+            background-color: #fffdf7; 
+            padding: 30px 25px; 
+            border-radius: 12px; 
+            width: 100%; 
+            max-width: 400px; 
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); 
+            text-align: center; 
+            box-sizing: border-box; 
+            border: 3px dashed #d84315; 
+            margin: auto 0; 
+        }
         h1 { margin-top: 10px; font-family: 'Amatic SC', cursive; font-size: 48px; color: #bf360c; }
         label { font-weight: 600; margin-top: 15px; display: block; text-align: left; font-size: 14px; }
-        input, select { width: 100%; padding: 10px; border-radius: 8px; border: 2px dashed #bcaaa4; font-size: 14px; box-sizing: border-box; text-transform: none; transition: all 0.3s; }
+        input, select { 
+            width: 100%; 
+            padding: 10px; 
+            border-radius: 8px; 
+            border: 2px dashed #bcaaa4; 
+            font-size: 14px; 
+            box-sizing: border-box; 
+            text-transform: none;
+            transition: all 0.3s;
+        }
         .input-erro { border: 2px solid #ff1744 !important; background-color: #fff5f5; }
         .input-sucesso { border: 2px solid #2e7d32 !important; background-color: #f1f8e9; }
         .msg-erro-cpf { color: #ff1744; font-size: 11px; display: block; text-align: left; margin-top: 2px; font-weight: 400; }
@@ -83,7 +115,7 @@
             <button type="submit" id="btn-gerar" class="btn-principal">Gerar QR Code</button>
         </form>
 
-        <div class="texto-expiracao" id="timer-expiracao"></div>
+        <div class="texto-expiracao" id="timer-expiracao">O código a seguir expira em 10:00.</div>
 
         <div class="qr-container" id="sessao-qr">
             <div id="carregando-qr">Processando</div>
@@ -116,11 +148,22 @@
             timeout: "Tempo Limite"
         };
 
-        let idPagamentoAtual = null, intervaloPix = null, loopEmExecucao = false, cronometroRegressivo = null;
-        const selectQtde = document.getElementById("quantidade"), camposExtras = document.getElementById("campos-extras");
+        let idPagamentoAtual = null;
+        let intervaloPix = null;
+        let loopEmExecucao = false;
+        let cronometroRegressivo = null;
+        
+        const selectQtde = document.getElementById("quantidade");
+        const camposExtras = document.getElementById("campos-extras");
 
-        setTimeout(() => { document.getElementById('btnFecharPopup').style.display = 'block'; document.getElementById('btnXPopup').style.display = 'block'; }, 3000);
-        function fecharPopup() { document.getElementById('popupOverlay').style.display = 'none'; }
+        setTimeout(() => {
+            document.getElementById('btnFecharPopup').style.display = 'block';
+            document.getElementById('btnXPopup').style.display = 'block';
+        }, 3000);
+
+        function fecharPopup() {
+            document.getElementById('popupOverlay').style.display = 'none';
+        }
 
         function iniciarCronometro() {
             if (cronometroRegressivo) clearInterval(cronometroRegressivo);
@@ -128,71 +171,119 @@
             const elementoTimer = document.getElementById('timer-expiracao');
 
             cronometroRegressivo = setInterval(() => {
-                let min = Math.floor(tempoRestante / 60), seg = tempoRestante % 60;
-                elementoTimer.innerText = `O código a seguir expira em ${min < 10 ? '0'+min : min}:${seg < 10 ? '0'+seg : seg}.`;
-                if (tempoRestante <= 0) { clearInterval(cronometroRegressivo); executarFluxoTimeoutEstrito(); }
+                let minutes = Math.floor(tempoRestante / 60);
+                let segundos = tempoRestante % 60;
+
+                minutes = minutes < 10 ? '0' + minutes : minutes;
+                segundos = segundos < 10 ? '0' + segundos : segundos;
+
+                elementoTimer.innerText = `O código a seguir expira em ${minutes}:${segundos}.`;
+
+                if (tempoRestante <= 0) {
+                    clearInterval(cronometroRegressivo);
+                    executarFluxoTimeoutEstrito();
+                }
+
                 tempoRestante--;
             }, 1000);
         }
 
         function executarFluxoTimeoutEstrito() {
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
-            document.getElementById('timer-expiracao').innerText = MSGS.timeout;
+            
+            const elementoTimer = document.getElementById('timer-expiracao');
+            const sessaoQr = document.getElementById('sessao-qr');
+            const overlayPagamento = document.getElementById("pagamentoOverlay");
+            const txtOverlay = document.getElementById("txtOverlay");
+            
+            elementoTimer.innerText = MSGS.timeout;
             document.getElementById('status-verificacao').innerHTML = ""; 
-            document.getElementById('sessao-qr').classList.add("sessao-bloqueada");
-            document.getElementById('btn-copiar').disabled = document.getElementById('btn-validar').disabled = true;
+            
+            sessaoQr.classList.add("sessao-bloqueada");
+            document.getElementById('btn-copiar').disabled = true;
+            document.getElementById('btn-validar').disabled = true;
 
             let contagemRedirect = 9;
-            const overlay = document.getElementById("pagamentoOverlay"), txt = document.getElementById("txtOverlay");
-            txt.innerHTML = `Tempo Limite Excedido!<br><span style='font-size: 15px; font-weight: 400; opacity: 0.8;'>Redirecionando em ${contagemRedirect}s...</span>`;
-            overlay.style.display = "flex"; overlay.style.opacity = "1";
+            txtOverlay.innerHTML = `Tempo Limite Excedido!<br><span style='font-size: 15px; font-weight: 400; opacity: 0.8;'>Redirecionando em ${contagemRedirect}s...</span>`;
+            
+            overlayPagamento.style.display = "flex";
+            overlayPagamento.style.opacity = "1";
 
             const loopRedirect = setInterval(() => {
                 contagemRedirect--;
-                txt.innerHTML = `Tempo Limite Excedido!<br><span style='font-size: 15px; font-weight: 400; opacity: 0.8;'>Redirecionando em ${contagemRedirect}s...</span>`;
-                if (contagemRedirect <= 0) { clearInterval(loopRedirect); overlay.style.display = "none"; resetSistemicoTotal(); }
+                txtOverlay.innerHTML = `Tempo Limite Excedido!<br><span style='font-size: 15px; font-weight: 400; opacity: 0.8;'>Redirecionando em ${contagemRedirect}s...</span>`;
+                
+                if (contagemRedirect <= 0) {
+                    clearInterval(loopRedirect);
+                    overlayPagamento.style.display = "none";
+                    resetSistemicoTotal();
+                }
             }, 1000);
         }
 
         function resetSistemicoTotal() {
             if (intervaloPix) clearInterval(intervaloPix);
             if (cronometroRegressivo) clearInterval(cronometroRegressivo);
-            intervaloPix = cronometroRegressivo = idPagamentoAtual = null; loopEmExecucao = false;
+            intervaloPix = cronometroRegressivo = idPagamentoAtual = null;
+            loopEmExecucao = false;
 
             const sessaoQr = document.getElementById('sessao-qr');
-            sessaoQr.classList.remove("sessao-bloqueada"); sessaoQr.style.display = "none";
-            document.getElementById('status-verificacao').innerHTML = ""; document.getElementById('img-qr').style.display = 'none';
-            document.getElementById('img-qr').src = ""; document.getElementById('timer-expiracao').style.display = "none";
-            document.getElementById('btn-copiar').disabled = document.getElementById('btn-validar').disabled = false;
+            sessaoQr.classList.remove("sessao-bloqueada");
+            sessaoQr.style.display = "none";
+            document.getElementById('status-verificacao').innerHTML = "";
+            document.getElementById('img-qr').style.display = 'none';
+            document.getElementById('img-qr').src = "";
+            document.getElementById('timer-expiracao').style.display = "none";
+            document.getElementById('btn-copiar').disabled = false;
+            document.getElementById('btn-validar').disabled = false;
 
             const btnGerar = document.getElementById("btn-gerar");
             btnGerar.disabled = false; btnGerar.innerText = "Gerar QR Code";
 
-            const formulario = document.getElementById("sessao-formulario"); formulario.reset();
+            const formulario = document.getElementById("sessao-formulario");
+            formulario.reset();
             document.getElementById("comprador").className = document.getElementById("cpf-comprador").className = document.getElementById("telefone").className = "";
             document.querySelectorAll('.msg-erro-cpf').forEach(el => el.remove());
-            camposExtras.innerHTML = ""; selectQtde.value = "1";
+            document.getElementById("quantidade").value = "1";
+            document.getElementById("campos-extras").innerHTML = "";
+            document.getElementById("quantidade").dispatchEvent(new Event('change'));
+            formulario.style.display = "block";
         }
 
         function iniciarMonitoramentoPixAutomatico() {
             if (intervaloPix) clearInterval(intervaloPix);
             loopEmExecucao = false;
+
             intervaloPix = setInterval(async () => {
                 if (loopEmExecucao) return;
+
                 loopEmExecucao = true;
-                if (await efetuarChamadaValidacaoAPI()) { clearInterval(intervaloPix); intervaloPix = null; aplicarLayoutSucessoDefinitivo(); }
+                const confirmado = await efetuarChamadaValidacaoAPI();
+                
+                if (confirmado) {
+                    clearInterval(intervaloPix);
+                    intervaloPix = null;
+                    aplicarLayoutSucessoDefinitivo();
+                }
+                
                 loopEmExecucao = false;
             }, TEMPO_CHECK_PIX);
         }
 
         async function efetuarChamadaValidacaoAPI() {
             try {
+                const idParaValidar = idPagamentoAtual ? String(idPagamentoAtual).trim() : "";
                 const response = await fetch(URL_VALIDAR_PAGAMENTO, {
-                    method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ "id": idPagamentoAtual ? String(idPagamentoAtual).trim() : "" })
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ "id": idParaValidar })
                 });
-                return response.ok && (await response.text()).includes("Sucesso");
-            } catch (e) { return false; }
+                if (!response.ok) return false;
+                const resultado = await response.text();
+                return resultado.includes("Sucesso");
+            } catch (e) {
+                return false;
+            }
         }
 
         function aplicarLayoutSucessoDefinitivo() {
@@ -200,131 +291,301 @@
             if (intervaloPix) clearInterval(intervaloPix);
             document.getElementById("timer-expiracao").style.display = "none";
             document.getElementById("sessao-qr").innerHTML = `
-                <div class="msg-confirmacao"><span class="icon-grande">✅</span><h2>PAGAMENTO CONFIRMADO!</h2><p>ETA TREM BÃO!</p><p>NOS ENCONTRAMOS NA FESTA!</p></div>
+                <div class="msg-confirmacao">
+                    <span class="icon-grande">✅</span>
+                    <h2>PAGAMENTO CONFIRMADO!</h2>
+                    <p>ETA TREM BÃO!</p>
+                    <p>NOS ENCONTRAMOS NA FESTA!</p>
+                </div>
             `;
         }
 
         function validarCPF(cpf) {
             cpf = cpf.replace(/[^\d]+/g, '');
             if (cpf == '' || cpf.length != 11 || /^(\d)\1{10}$/.test(cpf)) return false;
-            let add = 0; for (let i = 0; i < 9; i++) add += parseInt(cpf.charAt(i)) * (10 - i);
-            let rev = 11 - (add % 11); if (rev == 10 || rev == 11) rev = 0; if (rev != parseInt(cpf.charAt(9))) return false;
-            add = 0; for (let i = 0; i < 10; i++) add += parseInt(cpf.charAt(i)) * (11 - i);
-            rev = 11 - (add % 11); if (rev == 10 || rev == 11) rev = 0; return rev == parseInt(cpf.charAt(10));
+            let add = 0;
+            for (let i = 0; i < 9; i++) add += parseInt(cpf.charAt(i)) * (10 - i);
+            let rev = 11 - (add % 11);
+            if (rev == 10 || rev == 11) rev = 0;
+            if (rev != parseInt(cpf.charAt(9))) return false;
+            add = 0;
+            for (let i = 0; i < 10; i++) add += parseInt(cpf.charAt(i)) * (11 - i);
+            rev = 11 - (add % 11);
+            if (rev == 10 || rev == 11) rev = 0;
+            if (rev != parseInt(cpf.charAt(10))) return false;
+            return true;
         }
 
         function formatarNomeProprio(nome) {
-            const prep = ["da", "das", "de", "do", "dos"];
-            return nome.toLowerCase().split(' ').map(p => prep.includes(p) || p === "" ? p : p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+            const preposicoes = ["da", "das", "de", "do", "dos"];
+            return nome.toLowerCase().split(' ').map(palavra => {
+                if (preposicoes.includes(palavra)) return palavra;
+                if (palavra === "") return "";
+                return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+            }).join(' ');
         }
 
-        function renderizarTelaQr(data) {
-            idPagamentoAtual = data.pagamento_id || data.id || data.id_pagamento || "";
-            document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
-            document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
-            document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(data.variavel).toFixed(2).replace('.', ',')}`;
-            document.getElementById("sessao-formulario").style.display = "none";
-            document.getElementById("timer-expiracao").style.display = document.getElementById("sessao-qr").style.display = "block";
-            document.getElementById("carregando-qr").style.display = "none";
-            document.getElementById("img-qr").style.display = "inline-block";
-        }
-
-        selectQtde.addEventListener("change", () => {
-            camposExtras.innerHTML = Array.from({ length: parseInt(selectQtde.value) }, (_, i) => `
-                <div class="ingresso-extra">
-                    <label>Nome no Ingresso ${i+1}</label><input class="nome-ing" required placeholder="Nome do convidado">
-                    <label>CPF Convidado ${i+1}</label><input class="cpf-ing cpf-validar" required placeholder="000.000.000-00">
-                </div>
-            `).join('');
-            document.querySelectorAll(".nome-ing").forEach(el => el.addEventListener('blur', e => { if (e.target.value.trim() !== "") e.target.value = formatarNomeProprio(e.target.value); }));
+        document.getElementById('comprador').addEventListener('blur', function (e) {
+            if (e.target.value.trim() !== "") {
+                e.target.value = formatarNomeProprio(e.target.value);
+            }
         });
 
-        async function processarEnvioFormulario(e) {
-            e.preventDefault();
-            const btn = document.getElementById("btn-gerar"), comprador = document.getElementById("comprador").value.trim(), cpfComprador = document.getElementById("cpf-comprador").value.trim(), telefone = document.getElementById("telefone").value.trim();
+        selectQtde.addEventListener("change", () => {
+            const qtde = parseInt(selectQtde.value);
+            camposExtras.innerHTML = "";
+            for(let i = 1; i <= qtde; i++) {
+                const div = document.createElement("div");
+                div.className = "ingresso-extra";
+                div.innerHTML = `
+                    <label>Nome no Ingresso ${i}</label>
+                    <input class="nome-ing" required placeholder="Nome do convidado">
+                    <label>CPF Convidado ${i}</label>
+                    <input class="cpf-ing cpf-validar" required placeholder="000.000.000-00">
+                `;
+                camposExtras.appendChild(div);
+            }
+            aplicarMascaras();
             
-            if (!comprador || !validarCPF(cpfComprador) || telefone.length < 14) { alert(MSGS.dados_invalidos); document.getElementById("cpf-comprador").classList.add("input-erro"); return; }
+            document.querySelectorAll(".nome-ing").forEach(el => {
+                el.addEventListener('blur', function(e) {
+                    if (e.target.value.trim() !== "") {
+                        e.target.value = formatarNomeProprio(e.target.value);
+                    }
+                });
+            });
+        });
+        selectQtde.dispatchEvent(new Event('change'));
 
-            const inputsNomes = document.querySelectorAll(".nome-ing"), inputsCpfs = document.querySelectorAll(".cpf-ing");
-            let listaIngressos = [], cpfsConvidados = [], contadorCpfComprador = 0, erroValidacao = false;
+        async function processarEnvioFormulario(e) {
+            e.preventDefault(); 
+
+            const btn = document.getElementById("btn-gerar");
+            const comprador = document.getElementById("comprador").value.trim();
+            const cpfComprador = document.getElementById("cpf-comprador").value.trim();
+            const telefone = document.getElementById("telefone").value.trim();
+            
+            if (!comprador || !validarCPF(cpfComprador) || telefone.length < 14) { 
+                alert(MSGS.dados_invalidos); 
+                document.getElementById("cpf-comprador").classList.add("input-erro");
+                return; 
+            }
+
+            const inputsNomes = document.querySelectorAll(".nome-ing");
+            const inputsCpfs = document.querySelectorAll(".cpf-ing");
+            let listaIngressos = [];
+            let cpfsConvidados = [];
+            let contadorCpfComprador = 0;
+            let erroValidacao = false;
 
             inputsCpfs.forEach((input, i) => {
-                const cpfVal = input.value.trim(), nomeVal = inputsNomes[i].value.trim();
-                if (!nomeVal || !validarCPF(cpfVal)) { erroValidacao = true; input.classList.add("input-erro"); } else { input.classList.remove("input-erro"); }
-                if (cpfVal === cpfComprador) contadorCpfComprador++; else cpfsConvidados.push(cpfVal);
+                const cpfVal = input.value.trim();
+                const nomeVal = inputsNomes[i].value.trim();
+
+                if (!nomeVal || !validarCPF(cpfVal)) {
+                    erroValidacao = true;
+                    input.classList.add("input-erro");
+                } else {
+                    input.classList.remove("input-erro");
+                }
+                
+                if (cpfVal === cpfComprador) {
+                    contadorCpfComprador++;
+                } else {
+                    cpfsConvidados.push(cpfVal);
+                }
+                
                 listaIngressos.push({ "NOME_INGRESSO": nomeVal, "CPF_INGRESSO": cpfVal });
             });
 
-            if (erroValidacao) { alert(MSGS.dados_invalidos); return; }
-            if (contadorCpfComprador > 1) { alert(MSGS.cpf_comprador_duplicado); return; }
-            if (new Set(cpfsConvidados).size !== cpfsConvidados.length) { alert(MSGS.cpf_convidado_duplicado); return; }
+            if (erroValidacao) {
+                alert(MSGS.dados_invalidos);
+                return;
+            }
 
-            btn.disabled = true; btn.innerText = "Por favor, aguarde...";
+            if (contadorCpfComprador > 1) {
+                alert(MSGS.cpf_comprador_duplicado);
+                return;
+            }
+
+            const convidadosUnicos = new Set(cpfsConvidados);
+            if (convidadosUnicos.size !== cpfsConvidados.length) {
+                alert(MSGS.cpf_convidado_duplicado);
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Por favor, aguarde...";
+
+            const payload = {
+                "COMPRADOR": comprador,
+                "CPF_COMPRADOR": cpfComprador,
+                "TELEFONE": telefone,
+                "QUANTIDADE": selectQtde.value,
+                "INGRESSOS": listaIngressos
+            };
 
             try {
-                const response = await fetch(URL_GERAR_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ "COMPRADOR": comprador, "CPF_COMPRADOR": cpfComprador, "TELEFONE": telefone, "QUANTIDADE": selectQtde.value, "INGRESSOS": listaIngressos }) });
+                const response = await fetch(URL_GERAR_PIX, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.status === "bloqueado") { alert("⚠️ BLOQUEIO: " + data.mensagem); btn.disabled = false; btn.innerText = "Gerar QR Code"; return; }
                     
-                    renderizarTelaQr(data);
-
-                    if (!((data.status === "pending" || data.status === "pendente") && data.mensagem === "recuperar")) {
-                        const overlay = document.getElementById("pagamentoOverlay"), btnValidar = document.getElementById("btn-validar");
-                        document.getElementById("txtOverlay").innerText = MSGS.overlay_texto;
-                        overlay.style.display = "flex"; btnValidar.style.zIndex = "6000";
-                        setTimeout(() => { overlay.style.opacity = "0"; setTimeout(() => { overlay.style.display = "none"; btnValidar.style.zIndex = "1"; }, 4000); }, 6000);
+                    if (data.status === "bloqueado") {
+                        alert("⚠️ BLOQUEIO: " + data.mensagem);
+                        btn.disabled = false;
+                        btn.innerText = "Gerar QR Code";
+                        return;
+                    }
+                    
+                    if ((data.status === "pending" || data.status === "pendente") && data.mensagem === "recuperar") {
+                        idPagamentoAtual = data.pagamento_id || data.id || data.id_pagamento || "";
+                        document.getElementById("sessao-formulario").style.display = "none";
+                        document.getElementById("sessao-qr").style.display = "block";
+                        
+                        document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
+                        document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
+                        document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(data.variavel).toFixed(2).replace('.', ',')}`;
+                        
+                        document.getElementById("carregando-qr").style.display = "none";
+                        document.getElementById("img-qr").style.display = "inline-block";
+                        document.getElementById("timer-expiracao").style.display = "block";
+                        
+                        iniciarCronometro();
+                        iniciarMonitoramentoPixAutomatico();
+                        return;
                     }
 
-                    iniciarCronometro(); iniciarMonitoramentoPixAutomatico();
-                } else { alert("Erro ao processar. Tente novamente."); btn.disabled = false; btn.innerText = "Gerar QR Code"; }
-            } catch (e) { alert("Erro de conexão com o servidor."); btn.disabled = false; btn.innerText = "Gerar QR Code"; }
+                    idPagamentoAtual = data.pagamento_id || data.id || data.id_pagamento || ""; 
+                    document.getElementById("img-qr").src = `data:image/png;base64,${data.pix_qr_code_base64}`;
+                    document.getElementById("pix-codigo").value = data.pix_copia_e_cola;
+                    document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(data.variavel).toFixed(2).replace('.', ',')}`;
+
+                    document.getElementById("sessao-formulario").style.display = "none";
+                    document.getElementById("timer-expiracao").style.display = "block";
+                    document.getElementById("sessao-qr").style.display = "block";
+                    document.getElementById("carregando-qr").style.display = "none";
+                    document.getElementById("img-qr").style.display = "inline-block";
+
+                    const overlayPagamento = document.getElementById("pagamentoOverlay");
+                    const btnValidar = document.getElementById("btn-validar");
+                    
+                    document.getElementById("txtOverlay").innerText = MSGS.overlay_texto;
+                    overlayPagamento.style.display = "flex";
+                    btnValidar.style.zIndex = "6000";
+
+                    setTimeout(() => {
+                        overlayPagamento.style.opacity = "0";
+                        setTimeout(() => {
+                            overlayPagamento.style.display = "none";
+                            btnValidar.style.zIndex = "1"; 
+                        }, 4000);
+                    }, 6000);
+
+                    iniciarCronometro();
+                    iniciarMonitoramentoPixAutomatico();
+                } else {
+                    alert("Erro ao processar. Tente novamente.");
+                    btn.disabled = false;
+                    btn.innerText = "Gerar QR Code";
+                }
+            } catch (e) {
+                alert("Erro de conexão com o servidor.");
+                btn.disabled = false;
+                btn.innerText = "Gerar QR Code";
+            }
         }
 
         document.getElementById("btn-validar").addEventListener("click", async () => {
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
-            const btn = document.getElementById("btn-validar"), msg = document.getElementById("status-verificacao");
-            btn.disabled = true; btn.innerText = "Verificando...";
+            
+            const btn = document.getElementById("btn-validar");
+            const msg = document.getElementById("status-verificacao");
 
-            if (await efetuarChamadaValidacaoAPI()) { aplicarLayoutSucessoDefinitivo(); } 
-            else {
-                msg.innerHTML = MSGS.negativo_status || `<span class="icon-grande" style="font-size: 60px; color: #bf360c; margin-bottom: 5px;">❌</span><br>Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!`;
-                btn.disabled = false; btn.innerText = "Verificar Pagamento"; iniciarMonitoramentoPixAutomatico();
+            btn.disabled = true;
+            btn.innerText = "Verificando...";
+
+            const verificado = await efetuarChamadaValidacaoAPI();
+
+            if (verificado) {
+                aplicarLayoutSucessoDefinitivo();
+            } else {
+                msg.innerHTML = `
+                    <span class="icon-grande" style="font-size: 60px; color: #bf360c; margin-bottom: 5px;">❌</span>
+                    <br>Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!
+                `;
+                btn.disabled = false;
+                btn.innerText = "Verificar Pagamento";
+                iniciarMonitoramentoPixAutomatico();
             }
         });
 
         function copiarPix() {
-            const pix = document.getElementById("pix-codigo"); pix.select(); navigator.clipboard.writeText(pix.value);
+            const pix = document.getElementById("pix-codigo");
+            pix.select();
+            navigator.clipboard.writeText(pix.value);
             document.getElementById("btn-copiar").innerText = MSGS.copiado;
             setTimeout(() => { document.getElementById("btn-copiar").innerText = "Copiar Código Pix"; }, 2000);
         }
 
-        document.getElementById('comprador').addEventListener('blur', e => { if (e.target.value.trim() !== "") e.target.value = formatarNomeProprio(e.target.value); });
-        
-        // Delegação Genérica Inteligente de Eventos (Máscaras e Validações)
-        document.body.addEventListener("input", e => {
-            if (e.target.id === "telefone") {
-                let v = e.target.value.replace(/\D/g, "").slice(0, 11);
-                e.target.value = v.length > 10 ? v.replace(/^(\d{2})(\d{5})(\d{4})/, "($1) $2-$3") : v.length > 6 ? v.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3") : v.length > 2 ? v.replace(/^(\d{2})(\d{0,5})/, "($1) $2") : v.length > 0 ? v.replace(/^(\d{0,2})/, "($1") : v;
-            }
-            if (e.target.classList.contains("cpf-validar")) {
-                let v = e.target.value.replace(/\D/g, "").slice(0, 11);
-                e.target.value = v.length > 9 ? v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4") : v.length > 6 ? v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3") : v.length > 3 ? v.replace(/(\d{3})(\d{0,3})/, "$1.$2") : v;
-            }
-        });
+        function aplicarMascaras() {
+            document.querySelectorAll(".cpf-validar").forEach(el => {
+                el.removeEventListener("input", maskCPF);
+                el.addEventListener("input", maskCPF);
+                el.removeEventListener("blur", validateCPFBlur);
+                el.addEventListener("blur", validateCPFBlur);
+            });
 
-        document.body.addEventListener("blur", e => {
-            if (e.target.classList.contains("cpf-validar")) {
-                const val = e.target.value, err = e.target.nextElementSibling;
-                if (err && err.classList.contains('msg-erro-cpf')) err.remove();
-                if (val.length > 0) {
-                    if (validarCPF(val)) { e.target.className = "input-sucesso"; } 
-                    else { e.target.className = "input-erro"; const span = document.createElement("span"); span.className = "msg-erro-cpf"; span.innerText = "CPF Inválido"; e.target.after(span); }
-                } else { e.target.className = ""; }
+            const telInput = document.getElementById("telefone");
+            if(telInput) {
+                telInput.addEventListener("input", e => {
+                    let v = e.target.value.replace(/\D/g, "").slice(0, 11);
+                    if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
+                    else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
+                    else if (v.length > 2) v = v.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
+                    else if (v.length > 0) v = v.replace(/^(\d{0,2})/, "($1");
+                    e.target.value = v;
+                });
             }
-        }, true);
+        }
 
-        selectQtde.dispatchEvent(new Event('change'));
+        function maskCPF(e) {
+            let v = e.target.value.replace(/\D/g, "").slice(0, 11);
+            if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+            else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
+            else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, "$1.$2");
+            e.target.value = v;
+        }
+
+        function validateCPFBlur(e) {
+            const val = e.target.value;
+            const erroExistente = e.target.nextElementSibling;
+            if (erroExistente && erroExistente.classList.contains('msg-erro-cpf')) {
+                erroExistente.remove();
+            }
+
+            if (val.length > 0) {
+                if (validarCPF(val)) {
+                    e.target.classList.remove("input-erro");
+                    e.target.classList.add("input-sucesso");
+                } else {
+                    e.target.classList.remove("input-sucesso");
+                    e.target.classList.add("input-erro");
+                    const span = document.createElement("span");
+                    span.className = "msg-erro-cpf";
+                    span.innerText = "CPF Inválido";
+                    e.target.after(span);
+                }
+            } else {
+                e.target.classList.remove("input-erro", "input-sucesso");
+            }
+        }
+
+        aplicarMascaras();
     </script>
 </body>
 </html>
