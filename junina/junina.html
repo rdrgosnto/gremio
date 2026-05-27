@@ -93,13 +93,17 @@
         const CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95";
         const CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
         const CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs w-full text-sm";
-        // Tamanho aumentado dos botões (+ e -) padronizado para as duas paletas
         const CSS_BTN_MAIS_MENOS = "w-9 h-9 rounded-md font-black text-lg shadow-sm transition-all flex items-center justify-center";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0;
 
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
-        const liberarExibicaoSegura = () => { document.documentElement.style.visibility = document.body.style.visibility = "visible"; document.documentElement.style.opacity = "1"; };
+        
+        // CORREÇÃO AQUI: Garante a remoção da trava visual tanto no HTML quanto no BODY
+        function liberarExibicaoSegura() {
+            document.documentElement.style.visibility = document.body.style.visibility = "visible";
+            document.documentElement.style.opacity = document.body.style.opacity = "1";
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             const cache = localStorage.getItem("festa_junina_cardapio");
@@ -121,7 +125,7 @@
 
         function gerenciarCliqueCard(id, estoqueEsgotado) {
             if (estoqueEsgotado || modoBuscaAtivo || modoResgateManual) return;
-            if ((carrinho[id] || 0) === 0) alterarQuantidade(id, 1); // Só adiciona se estiver zerado. Não remove mais pelo card!
+            if ((carrinho[id] || 0) === 0) alterarQuantidade(id, 1);
         }
 
         function renderizarProdutos() {
@@ -166,7 +170,6 @@
             });
             
             let preActive = modoBuscaAtivo || modoResgateManual;
-            // CARD ON - COM EVENT.STOPPROPAGATION() PARA ISOLAR OS CLIQUES DOS BOTÕES + E - DOS MODOS ONLINE
             grid.innerHTML += `
                 <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-300">
                     <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${preActive ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">
