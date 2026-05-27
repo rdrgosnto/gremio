@@ -3,84 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page Refactored - Checkout Pix</title>
+    <title>Page Refactored - Checkout Pix Premium</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;600;700&family=JetBrains+Mono&family=Montserrat:wght@400;700&family=Playfair+Display:ital,wght@0,700;1,400&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;600;700&family=JetBrains+Mono&family=Montserrat:wght@400;900&family=Orbitron:wght@400;700;900&family=Playfair+Display:ital,wght@0,700;1,400&family=Space+Grotesk:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 
     <style>
         /* ==========================================================================
-           RESET E ELEMENTOS FIXOS (Seletor de Layouts)
+           RESET & CORE INFRASTRUCTURE
            ========================================================================== */
-        * { box-sizing: border-box; margin: 0; padding: 0; transition: all 0.25s ease; }
-        body { font-family: 'Inter', sans-serif; min-height: 100vh; }
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
 
-        /* Barra flutuante do seletor */
+        /* Barra global do seletor flutuante */
         #layout-switcher-container {
-            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            z-index: 10000; background: rgba(0, 0, 0, 0.85); padding: 8px 15px;
-            border-radius: 30px; display: flex; align-items: center; gap: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3); backdrop-filter: blur(5px);
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
+            z-index: 100000; background: rgba(15, 23, 42, 0.9); padding: 10px 20px;
+            border-radius: 40px; display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1); width: 90%; max-width: 400px;
         }
-        #layout-switcher-container label { color: #fff; font-size: 12px; font-weight: bold; font-family: sans-serif;}
+        #layout-switcher-container label { color: #38b6ff; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         #layout-switcher {
-            background: #fff; border: none; padding: 5px 10px; border-radius: 15px;
-            font-size: 12px; font-weight: bold; cursor: pointer; outline: none;
+            flex: 1; background: #27273a; border: 1px solid #3f3f56; padding: 6px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: bold; color: #fff; cursor: pointer; outline: none;
         }
 
-        /* Estrutura Base que os layouts vão manipular */
-        .wrapper { display: flex; width: 100%; min-height: 100vh; align-items: center; justify-content: center; padding: 20px; }
-        .card { width: 100%; max-width: 420px; position: relative; }
-        .form-group { margin-bottom: 20px; position: relative; }
-        .input-icon { position: absolute; left: 12px; top: 40px; color: #888; }
-        .has-icon input, .has-icon select { padding-left: 38px !important; }
+        /* Envoltório responsivo universal */
+        .wrapper { display: flex; width: 100%; min-height: 100vh; align-items: center; justify-content: center; padding: 80px 20px 40px 20px; }
+        .card { width: 100%; max-width: 440px; position: relative; }
+        .form-group { margin-bottom: 22px; position: relative; }
+        .input-icon { position: absolute; left: 14px; top: 43px; color: #94a3b8; font-size: 16px; }
+        .has-icon input, .has-icon select { padding-left: 44px !important; }
         #qrcode img { display: block; margin: 0 auto; max-width: 100%; height: auto; }
-        .pix-copia-cola { width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 11px; word-break: break-all; resize: none; }
+        .pix-copia-cola { width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 11px; word-break: break-all; resize: none; outline: none; }
+        .loading { font-weight: bold; display: none; margin-top: 15px; text-align: center; }
 
         /* ==========================================================================
-           ARQUITETURA DOS 20 LAYOUTS (Via Classes no Body)
+           CATÁLOGO DE LAYOUTS DISRUPTIVOS & FUTURISTAS (21 a 40)
            ========================================================================== */
 
-        /* --- 1. CLASSIC DEFAULT (O seu original polido) --- */
+        /* --- 21. APPLE SPATIAL UI (Efeito Vision Pro, translúcido com reflexo de luz dinâmico) --- */
+        body.ly-21 { background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #090514 100%); color: #fff; }
+        body.ly-21 .card { background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(30px) saturate(190%); border: 1px solid rgba(255,255,255,0.15); border-radius: 28px; padding: 40px; box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.2); }
+        body.ly-21 input, body.ly-21 select { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 14px; padding: 14px; width: 100%; }
+        body.ly-21 button { background: #fff; color: #000; border-radius: 40px; font-weight: 600; padding: 15px; width: 100%; border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(255,255,255,0.2); }
+
+        /* --- 22. BENTO GRID LAB (Estilo Apple Dashboard, informações organizadas em blocos assimétricos) --- */
+        body.ly-22 { background: #0b0f19; color: #f8fafc; }
+        body.ly-22 .card { background: transparent; max-width: 500px; display: flex; flex-direction: column; gap: 15px; }
+        body.ly-22 h2, body.ly-22 p { background: #111827; padding: 20px; border-radius: 16px; border: 1px solid #1f2937; margin: 0; }
+        body.ly-22 form { background: #111827; padding: 25px; border-radius: 16px; border: 1px solid #1f2937; display: flex; flex-direction: column; }
+        body.ly-22 input, body.ly-22 select { background: #1f2937; border: 1px solid #374151; color: #fff; padding: 12px; border-radius: 8px; width: 100%; }
+        body.ly-22 button { background: #3b82f6; color: white; padding: 14px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; }
+        body.ly-22 #qrcode-container { background: #111827; border: 1px dashed #3b82f6; border-radius: 16px; padding: 25px; margin: 0; }
+
+        /* --- 23. SCI-FI HUD TERMINAL (Interface tática militar futurista com mira e cantos angulares) --- */
+        body.ly-23 { background: #020617; color: #38b6ff; font-family: 'Orbitron', sans-serif; }
+        body.ly-23 .card { background: rgba(15, 23, 42, 0.8); border: 1px solid #38b6ff; padding: 30px; position: relative; clip-path: polygon(0 0, 93% 0, 100% 7%, 100% 100%, 7% 100%, 0 93%); }
+        body.ly-23 .card::before { content: "[SECURE INTERFACE v4.02]"; position: absolute; top: 5px; right: 15px; font-size: 8px; opacity: 0.5; }
+        body.ly-23 input, body.ly-23 select { background: rgba(56, 182, 255, 0.05); border: 1px solid #38b6ff; color: #fff; padding: 12px; font-family: inherit; width: 100%; }
+        body.ly-23 button { background: #38b6ff; color: #020617; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; border: none; padding: 14px; width: 100%; cursor: pointer; }
+
+        /* --- 24. METALLIC CHROMIUM (Estilo Y2K / Brutalismo Cromado de alto reflexo) --- */
+        body.ly-24 { background: linear-gradient(180deg, #1e1e1e 0%, #3a3a3a 100%); color: #fff; }
+        body.ly-24 .card { background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 50%, #cbd5e1 100%); border: 3px solid #fff; border-radius: 0; padding: 35px; box-shadow: 15px 15px 0px #000; color: #000; }
+        body.ly-24 h2 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 32px; text-transform: uppercase; }
+        body.ly-24 input, body.ly-24 select { background: #fff; border: 2px solid #000; padding: 12px; font-weight: bold; border-radius: 0; width: 100%; }
+        body.ly-24 button { background: #000; color: #fff; font-family: 'Syne', sans-serif; font-weight: bold; text-transform: uppercase; padding: 15px; border: none; cursor: pointer; width: 100%; font-size: 16px; }
+
+        /* --- 25. TOKYO NEO-NOIR (Estilo Blade Runner, pretos profundos com magenta pulsante) --- */
+        body.ly-25 { background: #050508; color: #fff; }
+        body.ly-25 .card { background: #0d0d15; border-left: 5px solid #ff0055; padding: 35px; box-shadow: 0 20px 50px rgba(255,0,85,0.15); }
+        body.ly-25 h2 { font-weight: 900; text-transform: uppercase; letter-spacing: -1px; }
+        body.ly-25 input, body.ly-25 select { background: #141423; border: 1px solid #23233c; color: #ff0055; padding: 14px; border-radius: 4px; width: 100%; font-weight: bold; }
+        body.ly-25 button { background: #ff0055; color: white; border-radius: 4px; font-weight: bold; text-transform: uppercase; padding: 15px; border: none; cursor: pointer; width: 100%; box-shadow: 0 0 15px rgba(255,0,85,0.4); }
+
+        /* --- 26. SOLAR DESIGN MATRIX (Estilo minimalista futurista baseado em branco absoluto e laranja solar) --- */
+        body.ly-26 { background: #fafafa; color: #111; }
+        body.ly-26 .card { border: 1px solid #e5e5e5; padding: 40px; border-radius: 32px; background: #fff; }
+        body.ly-26 h2 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 28px; }
+        body.ly-26 input, body.ly-26 select { border: 1px solid #e5e5e5; background: #f5f5f7; padding: 14px; border-radius: 12px; width: 100%; font-family: 'Space Grotesk', sans-serif; }
+        body.ly-26 button { background: #ff5a00; color: #fff; font-family: 'Space Grotesk', sans-serif; font-weight: 700; padding: 15px; border-radius: 12px; border: none; cursor: pointer; width: 100%; }
+
+        /* --- 27. GENERATIVE AI FLUID (Formas abstratas e gradientes fluidos inspirados em assistentes de IA) --- */
+        body.ly-27 { background: #000; color: #fff; }
+        body.ly-27 .card { background: rgba(15,15,25,0.7); padding: 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 0 80px rgba(139, 92, 246, 0.15); }
+        body.ly-27 h2 { background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Syne', sans-serif; font-size: 30px; }
+        body.ly-27 input, body.ly-27 select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 99px; width: 100%; text-align: center; }
+        body.ly-27 button { background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899); color: white; padding: 14px; border-radius: 99px; font-weight: bold; border: none; cursor: pointer; width: 100%; }
+
+        /* --- 28. RETRO WEB 3.0 (Estilo blocos flutuantes empilhados com tipografia técnica) --- */
+        body.ly-28 { background: #0f172a; color: #94a3b8; font-family: 'JetBrains Mono', monospace; }
+        body.ly-28 .card { background: #1e293b; padding: 30px; border-radius: 4px; border-bottom: 6px solid #6366f1; }
+        body.ly-28 h2 { color: #fff; font-size: 20px; text-transform: uppercase; }
+        body.ly-28 input, body.ly-28 select { background: #0f172a; border: 1px solid #334155; color: #38b6ff; padding: 12px; width: 100%; font-family: inherit; }
+        body.ly-28 button { background: #6366f1; color: white; font-family: inherit; font-weight: bold; padding: 12px; border: none; width: 100%; cursor: pointer; }
+
+        /* --- 29. LIQUID MERCURY CUBIC (Bordas arredondadas assimétricas e alto brilho metálico escuro) --- */
+        body.ly-29 { background: #111; color: #e2e8f0; }
+        body.ly-29 .card { background: #1c1c1e; border-radius: 40px 10px 40px 10px; padding: 35px; border: 1px solid #2c2c2e; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        body.ly-29 input, body.ly-29 select { background: #2c2c2e; border: none; border-radius: 12px; padding: 14px; color: #fff; width: 100%; }
+        body.ly-29 button { background: linear-gradient(135deg, #8e9196 0%, #2c2f33 100%); color: white; font-weight: bold; padding: 15px; border-radius: 12px; border: 1px solid #555; width: 100%; cursor: pointer; }
+
+        /* --- 30. GAME RPG INTERFACE (Estilo painel de inventário de jogos de ficção científica/cyberpunk) --- */
+        body.ly-30 { background: #070a0e; color: #00f0ff; font-family: 'Orbitron', sans-serif; background-image: linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px); background-size: 30px 30px; }
+        body.ly-30 .card { background: rgba(10,17,26,0.9); border: 2px solid #00f0ff; padding: 30px; border-radius: 12px; box-shadow: inset 0 0 15px rgba(0,240,255,0.2); }
+        body.ly-30 h2 { text-shadow: 0 0 8px #00f0ff; letter-spacing: 1px; font-size: 22px; }
+        body.ly-30 input, body.ly-30 select { background: #0d1520; border: 1px solid #005577; color: #fff; padding: 12px; font-family: inherit; width: 100%; }
+        body.ly-30 button { background: #ffaa00; color: #000; font-weight: 900; padding: 14px; border: none; width: 100%; cursor: pointer; text-shadow: none; box-shadow: 0 0 10px #ffaa00; }
+
+        /* --- 31. ABSTRACT PRISM (Estilo geométrico angular cristalino com cores quentes saturadas) --- */
+        body.ly-31 { background: #311042; color: #fff; }
+        body.ly-31 .card { background: #1f072b; padding: 35px; border-radius: 0; clip-path: polygon(0 8%, 100% 0, 100% 92%, 0 100%); border-left: 4px solid #f43f5e; }
+        body.ly-31 input, body.ly-31 select { background: #2d0e3d; border: 1px solid #521b6d; color: #fff; padding: 12px; width: 100%; }
+        body.ly-31 button { background: #f43f5e; color: white; padding: 14px; font-weight: bold; border: none; width: 100%; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- 32. BRUTALIST MONOCHROME (Tipografia gigante, preto absoluto no branco puro, sem curvas) --- */
+        body.ly-32 { background: #fff; color: #000; }
+        body.ly-32 .card { max-width: 460px; padding: 20px; border: 5px solid #000; }
+        body.ly-32 h2 { font-family: 'Montserrat', sans-serif; font-size: 40px; font-weight: 900; letter-spacing: -2px; text-transform: uppercase; line-height: 0.9; }
+        body.ly-32 input, body.ly-32 select { border: 4px solid #000; padding: 14px; font-size: 18px; font-weight: 900; width: 100%; border-radius: 0; }
+        body.ly-32 button { background: #000; color: #fff; font-size: 20px; font-weight: 900; padding: 16px; border: none; width: 100%; cursor: pointer; border-radius: 0; }
+
+        /* --- 33. GALAXY NEBULA VISUAL (Fundo cósmico profundo com componentes flutuantes extremamente luminosos) --- */
+        body.ly-33 { background: radial-gradient(circle at top right, #311042, #070409); color: #fff; }
+        body.ly-33 .card { background: rgba(15, 10, 25, 0.6); padding: 35px; border-radius: 24px; border: 1px solid #c084fc; box-shadow: 0 0 40px rgba(192, 132, 252, 0.2); }
+        body.ly-33 h2 { color: #e9d5ff; }
+        body.ly-33 input, body.ly-33 select { background: rgba(0,0,0,0.4); border: 1px solid #581c87; color: white; padding: 12px; border-radius: 8px; width: 100%; }
+        body.ly-33 button { background: #c084fc; color: #311042; font-weight: bold; padding: 14px; border-radius: 8px; border: none; width: 100%; cursor: pointer; }
+
+        /* --- 34. SWISS ULTRA-CLEAN (Estilo design editorial suíço, foco absoluto em hierarquia textual e precisão) --- */
+        body.ly-34 { background: #f4f4f4; color: #000; }
+        body.ly-34 .card { max-width: 420px; padding: 40px 0; }
+        body.ly-34 h2 { font-size: 36px; font-weight: 700; letter-spacing: -1.5px; text-align: left; }
+        body.ly-34 input, body.ly-34 select { background: transparent; border: 2px solid #000; padding: 12px; font-size: 16px; width: 100%; border-radius: 0; }
+        body.ly-34 button { background: #000; color: #fff; font-weight: bold; padding: 15px; border: none; width: 100%; cursor: pointer; border-radius: 0; }
+
+        /* --- 35. INDUSTRIAL CYBER-GRID (Estilo placas de metal industrial, parafusos e estética de fábrica futurista) --- */
+        body.ly-35 { background: #22252a; color: #a3a7b0; }
+        body.ly-35 .card { background: #2d3139; border: 2px solid #434956; padding: 30px; border-radius: 4px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 10px 25px rgba(0,0,0,0.3); }
+        body.ly-35 h2 { color: #fff; font-family: 'Orbitron', sans-serif; font-size: 20px; border-bottom: 2px solid #434956; padding-bottom: 10px; }
+        body.ly-35 input, body.ly-35 select { background: #1e2127; border: 1px solid #434956; color: #fff; padding: 12px; width: 100%; }
+        body.ly-35 button { background: #00ff66; color: #111; font-weight: bold; padding: 14px; border: none; width: 100%; cursor: pointer; text-transform: uppercase; font-family: 'Orbitron', sans-serif; }
+
+        /* --- 36. SMOOTH AVOCADO SKEW (Layout moderno orgânico com inclinação geométrica sutil) --- */
+        body.ly-36 { background: #e8f5e9; color: #2e7d32; }
+        body.ly-36 .card { background: #fff; padding: 35px; border-radius: 24px; transform: skewY(-1deg); box-shadow: 0 15px 35px rgba(46,125,50,0.08); }
+        body.ly-36 h2, body.ly-36 form { transform: skewY(1deg); }
+        body.ly-36 input, body.ly-36 select { background: #f1f8e9; border: 1px solid transparent; border-radius: 12px; padding: 12px; width: 100%; color: #1b5e20; }
+        body.ly-36 button { background: #2e7d32; color: white; padding: 14px; border-radius: 12px; font-weight: bold; border: none; width: 100%; cursor: pointer; }
+
+        /* --- 37. HIGH-DENSITY SAAS COGNITIVE (Visual dashboards de alta tecnologia, compacto e limpo) --- */
+        body.ly-37 { background: #090d16; color: #64748b; }
+        body.ly-37 .card { background: #111726; border: 1px solid #1e293b; padding: 25px; border-radius: 12px; }
+        body.ly-37 h2 { color: #f8fafc; font-size: 18px; text-align: left; font-weight: 600; }
+        body.ly-37 input, body.ly-37 select { background: #090d16; border: 1px solid #1e293b; color: #fff; padding: 10px; border-radius: 6px; width: 100%; font-size: 14px; }
+        body.ly-37 button { background: #0ea5e9; color: white; padding: 12px; border-radius: 6px; font-weight: 600; font-size: 14px; border: none; width: 100%; cursor: pointer; }
+
+        /* --- 38. BOLD GLASS RADIUS (Efeito vidro fosco com bordas extremamente arredondadas e cores neon) --- */
+        body.ly-38 { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); color: #fff; }
+        body.ly-38 .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border-radius: 50px; padding: 40px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        body.ly-38 input, body.ly-38 select { background: rgba(255,255,255,0.08); border: none; padding: 14px; border-radius: 25px; color: white; width: 100%; text-align: center; }
+        body.ly-38 button { background: #10b981; color: white; padding: 15px; border-radius: 25px; font-weight: bold; border: none; width: 100%; cursor: pointer; box-shadow: 0 0 20px rgba(16,185,129,0.4); }
+
+        /* --- 39. MINIMAL DEEP DEBOSED (Efeito esculpido para dentro em fundo escuro absoluto) --- */
+        body.ly-39 { background: #000; color: #777; }
+        body.ly-39 .card { padding: 40px 20px; max-width: 400px; }
+        body.ly-39 h2 { color: #fff; font-weight: 300; text-align: left; }
+        body.ly-39 input, body.ly-39 select { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 14px; color: #fff; width: 100%; outline: none; }
+        body.ly-39 input:focus { border-color: #333; }
+        body.ly-39 button { background: #fff; color: #000; font-weight: bold; padding: 14px; border: none; width: 100%; cursor: pointer; margin-top: 10px; }
+
+        /* --- 40. GUMROAD ULTRA-FAST (Arrojado, de alta velocidade, voltado para conversão instantânea de infoprodutos) --- */
+        body.ly-40 { background: #ff90e8; color: #000; }
+        body.ly-40 .card { background: #fff; border: 3px solid #000; padding: 30px; border-radius: 16px; box-shadow: 6px 6px 0px #000; }
+        body.ly-40 h2 { font-family: 'Syne', sans-serif; font-weight: 800; text-align: left; }
+        body.ly-40 input, body.ly-40 select { border: 2px solid #000; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; }
+        body.ly-40 button { background: #000; color: #fff; font-weight: bold; padding: 14px; border-radius: 8px; border: none; width: 100%; cursor: pointer; font-size: 16px; }
+
+        /* ==========================================================================
+           LAYOUTS COMPLEMENTARES ANTERIORES (1 a 20 RECAP)
+           ========================================================================== */
         body.ly-1 { background: #f0f2f5; }
         body.ly-1 .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center;}
         body.ly-1 input, body.ly-1 select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; margin-top: 5px; }
         body.ly-1 button { width: 100%; padding: 14px; background: #00a650; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
         body.ly-1 #qrcode-container { margin-top: 25px; background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px dashed #ddd; }
 
-        /* --- 2. NEO-MINIMALIST (Clean, espaços brancos, sem bordas pesadas) --- */
         body.ly-2 { background: #ffffff; color: #111; }
         body.ly-2 .card { max-width: 480px; padding: 40px 0; }
         body.ly-2 h2 { font-weight: 300; font-size: 32px; letter-spacing: -1px; text-align: left; margin-bottom: 10px; }
         body.ly-2 p { text-align: left; margin-bottom: 30px; }
         body.ly-2 input, body.ly-2 select { border: none; border-bottom: 2px solid #eee; border-radius: 0; padding: 15px 0; font-size: 16px; width: 100%; }
-        body.ly-2 input:focus { border-bottom-color: #000; }
-        body.ly-2 button { background: #000; color: #fff; border-radius: 0; padding: 16px; width: 100%; font-weight: 400; text-transform: uppercase; letter-spacing: 2px; border: none; cursor: pointer; }
+        body.ly-2 button { background: #000; color: #fff; padding: 16px; width: 100%; font-weight: 400; text-transform: uppercase; letter-spacing: 2px; border: none; cursor: pointer; }
 
-        /* --- 3. DARK CYBERPUNK (Neon, fundo escuro, geométrico) --- */
         body.ly-3 { background: #0a0a0c; color: #00ff99; font-family: 'Space Grotesk', sans-serif; }
         body.ly-3 .card { background: #121216; border: 2px solid #00ff99; padding: 30px; box-shadow: 0 0 20px rgba(0,255,153,0.2); text-align: center; }
         body.ly-3 h2 { text-transform: uppercase; letter-spacing: 3px; color: #fff; text-shadow: 0 0 5px #00ff99; }
-        body.ly-3 input, body.ly-3 select { background: #1c1c24; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 0; width: 100%; }
-        body.ly-3 input:focus { border-color: #ff007f; box-shadow: 0 0 10px #ff007f; }
+        body.ly-3 input, body.ly-3 select { background: #1c1c24; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; }
         body.ly-3 button { background: #ff007f; color: #fff; font-family: 'Space Grotesk', sans-serif; font-weight: bold; text-transform: uppercase; border: none; padding: 14px; width: 100%; cursor: pointer; box-shadow: 0 0 15px #ff007f; }
 
-        /* --- 4. GLASSMORPHISM (Efeito de vidro fosco flutuante) --- */
         body.ly-4 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        body.ly-4 .card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.25); border-radius: 24px; padding: 35px; color: white; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+        body.ly-4 .card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.25); border-radius: 24px; padding: 35px; color: white; text-align: center; }
         body.ly-4 input, body.ly-4 select { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 12px; width: 100%; }
-        body.ly-4 input::placeholder { color: rgba(255,255,255,0.6); }
         body.ly-4 button { background: white; color: #764ba2; border-radius: 12px; font-weight: 700; padding: 14px; width: 100%; border: none; cursor: pointer; }
 
-        /* --- 5. FINTECH APP METRIC (Estilo app de banco moderno, rounded e roxo) --- */
         body.ly-5 { background: #f8fafc; color: #1e293b; }
         body.ly-5 .card { background: #fff; border-radius: 24px; padding: 25px; box-shadow: 0 10px 25px rgba(100, 116, 139, 0.15); border: 1px solid #e2e8f0; }
-        body.ly-5 h2 { font-size: 22px; color: #4f46e5; display: flex; align-items: center; gap: 10px; justify-content: center; }
-        body.ly-5 input, body.ly-5 select { background: #f1f5f9; border: 1px solid transparent; border-radius: 14px; padding: 14px; width: 100%; font-weight: 600; }
-        body.ly-5 input:focus { background: #fff; border-color: #4f46e5; }
-        body.ly-5 button { background: #4f46e5; color: white; border-radius: 14px; padding: 16px; font-weight: 600; width: 100%; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+        body.ly-5 input, body.ly-5 select { background: #f1f5f9; border: 1px solid transparent; border-radius: 14px; padding: 14px; width: 100%; }
+        body.ly-5 button { background: #4f46e5; color: white; border-radius: 14px; padding: 16px; font-weight: 600; width: 100%; border: none; cursor: pointer; }
 
-        /* --- 6. SPLIT SCREEN SIDEBAR (Layout em duas colunas no Desktop) --- */
         body.ly-6 { background: #fff; }
         @media (min-width: 768px) {
             body.ly-6 .wrapper { padding: 0; }
@@ -93,137 +226,139 @@
         body.ly-6 input, body.ly-6 select { width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 8px; }
         body.ly-6 button { background: #111827; color: white; border-radius: 8px; padding: 14px; border: none; cursor: pointer; width: 100%; }
 
-        /* --- 7. NEOBRUTALISM (Estilo Figma/Gumroad, bordas grossas pretas, cores sólidas) --- */
         body.ly-7 { background: #f1f5f9; }
         body.ly-7 .card { background: #ffde4d; border: 4px solid #000; box-shadow: 8px 8px 0px #000; padding: 30px; }
-        body.ly-7 h2 { font-family: 'Space Grotesk', sans-serif; font-weight: 900; text-align: left; font-size: 28px; }
-        body.ly-7 input, body.ly-7 select { border: 3px solid #000; background: white; padding: 12px; border-radius: 0; font-weight: bold; box-shadow: 4px 4px 0px #000; width: 100%; }
+        body.ly-7 input, body.ly-7 select { border: 3px solid #000; background: white; padding: 12px; width: 100%; }
         body.ly-7 button { background: #38b6ff; color: #000; border: 3px solid #000; font-weight: 900; text-transform: uppercase; padding: 14px; box-shadow: 4px 4px 0px #000; width: 100%; cursor: pointer; }
-        body.ly-7 button:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px #000; }
         body.ly-7 #qrcode-container { background: white; border: 3px solid #000; box-shadow: 4px 4px 0px #000; margin-top: 20px; padding: 20px; }
 
-        /* --- 8. LUXURY PREMIUM (Estilo serifado, elegante, tons dourados e pretos) --- */
         body.ly-8 { background: #121212; color: #c5a880; font-family: 'Cinzel', serif; }
         body.ly-8 .card { background: #1a1a1a; border: 1px solid #c5a880; padding: 40px; text-align: center; }
-        body.ly-8 h2 { font-size: 24px; letter-spacing: 2px; margin-bottom: 20px; }
-        body.ly-8 input, body.ly-8 select { background: transparent; border: 1px solid #444; color: #fff; padding: 12px; font-family: 'Inter', sans-serif; width: 100%; text-align: center; }
-        body.ly-8 input:focus { border-color: #c5a880; }
-        body.ly-8 button { background: #c5a880; color: #121212; font-family: 'Cinzel', serif; font-weight: bold; letter-spacing: 2px; padding: 14px; border: none; width: 100%; cursor: pointer; }
+        body.ly-8 input, body.ly-8 select { background: transparent; border: 1px solid #444; color: #fff; padding: 12px; width: 100%; text-align: center; }
+        body.ly-8 button { background: #c5a880; color: #121212; font-family: 'Cinzel', serif; padding: 14px; border: none; width: 100%; cursor: pointer; }
 
-        /* --- 9. CLEAN RETRO TERMINAL (Monospaced, verde no preto, minimalista) --- */
         body.ly-9 { background: #000; color: #00ff00; font-family: 'JetBrains Mono', monospace; }
         body.ly-9 .card { max-width: 500px; padding: 20px; border: 1px solid #00ff00; }
-        body.ly-9 h2::before { content: "> "; }
-        body.ly-9 input, body.ly-9 select { background: transparent; border: 1px solid #00ff00; color: #00ff00; padding: 10px; font-family: inherit; width: 100%; }
-        body.ly-9 button { background: #00ff00; color: #000; font-family: inherit; font-weight: bold; padding: 12px; border: none; width: 100%; cursor: pointer; }
+        body.ly-9 input, body.ly-9 select { background: transparent; border: 1px solid #00ff00; color: #00ff00; padding: 10px; width: 100%; }
+        body.ly-9 button { background: #00ff00; color: #000; font-weight: bold; padding: 12px; border: none; width: 100%; cursor: pointer; }
 
-        /* --- 10. ORGANIC SOFT (Tons pastéis, formas super arredondadas, amigável) --- */
         body.ly-10 { background: #fefae0; color: #283618; }
-        body.ly-10 .card { background: #fff; border-radius: 40px; padding: 35px; box-shadow: 0 15px 30px rgba(40,54,24,0.05); }
+        body.ly-10 .card { background: #fff; border-radius: 40px; padding: 35px; }
         body.ly-10 input, body.ly-10 select { background: #fefae0; border: 2px solid transparent; border-radius: 20px; padding: 14px; width: 100%; }
-        body.ly-10 button { background: #606c38; color: white; border-radius: 20px; padding: 14px; font-weight: bold; width: 100%; border: none; cursor: pointer; }
+        body.ly-10 button { background: #606c38; color: white; border-radius: 20px; padding: 14px; border: none; width: 100%; cursor: pointer; }
 
-        /* --- 11. STRIPE INSPIRED (Corporativo elegante, gradientes suaves e sombras flutuantes) --- */
         body.ly-11 { background: #f6f9fc; color: #424770; }
-        body.ly-11 .card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 50px 100px rgba(50,50,93,0.1), 0 15px 35px rgba(50,50,93,0.15); }
-        body.ly-11 h2 { color: #32325d; font-size: 24px; text-align: left; }
-        body.ly-11 input, body.ly-11 select { border: 1px solid #e6ebf1; border-radius: 4px; padding: 12px; box-shadow: 0 1px 3px rgba(50,50,93,0.05); width: 100%; }
-        body.ly-11 button { background: linear-gradient(135deg, #6772e5 0%, #24b47e 100%); color: white; border-radius: 4px; padding: 14px; font-weight: 600; width: 100%; border: none; cursor: pointer; }
+        body.ly-11 .card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 50px 100px rgba(50,50,93,0.1); }
+        body.ly-11 input, body.ly-11 select { border: 1px solid #e6ebf1; padding: 12px; width: 100%; }
+        body.ly-11 button { background: linear-gradient(135deg, #6772e5 0%, #24b47e 100%); color: white; padding: 14px; border: none; width: 100%; cursor: pointer; }
 
-        /* --- 12. FLOATING STEPPER (Foco centralizado no formulário, fundo geométrico pesado) --- */
         body.ly-12 { background-color: #e5e5e5; background-image: radial-gradient(#444444 1px, #e5e5e5 1px); background-size: 20px 20px; }
-        body.ly-12 .card { background: #white; padding: 30px; box-shadow: 20px 20px 0px rgba(0,0,0,0.9); border: 2px solid #000; }
+        body.ly-12 .card { background: white; padding: 30px; box-shadow: 20px 20px 0px rgba(0,0,0,0.9); border: 2px solid #000; }
         body.ly-12 input, body.ly-12 select { border: 2px solid #000; padding: 10px; width: 100%; }
-        body.ly-12 button { background: #000; color: #fff; font-size: 18px; padding: 14px; border: none; cursor: pointer; width: 100%; }
+        body.ly-12 button { background: #000; color: #fff; padding: 14px; border: none; width: 100%; }
 
-        /* --- 13. NEUMORPHISM (Efeito extrudado sutil baseado em sombras gêmeas) --- */
         body.ly-13 { background: #e0e0e0; color: #555; }
         body.ly-13 .card { background: #e0e0e0; padding: 35px; border-radius: 30px; box-shadow: 15px 15px 30px #bebebe, -15px -15px 30px #ffffff; }
-        body.ly-13 input, body.ly-13 select { border: none; background: #e0e0e0; padding: 14px; border-radius: 15px; box-shadow: inset 5px 5px 10px #bebebe, inset -5px -5px 10px #ffffff; width: 100%; outline: none; }
-        body.ly-13 button { border: none; background: #e0e0e0; padding: 14px; border-radius: 15px; box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff; color: #111; font-weight: bold; width: 100%; cursor: pointer; }
-        body.ly-13 button:active { box-shadow: inset 5px 5px 10px #bebebe, inset -5px -5px 10px #ffffff; }
+        body.ly-13 input, body.ly-13 select { border: none; background: #e0e0e0; padding: 14px; border-radius: 15px; box-shadow: inset 5px 5px 10px #bebebe, inset -5px -5px 10px #ffffff; width: 100%; }
+        body.ly-13 button { border: none; background: #e0e0e0; padding: 14px; border-radius: 15px; box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff; color: #111; font-weight: bold; width: 100%; }
 
-        /* --- 14. BOLD HEADLINE BLOCK (Estilo revista ou portal de notícias independente) --- */
         body.ly-14 { background: #fff; color: #000; }
         body.ly-14 .card { border-top: 12px solid #ff3e3e; padding: 20px 0; max-width: 450px; }
-        body.ly-14 h2 { font-family: 'Montserrat', sans-serif; font-size: 36px; font-weight: 900; text-align: left; text-transform: uppercase; line-height: 1; margin-bottom: 15px; }
-        body.ly-14 input, body.ly-14 select { border: 2px solid #000; padding: 12px; font-size: 14px; font-weight: bold; width: 100%; }
-        body.ly-14 button { background: #ff3e3e; color: white; padding: 16px; font-weight: 900; text-transform: uppercase; border: none; width: 100%; cursor: pointer; }
+        body.ly-14 h2 { font-family: 'Montserrat', sans-serif; font-size: 36px; font-weight: 900; text-transform: uppercase; }
+        body.ly-14 input, body.ly-14 select { border: 2px solid #000; padding: 12px; width: 100%; }
+        body.ly-14 button { background: #ff3e3e; color: white; padding: 16px; border: none; width: 100%; cursor: pointer; }
 
-        /* --- 15. COZY GOTHAM (Escuro aconchegante com tons quentes de madeira e âmbar) --- */
         body.ly-15 { background: #1f1d24; color: #f5f5f5; }
-        body.ly-15 .card { background: #2d2a34; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        body.ly-15 .card { background: #2d2a34; padding: 30px; border-radius: 16px; }
         body.ly-15 h2 { color: #ffb703; }
-        body.ly-15 input, body.ly-15 select { background: #1f1d24; border: 1px solid #444; color: white; padding: 12px; border-radius: 8px; width: 100%; }
-        body.ly-15 button { background: #ffb703; color: #1f1d24; font-weight: bold; padding: 14px; border-radius: 8px; border: none; width: 100%; cursor: pointer; }
+        body.ly-15 input, body.ly-15 select { background: #1f1d24; border: 1px solid #444; color: white; padding: 12px; width: 100%; }
+        body.ly-15 button { background: #ffb703; color: #1f1d24; font-weight: bold; padding: 14px; border: none; width: 100%; }
 
-        /* --- 16. PLAYFUL GRADIENT CORNERS (Bordas animadas em gradiente infinito) --- */
         body.ly-16 { background: #0f172a; color: #fff; }
-        body.ly-16 .card { background: #1e293b; padding: 35px; border-radius: 20px; position: relative; border: 2px solid transparent; background-image: linear-gradient(#1e293b, #1e293b), linear-gradient(135deg, #ec4899, #8b5cf6, #06b6d4); background-origin: border-box; background-clip: content-box, border-box; }
-        body.ly-16 input, body.ly-16 select { background: #334155; border: 1px solid #475569; color: white; padding: 12px; border-radius: 8px; width: 100%; }
-        body.ly-16 button { background: linear-gradient(90deg, #ec4899, #8b5cf6); color: white; padding: 14px; border-radius: 8px; font-weight: bold; border: none; width: 100%; cursor: pointer; }
+        body.ly-16 .card { background: #1e293b; padding: 35px; border-radius: 20px; border: 2px solid transparent; background-image: linear-gradient(#1e293b, #1e293b), linear-gradient(135deg, #ec4899, #8b5cf6, #06b6d4); background-origin: border-box; background-clip: content-box, border-box; }
+        body.ly-16 input, body.ly-16 select { background: #334155; border: 1px solid #475569; color: white; padding: 12px; width: 100%; }
+        body.ly-16 button { background: linear-gradient(90deg, #ec4899, #8b5cf6); color: white; padding: 14px; border: none; width: 100%; }
 
-        /* --- 17. GLASS INVERTED DARK (Vidro escuro translúcido em fundo vivo) --- */
         body.ly-17 { background: linear-gradient(45deg, #ff416c, #ff4b2b); }
         body.ly-17 .card { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); border-radius: 16px; padding: 35px; color: white; }
         body.ly-17 input, body.ly-17 select { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 12px; width: 100%; }
-        body.ly-17 button { background: #fff; color: #ff416c; padding: 14px; font-weight: bold; border: none; width: 100%; cursor: pointer; border-radius: 4px; }
+        body.ly-17 button { background: #fff; color: #ff416c; padding: 14px; font-weight: bold; border: none; width: 100%; }
 
-        /* --- 18. HIGH CONTENSATED CARD (Estilo cupom / ticket perfurado) --- */
         body.ly-18 { background: #e2e8f0; color: #334155; }
-        body.ly-18 .card { background: white; padding: 30px; border-radius: 0; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        body.ly-18 .card { background: white; padding: 30px; border-radius: 0; }
         body.ly-18 .card::before, body.ly-18 .card::after { content: ""; position: absolute; height: 20px; width: 20px; background: #e2e8f0; border-radius: 50%; top: 50%; transform: translateY(-50%); }
-        body.ly-18 .card::before { left: -10px; }
-        body.ly-18 .card::after { right: -10px; }
+        body.ly-18 .card::before { left: -10px; } body.ly-18 .card::after { right: -10px; }
         body.ly-18 input, body.ly-18 select { border: 1px dashed #334155; padding: 12px; width: 100%; }
-        body.ly-18 button { background: #334155; color: white; padding: 14px; border: none; font-weight: bold; width: 100%; cursor: pointer; }
+        body.ly-18 button { background: #334155; color: white; padding: 14px; border: none; width: 100%; }
 
-        /* --- 19. BRUTALIST GRID RADIAL (Esquema técnico estruturado com grid de engenharia) --- */
         body.ly-19 { background: #fdfdfd; color: #111; }
         body.ly-19 .card { border: 1px solid #111; padding: 25px; background: repeating-linear-gradient(0deg, #f5f5f5, #f5f5f5 1px, transparent 1px, transparent 10px); }
-        body.ly-19 input, body.ly-19 select { border: 1px solid #111; padding: 10px; border-radius: 0; width: 100%; background: #fff; }
-        body.ly-19 button { background: #111; color: #fff; font-family: monospace; font-size: 16px; padding: 14px; border: none; cursor: pointer; width: 100%; }
+        body.ly-19 input, body.ly-19 select { border: 1px solid #111; padding: 10px; width: 100%; }
+        body.ly-19 button { background: #111; color: #fff; padding: 14px; border: none; width: 100%; }
 
-        /* --- 20. GLASS LIGHT MORPH (Minimalista translúcido claro com blur extremo) --- */
         body.ly-20 { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); }
-        body.ly-20 .card { background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.5); border-radius: 30px; padding: 35px; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.05); color: #4a4a4a; text-align: center; }
-        body.ly-20 input, body.ly-20 select { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255,255,255,0.3); border-radius: 15px; padding: 12px; width: 100%; color: #333; }
-        body.ly-20 button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px; padding: 14px; border: none; width: 100%; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
+        body.ly-20 .card { background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.5); border-radius: 30px; padding: 35px; }
+        body.ly-20 input, body.ly-20 select { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255,255,255,0.3); padding: 12px; width: 100%; }
+        body.ly-20 button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px; border: none; width: 100%; }
 
     </style>
 </head>
 <body class="ly-1">
 
     <div id="layout-switcher-container">
-        <label for="layout-switcher"><i class="fa-solid fa-wand-magic-sparkles"></i> Escolha o Layout:</label>
+        <label for="layout-switcher"><i class="fa-solid fa-wand-magic-sparkles"></i> Layout:</label>
         <select id="layout-switcher">
-            <option value="ly-1">1. Clássico Original</option>
-            <option value="ly-2">2. Neo-Minimalista</option>
-            <option value="ly-3">3. Cyberpunk Neon</option>
-            <option value="ly-4">4. Glassmorphism Roxo</option>
-            <option value="ly-5">5. App Fintech Moderno</option>
-            <option value="ly-6">6. Split Screen Lateral</option>
-            <option value="ly-7">7. Neobrutalismo Gumroad</option>
-            <option value="ly-8">8. Premium Ouro & Preto</option>
-            <option value="ly-9">9. Terminal de Computador</option>
-            <option value="ly-10">10. Orgânico Soft Pastéis</option>
-            <option value="ly-11">11. Stripe Corporativo</option>
-            <option value="ly-12">12. Industrial Dot Grid</option>
-            <option value="ly-13">13. Neumorphism Extrudado</option>
-            <option value="ly-14">14. Red Headline Magazine</option>
-            <option value="ly-15">15. Gotham Noturno & Âmbar</option>
-            <option value="ly-16">16. Pink/Purple Glow</option>
-            <option value="ly-17">17. Dark Glass Translúcido</option>
-            <option value="ly-18">18. Ticket Perfurado</option>
-            <option value="ly-19">19. Grid de Engenharia</option>
-            <option value="ly-20">20. Soft Glass Light</option>
+            <optgroup label="✨ NOVOS: FUTURISTAS & DISRUPTIVOS">
+                <option value="ly-21">21. Apple Spatial UI (Vision Pro)</option>
+                <option value="ly-22">22. Bento Grid Lab (Apple Dash)</option>
+                <option value="ly-23">23. Sci-Fi HUD Terminal</option>
+                <option value="ly-24">24. Metallic Chromium (Y2K)</option>
+                <option value="ly-25">25. Tokyo Neo-Noir (Blade Runner)</option>
+                <option value="ly-26">26. Solar Design Matrix</option>
+                <option value="ly-27">27. Generative AI Fluid</option>
+                <option value="ly-28">28. Retro Web 3.0 Mono</option>
+                <option value="ly-29">29. Liquid Mercury Cubic</option>
+                <option value="ly-30">30. Game RPG Interface</option>
+                <option value="ly-31">31. Abstract Prism Ruby</option>
+                <option value="ly-32">32. Brutalist Bold Block</option>
+                <option value="ly-33">33. Galaxy Nebula Visual</option>
+                <option value="ly-34">34. Swiss Ultra-Clean Grid</option>
+                <option value="ly-35">36. Industrial Cyber-Grid</option>
+                <option value="ly-36">36. Smooth Avocado Skew</option>
+                <option value="ly-37">37. High-Density SaaS Cognitive</option>
+                <option value="ly-38">38. Bold Glass Rounded Neon</option>
+                <option value="ly-39">39. Minimal Debosed Dark</option>
+                <option value="ly-40">40. Gumroad Ultra-Fast</option>
+            </optgroup>
+            <optgroup label="💼 TRADICIONAIS & MODERNOS (Anteriores)">
+                <option value="ly-1" selected>1. Clássico Original</option>
+                <option value="ly-2">2. Neo-Minimalista</option>
+                <option value="ly-3">3. Cyberpunk Neon</option>
+                <option value="ly-4">4. Glassmorphism Roxo</option>
+                <option value="ly-5">5. App Fintech Moderno</option>
+                <option value="ly-6">6. Split Screen Lateral</option>
+                <option value="ly-7">7. Neobrutalismo Gumroad</option>
+                <option value="ly-8">8. Premium Ouro & Preto</option>
+                <option value="ly-9">9. Terminal de Computador</option>
+                <option value="ly-10">10. Orgânico Soft Pastéis</option>
+                <option value="ly-11">11. Stripe Corporativo</option>
+                <option value="ly-12">12. Industrial Dot Grid</option>
+                <option value="ly-13">13. Neumorphism Extrudado</option>
+                <option value="ly-14">14. Red Headline Magazine</option>
+                <option value="ly-15">15. Gotham Noturno & Âmbar</option>
+                <option value="ly-16">16. Pink/Purple Glow</option>
+                <option value="ly-17">17. Dark Glass Translúcido</option>
+                <option value="ly-18">18. Ticket Perfurado</option>
+                <option value="ly-19">19. Grid de Engenharia</option>
+                <option value="ly-20">20. Soft Glass Light</option>
+            </optgroup>
         </select>
     </div>
 
     <div class="wrapper">
         <div class="card">
             <h2>Finalizar Inscrição</h2>
-            <p style="color: #666; font-size: 14px; margin-top: 5px; margin-bottom: 20px;">O valor será calculado automaticamente com base no seu lote e categoria.</p>
+            <p style="font-size: 14px; margin-top: 5px; margin-bottom: 20px;">O valor será calculado automaticamente com base no seu lote e categoria.</p>
             
             <form id="payment-form">
                 <div class="form-group has-icon">
@@ -261,7 +396,6 @@
     <script>
         const switcher = document.getElementById('layout-switcher');
         switcher.addEventListener('change', (e) => {
-            // Remove qualquer classe de layout existente no body e aplica a nova escolhida
             document.body.className = e.target.value;
         });
     </script>
