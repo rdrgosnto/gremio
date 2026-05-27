@@ -93,17 +93,14 @@
         const CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95";
         const CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
         const CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs w-full text-sm";
-        const CSS_BTN_MAIS_MENOS = "w-9 h-9 rounded-md font-black text-lg shadow-sm transition-all flex items-center justify-center";
+        
+        // Calibrado: tamanho reduzido levemente para w-8 h-8 (ficou perfeito e discreto)
+        const CSS_BTN_MAIS_MENOS = "w-8 h-8 rounded-md font-black text-base shadow-sm transition-all flex items-center justify-center focus:outline-none";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0;
 
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
-        
-        // CORREÇÃO AQUI: Garante a remoção da trava visual tanto no HTML quanto no BODY
-        function liberarExibicaoSegura() {
-            document.documentElement.style.visibility = document.body.style.visibility = "visible";
-            document.documentElement.style.opacity = document.body.style.opacity = "1";
-        }
+        function liberarExibicaoSegura() { document.documentElement.style.visibility = document.body.style.visibility = "visible"; document.documentElement.style.opacity = "1"; }
 
         window.addEventListener('DOMContentLoaded', () => {
             const cache = localStorage.getItem("festa_junina_cardapio");
@@ -127,6 +124,10 @@
             if (estoqueEsgotado || modoBuscaAtivo || modoResgateManual) return;
             if ((carrinho[id] || 0) === 0) alterarQuantidade(id, 1);
         }
+
+        // Isolados os fluxos de clique do Card ON
+        function ligarModoOnline(e) { if(e) { e.preventDefault(); e.stopPropagation(); } ativarModoBuscaPre(); }
+        function desligarModoOnline(e) { if(e) { e.preventDefault(); e.stopPropagation(); } forçarFechamentoSistemico(); }
 
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos"); grid.innerHTML = "";
@@ -154,9 +155,9 @@
                         <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${boxEstilo}">
                             <div class="text-center font-bold text-xl mt-2 flex items-center justify-center flex-1 select-none">${p.sigla}</div>
                             <div class="flex items-center justify-between w-full mt-auto" onclick="event.stopPropagation()">
-                                <button onclick="alterarQuantidade(${p.id}, -1)" class="${CSS_BTN_MAIS_MENOS} ${btnEstilo} ${qtd === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                                <button type="button" onclick="alterarQuantidade(${p.id}, -1)" class="${CSS_BTN_MAIS_MENOS} ${btnEstilo} ${qtd === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button>
                                 <span class="text-xs font-bold text-center flex-1 select-none">${qtd > 0 ? `<span class="text-white text-base font-semibold">${qtd}</span>` : '-'}</span>
-                                <button onclick="alterarQuantidade(${p.id}, 1)" class="${CSS_BTN_MAIS_MENOS} ${btnEstilo} ${esg ? 'opacity-20 pointer-events-none' : ''}">+</button>
+                                <button type="button" onclick="alterarQuantidade(${p.id}, 1)" class="${CSS_BTN_MAIS_MENOS} ${btnEstilo} ${esg ? 'opacity-20 pointer-events-none' : ''}">+</button>
                             </div>
                         </div>
                         <div class="min-w-0 flex flex-col justify-between flex-1 select-none">
@@ -170,14 +171,15 @@
             });
             
             let preActive = modoBuscaAtivo || modoResgateManual;
+            // ESTRUTURA DO CARD ON TOTALMENTE INDEPENDENTE CONTRA TRAVAMENTO DE EVENTOS
             grid.innerHTML += `
                 <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-300">
                     <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${preActive ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">
                         <div class="text-center font-bold text-xl mt-2 flex items-center justify-center flex-1 select-none">ON</div>
-                        <div class="flex items-center justify-between w-full mt-auto" onclick="event.stopPropagation()">
-                            <button onclick="forçarFechamentoSistemico(event)" class="${CSS_BTN_MAIS_MENOS} bg-black/5 hover:bg-black/20 text-current ${!preActive ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                        <div class="flex items-center justify-between w-full mt-auto">
+                            <button type="button" onclick="desligarModoOnline(event)" class="${CSS_BTN_MAIS_MENOS} bg-black/5 hover:bg-black/20 text-current ${!preActive ? 'opacity-20 pointer-events-none' : ''}">-</button>
                             <span class="text-[13px] font-semibold text-center flex-1 select-none">${preActive ? 'ativo' : '-'}</span>
-                            <button onclick="ativarModoBuscaPre(event)" class="${CSS_BTN_MAIS_MENOS} bg-black/5 hover:bg-black/20 text-current ${preActive ? 'opacity-20 pointer-events-none' : ''}">+</button>
+                            <button type="button" onclick="ligarModoOnline(event)" class="${CSS_BTN_MAIS_MENOS} bg-black/5 hover:bg-black/20 text-current ${preActive ? 'opacity-20 pointer-events-none' : ''}">+</button>
                         </div>
                     </div>
                     <div class="min-w-0 flex flex-col justify-between flex-1 select-none"><h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5">Online</h3><div class="text-[13px] font-semibold text-orange-600">R$ 0,00</div></div>
@@ -241,7 +243,7 @@
 
         const gerarPayloadVenda = (idF, forma) => JSON.stringify({ 
             id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
-            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
+            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
         });
 
         function tratarMascaraDinheiro(inp) {
@@ -358,15 +360,14 @@
             validarEstadoFinalizar();
         }
 
-        function activarModoBuscaPre(e) {
-            if(e) { e.stopPropagation(); e.preventDefault(); }
+        function activarModoBuscaPre() {
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = null;
             bf.className = "bg-slate-800 " + CSS_BASE_FLUTUANTE + " cursor-default";
             bf.innerHTML = `
                 <div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div>
                 <input type="text" id="input-id-busca" placeholder="000000000000" class="bg-transparent text-white font-medium text-sm focus:outline-none flex-1 h-full px-2 text-center placeholder-white/30 min-w-0" maxlength="12" oninput="tratarDigitacaoIdBusca(this)">
-                <div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`;
+                <div onclick="desligarModoOnline(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`;
             setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100);
         }
 
@@ -391,7 +392,7 @@
                     </div>`;
             });
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidated)}`;
-            if (window.innerWidth >= 1024) { bf.className = "bg-slate-800 " + CSS_BASE_FLUTUANTE + " cursor-default"; bf.innerHTML = `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${idDigitado}</div><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`; } else { abrirOverlayCelular(); }
+            if (window.innerWidth >= 1024) { bf.className = "bg-slate-800 " + CSS_BASE_FLUTUANTE + " cursor-default"; bf.innerHTML = `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${idDigitado}</div><div onclick="desligarModoOnline(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`; } else { abrirOverlayCelular(); }
         }
 
         async function executingBaixaPedidoEntregue() {
