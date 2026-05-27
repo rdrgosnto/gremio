@@ -118,7 +118,7 @@
         function renderizarProdutos() {
             const grid = $("grid-produtos"); grid.innerHTML = "";
             produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
-                const qtd = carrinho[p.id] || 0, esg = p.estoque === 0, ativo = qtd > 0 && !esg, bloqueado = modoBuscaAtivo || modoResgateManual;
+                const qtd = carrinho[p.id] || 0; const esg = p.estoque === 0; const ativo = qtd > 0 && !esg; const bloqueado = modoBuscaAtivo || modoResgateManual;
                 grid.innerHTML += `
                     <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${esg ? 'bg-slate-100 text-slate-400 select-none pointer-events-none opacity-60' : bloqueado ? 'bg-slate-50 border-slate-300 text-slate-300 select-none pointer-events-none opacity-40' : 'bg-white border-slate-300 hover:border-slate-400'}">
                         <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${ativo ? 'bg-orange-50 border border-orange-200 text-orange-700' : 'bg-slate-100 text-slate-600'}">
@@ -207,7 +207,7 @@
         async function executarGravacaoDinheiroDirecto() {
             $("btn-finalizar").innerText = "Processando..."; $("btn-finalizar").disabled = true;
             try {
-                await enviarRequisicao(URL_MÃE, { id_pagamento: `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`, pagamento: "DINHEIRO", tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: totalAtual, transaction_amount: totalAtual, itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, grandmother_id: p.id, quantidade: carrinho[id], preco: p.preco, total: p.preco * carrinho[id] }; }) });
+                await enviarRequisicao(URL_MÃE, { id_pagamento: `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`, pagamento: "DINHEIRO", tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: totalAtual, transaction_amount: totalAtual, itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: carrinho[id], preco: p.preco, total: p.preco * carrinho[id] }; }) });
                 alert("Venda Finalizada!"); forçarFechamentoSistemico(null, true);
             } catch (e) { alert("Erro ao processar venda"); $("btn-finalizar").innerText = "Finalizar"; $("btn-finalizar").disabled = false; $("btn-finalizar").className = CSS_FINALIZAR_HABILITADO; }
         }
@@ -321,7 +321,7 @@
             $("btn-finalizar").innerText = "Processando..."; $("btn-finalizar").disabled = true;
             try {
                 const valorConsolidado = parseFloat($("valor-pedido-txt").innerText.replace("R$", "").replace(/\./g, "").replace(",", ".").trim()) || 0;
-                const r = await enviarRequisicao(URL_MÃE, { id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "ONLINE", status_retirada: "retirado", total_pedido_consolidado: valorConsolidado, transaction_amount: valorConsolidado, itens: cachePedidoOnlineOriginal.map(l => ({ sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", produto: l.PRODUTO ? String(l.PRODUTO).trim() : "", grandmother_id: parseInt(l.ID) || parseInt(l.GRANDMOTHER_ID) || 0, grandmother_id: parseInt(l.GRANDMOTHER_ID) || parseInt(l.ID) || 0, quantidade: parseInt(l.QUANTIDADE) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0 })) });
+                const r = await enviarRequisicao(URL_MÃE, { id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "ONLINE", status_retirada: "retirado", total_pedido_consolidado: valorConsolidado, transaction_amount: valorConsolidado, itens: cachePedidoOnlineOriginal.map(l => ({ sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", produto: l.PRODUTO ? String(l.PRODUTO).trim() : "", grandmother_id: parseInt(l.GRANDMOTHER_ID) || parseInt(l.ID) || 0, quantidade: parseInt(l.QUANTIDADE) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0 })) });
                 if (!r.ok) throw new Error();
                 alert("Pedido Entregue"); forçarFechamentoSistemico(null, true);
             } catch (e) { alert("Erro"); $("btn-finalizar").innerText = "Finalizar"; $("btn-finalizar").disabled = false; $("btn-finalizar").className = CSS_FINALIZAR_HABILITADO; }
