@@ -153,14 +153,18 @@
             cursor: not-allowed; 
         }
 
+        /* Botão Verificar Pagamento (Mantido Azul Original) */
         .btn-validar { 
             position: relative; 
-            background-color: #1565c0; 
-            box-shadow: 0 6px 0 #0d47a1; 
+            background-color: #1565c0 !important; 
+            box-shadow: 0 6px 0 #0d47a1 !important; 
             margin-top: 15px; 
             z-index: 1; 
         }
-        .btn-validar:active:not(:disabled) { box-shadow: 0 2px 0 #0d47a1; }
+        .btn-validar:active:not(:disabled) { 
+            box-shadow: 0 2px 0 #0d47a1 !important; 
+            transform: translateY(4px);
+        }
 
         .btn-copiar { 
             margin-top: 8px; 
@@ -178,7 +182,7 @@
         /* Container do QR Code Pix e Elementos de Retorno */
         .qr-container { 
             display: none; 
-            margin-top: 20px; 
+            margin-top: 10px; 
             padding: 20px; 
             border: 2px dashed #d84315; 
             border-radius: 10px; 
