@@ -22,7 +22,7 @@
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
         <section class="lg:col-span-3 space-y-2">
-            <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
+            <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-orange-500 uppercase tracking-wider">Produtos A - Z</h2></div>
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
 
@@ -40,7 +40,7 @@
                         </div>
                     </div>
 
-                    <div id="bloco-inferior-pagamento" class="space-y-4 pt-1 border-t">
+                    <div id="bloco-inferior-pagamento" class="space-y-4 pt-1 border-t transition-opacity duration-200">
                         <div class="space-y-1.5">
                             <label class="text-xs font-semibold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
                             <div class="grid grid-cols-2 gap-2">
@@ -54,7 +54,7 @@
                                 <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200">
                                     <div class="flex justify-between items-center text-base"><span class="text-slate-500 font-medium">Pedido</span><span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span></div>
                                     <div class="flex justify-between items-center text-base"><span class="text-slate-500 font-medium">Recebido</span><div class="relative w-36"><span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">R$</span><input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-0.5 border border-slate-300 rounded-md text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-base disabled:bg-slate-50"></div></div>
-                                    <div class="flex justify-between items-center text-base border-t border-slate-100 pt-1.5"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-emerald-600">R$ 0,00</span></div>
+                                    <div class="flex justify-between items-center text-base border-t border-slate-100 pt-1.5"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-orange-500">R$ 0,00</span></div>
                                 </div>
                                 <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
                                     <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 transition-none select-none text-center p-2">
@@ -90,7 +90,7 @@
         const LIMITE_EXPIRACAO_PIX = 600000; // 10 minutos em milissegundos
 
         // Estilos CSS Reutilizáveis
-        const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold text-sm text-center shadow-sm transition-all";
+        const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-orange-500 bg-orange-50 text-orange-600 font-bold text-sm text-center shadow-sm transition-all";
         const CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
         const CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95";
         const CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
@@ -127,10 +127,25 @@
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos"); grid.innerHTML = "";
             produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
-                const qtd = carrinho[p.id] || 0; let cEstilo = "bg-white border-slate-300 hover:border-slate-400", boxEstilo = "bg-slate-100 text-slate-600", bloq = "", esg = p.estoque === 0;
+                const qtd = carrinho[p.id] || 0; let esg = p.estoque === 0;
+                let cEstilo = "bg-white border-slate-300 hover:border-slate-400"; 
+                let boxEstilo = "bg-slate-100 text-slate-600"; 
+                let textColor = "text-slate-700";
+                let precoColor = "text-orange-600";
+                let bloq = ""; 
+                
                 let status = `<span class="${esg || p.estoque <= 5 ? 'text-rose-500 font-semibold' : 'text-emerald-600 font-semibold'}">${p.estoque}</span>`;
+                
                 if (esg) cEstilo = "bg-slate-100 text-slate-400 select-none pointer-events-none opacity-60";
-                if (qtd > 0 && !esg) boxEstilo = "bg-orange-50 border border-orange-200 text-orange-700";
+                
+                // INVERSÃO VISUAL SE HOUVER ITEM NO CARRINHO (qtd > 0)
+                if (qtd > 0 && !esg) {
+                    cEstilo = "bg-orange-500 border-orange-500 text-white";
+                    boxEstilo = "bg-white/20 border border-white text-orange-500";
+                    textColor = "text-white";
+                    precoColor = "text-white";
+                }
+                
                 if (modoBuscaAtivo || modoResgateManual) { cEstilo = "bg-slate-50 border-slate-300 text-slate-300 select-none pointer-events-none opacity-40"; bloq = "disabled"; }
 
                 grid.innerHTML += `
@@ -139,13 +154,13 @@
                             <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">${p.sigla}</div>
                             <div class="flex items-center justify-between w-full mt-auto">
                                 <button onclick="alterarQuantidade(${p.id}, -1)" ${bloq} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${qtd === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button>
-                                <span class="text-xs font-bold text-center flex-1">${qtd > 0 ? `<span class="text-orange-600 text-base font-semibold">${qtd}</span>` : '-'}</span>
+                                <span class="text-xs font-bold text-center flex-1">${qtd > 0 ? `<span class="${qtd > 0 ? 'text-white' : 'text-orange-600'} text-base font-semibold">${qtd}</span>` : '-'}</span>
                                 <button onclick="alterarQuantidade(${p.id}, 1)" ${bloq} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${esg ? 'opacity-20' : ''}">+</button>
                             </div>
                         </div>
                         <div class="min-w-0 flex flex-col justify-between flex-1">
-                            <h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5">${p.nome}</h3>
-                            <div class="flex items-center justify-between text-[13px] font-medium w-full"><span class="text-orange-600 font-semibold">R$ ${formatarMoeda(p.preco)}</span><div>E: ${status}</div></div>
+                            <h3 class="font-semibold ${textColor} text-[14px] truncate leading-tight mb-0.5">${p.nome}</h3>
+                            <div class="flex items-center justify-between text-[13px] font-medium w-full"><span class="${precoColor} font-semibold">R$ ${formatarMoeda(p.preco)}</span><div class="${qtd > 0 ? 'text-white/90' : ''}">E: ${status}</div></div>
                         </div>
                     </div>`;
             });
@@ -156,9 +171,9 @@
                     <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${preActive ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">
                         <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">ON</div>
                         <div class="flex items-center justify-between w-full mt-auto">
-                            <button onclick="forçarFechamentoSistemico(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${!preActive ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                            <button onclick="forçarFechamentoSistemico(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm">-</button>
                             <span class="text-[13px] font-semibold text-center flex-1">${preActive ? 'ativo' : '-'}</span>
-                            <button onclick="ativarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${preActive ? 'opacity-20 pointer-events-none' : ''}">+</button>
+                            <button onclick="ativarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm">+</button>
                         </div>
                     </div>
                     <div class="min-w-0 flex flex-col justify-between flex-1"><h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5">Online</h3><div class="text-[13px] font-semibold text-orange-600">R$ 0,00</div></div>
@@ -178,7 +193,30 @@
                 const p = produtos.find(item => item.id == id); const qtd = carrinho[id]; const sub = p.preco * qtd; totalAtual += sub; tItens += qtd;
                 lista.innerHTML += `<div class="flex justify-between items-center bg-slate-50 p-[6px] rounded-md border border-slate-100"><div class="max-w-[75%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${p.nome}</p><p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(p.preco)}</p></div><span class="font-semibold text-slate-700 text-[16px] flex-shrink-0 pl-2">R$ ${formatarMoeda(sub)}</span></div>`;
             });
-            if (tItens === 0) lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
+            
+            const blocoPagamento = document.getElementById("bloco-inferior-pagamento");
+            const btnDinheiro = document.getElementById("btn-dinheiro");
+            const btnPix = document.getElementById("btn-pix");
+            const boxQrCode = document.getElementById("box-qrcode");
+
+            if (tItens === 0) {
+                lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
+                // TRAVA TOTAL SE CARRINHO ESTIVER VAZIO
+                blocoPagamento.classList.add("opacity-40", "pointer-events-none");
+                btnDinheiro.disabled = true;
+                btnPix.disabled = true;
+                boxQrCode.classList.add("opacity-40", "pointer-events-none");
+                resetarEstadoPagamento();
+            } else {
+                // LIBERAÇÃO SE HOUVER PRODUTOS
+                blocoPagamento.classList.remove("opacity-40", "pointer-events-none");
+                btnDinheiro.disabled = false;
+                btnPix.disabled = false;
+                if (!formaPagamento || formaPagamento !== 'PIX') {
+                    boxQrCode.classList.remove("opacity-40", "pointer-events-none");
+                }
+            }
+
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
@@ -190,6 +228,7 @@
         };
 
         function selecionarPagamento(tipo) {
+            if (Object.keys(carrinho).length === 0) return; // Segurança extra
             formaPagamento = tipo; const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro"), secaoDin = document.getElementById("secao-valores-dinheiro"), carr = document.getElementById("carrossel-pagamento"), inp = document.getElementById("input-recebido");
             if (tipo === 'DINHEIRO') { 
                 if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
@@ -227,7 +266,7 @@
             let num = parseFloat(val) / 100; inp.value = num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             const txtT = document.getElementById("valor-troco-txt");
             if (num < totalAtual) { txtT.innerText = "Dinheiro Insuficiente"; txtT.className = "font-bold text-rose-500 text-xs"; } 
-            else { txtT.innerText = `R$ ${formatarMoeda(num - totalAtual)}`; txtT.className = "font-bold text-emerald-600 text-base"; }
+            else { txtT.innerText = `R$ ${formatarMoeda(num - totalAtual)}`; txtT.className = "font-bold text-orange-500 text-base"; }
             validarEstadoFinalizar();
         }
 
@@ -240,7 +279,7 @@
         }
 
         async function requisitarQrCodeReal() {
-            if (!formaPagamento || formaPagamento !== 'PIX') return;
+            if (Object.keys(carrinho).length === 0 || !formaPagamento || formaPagamento !== 'PIX') return;
             const box = document.getElementById("box-qrcode"); 
             box.className = "w-28 h-28 bg-white border border-slate-300 text-[10px] font-bold text-slate-400 uppercase text-center flex flex-col items-center justify-center p-2 pointer-events-none"; 
             box.innerHTML = `<span>Carregando...</span>`; 
@@ -311,7 +350,7 @@
                 if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) {
                     clearInterval(intervaloPix);
                     intervaloPix = null;
-                    alert("Tempo limite");
+                    alert("Tempo limite esgotado");
                     forçarFechamentoSistemico();
                     return;
                 }
@@ -322,7 +361,7 @@
                 if (pago) {
                     clearInterval(intervaloPix);
                     intervaloPix = null;
-                    aplicarLayoutSucessoPix();
+                    applyingLayoutSucessoPix();
                     await executarGravacaoPixAprovadoNasNuvens();
                 }
                 loopEmExecucao = false;
