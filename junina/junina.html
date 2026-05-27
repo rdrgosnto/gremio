@@ -88,7 +88,11 @@
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0;
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
         const $ = (id) => document.getElementById(id);
-        function liberarExibicaoSegura() { document.documentElement.style.visibility = document.body.style.visibility = "visible"; document.documentElement.style.opacity = "1"; }
+        
+        function liberarExibicaoSegura() { 
+            document.documentElement.style.visibility = document.body.style.visibility = "visible"; 
+            document.documentElement.style.opacity = document.body.style.opacity = "1"; 
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             const cache = localStorage.getItem("festa_junina_cardapio");
@@ -214,7 +218,7 @@
             pixChaveIdentificadora = "mp_" + Date.now(); timestampCriacaoPix = Date.now();
             $("btn-finalizar").disabled = true; $("btn-finalizar").className = CSS_FINALIZAR_DESABILITADO; $("btn-finalizar").setAttribute("data-trava-tempo", "true");
             try {
-                const r = await enviarRequisicao(URL_MÃE, { id_pagamento: pixChaveIdentificadora, pagamento: 'PIX', tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: totalAtual, transaction_amount: totalAtual, itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: carrinho[id], preco: p.preco, total: p.preco * carrinho[id] }; }) }), d = await r.json();
+                const r = await enviarRequisicao(URL_MÃE, { id_pagamento: pixChaveIdentificadora, pagamento: 'PIX', tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: totalAtual, transaction_amount: totalAtual, itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, grandmother_id: p.id, quantidade: carrinho[id], preco: p.preco, total: p.preco * carrinho[id] }; }) }), d = await r.json();
                 if (d.id_mercado_pago) { 
                     pixChaveIdentificadora = String(d.id_mercado_pago).trim(); stringQrCodeBase64Salva = d.qrcode_imagem;
                     gerenciarStatusQrCode("p-0 transition-none rounded-none", `<img src="data:image/jpeg;base64,${stringQrCodeBase64Salva}" class="w-full h-full object-contain rounded-none">`);
@@ -273,10 +277,10 @@
         function resetarEstadoPagamento() {
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             formaPagamento = null; pixChaveIdentificadora = ""; stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
-            $("btn-finalizar").removeAttribute("data-trava-tempo"); $("btn-finalizar").innerText = "Finalizar"; $("btn-finalizar").disabled = true; $("btn-finalizar").className = CSS_FINALIZAR_DESABILITADO;
+            const b = $("btn-finalizar"); b.removeAttribute("data-trava-tempo"); b.innerText = "Finalizar"; b.disabled = true; b.className = CSS_FINALIZAR_DESABILITADO;
             $("btn-pix").className = $("btn-dinheiro").className = CSS_BTN_INATIVO; $("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
             $("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200";
-            $("input-recebido").disabled = true; $("input-recebido").value = ""; $("valor-troco-txt").innerText = "R$ 0,00";
+            $("input-recebido").disabled = true; inputRecebido.value = ""; $("valor-troco-txt").innerText = "R$ 0,00";
             $("box-qrcode").className = "w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 text-center p-2 select-none";
             $("box-qrcode").innerHTML = `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>`;
             validarEstadoFinalizar();
