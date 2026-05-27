@@ -37,7 +37,7 @@
             background-position: 0 0, 20px 20px; 
         }
 
-        /* Container do Checkout (Card Creme com Sombra Profunda) */
+        /* Container do Checkout (Ajustado para 400px) */
         .container { 
             width: 100%; 
             max-width: 400px; 
@@ -70,15 +70,18 @@
             color: #4a3b32;
         }
 
-        /* Grupos de Formulário e Ícones */
+        /* Grupos de Formulário com Alinhamento Relativo */
         .form-group { 
             position: relative; 
+            display: flex;
+            flex-direction: column;
         }
         
+        /* Ajuste do Posicionamento Vertical dos Ícones */
         .input-icon { 
             position: absolute; 
             left: 14px; 
-            top: 40px; 
+            bottom: 12px; /* Baseia-se no alinhamento inferior do input, ignorando a label acima */
             color: #bcaaa4; 
             font-size: 16px; 
             z-index: 2;
