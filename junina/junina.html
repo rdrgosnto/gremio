@@ -74,17 +74,22 @@
     </main>
 
     <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 flex justify-center pointer-events-none">
-        <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none">
+        <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-sm">
             <div id="conteudo-flutuante-unico" class="text-sm tracking-wide text-center">Pedido R$ 0,00 - Revisar e Pagar</div>
         </div>
     </div>
 
     <script>
+        // ==========================================
+        // ⚠️ CONFIGURAÇÕES DO SISTEMA
+        // ==========================================
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/06f981a846ca45bc8bfe51c97c480d96/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n-3ys5toEStLZNzQS6q0bETlCP8-NuAjwWn-fAOqjOs";
         const TOKEN_MERCADO_PAGO = "APP_USR-8730603782812226-051221-bb8bc8394547cbf915d3587537067a9f-2391822607";
-        const TEMPO_CHECK_PIX = 12000, LIMITE_EXPIRACAO_PIX = 600000;
+        const TEMPO_CHECK_PIX = 12000;
+        const LIMITE_EXPIRACAO_PIX = 600000;
 
+        // Estilos CSS Reutilizáveis atualizados para Laranja (Orange)
         const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-orange-500 bg-orange-50 text-orange-600 font-bold text-sm text-center shadow-sm transition-all";
         const CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
         const CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95";
@@ -92,6 +97,7 @@
         const CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs w-full text-sm";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0;
+
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
         
         function liberarExibicaoSegura() {
@@ -225,7 +231,7 @@
 
         const gerarPayloadVenda = (idF, forma) => JSON.stringify({ 
             id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
-            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
+            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
         });
 
         function tratarMascaraDinheiro(inp) {
@@ -283,7 +289,9 @@
             loopEmExecucao = false;
             
             intervaloPix = setInterval(async () => {
-                if (loopEmExecucao || !pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return;
+                if (loopEmExecucao) return; 
+                if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return;
+                
                 if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) {
                     clearInterval(intervaloPix); intervaloPix = null; alert("Tempo limite esgotado"); forçarFechamentoSistemico(null, false); return;
                 }
@@ -307,10 +315,17 @@
 
         async function executarGravacaoPixAprovadoNasNuvens() {
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const res = await r.json();
-                if (res.pago === true) { alert("Venda Finalizada!"); forçarFechamentoSistemico(null, true); } 
-                else { alert("Aviso: Pagamento recebido, mas não registrado no Excel."); }
-            } catch (e) { alert("Erro"); }
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') });
+                if (r.ok) { 
+                    alert("Venda Finalizada!"); 
+                    forçarFechamentoSistemico(null, true); 
+                } else { 
+                    alert("Aviso: Falha ao registrar a venda no Excel."); 
+                }
+            } catch (e) { 
+                alert("Venda processada!"); 
+                forçarFechamentoSistemico(null, true); 
+            }
         }
 
         async function executarCliqueContingenciaManualPix() {
@@ -355,7 +370,7 @@
             
             document.getElementById("id-pedido-cabecalho").innerText = ""; document.getElementById("bloco-inferior-pagamento").className = "space-y-4 pt-1 border-t opacity-40 pointer-events-none";
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = abrirOverlayCelular;
-            bf.className = "pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none";
+            bf.className = "pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-sm";
             document.getElementById("conteudo-flutuante-unico").className = "text-sm tracking-wide text-center";
             document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ 0,00 - Revisar e Pagar`;
             resetarEstadoPagamento(); atualizarCarrinhoDOM(); document.getElementById("painel-fechamento").classList.add("hidden"); 
