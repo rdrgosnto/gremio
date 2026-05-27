@@ -8,52 +8,64 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
+        /* ==========================================================================
+           RESET & ESTRUTURA GLOBAL (REDUÇÃO PROPORCIONAL DE 10% - COMPACT SLIM)
+           ========================================================================== */
         * { box-sizing: border-box; margin: 0; padding: 0; transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s; }
         body { 
-            font-family: 'Inter', sans-serif; min-height: 100vh; min-height: 100dvh; color: #4a3b32; display: flex; justify-content: center; align-items: center; padding: 40px 20px;
+            font-family: 'Inter', sans-serif; min-height: 100vh; min-height: 100dvh; color: #4a3b32; display: flex; justify-content: center; align-items: center; padding: 35px 18px;
             background-color: #e65100; 
             background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%), linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%); 
             background-size: 40px 40px; background-position: 0 0, 20px 20px; 
         }
-        .container { width: 100%; max-width: 400px; position: relative; background-color: #fffdf7; padding: 35px 25px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35); text-align: center; border: 3px dashed #d84315; margin: auto 0; }
-        h1 { font-family: 'Amatic SC', cursive; font-size: 48px; color: #bf360c; margin-top: 10px; line-height: 1.1; margin-bottom: 20px; }
-        label { font-weight: 600; margin-top: 15px; display: block; text-align: left; font-size: 14px; color: #4a3b32; }
+        /* Card reduzido proporcionalmente de 400px para 360px */
+        .container { width: 100%; max-width: 360px; position: relative; background-color: #fffdf7; padding: 30px 22px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35); text-align: center; border: 3px dashed #d84315; margin: auto 0; }
+        h1 { font-family: 'Amatic SC', cursive; font-size: 44px; color: #bf360c; margin-top: 5px; line-height: 1.1; margin-bottom: 18px; }
+        label { font-weight: 600; margin-top: 12px; display: block; text-align: left; font-size: 13px; color: #4a3b32; }
         .form-group { position: relative; display: flex; flex-direction: column; }
-        .input-icon { position: absolute; left: 14px; bottom: 12px; color: #bcaaa4; font-size: 16px; z-index: 2; }
-        .has-icon input, .has-icon select { padding-left: 42px !important; }
-        input, select { width: 100%; padding: 11px 12px; border-radius: 8px; border: 2px dashed #bcaaa4; font-size: 14px; box-sizing: border-box; background-color: #fff; outline: none; margin-top: 5px; font-family: 'Inter', sans-serif; color: #4a3b32; }
+        .input-icon { position: absolute; left: 14px; bottom: 11px; color: #bcaaa4; font-size: 15px; z-index: 2; }
+        .has-icon input, .has-icon select { padding-left: 38px !important; }
+        input, select { width: 100%; padding: 10px 11px; border-radius: 8px; border: 2px dashed #bcaaa4; font-size: 13px; box-sizing: border-box; background-color: #fff; outline: none; margin-top: 5px; font-family: 'Inter', sans-serif; color: #4a3b32; }
         input:focus, select:focus { border-color: #e65100 !important; box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.15); }
         .input-erro { border: 2px solid #ff1744 !important; background-color: #fff5f5; }
         .input-sucesso { border: 2px solid #2e7d32 !important; background-color: #f1f8e9; }
         .msg-erro-cpf { color: #ff1744; font-size: 11px; display: block; text-align: left; margin-top: 2px; font-weight: 400; }
-        .ingresso-extra { background: #fdf2e9; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #ebba95; text-align: left; }
-        .ingresso-extra label { margin-top: 10px; }
+        .ingresso-extra { background: #fdf2e9; padding: 12px; border-radius: 8px; margin-top: 12px; border: 1px solid #ebba95; text-align: left; }
+        .ingresso-extra label { margin-top: 8px; }
         .ingresso-extra label:first-child { margin-top: 0; }
-        .btn-principal { margin-top: 25px; width: 100%; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 700; background-color: #e65100; color: white; cursor: pointer; border: none; box-shadow: 0 6px 0 #b33600; font-family: 'Inter', sans-serif; }
-        .btn-principal:active:not(:disabled) { box-shadow: 0 2px 0 #b33600; transform: translateY(4px); }
-        .btn-principal:disabled { background-color: #bcaaa4 !important; box-shadow: 0 6px 0 #8d6e63 !important; cursor: not-allowed; }
-        .btn-validar { position: relative; background-color: #1565c0 !important; box-shadow: 0 6px 0 #0d47a1 !important; margin-top: 15px; z-index: 1; }
-        .btn-validar:active:not(:disabled) { box-shadow: 0 2px 0 #0d47a1 !important; transform: translateY(4px); }
-        .btn-copiar { margin-top: 8px; width: 100%; padding: 10px; font-size: 13px; font-weight: 600; background-color: #616161; color: white; border: none; border-radius: 6px; cursor: pointer; }
-        .qr-container { display: none; margin-top: 10px; padding: 20px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
-        .qr-container img { width: 100%; max-width: 180px; display: inline-block; }
-        .valor { font-weight: bold; color: #bf360c; margin-top: 12px; font-size: 1.3em; }
-        .pix-box { margin-top: 15px; padding: 12px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
-        .pix-codigo-input { font-family: 'JetBrains Mono', monospace; font-size: 11px; width: 100%; text-align: center; border: 1px solid #ccc; background: #fff; padding: 8px; border-radius: 4px; color: #4a3b32; }
-        .status-msg { margin-top: 15px; font-size: 15px; font-weight: bold; color: #bf360c; line-height: 1.4; }
-        .texto-expiracao { display: none; color: #ff1744; font-size: 13px; font-weight: 600; margin-bottom: 5px; margin-top: 15px; }
+        
+        /* Botões Estilo 3D Fofos/Juninos */
+        .btn-principal { margin-top: 22px; width: 100%; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 700; background-color: #e65100; color: white; cursor: pointer; border: none; box-shadow: 0 5px 0 #b33600; font-family: 'Inter', sans-serif; }
+        .btn-principal:active:not(:disabled) { box-shadow: 0 2px 0 #b33600; transform: translateY(3px); }
+        .btn-principal:disabled { background-color: #bcaaa4 !important; box-shadow: 0 5px 0 #8d6e63 !important; cursor: not-allowed; }
+        .btn-validar { position: relative; background-color: #1565c0 !important; box-shadow: 0 5px 0 #0d47a1 !important; margin-top: 15px; z-index: 1; }
+        .btn-validar:active:not(:disabled) { box-shadow: 0 2px 0 #0d47a1 !important; transform: translateY(3px); }
+        .btn-copiar { margin-top: 8px; width: 100%; padding: 9px; font-size: 12px; font-weight: 600; background-color: #616161; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        
+        /* Containers secundários com borda suave */
+        .qr-container { display: none; margin-top: 10px; padding: 18px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
+        .qr-container img { width: 100%; max-width: 160px; display: inline-block; }
+        .valor { font-weight: bold; color: #bf360c; margin-top: 10px; font-size: 1.2em; }
+        .pix-box { margin-top: 12px; padding: 10px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
+        .pix-codigo-input { font-family: 'JetBrains Mono', monospace; font-size: 11px; width: 100%; text-align: center; border: 1px solid #ccc; background: #fff; padding: 7px; border-radius: 4px; color: #4a3b32; }
+        .status-msg { margin-top: 12px; font-size: 14px; font-weight: bold; color: #bf360c; line-height: 1.4; }
+        .texto-expiracao { display: none; color: #ff1744; font-size: 12px; font-weight: 600; margin-bottom: 5px; margin-top: 12px; }
         .msg-confirmacao { font-family: 'Amatic SC', cursive; color: #2e7d32; line-height: 1.1; }
-        .msg-confirmacao h2 { font-size: 45px; margin: 10px 0; font-weight: 700; color: #2e7d32; }
-        .msg-confirmacao p { font-size: 34px; margin: 5px 0; font-weight: 700; }
-        .icon-grande { font-size: 80px; display: block; margin-bottom: 10px; color: #2e7d32; }
+        .msg-confirmacao h2 { font-size: 40px; margin: 8px 0; font-weight: 700; color: #2e7d32; }
+        .msg-confirmacao p { font-size: 30px; margin: 4px 0; font-weight: 700; }
+        .icon-grande { font-size: 70px; display: block; margin-bottom: 8px; color: #2e7d32; }
+        
+        /* Overlays e Popups */
         .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .popup-conteudo { position: relative; max-width: 75vw; max-height: 75vh; }
         .popup-imagem { max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 8px; display: block; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .btn-fechar-popup { display: none; position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background-color: #616161; color: #ffffff; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-        .btn-x-popup { display: none; position: absolute; top: -12px; right: -12px; width: 30px; height: 30px; background-color: #ff1744; color: #ffffff; border: 2px solid #ffffff; border-radius: 50%; font-size: 15px; font-weight: bold; cursor: pointer; line-height: 26px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 10000; }
+        .btn-fechar-popup { display: none; position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background-color: #616161; color: #ffffff; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .btn-x-popup { display: none; position: absolute; top: -12px; right: -12px; width: 30px; height: 30px; background-color: #ff1744; color: #ffffff; border: 2px solid #ffffff; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; line-height: 26px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 10000; }
         .pagamento-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 5000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .pagamento-overlay-texto { color: #ffffff; font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 600; text-align: center; max-width: 340px; line-height: 1.5; }
-        .sessao-bloqueada { opacity: 0.35 !important; filter: grayscale(100%); pointer-events: none !important; }
+        .pagamento-overlay-texto { color: #ffffff; font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 600; text-align: center; max-width: 320px; line-height: 1.5; }
+        
+        /* Efeito de Bloqueio - Torna os elementos cinzas e inativos */
+        .sessao-bloqueada { opacity: 0.35 !important; filter: grayscale(100%) !important; pointer-events: none !important; }
     </style>
 </head>
 <body>
@@ -125,7 +137,7 @@
     </div>
 
     <script>
-        // CONFIGURAÇÕES GLOBAIS DE MANUTENÇÃO
+        // CONFIGURAÇÕES GLOBAIS DE MANUTENÇÃO (TOKENS)
         const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2ad0529973d74605bffbb1f1dd89c063/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9cFG_dFkGjSMngbCZU7Rj7MW02aldXs66m7z14mS89c";
         const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d03cad4eca5840989b744d1e6b4c867c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=UzdbeuNVzZn3kPiJkW7jr0Ebmm6Z-pyafYYUFlKuLOc";
         const TEMPO_CHECK_PIX = 6000;
@@ -142,7 +154,7 @@
         let idPagamentoAtual = null, intervaloPix = null, loopEmExecucao = false, cronometroRegressivo = null;
         const selectQtde = document.getElementById("quantidade"), camposExtras = document.getElementById("campos-extras");
 
-        // 1. EVENTOS DE INICIALIZAÇÃO E DIGITAÇÃO (MÁSCARAS E VALIDAÇÕES)
+        // 1. ADICIONANDO MÁSCARAS E EVENTOS DE ENTRADA
         setTimeout(() => {
             document.getElementById('btnFecharPopup').style.display = 'block';
             document.getElementById('btnXPopup').style.display = 'block';
@@ -214,7 +226,7 @@
             } else { e.target.classList.remove("input-erro", "input-sucesso"); }
         }
 
-        // 2. CONTROLE DE CAMPOS DINÂMICOS (CONVIDADOS)
+        // 2. DINAMISMO - EXIBIR CAMPOS DE CONVIDADOS
         selectQtde.addEventListener("change", () => {
             const q = parseInt(selectQtde.value); camposExtras.innerHTML = "";
             for(let i = 1; i <= q; i++) {
@@ -231,7 +243,7 @@
         });
         selectQtde.dispatchEvent(new Event('change'));
 
-        // 3. AÇÃO - BOTÃO GERAR QR CODE (SUBMIT E ENVIO API)
+        // 3. EVENTO - DISPARO E PROCESSAMENTO DO FORMULÁRIO (CHAMADA API 1)
         async function processarEnvioFormulario(e) {
             e.preventDefault();
             const btn = document.getElementById("btn-gerar"), comp = document.getElementById("comprador").value.trim(), cpfC = document.getElementById("cpf-comprador").value.trim(), tel = document.getElementById("telefone").value.trim();
@@ -281,7 +293,7 @@
             } catch (err) { alert("Erro de conexão com o servidor."); btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; }
         }
 
-        // 4. CONTROLE DE TELA DO QR CODE E CRONÔMETRO
+        // 4. CRONÔMETRO DE CONTAGEM REGRESSIVA DO PIX
         function iniciarCronometro() {
             if (cronometroRegressivo) clearInterval(cronometroRegressivo);
             let tRest = Math.floor(LIMITE_EXPIRACAO_PIX / 1000);
@@ -300,7 +312,7 @@
             setTimeout(() => { document.getElementById("btn-copiar").innerHTML = `<i class="fa-solid fa-copy"></i> Copiar Código Pix`; }, 2000);
         }
 
-        // 5. CHECAGEM E MONITORAMENTO DO PAGAMENTO (BOTÃO AZUL)
+        // 5. CHECAGEM E MONITORAMENTO DO PAGAMENTO (AUTOMÁTICO E MANUAL COM BOTÃO AZUL)
         function iniciarMonitoramentoPixAutomatico() {
             if (intervaloPix) clearInterval(intervaloPix); loopEmExecucao = false;
             intervaloPix = setInterval(async () => {
@@ -329,7 +341,7 @@
             }
         });
 
-        // 6. FINALIZAÇÕES (TELAS FINAIS DE SUCESSO OU TIMEOUT)
+        // 6. FINALIZAÇÕES - TELA DE SUCESSO OU EVENTO DE EXPIRAÇÃO (TIMEOUT)
         function aplicarLayoutSucessoDefinitivo() {
             if (cronometroRegressivo) clearInterval(cronometroRegressivo); if (intervaloPix) clearInterval(intervaloPix);
             document.getElementById("timer-expiracao").style.display = "none";
@@ -339,30 +351,31 @@
         function executarFluxoTimeoutEstrito() {
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             const elT = document.getElementById('timer-expiracao'), sQr = document.getElementById('sessao-qr'), ov = document.getElementById("pagamentoOverlay"), txtO = document.getElementById("txtOverlay");
-            elT.innerText = MSGS.timeout; document.getElementById('status-verificacao').innerHTML = ""; 
-            sQr.classList.add("sessao-bloqueada"); document.getElementById('btn-copiar').disabled = document.getElementById('btn-validar').disabled = true;
-            let cRedir = 9; txtO.innerHTML = `Tempo Limite Excedido!<br><span style='font-size:15px; font-weight:400; opacity:0.8;'>Redirecionando em ${cRedir}s...</span>`;
+            
+            elT.innerText = MSGS.timeout; 
+            document.getElementById('status-verificacao').innerHTML = ""; 
+            
+            // Mantém os elementos na tela, mas aplica o filtro cinza e desativa interações
+            sQr.classList.add("sessao-bloqueada"); 
+            document.getElementById('btn-copiar').disabled = document.getElementById('btn-validar').disabled = true;
+            
+            let cRedir = 9; 
+            txtO.innerHTML = `Tempo Limite Excedido!<br><span style='font-size:15px; font-weight:400; opacity:0.8;'>Redirecionando em ${cRedir}s...</span>`;
+            
+            // Ativa o overlay de bloqueio na tela inteira
             ov.style.display = "flex";
-            const loopRedir = setInterval(() => {
-                cRedir--; txtO.innerHTML = `Tempo Limite Excedido!<br><span style='font-size:15px; font-weight:400; opacity:0.8;'>Redirecionando em ${cRedir}s...</span>`;
-                if (cRedir <= 0) { clearInterval(loopRedir); ov.style.display = "none"; resetSistemicoTotal(); }
-            }, 1000);
-        }
+            ov.style.zIndex = "20000"; 
 
-        function resetSistemicoTotal() {
-            if (intervaloPix) clearInterval(intervaloPix); if (cronometroRegressivo) clearInterval(cronometroRegressivo);
-            intervaloPix = cronometroRegressivo = idPagamentoAtual = null; loopEmExecucao = false;
-            const sQr = document.getElementById('sessao-qr'), form = document.getElementById("sessao-formulario"), btnG = document.getElementById("btn-gerar");
-            sQr.classList.remove("sessao-bloqueada"); sQr.style.display = "none";
-            document.getElementById('status-verificacao').innerHTML = document.getElementById('img-qr').src = "";
-            document.getElementById('img-qr').style.display = document.getElementById('timer-expiracao').style.display = "none";
-            document.getElementById('btn-copiar').disabled = document.getElementById('btn-validar').disabled = false;
-            btnG.disabled = false; btnG.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`;
-            form.reset();
-            document.getElementById("comprador").className = document.getElementById("cpf-comprador").className = document.getElementById("telefone").className = "";
-            document.querySelectorAll('.msg-erro-cpf').forEach(el => el.remove());
-            selectQtde.value = "1"; camposExtras.innerHTML = ""; selectQtde.dispatchEvent(new Event('change'));
-            form.style.display = "block";
+            const loopRedir = setInterval(() => {
+                cRedir--; 
+                txtO.innerHTML = `Tempo Limite Excedido!<br><span style='font-size:15px; font-weight:400; opacity:0.8;'>Redirecionando em ${cRedir}s...</span>`;
+                
+                if (cRedir <= 0) { 
+                    clearInterval(loopRedir); 
+                    // Força a página a recarregar para a tela inicial limpa do formulário
+                    window.location.reload(); 
+                }
+            }, 1000);
         }
     </script>
 </body>
