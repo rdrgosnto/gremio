@@ -20,7 +20,7 @@
     </header>
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
         <section class="lg:col-span-3 space-y-2">
-            <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
+            <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-660 uppercase tracking-wider">Produtos A - Z</h2></div>
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
         <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
@@ -98,9 +98,15 @@
                 g.innerHTML += `<div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${c}"><div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${b}"><div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">${p.sigla}</div><div class="flex items-center justify-between w-full mt-auto"><button onclick="alterarQuantidade(${p.id}, -1)" ${bl} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${q === 0 ? 'opacity-20 pointer-events-none' : ''}">-</button><span class="text-xs font-bold text-center flex-1">${q > 0 ? `<span class="text-orange-600 text-base font-semibold">${q}</span>` : '-'}</span><button onclick="alterarQuantidade(${p.id}, 1)" ${bl} class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${esg ? 'opacity-20' : ''}">+</button></div></div><div class="min-w-0 flex flex-col justify-between flex-1"><h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5">${p.nome}</h3><div class="flex items-center justify-between text-[13px] font-medium w-full"><span class="text-orange-600 font-semibold">R$ ${formatarMoeda(p.preco)}</span><div>E: ${st}</div></div></div></div>`;
             });
             let pa = modoBuscaAtivo || modoResgateManual;
-            g.innerHTML += `<div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-300"><div id="box-card-on" class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${pa ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}"><div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">ON</div><div class="flex items-center justify-between w-full mt-auto"><button onclick="forçarFechamentoSistemico(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm">-</button><span id="txt-status-on" class="text-[13px] font-semibold text-center flex-1">${pa ? 'ativo' : '-'}</span><button onclick="ativarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${pa ? 'opacity-20 pointer-events-none' : ''}">+</button></div></div><div class="min-w-0 flex flex-col justify-between flex-1"><h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5">Online</h3><div class="text-[13px] font-semibold text-orange-600">R$ 0,00</div></div></div>`;
+            g.innerHTML += `<div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-300"><div id="box-card-on" class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${pa ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}"><div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">ON</div><div class="flex items-center justify-between w-full mt-auto"><button onclick="forçarFechamentoSistemico(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm">-</button><span id="txt-status-on" class="text-[13px] font-semibold text-center flex-1">${pa ? 'ativo' : '-'}</span><button onclick="ativarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm">+</button></div></div><div class="min-w-0 flex flex-col justify-between flex-1"><h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5">Online</h3><div class="text-[13px] font-semibold text-orange-600">R$ 0,00</div></div></div>`;
         }
-        function alterarQuantidade(id, d) { const n = (carrinho[id] || 0) + d; n <= 0 ? delete carrinho[id] : carrinho[id] = n; renderizarProdutos(); atualizarCarrinhoDOM(); }
+        function alterarQuantidade(id, d) { 
+            const p = produtos.find(item => item.id == id); if (!p) return;
+            const n = (carrinho[id] || 0) + d; 
+            if (d > 0 && n > p.estoque) return; 
+            n <= 0 ? delete carrinho[id] : carrinho[id] = n; 
+            renderizarProdutos(); atualizarCarrinhoDOM(); 
+        }
         function atualizarCarrinhoDOM() {
             if (modoResgateManual) return;
             const l = $("lista-carrinho"); totalAtual = 0; let ti = 0; l.innerHTML = "";
