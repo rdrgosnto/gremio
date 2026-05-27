@@ -211,7 +211,7 @@
                         <div class="flex items-center justify-between w-full mt-auto">
                             <button onclick="forçarFechamentoSistemico(event, false)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${!preActive ? 'opacity-20 pointer-events-none' : ''}">-</button>
                             <span class="text-[13px] font-semibold text-center flex-1">${preActive ? 'ativo' : '-'}</span>
-                            <button onclick="activarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${preActive ? 'opacity-20 pointer-events-none' : ''}">+</button>
+                            <button onclick="ativarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${preActive ? 'opacity-20 pointer-events-none' : ''}">+</button>
                         </div>
                     </div>
                     <div class="min-w-0 flex flex-col justify-between flex-1"><h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5">Online</h3><div class="text-[13px] font-semibold text-orange-600">R$ 0,00</div></div>
@@ -222,10 +222,7 @@
             const p = produtos.find(item => item.id == id);
             const nQtd = (carrinho[id] || 0) + d;
             
-            // Correção: Trava de segurança para impedir a adição acima do estoque real vindo do Excel
-            if (d > 0 && nQtd > p.estoque) {
-                return; 
-            }
+            if (d > 0 && nQtd > p.estoque) return; 
             
             if (nQtd <= 0) delete carrinho[id]; else carrinho[id] = nQtd;
             renderizarProdutos(); atualizarCarrinhoDOM();
@@ -246,9 +243,8 @@
                 lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
                 blocoPagamento.className = "space-y-4 pt-1 border-t opacity-40 pointer-events-none";
                 txtFlutuante.className = "text-sm tracking-wide text-center";
-                resetarEstadoPagamento(); // Só reseta se o carrinho for zerado
+                resetarEstadoPagamento(); 
             } else {
-                // Correção: Libera o bloco de pagamento sem disparar o reset e travar as opções
                 blocoPagamento.className = "space-y-4 pt-1 border-t opacity-100 pointer-events-auto";
                 txtFlutuante.className = modoBuscaAtivo ? "text-sm tracking-wide text-center" : "text-[15px] tracking-wide text-center";
             }
@@ -273,6 +269,25 @@
             validarEstadoFinalizar();
         }
 
+        function validarEstadoFinalizar() {
+            if (modoResgateManual) return;
+            const btn = document.getElementById("btn-finalizar"), rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0;
+            
+            if (formaPagamento === 'PIX') {
+                if (btn.getAttribute("data-trava-tempo") === "true") {
+                    btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
+                } else if (pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) {
+                    btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
+                } else {
+                    btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
+                }
+            } else {
+                // Correção: Arredonda os valores matemáticos para evitar conflito numérico/string no JavaScript
+                btn.disabled = !(Object.keys(carrinho).length > 0 && formaPagamento === 'DINHEIRO' && Math.round(rec * 100) >= Math.round(totalAtual * 100));
+                btn.className = btn.disabled ? CSS_FINALIZAR_DESABILITADO : CSS_FINALIZAR_HABILITADO;
+            }
+        }
+
         // =========================================================================
         // 💵 BLOCO 3: FLUXO DE PAGAMENTO EM DINHEIRO
         // =========================================================================
@@ -280,7 +295,7 @@
             let val = inp.value.replace(/\D/g, ""); if (val === "") return;
             let num = parseFloat(val) / 100; inp.value = num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             const txtT = document.getElementById("valor-troco-txt");
-            if (num < totalAtual) { txtT.innerText = "Dinheiro Insuficiente"; txtT.className = "font-bold text-rose-500 text-xs"; } 
+            if (Math.round(num * 100) < Math.round(totalAtual * 100)) { txtT.innerText = "Dinheiro Insuficiente"; txtT.className = "font-bold text-rose-500 text-xs"; } 
             else { txtT.innerText = `R$ ${formatarMoeda(num - totalAtual)}`; txtT.className = "font-bold text-orange-500 text-base"; }
             validarEstadoFinalizar();
         }
@@ -309,17 +324,15 @@
             btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO; btn.setAttribute("data-trava-tempo", "true");
 
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: generarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
-                if (d.id_mercado_pago) { 
-                    pixChaveIdentificadora = String(d.id_mercado_pago).trim(); 
-                    stringQrCodeBase64Salva = d.qrcode_imagem;
-                    
-                    box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-none rounded-none border border-slate-300"; 
-                    box.innerHTML = `<img src="data:image/jpeg;base64,${stringQrCodeBase64Salva}" class="w-full h-full object-contain rounded-none">`; 
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: generarPayloadVenda(pixChaveIdentificadora, 'PIX') });
+                // Correção: Remove a barreira do r.json() que causava o crash por falta de resposta estruturada do fluxo
+                if (r.ok) { 
+                    box.className = "w-28 h-28 bg-white flex items-center justify-center p-1 rounded-none border border-slate-300 text-center select-none pointer-events-none"; 
+                    box.innerHTML = `<span class="text-[10px] text-slate-400 font-bold uppercase">QR Code<br>Ativo nas Nuvem</span>`; 
                     
                     setTimeout(() => {
                         btn.removeAttribute("data-trava-tempo");
-                        if (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_") && !box.className.includes("bg-orange-500")) {
+                        if (formaPagamento === 'PIX' && pixChaveIdentificadora !== "") {
                             btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
                         }
                     }, 12000);
@@ -364,7 +377,7 @@
 
         async function executarGravacaoPixAprovadoNasNuvens() {
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: generarPayloadVenda(pixChaveIdentificadora, 'PIX') });
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') });
                 if (r.ok) { 
                     forçarFechamentoSistemico(null, true); 
                 } else { 
@@ -399,7 +412,7 @@
         // =========================================================================
         // 🌐 BLOCO 5: FLUXO DE RESGATE E RETIRADA DE PEDIDOS ONLINE (Card ON)
         // =========================================================================
-        function activarModoBuscaPre(e) {
+        function ativarModoBuscaPre(e) {
             if(e) { e.stopPropagation(); e.preventDefault(); }
             modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos();
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = null;
