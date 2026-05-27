@@ -158,7 +158,7 @@
                         <div class="flex items-center justify-between w-full mt-auto">
                             <button onclick="forçarFechamentoSistemico(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${!preActive ? 'opacity-20 pointer-events-none' : ''}">-</button>
                             <span class="text-[13px] font-semibold text-center flex-1">${preActive ? 'ativo' : '-'}</span>
-                            <button onclick="ativarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${preActive ? 'opacity-20 pointer-events-none' : ''}">+</button>
+                            <button onclick="activarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${preActive ? 'opacity-20 pointer-events-none' : ''}">+</button>
                         </div>
                     </div>
                     <div class="min-w-0 flex flex-col justify-between flex-1"><h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5">Online</h3><div class="text-[13px] font-semibold text-orange-600">R$ 0,00</div></div>
@@ -323,7 +323,7 @@
                     clearInterval(intervaloPix);
                     intervaloPix = null;
                     aplicarLayoutSucessoPix();
-                    await executarGravacaoPixAprovadoNasNuvens();
+                    await executorsGravacaoPixAprovadoNasNuvens();
                 }
                 loopEmExecucao = false;
             }, TEMPO_CHECK_PIX);
@@ -479,7 +479,7 @@
             lines.forEach(linha => {
                 const totalLinha = parseFloat(linha.TOTAL) || 0; valorConsolidated += totalLinha; 
                 let entregue = (linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente") === "retirado";
-                if (entregue) { btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Já Entregue Anteriormente"; btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; }
+                if (entregue) { btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Entregue"; btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; }
                 lista.innerHTML += `
                     <div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-200 shadow-sm font-sistema">
                         <div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(linha.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div>
@@ -496,12 +496,24 @@
         async function executingBaixaPedidoEntregue() {
             const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
             try {
-                const valorConsolidado = parseFloat(document.getElementById("valor-pedido-txt").innerText.replace("R$", "").replace(".", "").replace(",", ".").trim()) || 0;
+                const valorConsolidado = parseFloat(document.getElementById("valor-pedido-txt").innerText.replace("R$", "").replace(/\./g, "").replace(",", ".").trim()) || 0;
                 const resposta = await fetch(URL_MÃE, { 
                     method: "POST", headers: { "Content-Type": "application/json" }, 
                     body: JSON.stringify({ 
-                        id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "ONLINE", status_retirada: "retirado", total_pedido_consolidado: valorConsolidado, transaction_amount: valorConsolidado, 
-                        itens: cachePedidoOnlineOriginal.map(l => ({ "ID_PAGAMENTO": String(pixChaveIdentificadora).trim(), "SIGLA": l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", "PRODUTO": String(l.PRODUTO).trim(), "QUANTIDADE": String(l.QUANTIDADE).trim(), "PRECO": String(l.PRECO).trim(), "TOTAL": String(l.TOTAL).trim() }))
+                        id_pagamento: String(pixChaveIdentificadora).trim(), 
+                        pagamento: "PIX", 
+                        tipo_venda: "ONLINE", 
+                        status_retirada: "retirado", 
+                        total_pedido_consolidado: valorConsolidado, 
+                        transaction_amount: valorConsolidado, 
+                        itens: cachePedidoOnlineOriginal.map(l => ({ 
+                            sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", 
+                            produto: l.PRODUTO ? String(l.PRODUTO).trim() : "", 
+                            grandmother_id: parseInt(l.ID) || parseInt(l.GRANDMOTHER_ID) || 0, 
+                            quantidade: parseInt(l.QUANTIDADE) || 1, 
+                            preco: parseFloat(l.PRECO) || 0, 
+                            total: parseFloat(l.TOTAL) || 0 
+                        }))
                     }) 
                 });
                 if (!resposta.ok) throw new Error();
