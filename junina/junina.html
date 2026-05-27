@@ -316,7 +316,7 @@
         async function executarGravacaoPixAprovadoNasNuvens() {
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') });
-                // Correção: Valida se a requisição foi entregue (r.ok), eliminando o crash por falta de JSON do Excel
+                // Mudado aqui: Checa se a requisição foi entregue (r.ok), sem travar esperando resposta textual do Power Automate
                 if (r.ok) { 
                     alert("Venda Finalizada!"); 
                     forçarFechamentoSistemico(null, true); 
@@ -324,7 +324,7 @@
                     alert("Aviso: Falha ao registrar a venda no Excel."); 
                 }
             } catch (e) { 
-                // Fallback de contingência caso o Power Automate envie corpo em branco mas salve
+                // Fallback para fechar a tela e atualizar o estoque mesmo se o cabeçalho falhar no parse
                 alert("Venda Finalizada!"); 
                 forçarFechamentoSistemico(null, true); 
             }
