@@ -197,19 +197,26 @@
             const b = $("btn-finalizar"); b.disabled = false; b.innerText = "Finalizar"; b.className = CSS_FINALIZAR_HABILITADO; const l = $("lista-carrinho"); l.innerHTML = ""; let vc = 0;
             lines.forEach(ln => {
                 const tl = parseFloat(ln.TOTAL) || 0; vc += tl; let en = (ln.RETIRADA ? String(ln.RETIRADA).trim().toLowerCase() : "pendente") === "retirado";
-                if (en) { b.disabled = true; b.innerText = "Pedido Já Entregue Anteriormente"; b.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; }
+                if (en) { b.disabled = true; b.innerText = "Pedido Entregue"; b.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; }
                 l.innerHTML += `<div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-200 shadow-sm font-sistema"><div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${ln.PRODUTO}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(ln.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(ln.PRECO) || 0)}</p></div><div class="text-right flex-shrink-0 pl-2"><p class="font-semibold text-slate-700 text-[16px]">R$ ${formatarMoeda(tl)}</p>${en ? '<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>' : '<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>'}</div></div>`;
             });
             $("valor-pedido-txt").innerText = `R$ ${formatarMoeda(vc)}`;
             if (window.innerWidth >= 1024) { bf.className = "bg-slate-800 " + CSS_BASE_FLUTUANTE + " cursor-default"; bf.innerHTML = `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${id}</div><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`; } else { abrirOverlayCelular(); }
         }
         async function executingBaixaPedidoEntregue() {
-            const b = $("btn-finalizar"); b.innerText = "Processando..."; b.disabled = true;
+            const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
             try {
-                const vc = parseFloat($("valor-pedido-txt").innerText.replace("R$", "").replace(".", "").replace(",", ".").trim()) || 0;
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "ONLINE", status_retirada: "retirado", total_pedido_consolidado: vc, transaction_amount: vc, itens: cachePedidoOnlineOriginal.map(l => ({ "ID_PAGAMENTO": String(pixChaveIdentificadora).trim(), "SIGLA": l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", "PRODUTO": String(l.PRODUTO).trim(), "QUANTIDADE": String(l.QUANTIDADE).trim(), "PRECO": String(l.PRECO).trim(), "TOTAL": String(l.TOTAL).trim() })) }) });
-                if (!r.ok) throw new Error(); alert("Pedido Entregue"); forçarFechamentoSistemico();
-            } catch (e) { alert("Erro"); b.innerText = "Finalizar"; b.disabled = false; b.className = CSS_FINALIZAR_HABILITADO; }
+                const valorConsolidado = parseFloat(document.getElementById("valor-pedido-txt").innerText.replace("R$", "").replace(".", "").replace(",", ".").trim()) || 0;
+                const resposta = await fetch(URL_MÃE, { 
+                    method: "POST", headers: { "Content-Type": "application/json" }, 
+                    body: JSON.stringify({ 
+                        id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "ONLINE", status_retirada: "retirado", total_pedido_consolidado: valorConsolidado, transaction_amount: valorConsolidado, 
+                        itens: cachePedidoOnlineOriginal.map(l => ({ "ID_PAGAMENTO": String(pixChaveIdentificadora).trim(), "SIGLA": l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", "PRODUTO": String(l.PRODUTO).trim(), "QUANTIDADE": String(l.QUANTIDADE).trim(), "PRECO": String(l.PRECO).trim(), "TOTAL": String(l.TOTAL).trim() }))
+                    }) 
+                });
+                if (!resposta.ok) throw new Error();
+                alert("Pedido Entregue"); forçarFechamentoSistemico();
+            } catch (e) { alert("Erro"); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
         }
     </script>
 </body>
