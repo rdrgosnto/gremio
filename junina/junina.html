@@ -11,7 +11,6 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
         .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
-        html, body { visibility: hidden; opacity: 0; background-color: #f8fafc; }
     </style>
 </head>
 <body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800">
@@ -93,14 +92,11 @@
         const CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95";
         const CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
         const CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs w-full text-sm";
-        
-        // Calibrado: tamanho reduzido levemente para w-8 h-8 (ficou perfeito e discreto)
         const CSS_BTN_MAIS_MENOS = "w-8 h-8 rounded-md font-black text-base shadow-sm transition-all flex items-center justify-center focus:outline-none";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0;
 
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
-        function liberarExibicaoSegura() { document.documentElement.style.visibility = document.body.style.visibility = "visible"; document.documentElement.style.opacity = "1"; }
 
         window.addEventListener('DOMContentLoaded', () => {
             const cache = localStorage.getItem("festa_junina_cardapio");
@@ -117,7 +113,7 @@
                     localStorage.setItem("festa_junina_cardapio", JSON.stringify(produtos)); renderizarProdutos();
                 }
                 if (idParaBuscar !== "" && combo && combo.pedido) processarResultadoBuscaPedido(combo.pedido, idParaBuscar);
-            } catch (e) { console.error(e); if (idParaBuscar !== "") forçarFechamentoSistemico(); } finally { liberarExibicaoSegura(); }
+            } catch (e) { console.error(e); if (idParaBuscar !== "") forçarFechamentoSistemico(); }
         }
 
         function gerenciarCliqueCard(id, estoqueEsgotado) {
@@ -125,8 +121,7 @@
             if ((carrinho[id] || 0) === 0) alterarQuantidade(id, 1);
         }
 
-        // Isolados os fluxos de clique do Card ON
-        function ligarModoOnline(e) { if(e) { e.preventDefault(); e.stopPropagation(); } ativarModoBuscaPre(); }
+        function ligarModoOnline(e) { if(e) { e.preventDefault(); e.stopPropagation(); } activarModoBuscaPre(); }
         function desligarModoOnline(e) { if(e) { e.preventDefault(); e.stopPropagation(); } forçarFechamentoSistemico(); }
 
         function renderizarProdutos() {
@@ -171,7 +166,6 @@
             });
             
             let preActive = modoBuscaAtivo || modoResgateManual;
-            // ESTRUTURA DO CARD ON TOTALMENTE INDEPENDENTE CONTRA TRAVAMENTO DE EVENTOS
             grid.innerHTML += `
                 <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-300">
                     <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${preActive ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">
@@ -243,7 +237,7 @@
 
         const gerarPayloadVenda = (idF, forma) => JSON.stringify({ 
             id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
-            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
+            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
         });
 
         function tratarMascaraDinheiro(inp) {
