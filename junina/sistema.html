@@ -259,6 +259,10 @@
 
         function selecionarPagamento(tipo) {
             formaPagamento = tipo; const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro"), secaoDin = document.getElementById("secao-valores-dinheiro"), carr = document.getElementById("carrossel-pagamento"), inp = document.getElementById("input-recebido");
+            
+            const btnFinalizar = document.getElementById("btn-finalizar");
+            btnFinalizar.innerText = "Finalizar"; 
+            
             if (tipo === 'DINHEIRO') { 
                 if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
                 btnDin.className = CSS_BTN_ATIVO; btnPix.className = CSS_BTN_INATIVO; carr.className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0"; secaoDin.className = "w-1/2 h-full space-y-3.5 opacity-100 pointer-events-auto transition-all duration-200"; inp.disabled = false; inp.value = ""; inp.focus(); 
@@ -282,13 +286,11 @@
                     btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
                 }
             } else {
-                // Correção: Garante a comparação numérica exata arredondando centavos
                 btn.disabled = !(Object.keys(carrinho).length > 0 && formaPagamento === 'DINHEIRO' && Math.round(rec * 100) >= Math.round(totalAtual * 100));
                 btn.className = btn.disabled ? CSS_FINALIZAR_DESABILITADO : CSS_FINALIZAR_HABILITADO;
             }
         }
 
-        // Correção: Removida a chave duplicada 'grandmother_id' que explodia o JSON e dava erro de processamento
         const gerarPayloadVenda = (idF, forma) => JSON.stringify({ 
             id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
             itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
@@ -309,7 +311,7 @@
         async function executarGravacaoDinheiroDirecto() {
             const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
             try {
-                await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`, "DINHEIRO") });
+                await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: generarPayloadVenda(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`, "DINHEIRO") });
                 alert("Venda Finalizada!"); forçarFechamentoSistemico(null, true);
             } catch (e) { alert("Erro ao processar venda"); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
         }
@@ -330,16 +332,23 @@
             btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO; btn.setAttribute("data-trava-tempo", "true");
 
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') });
-                if (r.ok) { 
-                    box.className = "w-28 h-28 bg-white flex items-center justify-center p-1 rounded-none border border-slate-300 text-center select-none pointer-events-none"; 
-                    box.innerHTML = `<span class="text-[10px] text-slate-400 font-bold uppercase">QR Code<br>Ativo nas Nuvem</span>`; 
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: generarPayloadVenda(pixChaveIdentificadora, 'PIX') });
+                const d = await r.json();
+                
+                if (d.id_mercado_pago && d.qrcode_imagem) { 
+                    pixChaveIdentificadora = String(d.id_mercado_pago).trim(); 
+                    stringQrCodeBase64Salva = d.qrcode_imagem;
+                    
+                    box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-none rounded-none border border-slate-300"; 
+                    box.innerHTML = `<img src="data:image/jpeg;base64,${stringQrCodeBase64Salva}" class="w-full h-full object-contain rounded-none">`; 
+                    
                     setTimeout(() => {
                         btn.removeAttribute("data-trava-tempo");
-                        if (formaPagamento === 'PIX' && pixChaveIdentificadora !== "") {
+                        if (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) {
                             btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
                         }
                     }, 12000);
+
                     iniciarMonitoramentoPixAutomatico();
                 } else throw new Error();
             } catch (e) { alert("Falha ao gerar QR Code."); resetarEstadoPagamento(); }
@@ -348,16 +357,23 @@
         function iniciarMonitoramentoPixAutomatico() {
             if (intervaloPix) clearInterval(intervaloPix);
             loopEmExecucao = false;
+            
             intervaloPix = setInterval(async () => {
-                if (loopEmExecucao || !pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return;
+                if (loopEmExecucao) return; 
+                if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return;
+                
                 if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) {
                     clearInterval(intervaloPix); intervaloPix = null; alert("Tempo limite esgotado"); forçarFechamentoSistemico(null, false); return;
                 }
+
                 loopEmExecucao = true; const pago = await consultarStatusMercadoPagoDireto();
                 if (pago) {
                     clearInterval(intervaloPix); intervaloPix = null;
-                    aplicarLayoutSucessoPix(); alert("Pagamento Confirmado");
-                    setTimeout(async () => { await executarGravacaoPixAprovadoNasNuvens(); }, 6000);
+                    aplicarLayoutSucessoPix(); 
+                    alert("Pagamento Confirmado");
+                    setTimeout(async () => {
+                        await executarGravacaoPixAprovadoNasNuvens();
+                    }, 6000);
                 }
                 loopEmExecucao = false;
             }, TEMPO_CHECK_PIX);
@@ -371,9 +387,31 @@
             } catch (erro) { return false; }
         }
 
+        function aplicarLayoutSucessoPix() {
+            const box = document.getElementById("box-qrcode");
+            box.className = "w-28 h-28 bg-white border border-slate-300 flex items-center justify-center p-1 rounded-none select-none pointer-events-none";
+            box.innerHTML = `<div class="w-full h-full bg-orange-500 text-white font-medium text-[11px] text-center flex items-center justify-center tracking-wider uppercase">Pagamento<br>Confirmado</div>`;
+            const btn = document.getElementById("btn-finalizar");
+            btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
+        }
+
+        function aplicarLayoutFalhaPix() {
+            const box = document.getElementById("box-qrcode");
+            box.className = "w-28 h-28 bg-white border border-slate-300 flex items-center justify-center p-1 rounded-none select-none pointer-events-none communities animate-shake";
+            box.innerHTML = `<div class="w-full h-full bg-rose-700 text-white font-medium text-[11px] text-center flex items-center justify-center tracking-wider uppercase">Pagamento<br>Pendente</div>`;
+            setTimeout(() => {
+                if (formaPagamento === 'PIX' && pixChaveIdentificadora && !pixChaveIdentificadora.startsWith("mp_") && stringQrCodeBase64Salva !== "") {
+                    if (box.innerHTML.includes("Pendente")) {
+                        box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-none rounded-none border border-slate-300";
+                        box.innerHTML = `<img src="data:image/jpeg;base64,${stringQrCodeBase64Salva}" class="w-full h-full object-contain rounded-none">`;
+                    }
+                }
+            }, 3000);
+        }
+
         async function executarGravacaoPixAprovadoNasNuvens() {
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') });
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: generarPayloadVenda(pixChaveIdentificadora, 'PIX') });
                 forçarFechamentoSistemico(null, true);
             } catch (e) { 
                 forçarFechamentoSistemico(null, true); 
@@ -386,10 +424,15 @@
             const pago = await consultarStatusMercadoPagoDireto();
 
             if (pago) {
-                btn.innerText = "Finalizar"; aplicarLayoutSucessoPix(); alert("Pagamento Confirmado");
-                setTimeout(async () => { await executarGravacaoPixAprovadoNasNuvens(); }, 6000);
+                btn.innerText = "Finalizar"; 
+                aplicarLayoutSucessoPix(); 
+                alert("Pagamento Confirmado");
+                setTimeout(async () => {
+                    await executarGravacaoPixAprovadoNasNuvens();
+                }, 6000);
             } else {
-                aplicarLayoutFalhaPix(); alert("Pagamento Pendente"); 
+                aplicarLayoutFalhaPix(); 
+                alert("Pagamento Pendente"); 
                 btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
                 iniciarMonitoramentoPixAutomatico(); 
             }
@@ -443,8 +486,6 @@
                         <div class="text-right flex-shrink-0 pl-2"><p class="font-semibold text-slate-700 text-[16px]">R$ ${formatarMoeda(totalLinha)}</p>${entregue ? '<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>' : '<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>'}</div>
                     </div>`;
             });
-            
-            // Correção: Garante a persistência do ID digitado em variáveis locais limpas
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidated)}`;
             if (window.innerWidth >= 1024) {
                 bf.className = "bg-slate-800 " + CSS_BASE_FLUTUANTE + " cursor-default";
@@ -455,7 +496,6 @@
         async function executingBaixaPedidoEntregue() {
             const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
             try {
-                // Correção: Captura o valor diretamente e limpa o seletor para rodar o disparo sem travar
                 const valorConsolidado = parseFloat(document.getElementById("valor-pedido-txt").innerText.replace("R$", "").replace(/\./g, "").replace(",", ".").trim()) || 0;
                 const resposta = await fetch(URL_MÃE, { 
                     method: "POST", headers: { "Content-Type": "application/json" }, 
