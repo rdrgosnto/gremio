@@ -185,7 +185,6 @@
             if (modoResgateManual) return;
             const lista = document.getElementById("lista-carrinho"); totalAtual = 0; let tItens = 0; lista.innerHTML = "";
             
-            // Gerenciador de bloqueio do bloco de pagamentos
             const blocoPagamento = document.getElementById("bloco-inferior-pagamento");
             const btnDinheiro = document.getElementById("btn-dinheiro");
             const btnPix = document.getElementById("btn-pix");
@@ -312,7 +311,6 @@
             btn.disabled = true;
             btn.className = CSS_FINALIZAR_DESABILITADO;
             
-            // Alerta disparado em sincronia absoluta com a mudança visual
             alert("Pagamento Confirmado");
         }
 
@@ -321,7 +319,6 @@
             box.className = "w-28 h-28 bg-white border border-slate-300 flex items-center justify-center p-1 rounded-none select-none pointer-events-none animate-shake";
             box.innerHTML = `<div class="w-full h-full bg-rose-700 text-white font-medium text-[11px] text-center flex items-center justify-center tracking-wider uppercase">Pagamento<br>Pendente</div>`;
 
-            // Alerta disparado em sincronia absoluta com a mudança visual
             alert("Pagamento Pendente");
 
             setTimeout(() => {
@@ -530,16 +527,35 @@
             const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
             try {
                 const valorConsolidado = parseFloat(document.getElementById("valor-pedido-txt").innerText.replace("R$", "").replace(".", "").replace(",", ".").trim()) || 0;
+                
+                // Mapeamento corrigido em conformidade estrita com o JSON Schema do Power Automate
+                const itensFormatados = cachePedidoOnlineOriginal.map(l => {
+                    return {
+                        "sigla": l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE",
+                        "produto": l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online",
+                        "grandmother_id": parseInt(l.ID) || parseInt(l.GRANDMOTHER_ID) || 0,
+                        "quantidade": parseInt(l.QUANTIDADE) || 1,
+                        "preco": parseFloat(l.PRECO) || 0,
+                        "total": parseFloat(l.TOTAL) || 0
+                    };
+                });
+
                 const resposta = await fetch(URL_MÃE, { 
-                    method: "POST", headers: { "Content-Type": "application/json" }, 
+                    method: "POST", 
+                    headers: { "Content-Type": "application/json" }, 
                     body: JSON.stringify({ 
-                        id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "ONLINE", status_retirada: "retirado", total_pedido_consolidado: valorConsolidado, transaction_amount: valorConsolidado, 
-                        itens: cachePedidoOnlineOriginal.map(l => ({ "ID_PAGAMENTO": String(pixChaveIdentificadora).trim(), "SIGLA": l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", "PRODUTO": String(l.PRODUTO).trim(), "QUANTIDADE": String(l.QUANTIDADE).trim(), "PRECO": String(l.PRECO).trim(), "TOTAL": String(l.TOTAL).trim() }))
+                        id_pagamento: String(pixChaveIdentificadora).trim(), 
+                        pagamento: "PIX", 
+                        tipo_venda: "ONLINE", 
+                        status_retirada: "retirado", 
+                        total_pedido_consolidado: valorConsolidado, 
+                        transaction_amount: valorConsolidado, 
+                        itens: itensFormatados
                     }) 
                 });
                 if (!resposta.ok) throw new Error();
                 alert("Pedido Entregue"); forçarFechamentoSistemico();
-            } catch (e) { alert("Erro"); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
+            } catch (e) { alert("Erro ao processar baixa do pedido online."); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
         }
     </script>
 </body>
