@@ -208,11 +208,11 @@
             if (modoResgateManual) return executingBaixaPedidoEntregue();
             
             if (formaPagamento === 'DINHEIRO') {
-                aplicarDescontoEstoqueLocal(); // Dinheiro desconta imediatamente na tela
+                aplicarDescontoEstoqueLocal(); 
                 return executarGravacaoDinheiroDirecto();
             }
             if (formaPagamento === 'PIX') {
-                return executarCliqueContingenciaManualPix(); // PIX não mexe no estoque local aqui
+                return executarCliqueContingenciaManualPix(); 
             }
         };
 
@@ -245,8 +245,8 @@
         }
 
         const gerarPayloadVenda = (idF, forma) => JSON.stringify({ 
-            id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidated: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
-            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
+            id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
+            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
         });
 
         function tratarMascaraDinheiro(inp) {
@@ -325,7 +325,7 @@
                 
                 if (pago) {
                     clearInterval(intervaloPix); intervaloPix = null;
-                    aplicarDescontoEstoqueLocal(); // Desconta localmente SÓ AGORA que confirmou
+                    aplicarDescontoEstoqueLocal(); 
                     alert("Pagamento Confirmado");
                     await executarGravacaoPixAprovadoNasNuvens();
                 }
@@ -338,7 +338,7 @@
             try {
                 const r = await fetch(URL_MÃE, {
                     method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "CAIXA", total_pedido_consolidado: parseFloat(totalAtual) })
+                    body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "CAIXA", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual) })
                 });
                 if (!r.ok) return false;
                 const dados = await r.json(); return dados.pago === true;
@@ -366,7 +366,7 @@
             const pago = await consultarStatusMercadoPagoDireto();
 
             if (pago) {
-                aplicarDescontoEstoqueLocal(); // Desconta localmente SÓ AGORA que confirmou manualmente
+                aplicarDescontoEstoqueLocal(); 
                 alert("Pagamento Confirmado");
                 await executarGravacaoPixAprovadoNasNuvens();
             } else {
