@@ -9,8 +9,6 @@
         .font-sistema { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
-        .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
         html, body { visibility: hidden; opacity: 0; background-color: #f8fafc; }
     </style>
 </head>
@@ -86,16 +84,14 @@
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/06f981a846ca45bc8bfe51c97c480d96/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n-3ys5toEStLZNzQS6q0bETlCP8-NuAjwWn-fAOqjOs";
         const TEMPO_CHECK_PIX = 6000;
-        const LIMITE_EXPIRACAO_PIX = 600000; // 10 minutos em milissegundos
+        const LIMITE_EXPIRACAO_PIX = 600000;
 
-        // Estilos CSS Reutilizáveis (Laranja)
         const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-orange-500 bg-orange-50 text-orange-700 font-bold text-sm text-center shadow-sm transition-all";
         const CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
         const CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95";
         const CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
         const CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs w-full text-sm";
 
-        // Variáveis de Controle Global e Segurança de Cache
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0;
 
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
@@ -167,15 +163,9 @@
         function alterarQuantidade(id, d) {
             const p = produtos.find(item => item.id == id);
             if (!p) return;
-
             const qtdAtual = carrinho[id] || 0;
             const nQtd = qtdAtual + d;
-
-            // Bloqueio se tentar adicionar mais do que o estoque disponível
-            if (d > 0 && qtdAtual >= p.estoque) {
-                return;
-            }
-
+            if (d > 0 && qtdAtual >= p.estoque) return;
             if (nQtd <= 0) delete carrinho[id]; else carrinho[id] = nQtd;
             renderizarProdutos(); atualizarCarrinhoDOM();
         }
@@ -183,7 +173,6 @@
         function atualizarCarrinhoDOM() {
             if (modoResgateManual) return;
             const lista = document.getElementById("lista-carrinho"); totalAtual = 0; let tItens = 0; lista.innerHTML = "";
-            
             const blocoPagamento = document.getElementById("bloco-inferior-pagamento");
             const btnDinheiro = document.getElementById("btn-dinheiro");
             const btnPix = document.getElementById("btn-pix");
@@ -196,13 +185,11 @@
             if (tItens === 0) {
                 lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
                 blocoPagamento.className = "space-y-4 pt-1 border-t opacity-40 pointer-events-none";
-                btnDinheiro.disabled = true;
-                btnPix.disabled = true;
+                btnDinheiro.disabled = btnPix.disabled = true;
                 resetarEstadoPagamento();
             } else {
                 blocoPagamento.className = "space-y-4 pt-1 border-t opacity-100 pointer-events-auto";
-                btnDinheiro.disabled = false;
-                btnPix.disabled = false;
+                btnDinheiro.disabled = btnPix.disabled = false;
             }
 
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
@@ -261,7 +248,9 @@
             const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
             try {
                 await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`, "DINHEIRO") });
-                alert("Venda Finalizada!"); forçarFechamentoSistemico();
+                alert("Venda Finalizada!"); 
+                if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
+                carregarEstoqueReal(); resetSistemicoTotal(true);
             } catch (e) { alert("Erro ao processar venda"); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
         }
 
@@ -275,8 +264,7 @@
             timestampCriacaoPix = Date.now();
             
             const btn = document.getElementById("btn-finalizar");
-            btn.disabled = true;
-            btn.className = CSS_FINALIZAR_DESABILITADO;
+            btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
             btn.setAttribute("data-trava-tempo", "true");
 
             try {
@@ -290,44 +278,14 @@
                     
                     setTimeout(() => {
                         btn.removeAttribute("data-trava-tempo");
-                        if (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_") && !box.className.includes("bg-orange-500")) {
-                            btn.disabled = false;
-                            btn.className = CSS_FINALIZAR_HABILITADO;
+                        if (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) {
+                            btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
                         }
                     }, 12000);
 
                     iniciarMonitoramentoPixAutomatico();
                 } else throw new Error();
             } catch (e) { alert("Falha ao gerar QR Code."); resetarEstadoPagamento(); }
-        }
-
-        function aplicarLayoutSucessoPix() {
-            const box = document.getElementById("box-qrcode");
-            box.className = "w-28 h-28 bg-white border border-slate-300 flex items-center justify-center p-1 rounded-none select-none pointer-events-none";
-            box.innerHTML = `<div class="w-full h-full bg-orange-500 text-white font-medium text-[11px] text-center flex items-center justify-center tracking-wider uppercase">Pagamento<br>Confirmado</div>`;
-            
-            const btn = document.getElementById("btn-finalizar");
-            btn.disabled = true;
-            btn.className = CSS_FINALIZAR_DESABILITADO;
-            
-            alert("Pagamento Confirmado");
-        }
-
-        function aplicarLayoutFalhaPix() {
-            const box = document.getElementById("box-qrcode");
-            box.className = "w-28 h-28 bg-white border border-slate-300 flex items-center justify-center p-1 rounded-none select-none pointer-events-none animate-shake";
-            box.innerHTML = `<div class="w-full h-full bg-rose-700 text-white font-medium text-[11px] text-center flex items-center justify-center tracking-wider uppercase">Pagamento<br>Pendente</div>`;
-
-            alert("Pagamento Pendente");
-
-            setTimeout(() => {
-                if (formaPagamento === 'PIX' && pixChaveIdentificadora && !pixChaveIdentificadora.startsWith("mp_") && stringQrCodeBase64Salva !== "") {
-                    if (box.innerHTML.includes("Pendente")) {
-                        box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-none rounded-none border border-slate-300";
-                        box.innerHTML = `<img src="data:image/jpeg;base64,${stringQrCodeBase64Salva}" class="w-full h-full object-contain rounded-none">`;
-                    }
-                }
-            }, 3000);
         }
 
         function iniciarMonitoramentoPixAutomatico() {
@@ -339,20 +297,16 @@
                 if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return;
                 
                 if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) {
-                    clearInterval(intervaloPix);
-                    intervaloPix = null;
-                    alert("Tempo limite esgotado");
-                    forçarFechamentoSistemico();
-                    return;
+                    clearInterval(intervaloPix); intervaloPix = null;
+                    alert("Tempo limite esgotado"); forçarFechamentoSistemico(); return;
                 }
 
                 loopEmExecucao = true;
                 const pago = await consultarStatusMercadoPagoDireto();
                 
                 if (pago) {
-                    clearInterval(intervaloPix);
-                    intervaloPix = null;
-                    aplicarLayoutSucessoPix();
+                    clearInterval(intervaloPix); intervaloPix = null;
+                    alert("Pagamento Confirmado");
                     await executarGravacaoPixAprovadoNasNuvens();
                 }
                 loopEmExecucao = false;
@@ -363,18 +317,11 @@
             if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return false;
             try {
                 const r = await fetch(URL_MÃE, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        id_pagamento: String(pixChaveIdentificadora).trim(),
-                        pagamento: "PIX",
-                        tipo_venda: "CAIXA",
-                        total_pedido_consolidado: parseFloat(totalAtual)
-                    })
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "CAIXA", total_pedido_consolidado: parseFloat(totalAtual) })
                 });
                 if (!r.ok) return false;
-                const dados = await r.json();
-                return dados.pago === true;
+                const dados = await r.json(); return dados.pago === true;
             } catch (erro) { return false; }
         }
 
@@ -382,33 +329,25 @@
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const res = await r.json();
                 if (res.pago === true) { 
-                    alert("Venda Finalizada!"); 
-                    forçarFechamentoSistemico(); 
+                    alert("Venda Finalizada!"); carregarEstoqueReal(); resetSistemicoTotal(true);
                 } else {
-                    alert("Aviso: Pagamento recebido, mas não registrado no Excel.");
+                    alert("Aviso: Pagamento recebido, mas não registrado no Excel."); carregarEstoqueReal(); resetSistemicoTotal(true);
                 }
             } catch (e) { alert("Erro"); }
         }
 
         async function executarCliqueContingenciaManualPix() {
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
-            
-            const btn = document.getElementById("btn-finalizar");
-            btn.innerText = "Processando...";
-            btn.disabled = true;
+            const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
 
             const pago = await consultarStatusMercadoPagoDireto();
 
             if (pago) {
-                btn.innerText = "Finalizar";
-                aplicarLayoutSucessoPix();
+                btn.innerText = "Finalizar"; alert("Pagamento Confirmado");
                 await executarGravacaoPixAprovadoNasNuvens();
             } else {
-                btn.innerText = "Finalizar";
-                btn.disabled = false; 
-                btn.className = CSS_FINALIZAR_HABILITADO;
-                aplicarLayoutFalhaPix();
-                iniciarMonitoramentoPixAutomatico(); 
+                btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
+                alert("Pagamento Pendente"); iniciarMonitoramentoPixAutomatico(); 
             }
         }
 
@@ -452,10 +391,7 @@
             formaPagamento = null; pixChaveIdentificadora = ""; stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
             
             const btn = document.getElementById("btn-finalizar");
-            btn.removeAttribute("data-trava-tempo");
-            btn.innerText = "Finalizar";
-            btn.disabled = true;
-            btn.className = CSS_FINALIZAR_DESABILITADO;
+            btn.removeAttribute("data-trava-tempo"); btn.innerText = "Finalizar"; btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
 
             document.getElementById("btn-pix").className = document.getElementById("btn-dinheiro").className = CSS_BTN_INATIVO;
             document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
@@ -526,8 +462,6 @@
             const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
             try {
                 const valorConsolidado = parseFloat(document.getElementById("valor-pedido-txt").innerText.replace("R$", "").replace(".", "").replace(",", ".").trim()) || 0;
-                
-                // Mapeamento corrigido em conformidade estrita com o JSON Schema do Power Automate
                 const itensFormatados = cachePedidoOnlineOriginal.map(l => {
                     return {
                         "sigla": l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE",
@@ -540,20 +474,14 @@
                 });
 
                 const resposta = await fetch(URL_MÃE, { 
-                    method: "POST", 
-                    headers: { "Content-Type": "application/json" }, 
+                    method: "POST", headers: { "Content-Type": "application/json" }, 
                     body: JSON.stringify({ 
-                        id_pagamento: String(pixChaveIdentificadora).trim(), 
-                        pagamento: "PIX", 
-                        tipo_venda: "ONLINE", 
-                        status_retirada: "retirado", 
-                        total_pedido_consolidado: valorConsolidado, 
-                        transaction_amount: valorConsolidado, 
-                        itens: itensFormatados
+                        id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "ONLINE", status_retirada: "retirado", total_pedido_consolidado: valorConsolidado, transaction_amount: valorConsolidado, itens: itensFormatados
                     }) 
                 });
                 if (!resposta.ok) throw new Error();
-                alert("Pedido Entregue"); forçarFechamentoSistemico();
+                alert("Pedido Entregue"); 
+                carregarEstoqueReal(); resetSistemicoTotal(true);
             } catch (e) { alert("Erro ao processar baixa do pedido online."); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
         }
     </script>
