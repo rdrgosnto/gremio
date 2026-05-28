@@ -196,18 +196,24 @@
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
-        const processarCliqueFinalizar = () => {
-            if (modoResgateManual) return executingBaixaPedidoEntregue();
-            
-            // Dedução Local Preventiva antes de disparar a nuvem (Apenas Vendas Locais)
+        function aplicarDescontoEstoqueLocal() {
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id);
                 if (p) p.estoque = Math.max(0, p.estoque - carrinho[id]);
             });
-            renderizarProdutos(); // Atualiza instantaneamente a tela do caixa atual
+            renderizarProdutos();
+        }
 
-            if (formaPagamento === 'DINHEIRO') return executarGravacaoDinheiroDirecto();
-            if (formaPagamento === 'PIX') return executarCliqueContingenciaManualPix();
+        const processarCliqueFinalizar = () => {
+            if (modoResgateManual) return executingBaixaPedidoEntregue();
+            
+            if (formaPagamento === 'DINHEIRO') {
+                aplicarDescontoEstoqueLocal(); // Dinheiro desconta imediatamente na tela
+                return executarGravacaoDinheiroDirecto();
+            }
+            if (formaPagamento === 'PIX') {
+                return executarCliqueContingenciaManualPix(); // PIX não mexe no estoque local aqui
+            }
         };
 
         function selecionarPagamento(tipo) {
@@ -239,8 +245,8 @@
         }
 
         const gerarPayloadVenda = (idF, forma) => JSON.stringify({ 
-            id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
-            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
+            id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidated: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
+            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
         });
 
         function tratarMascaraDinheiro(inp) {
@@ -258,7 +264,6 @@
                 await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`, "DINHEIRO") });
                 if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
                 
-                // Aguarda 3 segundos mantendo em "Processando..." para o Power Automate salvar no Excel
                 setTimeout(async () => {
                     await carregarEstoqueReal(); 
                     alert("Venda Finalizada!");
@@ -320,6 +325,7 @@
                 
                 if (pago) {
                     clearInterval(intervaloPix); intervaloPix = null;
+                    aplicarDescontoEstoqueLocal(); // Desconta localmente SÓ AGORA que confirmou
                     alert("Pagamento Confirmado");
                     await executarGravacaoPixAprovadoNasNuvens();
                 }
@@ -344,7 +350,6 @@
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const res = await r.json();
                 
-                // Aguarda 3 segundos mantendo em "Processando..." para o Power Automate salvar no Excel
                 setTimeout(async () => {
                     await carregarEstoqueReal(); 
                     alert("Venda Finalizada!");
@@ -361,6 +366,7 @@
             const pago = await consultarStatusMercadoPagoDireto();
 
             if (pago) {
+                aplicarDescontoEstoqueLocal(); // Desconta localmente SÓ AGORA que confirmou manualmente
                 alert("Pagamento Confirmado");
                 await executarGravacaoPixAprovadoNasNuvens();
             } else {
@@ -499,7 +505,6 @@
                 });
                 if (!resposta.ok) throw new Error();
                 
-                // Pedidos online não possuem desconto local nem delay de 3s (já atualizam direto e limpo)
                 alert("Pedido Entregue"); 
                 carregarEstoqueReal(); resetSistemicoTotal(true);
             } catch (e) { alert("Erro ao processar baixa do pedido online."); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
