@@ -208,11 +208,11 @@
             if (modoResgateManual) return executingBaixaPedidoEntregue();
             
             if (formaPagamento === 'DINHEIRO') {
-                aplicarDescontoEstoqueLocal(); 
+                aplicarDescontoEstoqueLocal(); // Dinheiro desconta imediatamente
                 return executarGravacaoDinheiroDirecto();
             }
             if (formaPagamento === 'PIX') {
-                return executarCliqueContingenciaManualPix(); 
+                return executarCliqueContingenciaManualPix(); // PIX aguarda confirmação real
             }
         };
 
@@ -325,8 +325,7 @@
                 
                 if (pago) {
                     clearInterval(intervaloPix); intervaloPix = null;
-                    aplicarDescontoEstoqueLocal(); 
-                    alert("Pagamento Confirmado");
+                    aplicarDescontoEstoqueLocal(); // Desconta localmente na aprovação automática
                     await executarGravacaoPixAprovadoNasNuvens();
                 }
                 loopEmExecucao = false;
@@ -348,7 +347,7 @@
         async function executarGravacaoPixAprovadoNasNuvens() {
             const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const res = await r.json();
+                await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') });
                 
                 setTimeout(async () => {
                     await carregarEstoqueReal(); 
@@ -366,8 +365,7 @@
             const pago = await consultarStatusMercadoPagoDireto();
 
             if (pago) {
-                aplicarDescontoEstoqueLocal(); 
-                alert("Pagamento Confirmado");
+                aplicarDescontoEstoqueLocal(); // Desconta localmente na aprovação manual
                 await executarGravacaoPixAprovadoNasNuvens();
             } else {
                 btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
