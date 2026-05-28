@@ -198,6 +198,14 @@
 
         const processarCliqueFinalizar = () => {
             if (modoResgateManual) return executingBaixaPedidoEntregue();
+            
+            // Dedução Local Preventiva antes de disparar a nuvem (Apenas Vendas Locais)
+            Object.keys(carrinho).forEach(id => {
+                const p = produtos.find(item => item.id == id);
+                if (p) p.estoque = Math.max(0, p.estoque - carrinho[id]);
+            });
+            renderizarProdutos(); // Atualiza instantaneamente a tela do caixa atual
+
             if (formaPagamento === 'DINHEIRO') return executarGravacaoDinheiroDirecto();
             if (formaPagamento === 'PIX') return executarCliqueContingenciaManualPix();
         };
@@ -248,9 +256,15 @@
             const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
             try {
                 await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`, "DINHEIRO") });
-                alert("Venda Finalizada!"); 
                 if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
-                carregarEstoqueReal(); resetSistemicoTotal(true);
+                
+                // Aguarda 3 segundos mantendo em "Processando..." para o Power Automate salvar no Excel
+                setTimeout(async () => {
+                    await carregarEstoqueReal(); 
+                    alert("Venda Finalizada!");
+                    resetSistemicoTotal(true);
+                }, 3000);
+
             } catch (e) { alert("Erro ao processar venda"); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
         }
 
@@ -326,14 +340,18 @@
         }
 
         async function executarGravacaoPixAprovadoNasNuvens() {
+            const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const res = await r.json();
-                if (res.pago === true) { 
-                    alert("Venda Finalizada!"); carregarEstoqueReal(); resetSistemicoTotal(true);
-                } else {
-                    alert("Aviso: Pagamento recebido, mas não registrado no Excel."); carregarEstoqueReal(); resetSistemicoTotal(true);
-                }
-            } catch (e) { alert("Erro"); }
+                
+                // Aguarda 3 segundos mantendo em "Processando..." para o Power Automate salvar no Excel
+                setTimeout(async () => {
+                    await carregarEstoqueReal(); 
+                    alert("Venda Finalizada!");
+                    resetSistemicoTotal(true);
+                }, 3000);
+
+            } catch (e) { alert("Erro"); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
         }
 
         async function executarCliqueContingenciaManualPix() {
@@ -343,7 +361,7 @@
             const pago = await consultarStatusMercadoPagoDireto();
 
             if (pago) {
-                btn.innerText = "Finalizar"; alert("Pagamento Confirmado");
+                alert("Pagamento Confirmado");
                 await executarGravacaoPixAprovadoNasNuvens();
             } else {
                 btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
@@ -480,6 +498,8 @@
                     }) 
                 });
                 if (!resposta.ok) throw new Error();
+                
+                // Pedidos online não possuem desconto local nem delay de 3s (já atualizam direto e limpo)
                 alert("Pedido Entregue"); 
                 carregarEstoqueReal(); resetSistemicoTotal(true);
             } catch (e) { alert("Erro ao processar baixa do pedido online."); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
