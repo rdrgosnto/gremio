@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grêmio | Festa Junina</title>
+    <link rel="manifest" href="manifest.json">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .font-sistema { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif; }
@@ -208,11 +210,11 @@
             if (modoResgateManual) return executingBaixaPedidoEntregue();
             
             if (formaPagamento === 'DINHEIRO') {
-                aplicarDescontoEstoqueLocal(); // Dinheiro desconta imediatamente
+                aplicarDescontoEstoqueLocal();
                 return executarGravacaoDinheiroDirecto();
             }
             if (formaPagamento === 'PIX') {
-                return executarCliqueContingenciaManualPix(); // PIX aguarda confirmação real
+                return executarCliqueContingenciaManualPix();
             }
         };
 
@@ -325,7 +327,7 @@
                 
                 if (pago) {
                     clearInterval(intervaloPix); intervaloPix = null;
-                    aplicarDescontoEstoqueLocal(); // Desconta localmente na aprovação automática
+                    aplicarDescontoEstoqueLocal();
                     await executarGravacaoPixAprovadoNasNuvens();
                 }
                 loopEmExecucao = false;
@@ -365,7 +367,7 @@
             const pago = await consultarStatusMercadoPagoDireto();
 
             if (pago) {
-                aplicarDescontoEstoqueLocal(); // Desconta localmente na aprovação manual
+                aplicarDescontoEstoqueLocal();
                 await executarGravacaoPixAprovadoNasNuvens();
             } else {
                 btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
