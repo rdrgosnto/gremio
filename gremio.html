@@ -305,7 +305,7 @@
         }
 
         function iniciarCronometro() {
-            if (cronometroRegressive) clearInterval(cronometroRegressivo);
+            if (cronometroRegressivo) clearInterval(cronometroRegressivo);
             let tRest = Math.floor(LIMITE_EXPIRACAO_PIX / 1000);
             const elT = document.getElementById('timer-expiracao');
             cronometroRegressivo = setInterval(() => {
