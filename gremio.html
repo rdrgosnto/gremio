@@ -6,26 +6,30 @@
     <title>Grêmio | Ingressos Festa Junina</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght=700&family=Inter:wght=300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <!-- Corrigido o link das fontes para garantir a renderização correta da Amatic SC estilizada -->
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Poppins:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         /* ==========================================================================
            RESET & ESTRUTURA GLOBAL (REDUÇÃO PROPORCIONAL DE 10% - COMPACT SLIM)
            ========================================================================== */
         * { box-sizing: border-box; margin: 0; padding: 0; transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s; }
         body { 
-            font-family: 'Inter', sans-serif; min-height: 100vh; min-height: 100dvh; color: #4a3b32; display: flex; justify-content: center; align-items: center; padding: 35px 18px;
+            font-family: 'Poppins', sans-serif; min-height: 100vh; min-height: 100dvh; color: #4a3b32; display: flex; justify-content: center; align-items: center; padding: 35px 18px;
             background-color: #e65100; 
             background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%), linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%); 
             background-size: 40px 40px; background-position: 0 0, 20px 20px; 
         }
         /* Card reduzido proporcionalmente de 400px para 360px */
         .container { width: 100%; max-width: 360px; position: relative; background-color: #fffdf7; padding: 30px 22px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35); text-align: center; border: 3px dashed #d84315; margin: auto 0; }
-        h1 { font-family: 'Amatic SC', cursive; font-size: 44px; color: #bf360c; margin-top: 5px; line-height: 1.1; margin-bottom: 18px; }
+        
+        /* Ajuste fino na fonte temática para garantir o destaque e o estilo desenhado */
+        h1 { font-family: 'Amatic SC', cursive; font-weight: 700; font-size: 52px; letter-spacing: 1px; color: #bf360c; margin-top: 5px; line-height: 1; margin-bottom: 18px; }
+        
         label { font-weight: 600; margin-top: 12px; display: block; text-align: left; font-size: 13px; color: #4a3b32; }
         .form-group { position: relative; display: flex; flex-direction: column; }
         .input-icon { position: absolute; left: 14px; bottom: 11px; color: #bcaaa4; font-size: 15px; z-index: 2; }
         .has-icon input, .has-icon select { padding-left: 38px !important; }
-        input, select { width: 100%; padding: 10px 11px; border-radius: 8px; border: 2px dashed #bcaaa4; font-size: 13px; box-sizing: border-box; background-color: #fff; outline: none; margin-top: 5px; font-family: 'Inter', sans-serif; color: #4a3b32; }
+        input, select { width: 100%; padding: 10px 11px; border-radius: 8px; border: 2px dashed #bcaaa4; font-size: 13px; box-sizing: border-box; background-color: #fff; outline: none; margin-top: 5px; font-family: 'Poppins', sans-serif; color: #4a3b32; }
         input:focus, select:focus { border-color: #e65100 !important; box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.15); }
         .input-erro { border: 2px solid #ff1744 !important; background-color: #fff5f5; }
         .input-sucesso { border: 2px solid #2e7d32 !important; background-color: #f1f8e9; }
@@ -35,7 +39,7 @@
         .ingresso-extra label:first-child { margin-top: 0; }
         
         /* Botões Estilo 3D Fofos/Juninos */
-        .btn-principal { margin-top: 22px; width: 100%; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 700; background-color: #e65100; color: white; cursor: pointer; border: none; box-shadow: 0 5px 0 #b33600; font-family: 'Inter', sans-serif; }
+        .btn-principal { margin-top: 22px; width: 100%; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 700; background-color: #e65100; color: white; cursor: pointer; border: none; box-shadow: 0 5px 0 #b33600; font-family: 'Poppins', sans-serif; }
         .btn-principal:active:not(:disabled) { box-shadow: 0 2px 0 #b33600; transform: translateY(3px); }
         .btn-principal:disabled { background-color: #bcaaa4 !important; box-shadow: 0 5px 0 #8d6e63 !important; cursor: not-allowed; }
         .btn-validar { position: relative; background-color: #1565c0 !important; box-shadow: 0 5px 0 #0d47a1 !important; margin-top: 15px; z-index: 1; }
@@ -59,10 +63,10 @@
         .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .popup-conteudo { position: relative; max-width: 75vw; max-height: 75vh; }
         .popup-imagem { max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 8px; display: block; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .btn-fechar-popup { display: none; position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background-color: #616161; color: #ffffff; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .btn-fechar-popup { display: none; position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background-color: #616161; color: #ffffff; border: none; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .btn-x-popup { display: none; position: absolute; top: -12px; right: -12px; width: 30px; height: 30px; background-color: #ff1744; color: #ffffff; border: 2px solid #ffffff; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; line-height: 26px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 10000; }
         .pagamento-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 5000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .pagamento-overlay-texto { color: #ffffff; font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 600; text-align: center; max-width: 320px; line-height: 1.5; }
+        .pagamento-overlay-texto { color: #ffffff; font-family: 'Poppins', sans-serif; font-size: 17px; font-weight: 600; text-align: center; max-width: 320px; line-height: 1.5; }
         
         /* Efeito de Bloqueio - Torna os elementos cinzas e inativos */
         .sessao-bloqueada { opacity: 0.35 !important; filter: grayscale(100%) !important; pointer-events: none !important; }
@@ -263,7 +267,7 @@
             if ((new Set(cpfsConv)).size !== cpfsConv.length) { alert(MSGS.cpf_convidado_duplicado); return; }
             
             btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...`;
-            const payload = { "COMPRADOR": comp, "CPF_COMPRAPOR": cpfC, "TELEFONE": tel, "QUANTIDADE": selectQtde.value, "INGRESSOS": list };
+            const payload = { "COMPRADOR": comp, "CPF_COMPRADOR": cpfC, "TELEFONE": tel, "QUANTIDADE": selectQtde.value, "INGRESSOS": list };
 
             try {
                 const r = await fetch(URL_GERAR_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
@@ -331,19 +335,12 @@
         }
 
         document.getElementById("btn-validar").addEventListener("click", async () => {
-            if (loopEmExecucao) return; // Nova trava de segurança contra duplicidade visual
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
-            
-            loopEmExecucao = true;
             const btn = document.getElementById("btn-validar"), msg = document.getElementById("status-verificacao");
             btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Verificando...`;
-            
-            if (await efetuarChamadaValidacaoAPI()) { 
-                aplicarLayoutSucessoDefinitivo(); 
-            } else {
+            if (await efetuarChamadaValidacaoAPI()) { aplicarLayoutSucessoDefinitivo(); } else {
                 msg.innerHTML = `<span class="icon-grande" style="font-size:50px; color:#bf360c; margin-bottom:5px;">❌</span><br>Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!`;
                 btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Verificar Pagamento`;
-                loopEmExecucao = false; // Libera o controle
                 iniciarMonitoramentoPixAutomatico();
             }
         });
