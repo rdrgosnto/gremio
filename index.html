@@ -6,10 +6,12 @@
     <title>Grêmio | Ingressos Festa Junina</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght=400;700&family=Poppins:wght=300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Chamada otimizada das fontes garantindo a renderização do Amatic SC -->
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         /* ==========================================================================
-           RESET & ESTRUTURA GLOBAL (COMPACT SLIM COM FONTE POPPINS)
+           RESET & ESTRUTURA GLOBAL (COMPACT SLIM PERSONALIZADO)
            ========================================================================== */
         * { box-sizing: border-box; margin: 0; padding: 0; transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s; }
         body { 
@@ -18,37 +20,37 @@
             background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%), linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%); 
             background-size: 40px 40px; background-position: 0 0, 20px 20px; 
         }
-        /* Card Compacto */
-        .container { width: 100%; max-width: 360px; position: relative; background-color: #fffdf7; padding: 24px 20px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35); text-align: center; border: 3px dashed #d84315; margin: auto 0; }
         
-        /* Título destacado, mas com margem inferior reduzida para economizar espaço */
-        h1 { font-family: 'Amatic SC', cursive; font-weight: 700; font-size: 52px; letter-spacing: 1px; color: #bf360c; margin-top: 5px; line-height: 1; margin-bottom: 12px; }
+        .container { width: 100%; max-width: 360px; position: relative; background-color: #fffdf7; padding: 26px 20px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35); text-align: center; border: 3px dashed #d84315; margin: auto 0; }
         
-        /* Ajuste Slim nos Labels e Form Groups */
-        label { font-weight: 600; margin-top: 8px; display: block; text-align: left; font-size: 12px; color: #4a3b32; }
+        /* TÍTULO AMATIC SC REFORÇADO */
+        h1 { font-family: 'Amatic SC', cursive !important; font-weight: 700 !important; font-size: 52px; letter-spacing: 2px; color: #bf360c; margin-top: 2px; line-height: 1; margin-bottom: 14px; }
+        
+        /* AJUSTE SOLICITADO: Nome dos campos levemente maior e sutil aumento no espaçamento entre blocos */
+        label { font-weight: 600; margin-top: 11px; display: block; text-align: left; font-size: 13.5px; color: #4a3b32; }
         .form-group { position: relative; display: flex; flex-direction: column; }
         
-        /* Ícone centralizado verticalmente com base no novo tamanho slim */
-        .input-icon { position: absolute; left: 14px; bottom: 10px; color: #bcaaa4; font-size: 14px; z-index: 2; }
+        /* Ícone centralizado com a nova proporção */
+        .input-icon { position: absolute; left: 14px; bottom: 11px; color: #bcaaa4; font-size: 14px; z-index: 2; }
         .has-icon input, .has-icon select { padding-left: 38px !important; }
         
-        /* CAIXAS DE PREENCHIMENTO SLIM: Reduzido padding e margem para igualar ao comportamento do segundo código */
-        input, select { width: 100%; padding: 8px 11px; border-radius: 8px; border: 2px dashed #bcaaa4; font-size: 13px; box-sizing: border-box; background-color: #fff; outline: none; margin-top: 4px; font-family: 'Poppins', sans-serif; color: #4a3b32; }
+        /* Inputs mantendo a altura slim prototipada */
+        input, select { width: 100%; padding: 9px 11px; border-radius: 8px; border: 2px dashed #bcaaa4; font-size: 13px; box-sizing: border-box; background-color: #fff; outline: none; margin-top: 5px; font-family: 'Poppins', sans-serif; color: #4a3b32; }
         input:focus, select:focus { border-color: #e65100 !important; box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.15); }
         .input-erro { border: 2px solid #ff1744 !important; background-color: #fff5f5; }
         .input-sucesso { border: 2px solid #2e7d32 !important; background-color: #f1f8e9; }
         .msg-erro-cpf { color: #ff1744; font-size: 11px; display: block; text-align: left; margin-top: 2px; font-weight: 400; }
         
-        /* Ajuste nos blocos de ingressos extras */
-        .ingresso-extra { background: #fdf2e9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #ebba95; text-align: left; }
-        .ingresso-extra label { margin-top: 6px; }
+        /* Blocos de convidados extras com pequenos ajustes de respiro */
+        .ingresso-extra { background: #fdf2e9; padding: 10px; border-radius: 8px; margin-top: 11px; border: 1px solid #ebba95; text-align: left; }
+        .ingresso-extra label { margin-top: 8px; }
         .ingresso-extra label:first-child { margin-top: 0; }
         
-        /* Botões Estilo 3D Fofos ligeiramente mais compactos */
-        .btn-principal { margin-top: 18px; width: 100%; padding: 10px; border-radius: 8px; font-size: 15px; font-weight: 700; background-color: #e65100; color: white; cursor: pointer; border: none; box-shadow: 0 4px 0 #b33600; font-family: 'Poppins', sans-serif; }
+        /* Botões Estilo 3D Juninos */
+        .btn-principal { margin-top: 20px; width: 100%; padding: 11px; border-radius: 8px; font-size: 15px; font-weight: 700; background-color: #e65100; color: white; cursor: pointer; border: none; box-shadow: 0 4px 0 #b33600; font-family: 'Poppins', sans-serif; }
         .btn-principal:active:not(:disabled) { box-shadow: 0 1px 0 #b33600; transform: translateY(3px); }
         .btn-principal:disabled { background-color: #bcaaa4 !important; box-shadow: 0 4px 0 #8d6e63 !important; cursor: not-allowed; }
-        .btn-validar { position: relative; background-color: #1565c0 !important; box-shadow: 0 4px 0 #0d47a1 !important; margin-top: 12px; z-index: 1; }
+        .btn-validar { position: relative; background-color: #1565c0 !important; box-shadow: 0 4px 0 #0d47a1 !important; margin-top: 14px; z-index: 1; }
         .btn-validar:active:not(:disabled) { box-shadow: 0 1px 0 #0d47a1 !important; transform: translateY(3px); }
         .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font-size: 12px; font-weight: 600; background-color: #616161; color: white; border: none; border-radius: 6px; cursor: pointer; }
         
@@ -60,7 +62,7 @@
         .pix-codigo-input { font-family: 'JetBrains Mono', monospace; font-size: 11px; width: 100%; text-align: center; border: 1px solid #ccc; background: #fff; padding: 6px; border-radius: 4px; color: #4a3b32; }
         .status-msg { margin-top: 10px; font-size: 13px; font-weight: bold; color: #bf360c; line-height: 1.4; }
         .texto-expiracao { display: none; color: #ff1744; font-size: 12px; font-weight: 600; margin-bottom: 5px; margin-top: 10px; }
-        .msg-confirmacao { font-family: 'Amatic SC', cursive; color: #2e7d32; line-height: 1.1; }
+        .msg-confirmacao { font-family: 'Amatic SC', cursive !important; color: #2e7d32; line-height: 1.1; }
         .msg-confirmacao h2 { font-size: 38px; margin: 8px 0; font-weight: 700; color: #2e7d32; }
         .msg-confirmacao p { font-size: 28px; margin: 4px 0; font-weight: 700; }
         .icon-grande { font-size: 60px; display: block; margin-bottom: 6px; color: #2e7d32; }
@@ -74,7 +76,6 @@
         .pagamento-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 5000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .pagamento-overlay-texto { color: #ffffff; font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; text-align: center; max-width: 320px; line-height: 1.5; }
         
-        /* Efeito de Bloqueio */
         .sessao-bloqueada { opacity: 0.35 !important; filter: grayscale(100%) !important; pointer-events: none !important; }
     </style>
 </head>
@@ -147,7 +148,6 @@
     </div>
 
     <script>
-        // CONFIGURAÇÕES GLOBAIS DE MANUTENÇÃO (TOKENS)
         const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/c865df3051554f7fa285ee3b51414a15/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=WWvqT25xLU-f9h4y3Cd0JBJJQH9Px75X5C1Y8C1355g";
         const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/484f77e462c548b58ec3628b695cb04a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=hhue2aeqHlRV4ynfMUcFnY90J4b-wyDlvj-t8TfambE";
         const TEMPO_CHECK_PIX = 6000;
@@ -164,7 +164,6 @@
         let idPagamentoAtual = null, intervaloPix = null, loopEmExecucao = false, cronometroRegressivo = null;
         const selectQtde = document.getElementById("quantidade"), camposExtras = document.getElementById("campos-extras");
 
-        // 1. ADICIONANDO MÁSCARAS E EVENTOS DE ENTRADA
         setTimeout(() => {
             document.getElementById('btnFecharPopup').style.display = 'block';
             document.getElementById('btnXPopup').style.display = 'block';
@@ -236,7 +235,6 @@
             } else { e.target.classList.remove("input-erro", "input-sucesso"); }
         }
 
-        // 2. DINAMISMO - EXIBIR CAMPOS DE CONVIDADOS
         selectQtde.addEventListener("change", () => {
             const q = parseInt(selectQtde.value); camposExtras.innerHTML = "";
             for(let i = 1; i <= q; i++) {
@@ -253,7 +251,6 @@
         });
         selectQtde.dispatchEvent(new Event('change'));
 
-        // 3. EVENTO - DISPARO E PROCESSAMENTO DO FORMULÁRIO (CHAMADA API 1)
         async function processarEnvioFormulario(e) {
             e.preventDefault();
             const btn = document.getElementById("btn-gerar"), comp = document.getElementById("comprador").value.trim(), cpfC = document.getElementById("cpf-comprador").value.trim(), tel = document.getElementById("telefone").value.trim();
@@ -303,7 +300,6 @@
             } catch (err) { alert("Erro de conexão com o servidor."); btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; }
         }
 
-        // 4. CRONÔMETRO DE CONTAGEM REGRESSIVA DO PIX
         function iniciarCronometro() {
             if (cronometroRegressivo) clearInterval(cronometroRegressivo);
             let tRest = Math.floor(LIMITE_EXPIRACAO_PIX / 1000);
@@ -322,7 +318,6 @@
             setTimeout(() => { document.getElementById("btn-copiar").innerHTML = `<i class="fa-solid fa-copy"></i> Copiar Código Pix`; }, 2000);
         }
 
-        // 5. CHECAGEM E MONITORAMENTO DO PAGAMENTO (AUTOMÁTICO E MANUAL COM BOTÃO AZUL)
         function iniciarMonitoramentoPixAutomatico() {
             if (intervaloPix) clearInterval(intervaloPix); loopEmExecucao = false;
             intervaloPix = setInterval(async () => {
@@ -351,7 +346,6 @@
             }
         });
 
-        // 6. FINALIZAÇÕES - TELA DE SUCESSO OU EVENTO DE EXPIRAÇÃO (TIMEOUT)
         function aplicarLayoutSucessoDefinitivo() {
             if (cronometroRegressivo) clearInterval(cronometroRegressivo); if (intervaloPix) clearInterval(intervaloPix);
             document.getElementById("timer-expiracao").style.display = "none";
