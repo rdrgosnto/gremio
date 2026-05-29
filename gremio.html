@@ -6,58 +6,64 @@
     <title>Grêmio | Ingressos Festa Junina</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <!-- Corrigido o link das fontes para garantir a renderização correta da Amatic SC estilizada -->
-    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Poppins:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght=400;700&family=Poppins:wght=300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         /* ==========================================================================
-           RESET & ESTRUTURA GLOBAL (REDUÇÃO PROPORCIONAL DE 10% - COMPACT SLIM)
+           RESET & ESTRUTURA GLOBAL (COMPACT SLIM COM FONTE POPPINS)
            ========================================================================== */
         * { box-sizing: border-box; margin: 0; padding: 0; transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s; }
         body { 
-            font-family: 'Poppins', sans-serif; min-height: 100vh; min-height: 100dvh; color: #4a3b32; display: flex; justify-content: center; align-items: center; padding: 35px 18px;
+            font-family: 'Poppins', sans-serif; min-height: 100vh; min-height: 100dvh; color: #4a3b32; display: flex; justify-content: center; align-items: center; padding: 25px 18px;
             background-color: #e65100; 
             background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%), linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%); 
             background-size: 40px 40px; background-position: 0 0, 20px 20px; 
         }
-        /* Card reduzido proporcionalmente de 400px para 360px */
-        .container { width: 100%; max-width: 360px; position: relative; background-color: #fffdf7; padding: 30px 22px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35); text-align: center; border: 3px dashed #d84315; margin: auto 0; }
+        /* Card Compacto */
+        .container { width: 100%; max-width: 360px; position: relative; background-color: #fffdf7; padding: 24px 20px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35); text-align: center; border: 3px dashed #d84315; margin: auto 0; }
         
-        /* Ajuste fino na fonte temática para garantir o destaque e o estilo desenhado */
-        h1 { font-family: 'Amatic SC', cursive; font-weight: 700; font-size: 52px; letter-spacing: 1px; color: #bf360c; margin-top: 5px; line-height: 1; margin-bottom: 18px; }
+        /* Título destacado, mas com margem inferior reduzida para economizar espaço */
+        h1 { font-family: 'Amatic SC', cursive; font-weight: 700; font-size: 52px; letter-spacing: 1px; color: #bf360c; margin-top: 5px; line-height: 1; margin-bottom: 12px; }
         
-        label { font-weight: 600; margin-top: 12px; display: block; text-align: left; font-size: 13px; color: #4a3b32; }
+        /* Ajuste Slim nos Labels e Form Groups */
+        label { font-weight: 600; margin-top: 8px; display: block; text-align: left; font-size: 12px; color: #4a3b32; }
         .form-group { position: relative; display: flex; flex-direction: column; }
-        .input-icon { position: absolute; left: 14px; bottom: 11px; color: #bcaaa4; font-size: 15px; z-index: 2; }
+        
+        /* Ícone centralizado verticalmente com base no novo tamanho slim */
+        .input-icon { position: absolute; left: 14px; bottom: 10px; color: #bcaaa4; font-size: 14px; z-index: 2; }
         .has-icon input, .has-icon select { padding-left: 38px !important; }
-        input, select { width: 100%; padding: 10px 11px; border-radius: 8px; border: 2px dashed #bcaaa4; font-size: 13px; box-sizing: border-box; background-color: #fff; outline: none; margin-top: 5px; font-family: 'Poppins', sans-serif; color: #4a3b32; }
+        
+        /* CAIXAS DE PREENCHIMENTO SLIM: Reduzido padding e margem para igualar ao comportamento do segundo código */
+        input, select { width: 100%; padding: 8px 11px; border-radius: 8px; border: 2px dashed #bcaaa4; font-size: 13px; box-sizing: border-box; background-color: #fff; outline: none; margin-top: 4px; font-family: 'Poppins', sans-serif; color: #4a3b32; }
         input:focus, select:focus { border-color: #e65100 !important; box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.15); }
         .input-erro { border: 2px solid #ff1744 !important; background-color: #fff5f5; }
         .input-sucesso { border: 2px solid #2e7d32 !important; background-color: #f1f8e9; }
         .msg-erro-cpf { color: #ff1744; font-size: 11px; display: block; text-align: left; margin-top: 2px; font-weight: 400; }
-        .ingresso-extra { background: #fdf2e9; padding: 12px; border-radius: 8px; margin-top: 12px; border: 1px solid #ebba95; text-align: left; }
-        .ingresso-extra label { margin-top: 8px; }
+        
+        /* Ajuste nos blocos de ingressos extras */
+        .ingresso-extra { background: #fdf2e9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #ebba95; text-align: left; }
+        .ingresso-extra label { margin-top: 6px; }
         .ingresso-extra label:first-child { margin-top: 0; }
         
-        /* Botões Estilo 3D Fofos/Juninos */
-        .btn-principal { margin-top: 22px; width: 100%; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 700; background-color: #e65100; color: white; cursor: pointer; border: none; box-shadow: 0 5px 0 #b33600; font-family: 'Poppins', sans-serif; }
-        .btn-principal:active:not(:disabled) { box-shadow: 0 2px 0 #b33600; transform: translateY(3px); }
-        .btn-principal:disabled { background-color: #bcaaa4 !important; box-shadow: 0 5px 0 #8d6e63 !important; cursor: not-allowed; }
-        .btn-validar { position: relative; background-color: #1565c0 !important; box-shadow: 0 5px 0 #0d47a1 !important; margin-top: 15px; z-index: 1; }
-        .btn-validar:active:not(:disabled) { box-shadow: 0 2px 0 #0d47a1 !important; transform: translateY(3px); }
-        .btn-copiar { margin-top: 8px; width: 100%; padding: 9px; font-size: 12px; font-weight: 600; background-color: #616161; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        /* Botões Estilo 3D Fofos ligeiramente mais compactos */
+        .btn-principal { margin-top: 18px; width: 100%; padding: 10px; border-radius: 8px; font-size: 15px; font-weight: 700; background-color: #e65100; color: white; cursor: pointer; border: none; box-shadow: 0 4px 0 #b33600; font-family: 'Poppins', sans-serif; }
+        .btn-principal:active:not(:disabled) { box-shadow: 0 1px 0 #b33600; transform: translateY(3px); }
+        .btn-principal:disabled { background-color: #bcaaa4 !important; box-shadow: 0 4px 0 #8d6e63 !important; cursor: not-allowed; }
+        .btn-validar { position: relative; background-color: #1565c0 !important; box-shadow: 0 4px 0 #0d47a1 !important; margin-top: 12px; z-index: 1; }
+        .btn-validar:active:not(:disabled) { box-shadow: 0 1px 0 #0d47a1 !important; transform: translateY(3px); }
+        .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font-size: 12px; font-weight: 600; background-color: #616161; color: white; border: none; border-radius: 6px; cursor: pointer; }
         
-        /* Containers secundários com borda suave */
-        .qr-container { display: none; margin-top: 10px; padding: 18px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
-        .qr-container img { width: 100%; max-width: 160px; display: inline-block; }
-        .valor { font-weight: bold; color: #bf360c; margin-top: 10px; font-size: 1.2em; }
-        .pix-box { margin-top: 12px; padding: 10px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
-        .pix-codigo-input { font-family: 'JetBrains Mono', monospace; font-size: 11px; width: 100%; text-align: center; border: 1px solid #ccc; background: #fff; padding: 7px; border-radius: 4px; color: #4a3b32; }
-        .status-msg { margin-top: 12px; font-size: 14px; font-weight: bold; color: #bf360c; line-height: 1.4; }
-        .texto-expiracao { display: none; color: #ff1744; font-size: 12px; font-weight: 600; margin-bottom: 5px; margin-top: 12px; }
+        /* Containers secundários */
+        .qr-container { display: none; margin-top: 10px; padding: 14px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
+        .qr-container img { width: 100%; max-width: 150px; display: inline-block; }
+        .valor { font-weight: bold; color: #bf360c; margin-top: 8px; font-size: 1.1em; }
+        .pix-box { margin-top: 10px; padding: 8px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
+        .pix-codigo-input { font-family: 'JetBrains Mono', monospace; font-size: 11px; width: 100%; text-align: center; border: 1px solid #ccc; background: #fff; padding: 6px; border-radius: 4px; color: #4a3b32; }
+        .status-msg { margin-top: 10px; font-size: 13px; font-weight: bold; color: #bf360c; line-height: 1.4; }
+        .texto-expiracao { display: none; color: #ff1744; font-size: 12px; font-weight: 600; margin-bottom: 5px; margin-top: 10px; }
         .msg-confirmacao { font-family: 'Amatic SC', cursive; color: #2e7d32; line-height: 1.1; }
-        .msg-confirmacao h2 { font-size: 40px; margin: 8px 0; font-weight: 700; color: #2e7d32; }
-        .msg-confirmacao p { font-size: 30px; margin: 4px 0; font-weight: 700; }
-        .icon-grande { font-size: 70px; display: block; margin-bottom: 8px; color: #2e7d32; }
+        .msg-confirmacao h2 { font-size: 38px; margin: 8px 0; font-weight: 700; color: #2e7d32; }
+        .msg-confirmacao p { font-size: 28px; margin: 4px 0; font-weight: 700; }
+        .icon-grande { font-size: 60px; display: block; margin-bottom: 6px; color: #2e7d32; }
         
         /* Overlays e Popups */
         .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; }
@@ -66,9 +72,9 @@
         .btn-fechar-popup { display: none; position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background-color: #616161; color: #ffffff; border: none; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .btn-x-popup { display: none; position: absolute; top: -12px; right: -12px; width: 30px; height: 30px; background-color: #ff1744; color: #ffffff; border: 2px solid #ffffff; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; line-height: 26px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 10000; }
         .pagamento-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 5000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .pagamento-overlay-texto { color: #ffffff; font-family: 'Poppins', sans-serif; font-size: 17px; font-weight: 600; text-align: center; max-width: 320px; line-height: 1.5; }
+        .pagamento-overlay-texto { color: #ffffff; font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; text-align: center; max-width: 320px; line-height: 1.5; }
         
-        /* Efeito de Bloqueio - Torna os elementos cinzas e inativos */
+        /* Efeito de Bloqueio */
         .sessao-bloqueada { opacity: 0.35 !important; filter: grayscale(100%) !important; pointer-events: none !important; }
     </style>
 </head>
@@ -359,14 +365,12 @@
             elT.innerText = MSGS.timeout; 
             document.getElementById('status-verificacao').innerHTML = ""; 
             
-            // Mantém os elementos na tela, mas aplica o filtro cinza e desativa interações
             sQr.classList.add("sessao-bloqueada"); 
             document.getElementById('btn-copiar').disabled = document.getElementById('btn-validar').disabled = true;
             
             let cRedir = 9; 
             txtO.innerHTML = `Tempo Limite Excedido!<br><span style='font-size:15px; font-weight:400; opacity:0.8;'>Redirecionando em ${cRedir}s...</span>`;
             
-            // Ativa o overlay de bloqueio na tela inteira
             ov.style.display = "flex";
             ov.style.zIndex = "20000"; 
 
@@ -376,7 +380,6 @@
                 
                 if (cRedir <= 0) { 
                     clearInterval(loopRedir); 
-                    // Força a página a recarregar para a tela inicial limpa do formulário
                     window.location.reload(); 
                 }
             }, 1000);
