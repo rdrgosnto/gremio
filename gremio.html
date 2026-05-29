@@ -6,7 +6,7 @@
     <title>Grêmio | Ingressos Festa Junina</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght=700&family=Inter:wght=300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         /* ==========================================================================
            RESET & ESTRUTURA GLOBAL (REDUÇÃO PROPORCIONAL DE 10% - COMPACT SLIM)
@@ -144,7 +144,7 @@
         const LIMITE_EXPIRACAO_PIX = 600000;
         const MSGS = {
             dados_invalidos: "Preencha os dados corretamente",
-            cpf_comprador_duplicado: "Atenção: O CPF do Comprador só pode constar in 1 campo dos ingressos",
+            cpf_comprador_duplicado: "Atenção: O CPF do Comprador só pode constar em 1 campo dos ingressos",
             cpf_convidado_duplicado: "Atenção: CPF duplicados na lista de convidados",
             overlay_texto: "Não se esqueça de clicar no botão abaixo ao finalizar o seu pagamento.",
             copiado: "Copiado!",
@@ -263,7 +263,7 @@
             if ((new Set(cpfsConv)).size !== cpfsConv.length) { alert(MSGS.cpf_convidado_duplicado); return; }
             
             btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...`;
-            const payload = { "COMPRADOR": comp, "CPF_COMPRADOR": cpfC, "TELEFONE": tel, "QUANTIDADE": selectQtde.value, "INGRESSOS": list };
+            const payload = { "COMPRADOR": comp, "CPF_COMPRAPOR": cpfC, "TELEFONE": tel, "QUANTIDADE": selectQtde.value, "INGRESSOS": list };
 
             try {
                 const r = await fetch(URL_GERAR_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
@@ -331,12 +331,19 @@
         }
 
         document.getElementById("btn-validar").addEventListener("click", async () => {
+            if (loopEmExecucao) return; // Nova trava de segurança contra duplicidade visual
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
+            
+            loopEmExecucao = true;
             const btn = document.getElementById("btn-validar"), msg = document.getElementById("status-verificacao");
             btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Verificando...`;
-            if (await efetuarChamadaValidacaoAPI()) { aplicarLayoutSucessoDefinitivo(); } else {
+            
+            if (await efetuarChamadaValidacaoAPI()) { 
+                aplicarLayoutSucessoDefinitivo(); 
+            } else {
                 msg.innerHTML = `<span class="icon-grande" style="font-size:50px; color:#bf360c; margin-bottom:5px;">❌</span><br>Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!`;
                 btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Verificar Pagamento`;
+                loopEmExecucao = false; // Libera o controle
                 iniciarMonitoramentoPixAutomatico();
             }
         });
