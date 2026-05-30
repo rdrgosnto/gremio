@@ -248,7 +248,7 @@
             // 📦 CENÁRIO 3: ENTREGA (Pedidos Online)
             if (modoResgateManual) {
                 if (!internetEstavel) {
-                    // [3 A] Frase de Contingência Offline unificada
+                    // [3 A] Contingência Offline
                     if (confirm("Sistema offline\nFinalizar Venda?")) {
                         salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal);
                         alert("Venda Finalizada!");
@@ -265,7 +265,7 @@
             // 💵 CENÁRIO 1: DINHEIRO
             if (formaPagamento === 'DINHEIRO') {
                 if (!internetEstavel) {
-                    // [3 A] Frase de Contingência Offline unificada
+                    // [3 A] Contingência Offline
                     if (confirm("Sistema offline\nFinalizar Venda?")) {
                         aplicarDescontoEstoqueLocal();
                         const idFake = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`;
@@ -286,7 +286,7 @@
 
                 // Caso esteja totalmente desconectado da Rede
                 if (!internetEstavel) {
-                    // [3 A] Frase de Contingência Offline unificada
+                    // [3 A] Contingência Offline
                     if (confirm("Sistema offline\nFinalizar Venda?")) {
                         aplicarDescontoEstoqueLocal();
                         salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio());
@@ -298,8 +298,8 @@
                 } 
                 // Caso tenha Internet, mas ultrapassou a barreira dos 59 segundos (Contingência B)
                 else if (tempoDeEsperaAtual >= LIMITE_TIMEOUT_BANCO_PIX) {
-                    // [3 B] Frase de Contingência Lenta unificada
-                    if (confirm("Sistema lento\nFinalizar Venda")) {
+                    // [3 B] Contingência Lenta
+                    if (confirm("Sistema lento\nFinalizar Venda?")) {
                         aplicarDescontoEstoqueLocal();
                         if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
                         executarForçamentoVendaPixNasNuvens();
@@ -365,7 +365,8 @@
 
         async function executarGravacaoDinheiroDirecto() {
             try {
-                await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`, "DINHEIRO") });
+                const resposta = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`, "DINHEIRO") });
+                if (!resposta.ok) throw new Error();
                 if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
                 
                 setTimeout(async () => {
@@ -374,7 +375,7 @@
                     resetSistemicoTotal(true);
                 }, 1500);
             } catch (e) { 
-                // [3 D] Unificação de falha de gravação/rede
+                // [3 D] Falha no processamento
                 alert("Falha no processamento"); 
                 reabrirVisualBotaoFinalizar(); 
             }
@@ -416,7 +417,7 @@
                     iniciarMonitoramentoPixAutomatico();
                 } else throw new Error();
             } catch (e) { 
-                // [3 D] Unificação de falha de geração do QR Code
+                // [3 D] Falha ao gerar QR Code
                 alert("Falha ao gerar QR Code"); 
                 resetarEstadoPagamento(); 
             }
@@ -432,7 +433,7 @@
                 
                 if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) {
                     clearInterval(intervaloPix); intervaloPix = null;
-                    // [3 C] Frase de expiração de tempo limite unificada (10 min)
+                    // [3 C] Tempo limite esgotado (10 min)
                     alert("Tempo limite esgotado"); forçarFechamentoSistemico(); return;
                 }
 
@@ -462,32 +463,25 @@
 
         async function executarGravacaoPixAprovadoNasNuvens() {
             try {
-                await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') });
+                const resposta = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') });
+                if (!resposta.ok) throw new Error();
                 setTimeout(async () => {
                     await carregarEstoqueReal(); 
                     alert("Venda Finalizada!");
                     resetSistemicoTotal(true);
                 }, 1500);
             } catch (e) { 
-                // [3 D] Unificação de falha de gravação/rede
+                // [3 D] Falha no processamento
                 alert("Falha no processamento"); 
                 reabrirVisualBotaoFinalizar(); 
             }
         }
 
         async function executarForçamentoVendaPixNasNuvens() {
-            try {
-                await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') });
-                setTimeout(async () => {
-                    await carregarEstoqueReal(); 
-                    alert("Venda Finalizada!");
-                    resetSistemicoTotal(true);
-                }, 1500);
-            } catch (e) { 
-                salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio());
-                alert("Venda Finalizada!");
-                resetSistemicoTotal(false);
-            }
+            // Lógica otimizada: envia direto para a caderneta offline para desobstruir a fila do caixa sem pingar a internet
+            salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio());
+            alert("Venda Finalizada!");
+            resetSistemicoTotal(false);
         }
 
         function abrirOverlayCelular() {
@@ -627,7 +621,7 @@
                 alert("Venda Finalizada!"); 
                 carregarEstoqueReal(); resetSistemicoTotal(true);
             } catch (e) { 
-                // [3 D] Unificação de falha de gravação/rede
+                // [3 D] Falha no processamento
                 alert("Falha no processamento"); 
                 reabrirVisualBotaoFinalizar(); 
             }
