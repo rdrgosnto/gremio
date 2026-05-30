@@ -41,7 +41,7 @@
                     <div class="flex-1 flex flex-col min-h-0">
                         <div class="flex justify-between items-center mb-1.5 w-full px-0.5 h-4">
                             <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Resumo:</h4>
-                            <button id="btn-limpar-carrinho" onclick="limparCarrinhoCompleto()" class="hidden text-xs font-semibold text-slate-400 uppercase tracking-wider underline hover:text-slate-600 transition-colors">Limpar</button>
+                            <button id="btn-limpar-carrinho" onclick="limparCarrinhoCompleto()" class="hidden text-xs font-semibold text-slate-400 uppercase tracking-wider pr-1 hover:text-slate-600 transition-colors">Limpar</button>
                             <span id="id-pedido-cabecalho" class="text-xs font-medium text-slate-400 tracking-wide ml-auto hidden"></span>
                         </div>
                         <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1 relative">
@@ -436,6 +436,7 @@
 
         function resetSistemicoTotal(forçarAtualizacaoHttp = true) {
             modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0;
+            document.getElementById("titulo-checkout").innerText = "PAGAMENTO";
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = abrirOverlayCelular;
             bf.className = "pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-sm";
             bf.innerHTML = `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center py-1">Pedido R$ 0,00 - Revisar e Pagar</div>`;
@@ -491,7 +492,8 @@
             }));
 
             renderizarProdutos();
-            document.getElementById("titulo-checkout").innerText = "Resumo do Pedido"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
+            document.getElementById("titulo-checkout").className = "text-sm font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200";
+            document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             const cabId = document.getElementById("id-pedido-cabecalho"); cabId.innerText = `ID: ${idDigitado}`; cabId.classList.remove("hidden");
             document.getElementById("btn-limpar-carrinho").classList.add("hidden");
 
