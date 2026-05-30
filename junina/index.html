@@ -83,7 +83,7 @@
     </main>
 
     <div id="container-botao-flutuante" class="fixed bottom-4 left-0 right-0 px-4 z-40 flex justify-center pointer-events-none">
-        <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-sm">
+        <div id="caixa-flutuante-base" onclick="abrirOverlayCelular()" class="pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-xs w-full cursor-pointer select-none text-sm">
             <div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center py-1">Pedido R$ 0,00 - Revisar e Pagar</div>
         </div>
     </div>
@@ -303,32 +303,33 @@
             renderizarProdutos();
         }
 
+        // 🔄 MAPEAMENTO RIGIDO: Chave alterada para "quantidade" para casar perfeitamente com seu JSON Schema oficial
         const extrairItensParaEnvio = (listaPronta = null) => {
             if (listaPronta) {
                 return listaPronta.map(i => ({
                     sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(),
                     produto: String(i.produto || i.PRODUTO).trim(),
                     grandmother_id: parseInt(i.grandmother_id || i.GRANDMOTHER_ID || i.ID || 0),
-                    quantity: parseInt(i.quantity || i.QUANTIDADE || i.quantidade || 1),
+                    quantidade: parseInt(i.quantidade || i.QUANTIDADE || i.quantity || 1),
                     preco: parseFloat(i.preco || i.PRECO || 0),
                     total: parseFloat(i.total || i.TOTAL || 0)
                 }));
             }
             return Object.keys(carrinho).map(id => { 
                 const p = produtos.find(i => i.id == id); 
-                return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantity: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
+                return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
             });
         };
 
-        const gerarPayloadVenda = (idF, forma, tipoVenda = "CAIXA", itensProntos = null, emContingencia = false) => JSON.stringify({ 
+        const gerarPayloadVenda = (idF, forma, tipoVenda = "CAIXA", itensProntos = null) => JSON.stringify({ 
             id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: tipoVenda, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
-            contingencia: emContingencia, itens: extrairItensParaEnvio(itensProntos)
+            itens: extrairItensParaEnvio(itensProntos)
         });
 
         function tratarContingenciaOffline(id, forma, tipoVenda, itens, msg) {
             if (confirm(msg)) {
                 if (tipoVenda === "CAIXA") aplicarDescontoEstoqueLocal();
-                salvarNoCacheContingencia(id, forma, tipoVenda, extrairItensParaEnvio(itens), true);
+                salvarNoCacheContingencia(id, forma, tipoVenda, extrairItensParaEnvio(itens));
                 alert("Venda Finalizada!"); resetSistemicoTotal(false); return true;
             }
             reabrirVisualBotaoFinalizar(); return false;
@@ -511,7 +512,7 @@
             modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(idDigitado).trim();
             cachePedidoOnlineOriginal = lines.map(l => ({
                 sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", produto: l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online",
-                grandmother_id: parseInt(l.ID) || parseInt(l.GRANDMOTHER_ID) || 0, quantity: parseInt(l.QUANTIDADE) || parseInt(l.quantity) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0
+                grandmother_id: parseInt(l.ID) || parseInt(l.GRANDMOTHER_ID) || 0, quantidade: parseInt(l.QUANTIDADE) || parseInt(l.quantidade) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0
             }));
 
             renderizarProdutos();
@@ -549,9 +550,9 @@
             } catch (e) { exibirFalhaProcessamento(); }
         }
 
-        function salvarNoCacheContingencia(idPagamento, tipoPagamento, tipoVenda, itensProntos, emContingencia = false) {
+        function salvarNoCacheContingencia(idPagamento, tipoPagamento, tipoVenda, itensProntos) {
             let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || [];
-            fila.push({ id_pagamento: idPagamento, pagamento: tipoPagamento, tipo_venda: tipoVenda, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), contingencia: emContingencia, itens: itensProntos });
+            fila.push({ id_pagamento: idPagamento, pagamento: tipoPagamento, tipo_venda: tipoVenda, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), itens: itensProntos });
             localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila));
         }
 
@@ -560,17 +561,17 @@
                 let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || [];
                 if (fila.length === 0 || !(await diagnosticarInternetEstavel())) return;
                 try {
-                    const pacoteHigienizado = {
+                    // Monta o JSON limpando campos estranhos e forçando as chaves do seu esquema oficial
+                    const pacoteValidadoPeloEsquema = {
                         id_pagamento: String(fila[0].id_pagamento),
                         pagamento: String(fila[0].pagamento),
                         tipo_venda: String(fila[0].tipo_venda),
                         status_retirada: "retirado",
                         total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado),
                         transaction_amount: parseFloat(fila[0].transaction_amount),
-                        contingencia: true,
                         itens: extrairItensParaEnvio(fila[0].itens) 
                     };
-                    const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacoteHigienizado) });
+                    const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacoteValidadoPeloEsquema) });
                     if (r.ok) { fila.shift(); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); }
                 } catch (err) { console.error("Erro na sincronização.", err); }
             }, 30000);
