@@ -325,28 +325,16 @@
                 id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: tipoVenda, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
                 itens: extrairItensParaEnvio(itensProntos)
             };
-            if (emContingencia) baseObj.contingencia = true; // Injeção compatível com o novo Schema opcional
+            if (emContingencia) baseObj.contingencia = true; 
             return JSON.stringify(baseObj);
         };
 
-        // 👁️ RAIO-X DOS DADOS ATIVADO: Exibe o pop-up com o JSON formatado antes de salvar localmente para auditoria
+        // 🚀 LIMPO PARA PRODUÇÃO: Sem o bloco de inspeção de texto bruto do "modo teste"
         function tratarContingenciaOffline(id, forma, tipoVenda, itens, msg, msgSucesso = "Venda Finalizada!", emContingencia = true) {
-            const payloadValidado = {
-                id_pagamento: String(id),
-                pagamento: String(forma),
-                tipo_venda: String(tipoVenda),
-                status_retirada: "retirado",
-                total_pedido_consolidado: parseFloat(totalAtual),
-                transaction_amount: parseFloat(totalAtual),
-                contingencia: emContingencia, // Garante que a propriedade viaje no LocalStorage
-                itens: extrairItensParaEnvio(itens)
-            };
-
-            const jsonInspecaoVisual = JSON.stringify(payloadValidado, null, 2);
-
-            if (confirm(`${msg}\n\n--- RAIO-X DOS DADOS (LOCAL STORAGE) ---\n${jsonInspecaoVisual}\n\nConfirmar gravação no cache local?`)) {
+            if (confirm(msg)) {
                 if (tipoVenda === "CAIXA") aplicarDescontoEstoqueLocal();
-                salvarNoCacheContingencia(id, forma, tipoVenda, payloadValidado.itens);
+                const itensProcessados = extrairItensParaEnvio(itens);
+                salvarNoCacheContingencia(id, forma, tipoVenda, itensProcessados);
                 alert(msgSucesso); resetSistemicoTotal(false); return true;
             }
             reabrirVisualBotaoFinalizar(); return false;
@@ -467,7 +455,7 @@
         async function consultarStatusMercadoPagoDireto() {
             if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return false;
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "CAIXA", total_pedido_consolidated: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual) }) });
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "CAIXA", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual) }) });
                 return r.ok && (await r.json()).pago === true;
             } catch (erro) { return false; }
         }
@@ -567,14 +555,12 @@
 
         async function executingBaixaPedidoEntregue() {
             try {
-                // Modificado para passar "true" no último parâmetro indicando contingência (no fluxo online normal)
                 await enviarVendaNuvem(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Produto Entregue!");
             } catch (e) { exibirFalhaProcessamento(); }
         }
 
         function salvarNoCacheContingencia(idPagamento, tipoPagamento, tipoVenda, itensProntos) {
             let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || [];
-            // Salva incluindo explicitamente o "contingencia: true"
             fila.push({ 
                 id_pagamento: idPagamento, pagamento: tipoPagamento, tipo_venda: tipoVenda, status_retirada: "retirado", 
                 total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
@@ -595,7 +581,7 @@
                         status_retirada: "retirado",
                         total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado),
                         transaction_amount: parseFloat(fila[0].transaction_amount),
-                        contingencia: true, // Força a propriedade aceita no novo JSON Schema
+                        contingencia: true, 
                         itens: extrairItensParaEnvio(fila[0].itens) 
                     };
                     const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacoteValidadoPeloEsquema) });
