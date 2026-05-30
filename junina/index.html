@@ -303,7 +303,6 @@
             renderizarProdutos();
         }
 
-        // 🔄 INTEGRAÇÃO UNIFICADA: Força os tipos primitivos rígidos do JSON Schema (integer e number)
         const extrairItensParaEnvio = (listaPronta = null) => {
             if (listaPronta) {
                 return listaPronta.map(i => ({
@@ -326,20 +325,20 @@
             itens: extrairItensParaEnvio(itensProntos)
         });
 
-        function tratarContingenciaOffline(id, forma, tipoVenda, itens, msg) {
+        function tratarContingenciaOffline(id, forma, tipoVenda, itens, msg, msgSucesso = "Venda Finalizada!") {
             if (confirm(msg)) {
                 if (tipoVenda === "CAIXA") aplicarDescontoEstoqueLocal();
                 salvarNoCacheContingencia(id, forma, tipoVenda, extrairItensParaEnvio(itens));
-                alert("Venda Finalizada!"); resetSistemicoTotal(false); return true;
+                alert(msgSucesso); resetSistemicoTotal(false); return true;
             }
             reabrirVisualBotaoFinalizar(); return false;
         }
 
-        async function enviarVendaNuvem(idFinal, forma, tipoVenda = "CAIXA", itensProntos = null) {
+        async function enviarVendaNuvem(idFinal, forma, tipoVenda = "CAIXA", itensProntos = null, msgSucesso = "Venda Finalizada!") {
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(idFinal, forma, tipoVenda, itensProntos) });
                 if (!r.ok) throw new Error();
-                setTimeout(async () => { await carregarEstoqueReal(); alert("Venda Finalizada!"); resetSistemicoTotal(true); }, 1500);
+                setTimeout(async () => { await carregarEstoqueReal(); alert(msgSucesso); resetSistemicoTotal(true); }, 1500);
             } catch (e) { exibirFalhaProcessamento(); }
         }
 
@@ -349,7 +348,7 @@
             const internetEstavel = await diagnosticarInternetEstavel();
 
             if (modoResgateManual) {
-                if (!internetEstavel) tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Sistema offline\nFinalizar venda?");
+                if (!internetEstavel) tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Sistema Offline\nConfirmar entrega?", "Produto Entregue!");
                 else executingBaixaPedidoEntregue();
                 return;
             }
@@ -361,10 +360,12 @@
             } 
             else if (formaPagamento === 'PIX') {
                 if (!internetEstavel) {
-                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", null, "Sistema offline\nFinalizar venda?");
+                    // Correção: Agora envia os itens coletados localmente antes que suma da tela
+                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?");
                 } else if ((Date.now() - timestampCriacaoPix) >= LIMITE_TIMEOUT_BANCO_PIX) {
                     if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
-                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", null, "Sistema lento\nFinalizar venda?");
+                    // Correção: Garante a passagem dos itens coletados localmente
+                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema lento\nFinalizar venda?");
                 } else {
                     if (await consultarStatusMercadoPagoDireto()) {
                         if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
@@ -544,8 +545,8 @@
 
         async function executingBaixaPedidoEntregue() {
             try {
-                // Correção: Agora usa a função unificada garantindo tipos numéricos nos itens do Excel para o Power Automate
-                await enviarVendaNuvem(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal);
+                // Correção: Envia a baixa online usando as frases customizadas em caso de sucesso
+                await enviarVendaNuvem(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Produto Entregue!");
             } catch (e) { exibirFalhaProcessamento(); }
         }
 
