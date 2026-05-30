@@ -359,12 +359,17 @@
                 else { aplicarDescontoEstoqueLocal(); enviarVendaNuvem(idDin, "DINHEIRO"); }
             } 
             else if (formaPagamento === 'PIX') {
+                // Reter se o QR code real não foi gerado pelo banco ainda (ID vazio ou mantendo assinatura provisória mp_)
+                if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) {
+                    alert("QR Code não foi gerado.\nNão é possível finalizar em contingência.");
+                    reabrirVisualBotaoFinalizar();
+                    return;
+                }
+
                 if (!internetEstavel) {
-                    // Correção: Agora envia os itens coletados localmente antes que suma da tela
                     tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?");
                 } else if ((Date.now() - timestampCriacaoPix) >= LIMITE_TIMEOUT_BANCO_PIX) {
                     if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
-                    // Correção: Garante a passagem dos itens coletados localmente
                     tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema lento\nFinalizar venda?");
                 } else {
                     if (await consultarStatusMercadoPagoDireto()) {
@@ -545,7 +550,6 @@
 
         async function executingBaixaPedidoEntregue() {
             try {
-                // Correção: Envia a baixa online usando as frases customizadas em caso de sucesso
                 await enviarVendaNuvem(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Produto Entregue!");
             } catch (e) { exibirFalhaProcessamento(); }
         }
