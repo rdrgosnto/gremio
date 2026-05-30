@@ -225,7 +225,7 @@
         function extrairItensParaEnvio() {
             return Object.keys(carrinho).map(id => { 
                 const p = produtos.find(i => i.id == id); 
-                return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
+                return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
             });
         }
 
@@ -248,9 +248,10 @@
             // 📦 CENÁRIO 3: ENTREGA (Pedidos Online)
             if (modoResgateManual) {
                 if (!internetEstavel) {
-                    if (confirm("Sistema offiline\nFinalizar Venda?")) {
+                    // [3 A] Frase de Contingência Offline unificada
+                    if (confirm("Sistema offline\nFinalizar Venda?")) {
                         salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal);
-                        alert("Pedido Entregue");
+                        alert("Venda Finalizada!");
                         resetSistemicoTotal(false);
                     } else {
                         reabrirVisualBotaoFinalizar();
@@ -264,7 +265,8 @@
             // 💵 CENÁRIO 1: DINHEIRO
             if (formaPagamento === 'DINHEIRO') {
                 if (!internetEstavel) {
-                    if (confirm("Sistema offiline\nFinalizar Venda?")) {
+                    // [3 A] Frase de Contingência Offline unificada
+                    if (confirm("Sistema offline\nFinalizar Venda?")) {
                         aplicarDescontoEstoqueLocal();
                         const idFake = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`;
                         salvarNoCacheContingencia(idFake, "DINHEIRO", "CAIXA", extrairItensParaEnvio());
@@ -284,7 +286,8 @@
 
                 // Caso esteja totalmente desconectado da Rede
                 if (!internetEstavel) {
-                    if (confirm("Sistema offiline\nFinalizar Venda?")) {
+                    // [3 A] Frase de Contingência Offline unificada
+                    if (confirm("Sistema offline\nFinalizar Venda?")) {
                         aplicarDescontoEstoqueLocal();
                         salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio());
                         alert("Venda Finalizada!");
@@ -293,9 +296,10 @@
                         reabrirVisualBotaoFinalizar();
                     }
                 } 
-                // Caso tenha Internet, mas ultrapassou a barreira protetora dos 59 segundos (Contingência B)
+                // Caso tenha Internet, mas ultrapassou a barreira dos 59 segundos (Contingência B)
                 else if (tempoDeEsperaAtual >= LIMITE_TIMEOUT_BANCO_PIX) {
-                    if (confirm("Sistema lento\nFinalizar Venda?")) {
+                    // [3 B] Frase de Contingência Lenta unificada
+                    if (confirm("Sistema lento\nFinalizar Venda")) {
                         aplicarDescontoEstoqueLocal();
                         if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
                         executarForçamentoVendaPixNasNuvens();
@@ -303,7 +307,7 @@
                         reabrirVisualBotaoFinalizar();
                     }
                 } 
-                // Dentro do tempo estável (0 a 58s), o clique apenas força a checagem manual síncrona
+                // Dentro do tempo estável (0 a 58s), o clique força a checagem manual síncrona
                 else {
                     const pagoImediato = await consultarStatusMercadoPagoDireto();
                     if (pagoImediato) {
@@ -312,7 +316,6 @@
                         await executarGravacaoPixAprovadoNasNuvens();
                     } else {
                         alert("Pagamento Pendente");
-                        // 📢 CORREÇÃO: Força a reativação visual do botão imediatamente após fechar o alert, sem travar cinza
                         btn.disabled = false;
                         btn.innerText = "Finalizar";
                         btn.className = CSS_FINALIZAR_HABILITADO;
@@ -337,9 +340,8 @@
             
             if (formaPagamento === 'PIX') {
                 if (pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) {
-                    // Impede o loop automático de voltar o botão para cinza se ele já passou da barreira dos 12 segundos
                     if (btn.disabled && btn.className === CSS_FINALIZAR_DESABILITADO && btn.innerText === "Finalizar") {
-                        // Respeita o fluxo do setTimeout dos 12 segundos iniciais
+                        // Respeita a trava inicial dos 12s
                     } else {
                         btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
                     }
@@ -371,7 +373,11 @@
                     alert("Venda Finalizada!");
                     resetSistemicoTotal(true);
                 }, 1500);
-            } catch (e) { alert("Erro ao processar venda"); reabrirVisualBotaoFinalizar(); }
+            } catch (e) { 
+                // [3 D] Unificação de falha de gravação/rede
+                alert("Falha no processamento"); 
+                reabrirVisualBotaoFinalizar(); 
+            }
         }
 
         async function requisitarQrCodeReal() {
@@ -409,7 +415,11 @@
 
                     iniciarMonitoramentoPixAutomatico();
                 } else throw new Error();
-            } catch (e) { alert("Falha ao gerar QR Code."); resetarEstadoPagamento(); }
+            } catch (e) { 
+                // [3 D] Unificação de falha de geração do QR Code
+                alert("Falha ao gerar QR Code"); 
+                resetarEstadoPagamento(); 
+            }
         }
 
         function iniciarMonitoramentoPixAutomatico() {
@@ -422,6 +432,7 @@
                 
                 if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) {
                     clearInterval(intervaloPix); intervaloPix = null;
+                    // [3 C] Frase de expiração de tempo limite unificada (10 min)
                     alert("Tempo limite esgotado"); forçarFechamentoSistemico(); return;
                 }
 
@@ -457,7 +468,11 @@
                     alert("Venda Finalizada!");
                     resetSistemicoTotal(true);
                 }, 1500);
-            } catch (e) { alert("Erro ao concluir gravação do PIX."); reabrirVisualBotaoFinalizar(); }
+            } catch (e) { 
+                // [3 D] Unificação de falha de gravação/rede
+                alert("Falha no processamento"); 
+                reabrirVisualBotaoFinalizar(); 
+            }
         }
 
         async function executarForçamentoVendaPixNasNuvens() {
@@ -583,7 +598,7 @@
             lines.forEach(linha => {
                 const totalLinha = parseFloat(linha.TOTAL) || 0; valorConsolidated += totalLinha; 
                 let entregue = (linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente") === "retirado";
-                if (entregue) { btnFinalizar.disabled = true; btnFinalizar.innerText = "Pedido Entregue"; btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; }
+                if (entregue) { btnFinalizar.disabled = true; btnFinalizar.innerText = "Venda Finalizada!"; btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; }
                 lista.innerHTML += `
                     <div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-200 shadow-sm font-sistema">
                         <div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(linha.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div>
@@ -609,9 +624,13 @@
                 });
                 if (!resposta.ok) throw new Error();
                 
-                alert("Pedido Entregue"); 
+                alert("Venda Finalizada!"); 
                 carregarEstoqueReal(); resetSistemicoTotal(true);
-            } catch (e) { alert("Erro ao processar baixa do pedido online."); reabrirVisualBotaoFinalizar(); }
+            } catch (e) { 
+                // [3 D] Unificação de falha de gravação/rede
+                alert("Falha no processamento"); 
+                reabrirVisualBotaoFinalizar(); 
+            }
         }
 
         // ==========================================
