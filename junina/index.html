@@ -303,7 +303,6 @@
             renderizarProdutos();
         }
 
-        // 🔄 INTEGRAÇÃO UNIFICADA: Garante o envio estrito da chave "quantity" esperada pelo Power Automate
         const extrairItensParaEnvio = (listaPronta = null) => {
             if (listaPronta) {
                 return listaPronta.map(i => ({
@@ -446,7 +445,7 @@
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "CAIXA", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual) }) });
                 return r.ok && (await r.json()).pago === true;
-            } catch (erro) return false;
+            } catch (erro) { return false; }
         }
 
         function abrirOverlayCelular() {
@@ -561,7 +560,6 @@
                 let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || [];
                 if (fila.length === 0 || !(await diagnosticarInternetEstavel())) return;
                 try {
-                    // Remapeamento estrito e higienização para que as chaves fiquem 100% no padrão do Power Automate
                     const pacoteHigienizado = {
                         id_pagamento: String(fila[0].id_pagamento),
                         pagamento: String(fila[0].pagamento),
@@ -570,7 +568,7 @@
                         total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado),
                         transaction_amount: parseFloat(fila[0].transaction_amount),
                         contingencia: true,
-                        itens: extrairItensParaEnvio(fila[0].itens) // Remapeia e força "quantity" em cada item da sublista
+                        itens: extrairItensParaEnvio(fila[0].itens) 
                     };
                     const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacoteHigienizado) });
                     if (r.ok) { fila.shift(); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); }
