@@ -11,6 +11,12 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         html, body { visibility: hidden; opacity: 0; background-color: #f8fafc; }
+        
+        /* touch-action: pan-y diz ao celular para rolar verticalmente direto pelo hardware */
+        .scroll-celular-perfeito {
+            touch-action: pan-y !important;
+        }
+        
         .swipe-card {
             transition: transform 0.15s ease-out, opacity 0.3s ease, max-height 0.3s ease, margin 0.3s ease, padding 0.3s ease;
             will-change: transform, opacity, max-height;
@@ -44,7 +50,7 @@
                             <button id="btn-limpar-carrinho" onclick="limparCarrinhoCompleto()" class="hidden text-xs font-semibold text-slate-400 uppercase tracking-wider pr-1 hover:text-slate-600 transition-colors">Limpar</button>
                             <span id="id-pedido-cabecalho" class="text-xs font-medium text-slate-400 tracking-wide ml-auto hidden"></span>
                         </div>
-                        <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1 relative">
+                        <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1 relative scroll-celular-perfeito">
                             <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
                         </div>
                     </div>
@@ -206,11 +212,11 @@
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(item => item.id == id), qtd = carrinho[id], sub = p.preco * qtd; totalAtual += sub; tItens += qtd;
                 lista.innerHTML += `
-                    <div data-id="${id}" class="swipe-card flex justify-between items-center bg-slate-50 p-[6px] rounded-md border border-slate-100 relative touch-none select-none">
-                        <div class="max-w-[75%] min-w-0 pointer-events-none">
+                    <div data-id="${id}" class="swipe-card flex justify-between items-center bg-slate-50 p-[6px] rounded-md border border-slate-100 relative scroll-celular-perfeito select-none">
+                        <div class="max-w-[75%] min-w-0 pointer-events-none w-full">
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 <p class="font-semibold text-slate-700 truncate text-[14px]">${p.nome}</p>
-                                <span onclick="event.stopPropagation(); removerItemDoCarrinhoCompleto(${id})" class="text-[11px] text-slate-400 font-normal cursor-pointer hover:text-rose-500 transition-colors pointer-events-auto">Remover Item</span>
+                                <span data-btn-remove="${id}" class="text-[11px] text-slate-400 font-normal cursor-pointer hover:text-rose-500 transition-colors pointer-events-auto p-1 -m-1">Remover Item</span>
                             </div>
                             <p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(p.preco)}</p>
                         </div>
@@ -233,34 +239,69 @@
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
-        // 🖐️ ENGENHARIA UNIFICADA DE SWIPE (POINTER EVENTS)
+        // 🖐️ ENGENHARIA AVANÇADA DE GESTOS (MATRIZ DE TOQUE INTELIGENTE COM ROLAGEM DE HARDWARE)
         function configurarSwipeToDelete() {
             document.querySelectorAll('.swipe-card').forEach(card => {
-                let startX = 0, currentX = 0, isDragging = false;
+                let startX = 0, startY = 0, currentX = 0, currentY = 0;
+                let isDragging = false, isScrolling = false, gestureChecked = false;
                 const id = card.getAttribute('data-id');
+                const btnRemove = card.querySelector('[data-btn-remove]');
 
-                card.addEventListener('pointerdown', (e) => {
-                    isDragging = true; startX = e.clientX; card.style.transition = 'none';
-                    card.setPointerCapture(e.pointerId);
-                });
+                if (btnRemove) {
+                    btnRemove.onpointerdown = (e) => {
+                        e.stopPropagation(); e.preventDefault();
+                        card.classList.add('removing');
+                        setTimeout(() => removerItemDoCarrinhoCompleto(id), 250);
+                    };
+                }
 
+                card.onpointerdown = (e) => {
+                    isDragging = true; gestureChecked = false; isScrolling = false;
+                    startX = e.clientX; startY = e.clientY;
+                    card.style.transition = 'none';
+                };
+
+                // Remove o atributo antigo do HTML se houver e usa addEventListener formal
+                card.removeAttribute('onpointermove'); 
                 card.addEventListener('pointermove', (e) => {
-                    if (!isDragging) return;
-                    currentX = e.clientX; let diffX = currentX - startX;
-                    card.style.transform = `translateX(${diffX > 0 ? 0 : diffX}px)`;
-                });
-
-                card.addEventListener('pointerup', (e) => {
-                    if (!isDragging) return; isDragging = false;
-                    let diffX = currentX - startX; card.style.transition = 'transform 0.15s ease-out';
+                    if (!isDragging || isScrolling) return;
+                    currentX = e.clientX; currentY = e.clientY;
                     
-                    if (diffX < 0 && Math.abs(diffX) > card.offsetWidth * 0.3) {
+                    let diffX = currentX - startX;
+                    let diffY = currentY - startY;
+
+                    if (!gestureChecked) {
+                        // Se o movimento for predominantemente vertical (Y), aborta o JS e deixa o celular rolar solto
+                        if (Math.abs(diffY) > 10 && Math.abs(diffY) > Math.abs(diffX)) {
+                            isScrolling = true; isDragging = false;
+                            card.style.transform = 'translateX(0px)';
+                            return;
+                        }
+                        // Só captura o ponteiro e inicia o Swipe se o movimento for claramente horizontal para a esquerda
+                        if (diffX < -10 && Math.abs(diffX) > Math.abs(diffY)) {
+                            gestureChecked = true;
+                            card.setPointerCapture(e.pointerId);
+                        }
+                    }
+
+                    if (gestureChecked) {
+                        card.style.transform = `translateX(${diffX > 0 ? 0 : diffX}px)`;
+                    }
+                }, { passive: true }); // passive: true libera os engasgos de processamento no mobile
+
+                card.onpointerup = (e) => {
+                    if (!isDragging) return; isDragging = false;
+                    let diffX = e.clientX - startX;
+                    card.style.transition = 'transform 0.15s ease-out';
+                    
+                    if (gestureChecked && diffX < 0 && Math.abs(diffX) > card.offsetWidth * 0.3) {
                         card.classList.add('removing');
                         setTimeout(() => removerItemDoCarrinhoCompleto(id), 300);
                     } else {
                         card.style.transform = 'translateX(0px)';
                     }
-                });
+                    try { card.releasePointerCapture(e.pointerId); } catch(err){}
+                };
             });
         }
 
@@ -273,7 +314,7 @@
 
         const extrairItensParaEnvio = () => Object.keys(carrinho).map(id => { 
             const p = produtos.find(i => i.id == id); 
-            return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
+            return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantity: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
         });
 
         const gerarPayloadVenda = (idF, forma, tipoVenda = "CAIXA", itensProntos = null, emContingencia = false) => JSON.stringify({ 
@@ -281,7 +322,6 @@
             contingencia: emContingencia, itens: itensProntos ? itensProntos : extrairItensParaEnvio()
         });
 
-        // ☁️ MOTOR UNIFICADO DE GRAVAÇÃO NA NUVEM (DINHEIRO/PIX)
         async function enviarVendaNuvem(idFinal, forma) {
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(idFinal, forma) });
@@ -437,6 +477,7 @@
         function resetSistemicoTotal(forçarAtualizacaoHttp = true) {
             modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0;
             document.getElementById("titulo-checkout").innerText = "PAGAMENTO";
+            document.getElementById("titulo-checkout").className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200";
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = abrirOverlayCelular;
             bf.className = "pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs w-full cursor-pointer select-none text-sm";
             bf.innerHTML = `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center py-1">Pedido R$ 0,00 - Revisar e Pagar</div>`;
@@ -492,6 +533,7 @@
             }));
 
             renderizarProdutos();
+            document.getElementById("titulo-checkout").innerText = "PAGAMENTO";
             document.getElementById("titulo-checkout").className = "text-sm font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200";
             document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
             const cabId = document.getElementById("id-pedido-cabecalho"); cabId.innerText = `ID: ${idDigitado}`; cabId.classList.remove("hidden");
