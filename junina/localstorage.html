@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sincronização com LocalStorage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Simulador de Envio</h2>
+        <p>Digite algo abaixo para simular a criação de um dado que precisa ser enviado:</p>
+        <input type="text" id="campoDado" placeholder="Digite um dado aqui...">
+        <button onclick="capturarEGuardarDado()">Salvar Dado</button>
+    </div>
+
+    <script>
+        
+        // Função acionada pelo botão do HTML para capturar o que o usuário digitou
+        function capturarEGuardarDado() {
+            const input = document.getElementById('campoDado');
+            const valor = input.value.trim();
+            
+            if (valor === "") {
+                alert("Por favor, digite algo antes de salvar!");
+                return;
+            }
+
+            // Cria um objeto estruturado com o dado e o momento em que foi criado
+            const novoDado = {
+                conteudo: valor,
+                timestamp: new Date().toISOString()
+            };
+
+            // Salva na nossa fila do LocalStorage
+            salvarDadoNoLocalStorage(novoDado);
+            
+            // Limpa o campo de texto do HTML
+            input.value = "";
+        }
+
+        // 1. Função que acumula dados no localStorage
+        function salvarDadoNoLocalStorage(novoDado) {
+            const dadosAtuais = JSON.parse(localStorage.getItem('fila_sincronizacao')) || [];
+            dadosAtuais.push(novoDado);
+            localStorage.setItem('fila_sincronizacao', JSON.stringify(dadosAtuais));
+            console.log("Dado salvo localmente. Total na fila:", dadosAtuais.length);
+        }
+
+        // 2. Função principal que envia os dados acumulados para o servidor
+        async function sincronizarDados() {
+            // Verifica se há internet antes de tentar enviar
+            if (!navigator.onLine) {
+                console.log("Sem conexão com a internet. Os dados aguardam no localStorage.");
+                return;
+            }
+
+            const dadosParaEnviar = JSON.parse(localStorage.getItem('fila_sincronizacao')) || [];
+            
+            if (dadosParaEnviar.length === 0) {
+                console.log("Nenhum dado pendente para envio.");
+                return;
+            }
+
+            console.log(`Tentando enviar ${dadosParaEnviar.length} itens...`);
+
+            try {
+                // Envia os dados para a função que simula a API
+                const resposta = await enviarParaOServidor(dadosParaEnviar);
+
+                if (resposta.sucesso) {
+                    // SÓ limpa o localStorage se o servidor confirmar o recebimento
+                    localStorage.removeItem('fila_sincronizacao');
+                    console.log("Sincronização concluída com sucesso! LocalStorage limpo.");
+                } else {
+                    console.error("O servidor recusou os dados. Mantendo no localStorage.");
+                }
+            } catch (erro) {
+                console.error("Erro na comunicação com o servidor. Dados preservados localmente.", erro);
+            }
+        }
+
+        // 3. Simulação da sua função de API (Substitua depois pelo seu fetch/axios real)
+        function enviarParaOServidor(dados) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    // Simulando que o servidor aceitou os dados com sucesso
+                    resolve({ sucesso: true }); 
+                }, 1000);
+            });
+        }
+
+        /* ==========================================================================
+           CONTROLE DOS GATILHOS (TIMERS E EVENTOS)
+           ========================================================================== */
+
+        // Gatilho 1: Executa a sincronização automaticamente a cada 30 segundos
+        const intervaloTrintaSegundos = setInterval(sincronizarDados, 30000);
+
+        // Gatilho 2: Escuta o evento de "Voltou a Internet" e dispara IMEDIATAMENTE
+        window.addEventListener('online', () => {
+            console.log("📶 Internet restaurada! Disparando sincronização imediata...");
+            sincronizarDados();
+        });
+
+        // Opcional: Avisar no console quando a internet cair
+        window.addEventListener('offline', () => {
+            console.warn("⚠️ Conexão perdida. O sistema passará a acumular dados localmente.");
+        });
+
+    </script>
+</body>
+</html>
