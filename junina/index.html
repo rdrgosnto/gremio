@@ -93,7 +93,7 @@
         // ⚙️ CONFIGURAÇÕES GLOBAIS DO SISTEMA (ALTERE AQUI SE NECESSÁRIO)
         // ==========================================================================
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
-        constURL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/06f981a846ca45bc8bfe51c97c480d96/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n-3ys5toEStLZNzQS6q0bETlCP8-NuAjwWn-fAOqjOs";
+        const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/06f981a846ca45bc8bfe51c97c480d96/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n-3ys5toEStLZNzQS6q0bETlCP8-NuAjwWn-fAOqjOs";
         
         const DATA_LIBERACAO_DINHEIRO = "2026-05-30T08:00:00"; 
         const TEMPO_CHECK_PIX = 6000;              
@@ -303,6 +303,7 @@
             renderizarProdutos();
         }
 
+        // 🔄 INTEGRAÇÃO UNIFICADA: Força os tipos primitivos rígidos do JSON Schema (integer e number)
         const extrairItensParaEnvio = (listaPronta = null) => {
             if (listaPronta) {
                 return listaPronta.map(i => ({
@@ -316,7 +317,7 @@
             }
             return Object.keys(carrinho).map(id => { 
                 const p = produtos.find(i => i.id == id); 
-                return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
+                return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
             });
         };
 
@@ -334,9 +335,9 @@
             reabrirVisualBotaoFinalizar(); return false;
         }
 
-        async function enviarVendaNuvem(idFinal, forma) {
+        async function enviarVendaNuvem(idFinal, forma, tipoVenda = "CAIXA", itensProntos = null) {
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(idFinal, forma) });
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(idFinal, forma, tipoVenda, itensProntos) });
                 if (!r.ok) throw new Error();
                 setTimeout(async () => { await carregarEstoqueReal(); alert("Venda Finalizada!"); resetSistemicoTotal(true); }, 1500);
             } catch (e) { exibirFalhaProcessamento(); }
@@ -543,9 +544,8 @@
 
         async function executingBaixaPedidoEntregue() {
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal) });
-                if (!r.ok) throw new Error();
-                alert("Venda Finalizada!"); carregarEstoqueReal(); resetSistemicoTotal(true);
+                // Correção: Agora usa a função unificada garantindo tipos numéricos nos itens do Excel para o Power Automate
+                await enviarVendaNuvem(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal);
             } catch (e) { exibirFalhaProcessamento(); }
         }
 
