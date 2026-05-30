@@ -233,7 +233,7 @@
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
-        // 🖐️ ENGENHARIA AVANÇADA DE GESTOS (MATRIZ DE TOQUE INTELIGENTE)
+        // 🖐️ ENGENHARIA REVISADA DE GESTOS (ROLOGEM VERTICAL LIVRE E PASSIVA)
         function configurarSwipeToDelete() {
             document.querySelectorAll('.swipe-card').forEach(card => {
                 let startX = 0, startY = 0, currentX = 0, currentY = 0;
@@ -241,11 +241,9 @@
                 const id = card.getAttribute('data-id');
                 const btnRemove = card.querySelector('[data-btn-remove]');
 
-                // Proteção 1: Garante remoção instantânea e limpa no clique direto do botão
                 if (btnRemove) {
                     btnRemove.onpointerdown = (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
+                        e.stopPropagation(); e.preventDefault();
                         card.classList.add('removing');
                         setTimeout(() => removerItemDoCarrinhoCompleto(id), 250);
                     };
@@ -255,43 +253,49 @@
                     isDragging = true; gestureChecked = false; isScrolling = false;
                     startX = e.clientX; startY = e.clientY;
                     card.style.transition = 'none';
-                    card.setPointerCapture(e.pointerId);
+                    // REMOVIDO o setPointerCapture imediato para não roubar o foco da rolagem nativa
                 };
 
-                card.onpointermove = (e) => {
+                // Substituído por addEventListener formal com { passive: true } para liberar a rolagem em tempo de hardware
+                card.removeAttribute('onpointermove'); 
+                card.addEventListener('pointermove', (e) => {
                     if (!isDragging || isScrolling) return;
                     currentX = e.clientX; currentY = e.clientY;
                     
                     let diffX = currentX - startX;
                     let diffY = currentY - startY;
 
-                    // Proteção 2: Trava de intenção inicial (10 pixels) para discernir direção
                     if (!gestureChecked) {
+                        // Se andou mais de 10 pixels verticais, mata o arrasto horizontal e deixa a página rolar
                         if (Math.abs(diffY) > 10 && Math.abs(diffY) > Math.abs(diffX)) {
-                            isScrolling = true; isDragging = false; // Usuário quer rolar a lista
+                            isScrolling = true; isDragging = false;
                             card.style.transform = 'translateX(0px)';
                             return;
                         }
-                        if (Math.abs(diffX) > 10) gestureChecked = true; // Usuário quer dar swipe
+                        // Só assume o controle do dedo se for um movimento horizontal claro de mais de 10 pixels
+                        if (Math.abs(diffX) > 10 && Math.abs(diffX) > Math.abs(diffY)) {
+                            gestureChecked = true;
+                            card.setPointerCapture(e.pointerId); // Captura tardia: só captura se for fazer o Swipe
+                        }
                     }
 
                     if (gestureChecked) {
                         card.style.transform = `translateX(${diffX > 0 ? 0 : diffX}px)`;
                     }
-                };
+                }, { passive: true });
 
                 card.onpointerup = (e) => {
                     if (!isDragging) return; isDragging = false;
                     let diffX = e.clientX - startX;
                     card.style.transition = 'transform 0.15s ease-out';
                     
-                    // Se passou do threshold de 30% da largura, remove o card
                     if (gestureChecked && diffX < 0 && Math.abs(diffX) > card.offsetWidth * 0.3) {
                         card.classList.add('removing');
                         setTimeout(() => removerItemDoCarrinhoCompleto(id), 300);
                     } else {
                         card.style.transform = 'translateX(0px)';
                     }
+                    try { card.releasePointerCapture(e.pointerId); } catch(err){}
                 };
             });
         }
