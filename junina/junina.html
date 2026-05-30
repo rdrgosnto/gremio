@@ -229,8 +229,10 @@
             });
         }
 
-        const gerarPayloadVenda = (idF, forma, tipoVenda = "CAIXA", itensProntos = null) => JSON.stringify({ 
+        // 🛡️ Ajustado para aceitar uma flag opcional indicando se o pacote é fruto de contingência forçada
+        const gerarPayloadVenda = (idF, forma, tipoVenda = "CAIXA", itensProntos = null, emContingencia = false) => JSON.stringify({ 
             id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: tipoVenda, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
+            contingencia: emContingencia,
             itens: itensProntos ? itensProntos : extrairItensParaEnvio()
         });
 
@@ -245,17 +247,11 @@
 
             const internetEstavel = await diagnosticarInternetEstavel();
 
-            // 📦 CENÁRIO 3: ENTREGA (Pedidos Online)
+            // 📦 [Parte 2]: CENÁRIO 3: ENTREGA (Pedidos Online) -> CONTINGÊNCIA OFF/LENTO REMOVIDA
             if (modoResgateManual) {
                 if (!internetEstavel) {
-                    // [3 A] Contingência Offline
-                    if (confirm("Sistema offline\nFinalizar Venda?")) {
-                        salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal);
-                        alert("Venda Finalizada!");
-                        resetSistemicoTotal(false);
-                    } else {
-                        reabrirVisualBotaoFinalizar();
-                    }
+                    alert("Falha no processamento");
+                    reabrirVisualBotaoFinalizar();
                 } else {
                     executingBaixaPedidoEntregue();
                 }
@@ -289,7 +285,7 @@
                     // [3 A] Contingência Offline
                     if (confirm("Sistema offline\nFinalizar Venda?")) {
                         aplicarDescontoEstoqueLocal();
-                        salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio());
+                        salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), true);
                         alert("Venda Finalizada!");
                         resetSistemicoTotal(false);
                     } else {
@@ -477,9 +473,9 @@
             }
         }
 
+        // 📦 [Parte 1]: Injeção da Propriedade 'contingencia: true' para pular checagem do banco no Power Automate
         async function executarForçamentoVendaPixNasNuvens() {
-            // Lógica otimizada: envia direto para a caderneta offline para desobstruir a fila do caixa sem pingar a internet
-            salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio());
+            salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), true);
             alert("Venda Finalizada!");
             resetSistemicoTotal(false);
         }
@@ -630,7 +626,7 @@
         // ==========================================
         // 💾 FUNÇÕES DE CONTINGÊNCIA & FILA OMA (LOCALSTORAGE)
         // ==========================================
-        function salvarNoCacheContingencia(idPagamento, tipoPagamento, tipoVenda, itensProntos) {
+        function salvarNoCacheContingencia(idPagamento, tipoPagamento, tipoVenda, itensProntos, emContingencia = false) {
             let filaContingencia = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || [];
             const payloadIdêntico = {
                 id_pagamento: idPagamento,
@@ -639,12 +635,14 @@
                 status_retirada: "retirado",
                 total_pedido_consolidado: parseFloat(totalAtual),
                 transaction_amount: parseFloat(totalAtual),
+                contingencia: emContingencia,
                 itens: itensProntos
             };
             filaContingencia.push(payloadIdêntico);
             localStorage.setItem("festa_junina_contingencia", JSON.stringify(filaContingencia));
         }
 
+        // 🛡️ [Parte 1]: Motor Oculto blindado contra rejeições da nuvem (Guarda o item caso falhe)
         function iniciarMotorSincronizacaoOculto() {
             setInterval(async () => {
                 let filaContingencia = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || [];
@@ -662,9 +660,13 @@
                     });
 
                     if (respostaFluxo.ok) {
+                        // Limpa o item enviado com sucesso e atualiza a caderneta local
                         filaContingencia.shift();
                         localStorage.setItem("festa_junina_contingencia", JSON.stringify(filaContingencia));
                         console.log(`Transação offline [${pacotePendente.id_pagamento}] integrada com sucesso à planilha.`);
+                    } else {
+                        // Se a resposta HTTP for um erro do servidor (502, 500, etc), mantém na fila e não joga fora
+                        console.warn(`Servidor recusou o pacote provisoriamente (${respostaFluxo.status}). Mantendo na fila local.`);
                     }
                 } catch (erroRede) {
                     console.error("Motor de lote temporariamente incapaz de subir dados. Aguardando estabilização.", erroRede);
