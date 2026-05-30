@@ -12,7 +12,7 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         html, body { visibility: hidden; opacity: 0; background-color: #f8fafc; }
         
-        /* touch-action: pan-y diz ao celular para rolar verticalmente direto pelo hardware */
+        /* Força a rolagem vertical nativa direto na GPU do celular */
         .scroll-celular-perfeito {
             touch-action: pan-y !important;
         }
@@ -95,23 +95,41 @@
     </div>
 
     <script>
-        // ==========================================
-        // ⚠️ CONFIGURAÇÕES DO SISTEMA
-        // ==========================================
+        // ==========================================================================
+        // ⚙️ CONFIGURAÇÕES GLOBAIS DO SISTEMA (ALTERE AQUI SE NECESSÁRIO)
+        // ==========================================================================
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/06f981a846ca45bc8bfe51c97c480d96/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n-3ys5toEStLZNzQS6q0bETlCP8-NuAjwWn-fAOqjOs";
-        const TEMPO_CHECK_PIX = 6000, LIMITE_EXPIRACAO_PIX = 600000, LIMITE_TIMEOUT_BANCO_PIX = 59000;
+        
+        // Trava de Segurança Cronológica (Venda Antecipada apenas via PIX)
+        const DATA_LIBERACAO_DINHEIRO = "2026-06-13T08:00:00"; // Padrão ISO (Ano-Mês-DiaTHora:Min:Seg)
 
+        // Tempos de Resposta do Banco e Loops
+        const TEMPO_CHECK_PIX = 6000;              // Varredura do status Mercado Pago (6s)
+        const LIMITE_EXPIRACAO_PIX = 600000;       // Tempo máximo para pagar o QR Code (10min)
+        const LIMITE_TIMEOUT_BANCO_PIX = 59000;    // Estouro de tempo para acionar contingência por lentidão (59s)
+
+        // Sensibilidade de Gestos e Toques
+        const DISTANCIA_TRAVA_GESTO = 10;          // Margem em pixels para travar/discernir direções de arrasto
+        const THRESHOLD_SLIDE_REMOVER = 0.3;       // Largura mínima (30%) de arraste lateral para acionar a deleção
+
+        // Design e Alertas Visuais de Negócio
+        const LIMITE_ESTOQUE_CRITICO = 5;          // Valor de estoque para baixo para alertar em vermelho na tela
+        const TEMPO_ANIMACAO_REMOVER = 250;        // Tempo em milissegundos do colapso do card ao apagar
+
+        // Estilos CSS Estáticos encapsulados
         const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-orange-500 bg-orange-50 text-orange-700 font-bold text-sm text-center shadow-sm transition-all";
         const CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
         const CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95";
         const CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
         const CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs w-full text-sm";
 
+        // Variáveis de Estado de Execução
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0;
 
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
         const exibirFalhaProcessamento = () => { alert("Falha no processamento"); reabrirVisualBotaoFinalizar(); };
+        const ehVendaLiberadaDinheiro = () => Date.now() >= new Date(DATA_LIBERACAO_DINHEIRO).getTime();
         
         function liberarExibicaoSegura() {
             document.documentElement.style.visibility = document.body.style.visibility = "visible";
@@ -150,7 +168,7 @@
             const grid = document.getElementById("grid-produtos"); grid.innerHTML = "";
             produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
                 const qtd = carrinho[p.id] || 0; let cEstilo = "bg-white border-slate-300 hover:border-slate-400 cursor-pointer", boxEstilo = "bg-slate-100 text-slate-600", bloq = "", esg = p.estoque === 0;
-                let status = `<span class="${esg || p.estoque <= 5 ? 'text-rose-500 font-semibold' : 'text-orange-600 font-semibold'}">${p.estoque}</span>`;
+                let status = `<span class="${esg || p.estoque <= LIMITE_ESTOQUE_CRITICO ? 'text-rose-500 font-semibold' : 'text-orange-600 font-semibold'}">${p.estoque}</span>`;
                 if (esg) cEstilo = "bg-slate-100 text-slate-400 select-none pointer-events-none opacity-60";
                 if (qtd > 0 && !esg) boxEstilo = "bg-orange-50 border border-orange-200 text-orange-700";
                 if (modoBuscaAtivo || modoResgateManual) { cEstilo = "bg-slate-50 border-slate-300 text-slate-300 select-none pointer-events-none opacity-40"; bloq = "disabled"; }
@@ -231,16 +249,19 @@
                 btnLimpar.classList.add("hidden"); cabecalhoId.classList.add("hidden"); resetarEstadoPagamento();
             } else {
                 blocoPagamento.className = "space-y-4 pt-1 border-t opacity-100 pointer-events-auto";
-                btnDinheiro.disabled = btnPix.disabled = false;
-                btnLimpar.classList.remove("hidden"); cabecalhoId.classList.add("hidden"); configurarSwipeToDelete();
+                btnPix.disabled = false;
+                // Valida se a venda por dinheiro está autorizada cronologicamente
+                btnDinheiro.disabled = !ehVendaLiberadaDinheiro();
+                
+                btnLimpar.classList.remove("hidden"); cabecalhoId.classList.add("hidden"); configuringMatrizGestos();
             }
 
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
-        // 🖐️ ENGENHARIA AVANÇADA DE GESTOS (MATRIZ DE TOQUE INTELIGENTE COM ROLAGEM DE HARDWARE)
-        function configurarSwipeToDelete() {
+        // 🖐️ ENGENHARIA AVANÇADA DE GESTOS (MATRIZ DE TOQUE E ROLAGEM DE HARDWARE)
+        function configuringMatrizGestos() {
             document.querySelectorAll('.swipe-card').forEach(card => {
                 let startX = 0, startY = 0, currentX = 0, currentY = 0;
                 let isDragging = false, isScrolling = false, gestureChecked = false;
@@ -251,7 +272,7 @@
                     btnRemove.onpointerdown = (e) => {
                         e.stopPropagation(); e.preventDefault();
                         card.classList.add('removing');
-                        setTimeout(() => removerItemDoCarrinhoCompleto(id), 250);
+                        setTimeout(() => removerItemDoCarrinhoCompleto(id), TEMPO_ANIMACAO_REMOVER);
                     };
                 }
 
@@ -261,7 +282,6 @@
                     card.style.transition = 'none';
                 };
 
-                // Remove o atributo antigo do HTML se houver e usa addEventListener formal
                 card.removeAttribute('onpointermove'); 
                 card.addEventListener('pointermove', (e) => {
                     if (!isDragging || isScrolling) return;
@@ -271,14 +291,14 @@
                     let diffY = currentY - startY;
 
                     if (!gestureChecked) {
-                        // Se o movimento for predominantemente vertical (Y), aborta o JS e deixa o celular rolar solto
-                        if (Math.abs(diffY) > 10 && Math.abs(diffY) > Math.abs(diffX)) {
+                        // Aborta interceptação de script se o movimento for nativo vertical
+                        if (Math.abs(diffY) > DISTANCIA_TRAVA_GESTO && Math.abs(diffY) > Math.abs(diffX)) {
                             isScrolling = true; isDragging = false;
                             card.style.transform = 'translateX(0px)';
                             return;
                         }
-                        // Só captura o ponteiro e inicia o Swipe se o movimento for claramente horizontal para a esquerda
-                        if (diffX < -10 && Math.abs(diffX) > Math.abs(diffY)) {
+                        // Assume controle e trava ponteiro apenas no arraste exclusivo para a esquerda
+                        if (diffX < -DISTANCIA_TRAVA_GESTO && Math.abs(diffX) > Math.abs(diffY)) {
                             gestureChecked = true;
                             card.setPointerCapture(e.pointerId);
                         }
@@ -287,16 +307,16 @@
                     if (gestureChecked) {
                         card.style.transform = `translateX(${diffX > 0 ? 0 : diffX}px)`;
                     }
-                }, { passive: true }); // passive: true libera os engasgos de processamento no mobile
+                }, { passive: true });
 
                 card.onpointerup = (e) => {
                     if (!isDragging) return; isDragging = false;
                     let diffX = e.clientX - startX;
                     card.style.transition = 'transform 0.15s ease-out';
                     
-                    if (gestureChecked && diffX < 0 && Math.abs(diffX) > card.offsetWidth * 0.3) {
+                    if (gestureChecked && diffX < 0 && Math.abs(diffX) > card.offsetWidth * THRESHOLD_SLIDE_REMOVER) {
                         card.classList.add('removing');
-                        setTimeout(() => removerItemDoCarrinhoCompleto(id), 300);
+                        setTimeout(() => removerItemDoCarrinhoCompleto(id), TEMPO_ANIMACAO_REMOVER + 50);
                     } else {
                         card.style.transform = 'translateX(0px)';
                     }
@@ -314,7 +334,7 @@
 
         const extrairItensParaEnvio = () => Object.keys(carrinho).map(id => { 
             const p = produtos.find(i => i.id == id); 
-            return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantity: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
+            return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
         });
 
         const gerarPayloadVenda = (idF, forma, tipoVenda = "CAIXA", itensProntos = null, emContingencia = false) => JSON.stringify({ 
@@ -336,29 +356,37 @@
 
             const internetEstavel = await diagnosticarInternetEstavel();
 
+            // ⚠️ FLUXO 3: PEDIDO ONLINE CARREGADO COM QUEDA POSTERIOR DE REDE
             if (modoResgateManual) {
-                if (!internetEstavel) exibirFalhaProcessamento(); else executingBaixaPedidoEntregue();
+                if (!internetEstavel) {
+                    if (confirm("Sistema offline\nFinalizar venda?")) {
+                        salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, true);
+                        alert("Venda Finalizada!"); resetSistemicoTotal(false);
+                    } else reabrirVisualBotaoFinalizar();
+                } else { executingBaixaPedidoEntregue(); }
                 return;
             }
             
+            // 💵 FLUXO 1: VENDA LOCAL EM DINHEIRO
             if (formaPagamento === 'DINHEIRO') {
                 if (!internetEstavel) {
-                    if (confirm("Sistema offline\nFinalizar Venda?")) {
+                    if (confirm("Sistema offline\nFinalizar venda?")) {
                         aplicarDescontoEstoqueLocal();
                         salvarNoCacheContingencia(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`, "DINHEIRO", "CAIXA", extrairItensParaEnvio());
                         alert("Venda Finalizada!"); resetSistemicoTotal(false);
                     } else reabrirVisualBotaoFinalizar();
                 } else { aplicarDescontoEstoqueLocal(); enviarVendaNuvem(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`, "DINHEIRO"); }
             } 
+            // 📱 FLUXO 2: VENDA LOCAL EM PIX
             else if (formaPagamento === 'PIX') {
                 if (!internetEstavel) {
-                    if (confirm("Sistema offline\nFinalizar Venda?")) {
+                    if (confirm("Sistema offline\nFinalizar venda?")) {
                         aplicarDescontoEstoqueLocal(); salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), true);
                         alert("Venda Finalizada!"); resetSistemicoTotal(false);
                     } else reabrirVisualBotaoFinalizar();
                 } 
                 else if ((Date.now() - timestampCriacaoPix) >= LIMITE_TIMEOUT_BANCO_PIX) {
-                    if (confirm("Sistema lento\nFinalizar Venda?")) {
+                    if (confirm("Sistema lento\nFinalizar venda?")) {
                         aplicarDescontoEstoqueLocal(); if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
                         salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), true);
                         alert("Venda Finalizada!"); resetSistemicoTotal(false);
@@ -475,7 +503,7 @@
         }
 
         function resetSistemicoTotal(forçarAtualizacaoHttp = true) {
-            modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0;
+            modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = [];
             document.getElementById("titulo-checkout").innerText = "PAGAMENTO";
             document.getElementById("titulo-checkout").className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200";
             const bf = document.getElementById("caixa-flutuante-base"); bf.onclick = abrirOverlayCelular;
