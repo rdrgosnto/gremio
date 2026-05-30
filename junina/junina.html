@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Grêmio | Festa Junina</title>
     <link rel="manifest" href="manifest.json">
     
@@ -87,6 +87,7 @@
         const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/06f981a846ca45bc8bfe51c97c480d96/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n-3ys5toEStLZNzQS6q0bETlCP8-NuAjwWn-fAOqjOs";
         const TEMPO_CHECK_PIX = 6000;
         const LIMITE_EXPIRACAO_PIX = 600000;
+        const LIMITE_TIMEOUT_BANCO_PIX = 59000; // Trava de 59 segundos para a contingência B do PIX
 
         const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-orange-500 bg-orange-50 text-orange-700 font-bold text-sm text-center shadow-sm transition-all";
         const CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 transition-all";
@@ -107,7 +108,22 @@
             const cache = localStorage.getItem("festa_junina_cardapio");
             if (cache) { produtos = JSON.parse(cache); renderizarProdutos(); }
             carregarEstoqueReal();
+            iniciarMotorSincronizacaoOculto();
         });
+
+        // 🛡️ MOTOR DE DIAGNÓSTICO DE REDE RÁPIDO (Hardware + Teste Ativo)
+        async function diagnosticarInternetEstavel() {
+            if (!navigator.onLine) return false;
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5 segundos limite de ping
+                await fetch("https://www.google.com", { mode: "no-cors", signal: controller.signal });
+                clearTimeout(timeoutId);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
 
         async function carregarEstoqueReal(idParaBuscar = "") {
             try {
@@ -206,17 +222,100 @@
             renderizarProdutos();
         }
 
-        const processarCliqueFinalizar = () => {
-            if (modoResgateManual) return executingBaixaPedidoEntregue();
+        function extrairItensParaEnvio() {
+            return Object.keys(carrinho).map(id => { 
+                const p = produtos.find(i => i.id == id); 
+                return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
+            });
+        }
+
+        const gerarPayloadVenda = (idF, forma, tipoVenda = "CAIXA", itensProntos = null) => JSON.stringify({ 
+            id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: tipoVenda, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
+            itens: itensProntos ? itensProntos : extrairItensParaEnvio()
+        });
+
+        // ⚡ GERENCIADOR DOS CLIQUES DE FINALIZAÇÃO (Dinheiro, PIX e Entrega)
+        async function processarCliqueFinalizar() {
+            const btn = document.getElementById("btn-finalizar");
             
+            // 🛡️ Trava Universal Anticlique Duplo
+            btn.disabled = true;
+            btn.innerText = "Processando...";
+            btn.className = CSS_FINALIZAR_DESABILITADO;
+
+            const internetEstavel = await diagnosticarInternetEstavel();
+
+            // 📦 CENÁRIO 3: ENTREGA (Pedidos Online)
+            if (modoResgateManual) {
+                if (!internetEstavel) {
+                    if (confirm("Sistema offiline\nFinalizar Venda?")) {
+                        salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal);
+                        alert("Pedido Entregue");
+                        resetSistemicoTotal(false);
+                    } else {
+                        reabrirVisualBotaoFinalizar();
+                    }
+                } else {
+                    executingBaixaPedidoEntregue();
+                }
+                return;
+            }
+            
+            // 💵 CENÁRIO 1: DINHEIRO
             if (formaPagamento === 'DINHEIRO') {
-                aplicarDescontoEstoqueLocal();
-                return executarGravacaoDinheiroDirecto();
+                if (!internetEstavel) {
+                    if (confirm("Sistema offiline\nFinalizar Venda?")) {
+                        aplicarDescontoEstoqueLocal();
+                        const idFake = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`;
+                        salvarNoCacheContingencia(idFake, "DINHEIRO", "CAIXA", extrairItensParaEnvio());
+                        alert("Venda Finalizada!");
+                        resetSistemicoTotal(false);
+                    } else {
+                        reabrirVisualBotaoFinalizar();
+                    }
+                } else {
+                    aplicarDescontoEstoqueLocal();
+                    executarGravacaoDinheiroDirecto();
+                }
+            } 
+            // 📱 CENÁRIO 2: PIX
+            else if (formaPagamento === 'PIX') {
+                const tempoDeEsperaAtual = Date.now() - timestampCriacaoPix;
+
+                // Caso esteja totalmente desconectado da Rede
+                if (!internetEstavel) {
+                    if (confirm("Sistema offiline\nFinalizar Venda?")) {
+                        aplicarDescontoEstoqueLocal();
+                        salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio());
+                        alert("Venda Finalizada!");
+                        resetSistemicoTotal(false);
+                    } else {
+                        reabrirVisualBotaoFinalizar();
+                    }
+                } 
+                // Caso tenha Internet, mas ultrapassou a barreira protetora dos 59 segundos (Contingência B)
+                else if (tempoDeEsperaAtual >= LIMITE_TIMEOUT_BANCO_PIX) {
+                    if (confirm("Sistema lento\nFinalizar Venda?")) {
+                        aplicarDescontoEstoqueLocal();
+                        if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
+                        executarForçamentoVendaPixNasNuvens();
+                    } else {
+                        reabrirVisualBotaoFinalizar();
+                    }
+                } 
+                // Dentro do tempo estável (0 a 58s), o clique apenas força a checagem manual síncrona
+                else {
+                    const pagoImediato = await consultarStatusMercadoPagoDireto();
+                    if (pagoImediato) {
+                        if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
+                        aplicarDescontoEstoqueLocal();
+                        await executarGravacaoPixAprovadoNasNuvens();
+                    } else {
+                        reabrirVisualBotaoFinalizar();
+                    }
+                }
             }
-            if (formaPagamento === 'PIX') {
-                return executarCliqueContingenciaManualPix();
-            }
-        };
+        }
 
         function selecionarPagamento(tipo) {
             formaPagamento = tipo; const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro"), secaoDin = document.getElementById("secao-valores-dinheiro"), carr = document.getElementById("carrossel-pagamento"), inp = document.getElementById("input-recebido");
@@ -233,9 +332,7 @@
             const btn = document.getElementById("btn-finalizar"), rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0;
             
             if (formaPagamento === 'PIX') {
-                if (btn.getAttribute("data-trava-tempo") === "true") {
-                    btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
-                } else if (pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) {
+                if (pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) {
                     btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
                 } else {
                     btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
@@ -245,11 +342,6 @@
                 btn.className = btn.disabled ? CSS_FINALIZAR_DESABILITADO : CSS_FINALIZAR_HABILITADO;
             }
         }
-
-        const gerarPayloadVenda = (idF, forma) => JSON.stringify({ 
-            id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: "CAIXA", status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
-            itens: Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }) 
-        });
 
         function tratarMascaraDinheiro(inp) {
             let val = inp.value.replace(/\D/g, ""); if (val === "") return;
@@ -261,18 +353,16 @@
         }
 
         async function executarGravacaoDinheiroDirecto() {
-            const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
             try {
-                await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}`, "DINHEIRO") });
+                await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(`DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`, "DINHEIRO") });
                 if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
                 
                 setTimeout(async () => {
                     await carregarEstoqueReal(); 
                     alert("Venda Finalizada!");
                     resetSistemicoTotal(true);
-                }, 3000);
-
-            } catch (e) { alert("Erro ao processar venda"); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
+                }, 1500);
+            } catch (e) { alert("Erro ao processar venda"); reabrirVisualBotaoFinalizar(); }
         }
 
         async function requisitarQrCodeReal() {
@@ -286,7 +376,6 @@
             
             const btn = document.getElementById("btn-finalizar");
             btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
-            btn.setAttribute("data-trava-tempo", "true");
 
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
@@ -297,12 +386,7 @@
                     box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-none rounded-none border border-slate-300"; 
                     box.innerHTML = `<img src="data:image/jpeg;base64,${stringQrCodeBase64Salva}" class="w-full h-full object-contain rounded-none">`; 
                     
-                    setTimeout(() => {
-                        btn.removeAttribute("data-trava-tempo");
-                        if (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) {
-                            btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
-                        }
-                    }, 12000);
+                    btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
 
                     iniciarMonitoramentoPixAutomatico();
                 } else throw new Error();
@@ -347,31 +431,29 @@
         }
 
         async function executarGravacaoPixAprovadoNasNuvens() {
-            const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
             try {
                 await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') });
-                
                 setTimeout(async () => {
                     await carregarEstoqueReal(); 
                     alert("Venda Finalizada!");
                     resetSistemicoTotal(true);
-                }, 3000);
-
-            } catch (e) { alert("Erro"); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
+                }, 1500);
+            } catch (e) { alert("Erro ao concluir gravação do PIX."); reabrirVisualBotaoFinalizar(); }
         }
 
-        async function executarCliqueContingenciaManualPix() {
-            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
-            const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
-
-            const pago = await consultarStatusMercadoPagoDireto();
-
-            if (pago) {
-                aplicarDescontoEstoqueLocal();
-                await executarGravacaoPixAprovadoNasNuvens();
-            } else {
-                btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
-                alert("Pagamento Pendente"); iniciarMonitoramentoPixAutomatico(); 
+        async function executarForçamentoVendaPixNasNuvens() {
+            try {
+                await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') });
+                setTimeout(async () => {
+                    await carregarEstoqueReal(); 
+                    alert("Venda Finalizada!");
+                    resetSistemicoTotal(true);
+                }, 1500);
+            } catch (e) { 
+                // Se a rede falhar na hora de forçar online, guarda silenciosamente em lote local
+                salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio());
+                alert("Venda Finalizada!");
+                resetSistemicoTotal(false);
             }
         }
 
@@ -414,8 +496,7 @@
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             formaPagamento = null; pixChaveIdentificadora = ""; stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
             
-            const btn = document.getElementById("btn-finalizar");
-            btn.removeAttribute("data-trava-tempo"); btn.innerText = "Finalizar"; btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
+            reabrirVisualBotaoFinalizar();
 
             document.getElementById("btn-pix").className = document.getElementById("btn-dinheiro").className = CSS_BTN_INATIVO;
             document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
@@ -426,6 +507,12 @@
             box.className = "w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 transition-none select-none text-center p-2";
             box.innerHTML = `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>`;
             
+            validarEstadoFinalizar();
+        }
+
+        function reabrirVisualBotaoFinalizar() {
+            const btn = document.getElementById("btn-finalizar");
+            btn.innerText = "Finalizar";
             validarEstadoFinalizar();
         }
 
@@ -456,7 +543,18 @@
                 setTimeout(() => { forçarFechamentoSistemico(); }, 2000); return;
             }
 
-            modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(idDigitado).trim(); cachePedidoOnlineOriginal = [...lines]; 
+            modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(idDigitado).trim();
+            
+            // Mapeia a estrutura original das linhas vinda do Excel para manipulação offline idêntica
+            cachePedidoOnlineOriginal = lines.map(l => ({
+                sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE",
+                produto: l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online",
+                grandmother_id: parseInt(l.ID) || parseInt(l.GRANDMOTHER_ID) || 0,
+                quantidade: parseInt(l.QUANTIDADE) || 1,
+                preco: parseFloat(l.PRECO) || 0,
+                total: parseFloat(l.TOTAL) || 0
+            }));
+
             renderizarProdutos();
 
             document.getElementById("titulo-checkout").innerText = "Resumo do Pedido"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
@@ -476,6 +574,8 @@
                     </div>`;
             });
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valorConsolidated)}`;
+            totalAtual = valorConsolidated;
+
             if (window.innerWidth >= 1024) {
                 bf.className = "bg-slate-800 " + CSS_BASE_FLUTUANTE + " cursor-default";
                 bf.innerHTML = `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${idDigitado}</div><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`;
@@ -483,31 +583,65 @@
         }
 
         async function executingBaixaPedidoEntregue() {
-            const btn = document.getElementById("btn-finalizar"); btn.innerText = "Processando..."; btn.disabled = true;
             try {
-                const valorConsolidado = parseFloat(document.getElementById("valor-pedido-txt").innerText.replace("R$", "").replace(".", "").replace(",", ".").trim()) || 0;
-                const itensFormatados = cachePedidoOnlineOriginal.map(l => {
-                    return {
-                        "sigla": l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE",
-                        "produto": l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online",
-                        "grandmother_id": parseInt(l.ID) || parseInt(l.GRANDMOTHER_ID) || 0,
-                        "quantidade": parseInt(l.QUANTIDADE) || 1,
-                        "preco": parseFloat(l.PRECO) || 0,
-                        "total": parseFloat(l.TOTAL) || 0
-                    };
-                });
-
                 const resposta = await fetch(URL_MÃE, { 
                     method: "POST", headers: { "Content-Type": "application/json" }, 
                     body: JSON.stringify({ 
-                        id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "ONLINE", status_retirada: "retirado", total_pedido_consolidado: valorConsolidado, transaction_amount: valorConsolidado, itens: itensFormatados
+                        id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "ONLINE", status_retirada: "retirado", total_pedido_consolidado: totalAtual, transaction_amount: totalAtual, itens: cachePedidoOnlineOriginal
                     }) 
                 });
                 if (!resposta.ok) throw new Error();
                 
                 alert("Pedido Entregue"); 
                 carregarEstoqueReal(); resetSistemicoTotal(true);
-            } catch (e) { alert("Erro ao processar baixa do pedido online."); btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; }
+            } catch (e) { alert("Erro ao processar baixa do pedido online."); reabrirVisualBotaoFinalizar(); }
+        }
+
+        // ==========================================
+        // 💾 FUNÇÕES DE CONTINGÊNCIA & FILA OMA (LOCALSTORAGE)
+        // ==========================================
+        function salvarNoCacheContingencia(idPagamento, tipoPagamento, tipoVenda, itensProntos) {
+            let filaContingencia = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || [];
+            const payloadIdêntico = {
+                id_pagamento: idPagamento,
+                pagamento: tipoPagamento,
+                tipo_venda: tipoVenda,
+                status_retirada: "retirado",
+                total_pedido_consolidado: parseFloat(totalAtual),
+                transaction_amount: parseFloat(totalAtual),
+                itens: itensProntos
+            };
+            filaContingencia.push(payloadIdêntico);
+            localStorage.setItem("festa_junina_contingencia", JSON.stringify(filaContingencia));
+        }
+
+        function iniciarMotorSincronizacaoOculto() {
+            setInterval(async () => {
+                let filaContingencia = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || [];
+                if (filaContingencia.length === 0) return;
+
+                const internetDisponivel = await diagnosticarInternetEstavel();
+                if (!internetDisponivel) return;
+
+                // Captura a primeira transação da caderneta local para sincronizar
+                const pacotePendente = filaContingencia[0];
+                try {
+                    const respostaFluxo = await fetch(URL_MÃE, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(pacotePendente)
+                    });
+
+                    if (respostaFluxo.ok) {
+                        // Limpa o item enviado com sucesso e atualiza a caderneta local
+                        filaContingencia.shift();
+                        localStorage.setItem("festa_junina_contingencia", JSON.stringify(filaContingencia));
+                        console.log(`Transação offline [${pacotePendente.id_pagamento}] integrada com sucesso à planilha.`);
+                    }
+                } catch (erroRede) {
+                    console.error("Motor de lote temporariamente incapaz de subir dados. Aguardando estabilização.", erroRede);
+                }
+            }, 30000); // Roda silenciosamente de fundo a cada 30 segundos
         }
     </script>
 </body>
