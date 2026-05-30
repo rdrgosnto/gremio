@@ -93,7 +93,7 @@
         // ⚙️ CONFIGURAÇÕES GLOBAIS DO SISTEMA (ALTERE AQUI SE NECESSÁRIO)
         // ==========================================================================
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
-        constURL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/06f981a846ca45bc8bfe51c97c480d96/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n-3ys5toEStLZNzQS6q0bETlCP8-NuAjwWn-fAOqjOs";
+        const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/06f981a846ca45bc8bfe51c97c480d96/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n-3ys5toEStLZNzQS6q0bETlCP8-NuAjwWn-fAOqjOs";
         
         const DATA_LIBERACAO_DINHEIRO = "2026-05-30T08:00:00"; 
         const TEMPO_CHECK_PIX = 6000;              
@@ -316,29 +316,35 @@
             }
             return Object.keys(carrinho).map(id => { 
                 const p = produtos.find(i => i.id == id); 
-                return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
+                return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
             });
         };
 
-        const gerarPayloadVenda = (idF, forma, tipoVenda = "CAIXA", itensProntos = null) => JSON.stringify({ 
-            id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: tipoVenda, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
-            itens: extrairItensParaEnvio(itensProntos)
-        });
+        const gerarPayloadVenda = (idF, forma, tipoVenda = "CAIXA", itensProntos = null, emContingencia = false) => {
+            const baseObj = { 
+                id_pagamento: String(idF).trim(), pagamento: forma, tipo_venda: tipoVenda, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
+                itens: extrairItensParaEnvio(itensProntos)
+            };
+            if (emContingencia) baseObj.contingencia = true; 
+            return JSON.stringify(baseObj);
+        };
 
-        function tratarContingenciaOffline(id, forma, tipoVenda, itens, msg) {
+        // 🚀 LIMPO PARA PRODUÇÃO: Sem o bloco de inspeção de texto bruto do "modo teste"
+        function tratarContingenciaOffline(id, forma, tipoVenda, itens, msg, msgSucesso = "Venda Finalizada!", emContingencia = true) {
             if (confirm(msg)) {
                 if (tipoVenda === "CAIXA") aplicarDescontoEstoqueLocal();
-                salvarNoCacheContingencia(id, forma, tipoVenda, extrairItensParaEnvio(itens));
-                alert("Venda Finalizada!"); resetSistemicoTotal(false); return true;
+                const itensProcessados = extrairItensParaEnvio(itens);
+                salvarNoCacheContingencia(id, forma, tipoVenda, itensProcessados);
+                alert(msgSucesso); resetSistemicoTotal(false); return true;
             }
             reabrirVisualBotaoFinalizar(); return false;
         }
 
-        async function enviarVendaNuvem(idFinal, forma) {
+        async function enviarVendaNuvem(idFinal, forma, tipoVenda = "CAIXA", itensProntos = null, msgSucesso = "Venda Finalizada!") {
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(idFinal, forma) });
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(idFinal, forma, tipoVenda, itensProntos) });
                 if (!r.ok) throw new Error();
-                setTimeout(async () => { await carregarEstoqueReal(); alert("Venda Finalizada!"); resetSistemicoTotal(true); }, 1500);
+                setTimeout(async () => { await carregarEstoqueReal(); alert(msgSucesso); resetSistemicoTotal(true); }, 1500);
             } catch (e) { exibirFalhaProcessamento(); }
         }
 
@@ -348,22 +354,28 @@
             const internetEstavel = await diagnosticarInternetEstavel();
 
             if (modoResgateManual) {
-                if (!internetEstavel) tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Sistema offline\nFinalizar venda?");
+                if (!internetEstavel) tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Sistema Offline\nConfirmar entrega?", "Produto Entregue!", true);
                 else executingBaixaPedidoEntregue();
                 return;
             }
             
             if (formaPagamento === 'DINHEIRO') {
                 let idDin = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`;
-                if (!internetEstavel) tratarContingenciaOffline(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline\nFinalizar venda?");
+                if (!internetEstavel) tratarContingenciaOffline(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
                 else { aplicarDescontoEstoqueLocal(); enviarVendaNuvem(idDin, "DINHEIRO"); }
             } 
             else if (formaPagamento === 'PIX') {
+                if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) {
+                    alert("QR Code não foi gerado.\nNão é possível finalizar em contingência.");
+                    reabrirVisualBotaoFinalizar();
+                    return;
+                }
+
                 if (!internetEstavel) {
-                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", null, "Sistema offline\nFinalizar venda?");
+                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
                 } else if ((Date.now() - timestampCriacaoPix) >= LIMITE_TIMEOUT_BANCO_PIX) {
                     if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
-                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", null, "Sistema lento\nFinalizar venda?");
+                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema lento\nFinalizar venda?", "Venda Finalizada!", true);
                 } else {
                     if (await consultarStatusMercadoPagoDireto()) {
                         if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
@@ -543,15 +555,17 @@
 
         async function executingBaixaPedidoEntregue() {
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal) });
-                if (!r.ok) throw new Error();
-                alert("Venda Finalizada!"); carregarEstoqueReal(); resetSistemicoTotal(true);
+                await enviarVendaNuvem(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Produto Entregue!");
             } catch (e) { exibirFalhaProcessamento(); }
         }
 
         function salvarNoCacheContingencia(idPagamento, tipoPagamento, tipoVenda, itensProntos) {
             let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || [];
-            fila.push({ id_pagamento: idPagamento, pagamento: tipoPagamento, tipo_venda: tipoVenda, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), itens: itensProntos });
+            fila.push({ 
+                id_pagamento: idPagamento, pagamento: tipoPagamento, tipo_venda: tipoVenda, status_retirada: "retirado", 
+                total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), 
+                contingencia: true, itens: itensProntos 
+            });
             localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila));
         }
 
@@ -567,6 +581,7 @@
                         status_retirada: "retirado",
                         total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado),
                         transaction_amount: parseFloat(fila[0].transaction_amount),
+                        contingencia: true, 
                         itens: extrairItensParaEnvio(fila[0].itens) 
                     };
                     const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacoteValidadoPeloEsquema) });
