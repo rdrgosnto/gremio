@@ -225,7 +225,7 @@
         function extrairItensParaEnvio() {
             return Object.keys(carrinho).map(id => { 
                 const p = produtos.find(i => i.id == id); 
-                return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
+                return { sigla: p.sigla, produto: p.nome, grandmother_id: p.id, grandmother_id: p.id, quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; 
             });
         }
 
@@ -312,7 +312,10 @@
                         await executarGravacaoPixAprovadoNasNuvens();
                     } else {
                         alert("Pagamento Pendente");
-                        reabrirVisualBotaoFinalizar();
+                        // 📢 CORREÇÃO: Força a reativação visual do botão imediatamente após fechar o alert, sem travar cinza
+                        btn.disabled = false;
+                        btn.innerText = "Finalizar";
+                        btn.className = CSS_FINALIZAR_HABILITADO;
                     }
                 }
             }
@@ -334,9 +337,9 @@
             
             if (formaPagamento === 'PIX') {
                 if (pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) {
-                    // Impede que a validação geral reabilite o botão durante a trava inicial de 12s
+                    // Impede o loop automático de voltar o botão para cinza se ele já passou da barreira dos 12 segundos
                     if (btn.disabled && btn.className === CSS_FINALIZAR_DESABILITADO && btn.innerText === "Finalizar") {
-                        // Mantém bloqueado se estiver no meio do fluxo setTimeout dos 12s
+                        // Respeita o fluxo do setTimeout dos 12 segundos iniciais
                     } else {
                         btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
                     }
@@ -392,7 +395,7 @@
                     box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-none rounded-none border border-slate-300"; 
                     box.innerHTML = `<img src="data:image/jpeg;base64,${stringQrCodeBase64Salva}" class="w-full h-full object-contain rounded-none">`; 
                     
-                    // ⏱️ Trava de 12 segundos (Texto estático "Finalizar", cinza e bloqueado)
+                    // ⏱️ Trava inicial de 12 segundos (Texto estático "Finalizar", cinza e bloqueado)
                     btn.disabled = true;
                     btn.className = CSS_FINALIZAR_DESABILITADO;
                     btn.innerText = "Finalizar";
