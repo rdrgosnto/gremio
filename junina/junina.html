@@ -311,6 +311,7 @@
                         aplicarDescontoEstoqueLocal();
                         await executarGravacaoPixAprovadoNasNuvens();
                     } else {
+                        alert("Pagamento Pendente");
                         reabrirVisualBotaoFinalizar();
                     }
                 }
@@ -333,7 +334,12 @@
             
             if (formaPagamento === 'PIX') {
                 if (pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) {
-                    btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
+                    // Impede que a validação geral reabilite o botão durante a trava inicial de 12s
+                    if (btn.disabled && btn.className === CSS_FINALIZAR_DESABILITADO && btn.innerText === "Finalizar") {
+                        // Mantém bloqueado se estiver no meio do fluxo setTimeout dos 12s
+                    } else {
+                        btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
+                    }
                 } else {
                     btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
                 }
@@ -386,7 +392,17 @@
                     box.className = "w-28 h-28 bg-white flex items-center justify-center p-0 pointer-events-none transition-none rounded-none border border-slate-300"; 
                     box.innerHTML = `<img src="data:image/jpeg;base64,${stringQrCodeBase64Salva}" class="w-full h-full object-contain rounded-none">`; 
                     
-                    btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
+                    // ⏱️ Trava de 12 segundos (Texto estático "Finalizar", cinza e bloqueado)
+                    btn.disabled = true;
+                    btn.className = CSS_FINALIZAR_DESABILITADO;
+                    btn.innerText = "Finalizar";
+
+                    setTimeout(() => {
+                        if (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) {
+                            btn.disabled = false; 
+                            btn.className = CSS_FINALIZAR_HABILITADO;
+                        }
+                    }, 12000);
 
                     iniciarMonitoramentoPixAutomatico();
                 } else throw new Error();
@@ -450,7 +466,6 @@
                     resetSistemicoTotal(true);
                 }, 1500);
             } catch (e) { 
-                // Se a rede falhar na hora de forçar online, guarda silenciosamente em lote local
                 salvarNoCacheContingencia(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio());
                 alert("Venda Finalizada!");
                 resetSistemicoTotal(false);
@@ -545,7 +560,6 @@
 
             modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(idDigitado).trim();
             
-            // Mapeia a estrutura original das linhas vinda do Excel para manipulação offline idêntica
             cachePedidoOnlineOriginal = lines.map(l => ({
                 sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE",
                 produto: l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online",
@@ -623,7 +637,6 @@
                 const internetDisponivel = await diagnosticarInternetEstavel();
                 if (!internetDisponivel) return;
 
-                // Captura a primeira transação da caderneta local para sincronizar
                 const pacotePendente = filaContingencia[0];
                 try {
                     const respostaFluxo = await fetch(URL_MÃE, {
@@ -633,7 +646,6 @@
                     });
 
                     if (respostaFluxo.ok) {
-                        // Limpa o item enviado com sucesso e atualiza a caderneta local
                         filaContingencia.shift();
                         localStorage.setItem("festa_junina_contingencia", JSON.stringify(filaContingencia));
                         console.log(`Transação offline [${pacotePendente.id_pagamento}] integrada com sucesso à planilha.`);
@@ -641,7 +653,7 @@
                 } catch (erroRede) {
                     console.error("Motor de lote temporariamente incapaz de subir dados. Aguardando estabilização.", erroRede);
                 }
-            }, 30000); // Roda silenciosamente de fundo a cada 30 segundos
+            }, 30000);
         }
     </script>
 </body>
