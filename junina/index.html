@@ -147,14 +147,8 @@
             try {
                 const r = await fetch(URL_LEITURA, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(idParaBuscar).trim() }) });
                 const combo = await r.json();
-                if (combo && combo.produto) { // CORRIGIDO: de combo.estoque para combo.produto
-                    produtos = combo.produto.map(l => ({ 
-                        id: parseInt(l.id), // CORRIGIDO: de l.ID para l.id
-                        sigla: l.sigla ? String(l.sigla).trim().toUpperCase() : "??", // CORRIGIDO: de l.SIGLA para l.sigla
-                        nome: l.produto, // CORRIGIDO: de l.PRODUTO para l.produto
-                        preco: parseFloat(l.preco), // CORRIGIDO: de l.PRECO para l.preco
-                        estoque: parseInt(l.estoque_atual) // CORRIGIDO: de l.ATUAL para l.estoque_atual
-                    }));
+                if (combo && combo.estoque) {
+                    produtos = combo.estoque.map(l => ({ id: parseInt(l.ID), sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??", nome: l.PRODUTO, preco: parseFloat(l.PRECO), estoque: parseInt(l.ATUAL) }));
                     localStorage.setItem("festa_junina_cardapio", JSON.stringify(produtos)); renderizarProdutos();
                 }
                 if (idParaBuscar !== "" && combo && combo.pedido) processarResultadoBuscaPedido(combo.pedido, idParaBuscar);
@@ -314,7 +308,7 @@
                 return listaPronta.map(i => ({
                     sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(),
                     produto: String(i.produto || i.PRODUTO).trim(),
-                    grandmother_id: parseInt(i.grandmother_id || i.GRANDMOTHER_ID || i.id || i.ID || 0), // CORRIGIDO: adicionado i.id
+                    grandmother_id: parseInt(i.grandmother_id || i.GRANDMOTHER_ID || i.ID || 0),
                     quantidade: parseInt(i.quantidade || i.QUANTIDADE || i.quantity || 1),
                     preco: parseFloat(i.preco || i.PRECO || 0),
                     total: parseFloat(i.total || i.TOTAL || 0)
@@ -335,6 +329,7 @@
             return JSON.stringify(baseObj);
         };
 
+        // 🚀 LIMPO PARA PRODUÇÃO: Sem o bloco de inspeção de texto bruto do "modo teste"
         function tratarContingenciaOffline(id, forma, tipoVenda, itens, msg, msgSucesso = "Venda Finalizada!", emContingencia = true) {
             if (confirm(msg)) {
                 if (tipoVenda === "CAIXA") aplicarDescontoEstoqueLocal();
@@ -360,7 +355,7 @@
 
             if (modoResgateManual) {
                 if (!internetEstavel) tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Sistema Offline\nConfirmar entrega?", "Produto Entregue!", true);
-                else { executingBaixaPedidoEntregue(); }
+                else executingBaixaPedidoEntregue();
                 return;
             }
             
@@ -528,7 +523,7 @@
             modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(idDigitado).trim();
             cachePedidoOnlineOriginal = lines.map(l => ({
                 sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", produto: l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online",
-                grandmother_id: parseInt(l.id) || parseInt(l.ID) || parseInt(l.GRANDMOTHER_ID) || 0, quantidade: parseInt(l.QUANTIDADE) || parseInt(l.quantidade) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0 // CORRIGIDO: adicionado l.id
+                grandmother_id: parseInt(l.ID) || parseInt(l.GRANDMOTHER_ID) || 0, quantidade: parseInt(l.QUANTIDADE) || parseInt(l.quantidade) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0
             }));
 
             renderizarProdutos();
