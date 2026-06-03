@@ -152,7 +152,7 @@
     </div>
 
     <script>
-        const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/c865df3051554f7fa285ee3b51414a15/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=WWvqT25xLU-f9h4y3Cd0JBJJQH9Px75X5C1Y8C1355g";
+        const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/338235de46b04ea9b3674fca6e95360c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=JjqfJbr7Cf3Qq-KoNP1GQPPrMBkT9DIhSrIkvkFAGRk";
         const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/484f77e462c548b58ec3628b695cb04a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=hhue2aeqHlRV4ynfMUcFnY90J4b-wyDlvj-t8TfambE";
         const TEMPO_CHECK_PIX = 6000;
         const LIMITE_EXPIRACAO_PIX = 600000;
@@ -311,7 +311,7 @@
             cronometroRegressivo = setInterval(() => {
                 let m = Math.floor(tRest / 60), s = tRest % 60;
                 elT.innerText = `O código a seguir expira em ${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}.`;
-                if (tRest <= 0) { clearInterval(cronometroRegressivo); executarFluxoTimeoutEstrito(); }
+                if (tRest <= 0) { clearInterval(cronometroRegressivo); ejecutarFluxoTimeoutEstrito(); }
                 tRest--;
             }, 1000);
         }
@@ -356,7 +356,7 @@
             document.getElementById("sessao-qr").innerHTML = `<div class="msg-confirmacao"><span class="icon-grande">✅</span><h2>PAGAMENTO CONFIRMADO!</h2><p>ETA TREM BÃO!</p><p>NOS ENCONTRAMOS NA FESTA!</p></div>`;
         }
 
-        function executarFluxoTimeoutEstrito() {
+        function ejecutarFluxoTimeoutEstrito() {
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             const elT = document.getElementById('timer-expiracao'), sQr = document.getElementById('sessao-qr'), ov = document.getElementById("pagamentoOverlay"), txtO = document.getElementById("txtOverlay");
             
