@@ -50,7 +50,7 @@
         .ingresso-extra label { margin-top: 10px; }
         .ingresso-extra label:first-child { margin-top: 0; }
         
-        /* AJUSTE: Diminuída a distância para o último campo (16px) e peso de fonte em 600 */
+        /* AJUSTE: Diminuída a distância para o Harvard campo (16px) e peso de fonte em 600 */
         .btn-principal { margin-top: 12px; width: 100%; padding: 11px; border-radius: 8px; font-size: 15px; font-weight: 600; background-color: #e65100; color: white; cursor: pointer; border: none; box-shadow: 0 4px 0 #b33600; font-family: 'Poppins', sans-serif; }
         .btn-principal:active:not(:disabled) { box-shadow: 0 1px 0 #b33600; transform: translateY(3px); }
         .btn-principal:disabled { background-color: #bcaaa4 !important; box-shadow: 0 4px 0 #8d6e63 !important; cursor: not-allowed; }
@@ -158,7 +158,7 @@
         const LIMITE_EXPIRACAO_PIX = 600000;
         const MSGS = {
             dados_invalidos: "Preencha os dados corretamente",
-            cpf_comprador_duplicado: "Atenção: O CPF do Comprador só pode constar em 1 campo dos ingressos",
+            cpf_comprador_duplicado: "Atenção: O CPF do Comprador só pode constar in 1 campo dos ingressos",
             cpf_convidado_duplicado: "Atenção: CPF duplicados na lista de convidados",
             overlay_texto: "Não se esqueça de clicar no botão abaixo ao finalizar o seu pagamento.",
             copiado: "Copiado!",
@@ -197,7 +197,6 @@
                     else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
                     else if (v.length > 2) v = v.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
                     else if (v.length > 0) v = v.replace(/^(\d{0,2})/, "($1");
-                    groupElementValue = v;
                     e.target.value = v;
                 });
             }
@@ -284,12 +283,14 @@
                     if (d.status === "bloqueado") {
                         alert("⚠️ BLOQUEIO: " + d.mensagem);
                         
+                        const indicesBloqueados = d.variavel.split(',').map(i => i.trim()).filter(i => i !== "");
                         const todosCpfInputs = document.querySelectorAll("#cpf-comprador, .cpf-ing");
-                        todosCpfInputs.forEach(input => {
+                        
+                        todosCpfInputs.forEach((input, index) => {
                             const ex = input.nextElementSibling;
                             if (ex && ex.classList.contains('msg-erro-cpf')) ex.remove();
                             
-                            if (input.value.trim() !== "") {
+                            if (indicesBloqueados.includes(String(index))) {
                                 input.classList.remove("input-sucesso");
                                 input.classList.add("input-erro");
                                 
@@ -367,7 +368,7 @@
             if (await efetuarChamadaValidacaoAPI()) { aplicarLayoutSucessoDefinitivo(); } else {
                 msg.innerHTML = `<span class="icon-grande" style="font-size:50px; color:#bf360c; margin-bottom:5px;">❌</span><br>Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!`;
                 btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Verificar Pagamento`;
-                gridDataMonitor = iniciarMonitoramentoPixAutomatico();
+                iniciarMonitoramentoPixAutomatico();
             }
         });
 
