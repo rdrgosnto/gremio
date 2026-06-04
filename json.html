@@ -149,7 +149,7 @@
 
             btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...`;
             try {
-                const r = await fetch(URL_GERAR_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ "COMPRADOR": comp, "CPF_COMPRAPOR": cpfC, "TELEFONE": tel, "QUANTIDADE": selectQtde.value, "INGRESSOS": Array.from(inC).map((input, i) => ({"NOME_INGRESSO": inN[i].value.trim(), "CPF_INGRESSO": input.value.trim()})) }) });
+                const r = await fetch(URL_GERAR_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ "COMPRADOR": comp, "CPF_COMPRADOR": cpfC, "TELEFONE": tel, "QUANTIDADE": selectQtde.value, "INGRESSOS": Array.from(inC).map((input, i) => ({"NOME_INGRESSO": inN[i].value.trim(), "CPF_INGRESSO": input.value.trim()})) }) });
                 if (r.ok) {
                     const d = await r.json();
                     if (d.status === "bloqueado") {
