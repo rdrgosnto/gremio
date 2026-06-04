@@ -53,7 +53,7 @@
                         <div class="space-y-1.5">
                             <label class="text-xs font-semibold text-slate-400 block uppercase tracking-wider text-center">Forma de Pagamento:</label>
                             <div class="grid grid-cols-2 gap-2">
-                                <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" disabled class="py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 transition-all disabled:cursor-not-allowed">DINHEIRO</button>
+                                <button onclick="selecionarPagamento('DINHEIRO')" id="btn-dinheiro" disabled class="py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-slate-100 text-slate-700 opacity-40 transition-all disabled:cursor-not-allowed">DINHEIRO</button>
                                 <button onclick="selecionarPagamento('PIX')" id="btn-pix" disabled class="py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 transition-all disabled:cursor-not-allowed">PIX</button>
                             </div>
                         </div>
@@ -93,7 +93,7 @@
         // ⚙️ CONFIGURAÇÕES GLOBAIS DO SISTEMA (ALTERE AQUI SE NECESSÁRIO)
         // ==========================================================================
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
-        const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/06f981a846ca45bc8bfe51c97c480d96/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n-3ys5toEStLZNzQS6q0bETlCP8-NuAjwWn-fAOqjOs";
+        const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/98221223b0c5414085d99db3124350bb/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sXkYuHLSdt1s6aiLFFkMc0fJKd27HDthp4nNRM2Qz20";
         
         const DATA_LIBERACAO_DINHEIRO = "2026-06-27T08:00:00"; 
         const TEMPO_CHECK_PIX = 6000;              
@@ -242,13 +242,13 @@
                 lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
                 blocoPagamento.className = "space-y-4 pt-1 border-t opacity-40 pointer-events-none";
                 btnDinheiro.disabled = btnPix.disabled = true;
-                btnDinheiro.classList.remove("opacity-40", "bg-slate-100");
+                btnDinheiro.classList.remove("opacity-100", "bg-white");
+                btnDinheiro.classList.add("opacity-40", "bg-slate-100");
                 btnLimpar.classList.add("hidden"); cabecalhoId.classList.add("hidden"); resetarEstadoPagamento();
             } else {
                 blocoPagamento.className = "space-y-4 pt-1 border-t opacity-100 pointer-events-auto";
                 btnPix.disabled = false; 
                 
-                // Valida o prazo do dinheiro e altera o visual da caixa dinamicamente
                 const liberado = ehVendaLiberadaDinheiro();
                 btnDinheiro.disabled = !liberado;
                 if (liberado) {
@@ -509,7 +509,14 @@
         function resetarEstadoPagamento() {
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             formaPagamento = null; pixChaveIdentificadora = ""; stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0; reabrirVisualBotaoFinalizar();
-            document.getElementById("btn-pix").className = document.getElementById("btn-dinheiro").className = CSS_BTN_INATIVO;
+            document.getElementById("btn-pix").className = CSS_BTN_INATIVO;
+            
+            const btnDinheiro = document.getElementById("btn-dinheiro");
+            btnDinheiro.className = CSS_BTN_INATIVO;
+            btnDinheiro.classList.remove("opacity-100", "bg-white");
+            btnDinheiro.classList.add("opacity-40", "bg-slate-100");
+            btnDinheiro.disabled = true;
+
             document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
             document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200";
             const inp = document.getElementById("input-recebido"); inp.disabled = true; inp.value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
@@ -558,7 +565,7 @@
             lines.forEach(linha => {
                 const totalLinha = parseFloat(linha.TOTAL) || 0; valorConsolidated += totalLinha; 
                 let entregue = (linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente") === "retirado";
-                if (entregue) { btnFinalizar.disabled = true; btnFinalizar.innerText = "Venda Finalizada!"; btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; }
+                if (entregue) { btnFinalizar.disabled = true; btnFinalizar.innerText = "Produto Entregue!"; btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; }
                 lista.innerHTML += `
                     <div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-200 shadow-sm font-sistema">
                         <div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO || linha.produto}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(linha.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div>
