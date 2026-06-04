@@ -215,7 +215,11 @@
                 cabId.classList.add("hidden"); resetarEstadoPagamento();
             } else {
                 bloco.className = "space-y-4 pt-1 border-t opacity-100 pointer-events-auto"; btnPix.disabled = false;
-                btnDin.disabled = false; btnDin.classList.remove("opacity-40", "bg-slate-100"); btnDin.classList.add("opacity-100", "bg-white");
+                
+                // RESPEITA O TRAVAMENTO MANUAL DO HTML SE O ATRIBUTO DISABLED EXISTIR
+                if (!btnDin.hasAttribute('disabled')) {
+                    btnDin.classList.remove("opacity-40", "bg-slate-100"); btnDin.classList.add("opacity-100", "bg-white");
+                }
                 cabId.classList.add("hidden"); configuringMatrizGestos();
             }
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
@@ -347,9 +351,7 @@
                     
                     if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
                     pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
-                    carrinhoBloqueado = false; 
-                    renderizarProdutos(); 
-                    resetarEstadoPagamento();
+                    carrinhoBloqueado = false; renderizarProdutos(); resetarEstadoPagamento();
                     document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
                     atualizarCarrinhoDOM();
 
@@ -405,7 +407,13 @@
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             formaPagamento = null; pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0; reabrirVisualBotaoFinalizar();
             document.getElementById("btn-pix").className = CSS_BTN_INATIVO; const btnDin = document.getElementById("btn-dinheiro");
-            btnDin.className = CSS_BTN_INATIVO; btnDin.classList.remove("opacity-100", "bg-white"); btnDin.classList.add("opacity-40", "bg-slate-100"); btnDin.disabled = true;
+            btnDin.className = CSS_BTN_INATIVO; 
+            
+            // SE O BOTÃO MANUALMENTE DESABILITADO JÁ NASCEU NO HTML, NÃO FORÇA A VOLTA CORRETA
+            if (!btnDin.hasAttribute('disabled')) {
+                btnDin.classList.remove("opacity-100", "bg-white"); btnDin.classList.add("opacity-40", "bg-slate-100"); btnDin.disabled = true;
+            }
+
             document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
             document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200";
             const inp = document.getElementById("input-recebido"); inp.disabled = true; inp.value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
@@ -425,7 +433,6 @@
             carrinhoBloqueado = true; renderizarProdutos();
             document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; document.getElementById("titulo-checkout").className = "text-sm font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200";
             document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; const cabId = document.getElementById("id-pedido-cabecalho"); cabId.innerText = `ID: ${id}`; cabId.classList.remove("hidden");
-            document.getElementById("btn-limpar-carrinho").classList.add("hidden");
             const btn = document.getElementById("btn-finalizar"); btn.disabled = false; btn.innerText = "Finalizar"; btn.className = CSS_FINALIZAR_HABILITADO;
             const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valCons = 0;
             lines.forEach(linha => {
