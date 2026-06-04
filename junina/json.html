@@ -101,6 +101,14 @@
             carregarEstoqueReal(); iniciarMotorSincronizacaoOculto();
         });
 
+        async function diagnosticarInternetEstavel() {
+            if (!navigator.onLine) return false;
+            try {
+                const c = new AbortController(); setTimeout(() => c.abort(), 2500);
+                await fetch("https://www.google.com", { mode: "no-cors", signal: c.signal }); return true;
+            } catch (e) { return false; }
+        }
+
         async function carregarEstoqueReal(id = "") {
             try {
                 const r = await fetch(URL_LEITURA, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(id).trim() }) });
@@ -161,6 +169,29 @@
             renderizarProdutos(); atualizarCarrinhoDOM();
         }
 
+        function removerItemDoCarrinhoCompleto(id) { 
+            delete carrinho[id];
+            renderizarProdutos();
+            if (Object.keys(carrinho).length === 0) fecharOverlay();
+            else atualizarCarrinhoDOM();
+        }
+        
+        function limparCarrinhoCompleto() { 
+            carrinho = {}; 
+            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
+            pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
+            carrinhoBloqueado = false; renderizarProdutos(); resetarEstadoPagamento();
+            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
+            atualizarCarrinhoDOM(); 
+        }
+
+        function construirMensagemFichas(arr) {
+            let copia = [...arr]; copia.sort((a, b) => a.produto.localeCompare(b.produto));
+            let txt = "Venda Finalizada!\n\n";
+            copia.forEach(i => txt += `- ${i.quantidade}x ${i.produto}\n`);
+            return txt;
+        }
+
         function atualizarCarrinhoDOM() {
             if (modoResgateManual) return;
             const lista = document.getElementById("lista-carrinho"), bloco = document.getElementById("bloco-inferior-pagamento");
@@ -188,14 +219,13 @@
             if (tItens === 0) {
                 lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
                 bloco.className = "space-y-4 pt-1 border-t opacity-40 pointer-events-none";
-                btnDin.disabled = btnPix.disabled = true; btnDin.classList.remove("opacity-100", "bg-white"); btnDin.classList.add("opacity-40", "bg-slate-100");
+                btnDin.disabled = true; btnDin.classList.remove("opacity-100", "bg-white"); btnDin.classList.add("opacity-40", "bg-slate-100");
                 cabId.classList.add("hidden"); resetarEstadoPagamento();
             } else {
                 bloco.className = "space-y-4 pt-1 border-t opacity-100 pointer-events-auto"; btnPix.disabled = false;
                 btnDin.disabled = false;
                 btnDin.classList.remove("opacity-40", "bg-slate-100"); btnDin.classList.add("opacity-100", "bg-white");
-                cabId.classList.add("hidden");
-                configuringMatrizGestos();
+                cabId.classList.add("hidden"); configuringMatrizGestos();
             }
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
@@ -204,56 +234,210 @@
         function configuringMatrizGestos() {
             if (carrinhoBloqueado) return;
             document.querySelectorAll('.swipe-card').forEach(card => {
-                const id = card.getAttribute('data-id');
-                const btnRemove = card.querySelector('[data-btn-remove]');
+                let startX = 0, gestureChecked = false, isScrolling = false, isDragging = false;
+                const id = card.getAttribute('data-id'), btnRemove = card.querySelector('[data-btn-remove]');
                 if (btnRemove) {
                     btnRemove.onclick = (e) => {
-                        e.stopPropagation(); card.classList.add('removing');
+                        if (carrinhoBloqueado) return; e.stopPropagation(); card.classList.add('removing');
                         setTimeout(() => removerItemDoCarrinhoCompleto(id), TEMPO_ANIMACAO_REMOVER);
                     };
                 }
-                // Gestos...
-                let startX = 0, startY = 0, gestureChecked = false, isScrolling = false, isDragging = false;
-                card.onpointerdown = (e) => { if (!carrinhoBloqueado) { isDragging = true; gestureChecked = isScrolling = false; startX = e.clientX; startY = e.clientY; card.style.transition = 'none'; } };
-                card.addEventListener('pointermove', (e) => { if (!isDragging || isScrolling || carrinhoBloqueado) return; let diffX = e.clientX - startX, diffY = e.clientY - startY; if (!gestureChecked) { if (Math.abs(diffY) > DISTANCIA_TRAVA_GESTO && Math.abs(diffY) > Math.abs(diffX)) { isScrolling = true; isDragging = false; card.style.transform = 'translateX(0px)'; return; } if (diffX < -DISTANCIA_TRAVA_GESTO && Math.abs(diffX) > Math.abs(diffY)) { gestureChecked = true; card.setPointerCapture(e.pointerId); } } if (gestureChecked) card.style.transform = `translateX(${diffX > 0 ? 0 : diffX}px)`; }, { passive: true });
-                card.onpointerup = (e) => { if (!isDragging || carrinhoBloqueado) return; isDragging = false; let diffX = e.clientX - startX; card.style.transition = 'transform 0.15s ease-out'; if (gestureChecked && diffX < 0 && Math.abs(diffX) > card.offsetWidth * THRESHOLD_SLIDE_REMOVER) { card.classList.add('removing'); setTimeout(() => removerItemDoCarrinhoCompleto(id), TEMPO_ANIMACAO_REMOVER + 50); } else { card.style.transform = 'translateX(0px)'; } try { card.releasePointerCapture(e.pointerId); } catch(err){} };
+                card.onpointerdown = (e) => { if (!carrinhoBloqueado) { isDragging = true; gestureChecked = isScrolling = false; startX = e.clientX; card.style.transition = 'none'; } };
+                card.addEventListener('pointermove', (e) => {
+                    if (!isDragging || isScrolling || carrinhoBloqueado) return;
+                    let diffX = e.clientX - startX;
+                    if (!gestureChecked && diffX < -10) { gestureChecked = true; card.setPointerCapture(e.pointerId); }
+                    if (gestureChecked) card.style.transform = `translateX(${diffX > 0 ? 0 : diffX}px)`;
+                }, { passive: true });
+                card.onpointerup = (e) => {
+                    if (!isDragging || carrinhoBloqueado) return; isDragging = false;
+                    let diffX = e.clientX - startX; card.style.transition = 'transform 0.15s ease-out';
+                    if (gestureChecked && diffX < -80) {
+                        card.classList.add('removing'); setTimeout(() => removerItemDoCarrinhoCompleto(id), TEMPO_ANIMACAO_REMOVER + 50);
+                    } else { card.style.transform = 'translateX(0px)'; }
+                    try { card.releasePointerCapture(e.pointerId); } catch(err){}
+                };
             });
         }
 
-        function limparCarrinhoCompleto() { 
-            carrinho = {}; 
-            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
-            pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
-            carrinhoBloqueado = false; renderizarProdutos(); resetarEstadoPagamento();
-            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
-            atualizarCarrinhoDOM(); 
+        function aplicarDescontoEstoqueLocal() {
+            Object.keys(carrinho).forEach(id => { const p = produtos.find(i => i.id == id); if (p) p.estoque = Math.max(0, p.estoque - carrinho[id]); });
+            renderizarProdutos();
         }
 
-        function resetarEstadoPagamento() {
-            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
-            formaPagamento = null; pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0; reabrirVisualBotaoFinalizar();
-            document.getElementById("btn-pix").className = CSS_BTN_INATIVO; const btnDin = document.getElementById("btn-dinheiro");
-            btnDin.className = CSS_BTN_INATIVO; 
-            btnDin.disabled = false;
-            document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0";
-            document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200";
-            const inp = document.getElementById("input-recebido"); inp.disabled = true; inp.value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
-            const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 text-center p-2";
-            box.innerHTML = `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>`; validarEstadoFinalizar();
+        const extrairItensParaEnvio = (pronto = null) => {
+            if (pronto) return pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) }));
+            return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
+        };
+
+        const gerarPayloadVenda = (id, forma, tipo = "CAIXA", pronto = null, cont = false) => {
+            const obj = { id_pagamento: String(id).trim(), pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), itens: extrairItensParaEnvio(pronto) };
+            if (cont) obj.contingencia = true; return JSON.stringify(obj);
+        };
+
+        function tratarContingenciaOffline(id, forma, tipo, itens, msg, sucesso = "Venda Finalizada!", cont = true) {
+            if (confirm(msg)) {
+                if (tipo === "CAIXA") aplicarDescontoEstoqueLocal();
+                const proc = extrairItensParaEnvio(itens); salvarNoCacheContingencia(id, forma, tipo, proc);
+                alert(construirMensagemFichas(proc)); resetSistemicoTotal(false); return true;
+            }
+            reabrirVisualBotaoFinalizar(); return false;
         }
 
-        // Funções auxiliares mantidas...
-        function removerItemDoCarrinhoCompleto(id) { if (!carrinhoBloqueado && carrinho[id]) { delete carrinho[id]; renderizarProdutos(); atualizarCarrinhoDOM(); } }
-        function reabrirVisualBotaoFinalizar() { document.getElementById("btn-finalizar").innerText = "Finalizar"; validarEstadoFinalizar(); }
-        function validarEstadoFinalizar() { if (modoResgateManual) return; const btn = document.getElementById("btn-finalizar"), rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0; btn.disabled = formaPagamento === 'PIX' ? !(pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) : !(Object.keys(carrinho).length > 0 && formaPagamento === 'DINHEIRO' && rec >= totalAtual); btn.className = btn.disabled ? CSS_FINALIZAR_DESABILITADO : CSS_FINALIZAR_HABILITADO; }
-        function tratarMascaraDinheiro(inp) { let val = inp.value.replace(/\D/g, ""); if (val === "") return; let num = parseFloat(val) / 100; inp.value = num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); const txtT = document.getElementById("valor-troco-txt"); txtT.innerText = num < totalAtual ? "Dinheiro Insuficiente" : `R$ ${formatarMoeda(num - totalAtual)}`; txtT.className = num < totalAtual ? "font-bold text-rose-500 text-xs" : "font-bold text-orange-600 text-base"; validarEstadoFinalizar(); }
+        async function enviarVendaNuvem(id, forma, tipo = "CAIXA", pronto = null) {
+            try {
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(id, forma, tipo, pronto) });
+                if (!r.ok) throw new Error();
+                setTimeout(async () => { await carregarEstoqueReal(); alert(construirMensagemFichas(extrairItensParaEnvio(pronto))); resetSistemicoTotal(true); }, 1500);
+            } catch (e) { exibirFalhaProcessamento(); }
+        }
+
+        async function processarCliqueFinalizar() {
+            const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando..."; btn.className = CSS_FINALIZAR_DESABILITADO;
+            const net = await diagnosticarInternetEstavel();
+            if (modoResgateManual) {
+                if (!net) tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Sistema Offline\nConfirmar entrega?", "Produto Entregue!", true);
+                else executingBaixaPedidoEntregue(); return;
+            }
+            if (formaPagamento === 'DINHEIRO') {
+                let idDin = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`;
+                if (!net) tratarContingenciaOffline(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
+                else { aplicarDescontoEstoqueLocal(); enviarVendaNuvem(idDin, "DINHEIRO"); }
+            } else if (formaPagamento === 'PIX') {
+                if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) { alert("QR Code não foi gerado.\nNão é possível finalizar em contingência."); reabrirVisualBotaoFinalizar(); return; }
+                if (!net) tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
+                else if ((Date.now() - timestampCriacaoPix) >= LIMITE_TIMEOUT_BANCO_PIX) { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema lento\nFinalizar venda?", "Venda Finalizada!", true); }
+                else { if (await consultarStatusMercadoPagoDireto()) { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } aplicarDescontoEstoqueLocal(); enviarVendaNuvem(pixChaveIdentificadora, 'PIX'); } else { alert("Pagamento Pendente"); reabrirVisualBotaoFinalizar(); } }
+            }
+        }
+
+        function selecionarPagamento(tipo) {
+            formaPagamento = tipo; const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro"), inp = document.getElementById("input-recebido");
+            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
+            carrinhoBloqueado = true; renderizarProdutos(); atualizarCarrinhoDOM();
+            btnDin.className = tipo === 'DINHEIRO' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO; btnPix.className = tipo === 'PIX' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO;
+            document.getElementById("carrossel-pagamento").className = `w-[200%] h-full flex transition-transform duration-300 transform ${tipo === 'DINHEIRO' ? 'translate-x-0' : '-translate-x-1/2'}`;
+            document.getElementById("secao-valores-dinheiro").className = `w-1/2 h-full space-y-3.5 transition-all duration-200 ${tipo === 'DINHEIRO' ? 'opacity-100 pointer-events-auto' : 'opacity-25 pointer-events-none'}`;
+            inp.disabled = tipo !== 'DINHEIRO'; if (tipo === 'DINHEIRO') { inp.value = ""; inp.focus(); } validarEstadoFinalizar();
+        }
+
+        function validarEstadoFinalizar() {
+            if (modoResgateManual) return;
+            const btn = document.getElementById("btn-finalizar"), rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0;
+            btn.disabled = formaPagamento === 'PIX' ? !(pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) : !(Object.keys(carrinho).length > 0 && formaPagamento === 'DINHEIRO' && rec >= totalAtual);
+            btn.className = btn.disabled ? CSS_FINALIZAR_DESABILITADO : CSS_FINALIZAR_HABILITADO;
+        }
+
+        function tratarMascaraDinheiro(inp) {
+            let val = inp.value.replace(/\D/g, ""); if (val === "") return;
+            let num = parseFloat(val) / 100; inp.value = num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const txtT = document.getElementById("valor-troco-txt");
+            txtT.innerText = num < totalAtual ? "Dinheiro Insuficiente" : `R$ ${formatarMoeda(num - totalAtual)}`;
+            txtT.className = num < totalAtual ? "font-bold text-rose-500 text-xs" : "font-bold text-orange-600 text-base";
+            validarEstadoFinalizar();
+        }
+
+        async function requisitarQrCodeReal() {
+            if (!formaPagamento || formaPagamento !== 'PIX') return;
+            const box = document.getElementById("box-qrcode"), btn = document.getElementById("btn-finalizar");
+            box.className = "w-28 h-28 bg-white border border-slate-300 text-[10px] font-bold text-slate-400 uppercase text-center flex flex-col items-center justify-center p-2 pointer-events-none";
+            box.innerHTML = `<span>Carregando...</span>`; pixChaveIdentificadora = "mp_" + Date.now(); timestampCriacaoPix = Date.now();
+            btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
+            try {
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
+                if (d.id_mercado_pago === "BLOQUEADO" || d.mensagem && d.mensagem !== "novo") {
+                    box.className = "w-28 h-28 bg-slate-300 border border-slate-400 flex items-center justify-center text-center p-1 select-none pointer-events-none";
+                    box.innerHTML = `<span class="text-[10px] font-bold text-slate-600 uppercase tracking-tight leading-tight">Pedido<br>Bloqueado</span>`;
+                    if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
+                    pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
+                    carrinhoBloqueado = false; renderizarProdutos(); resetarEstadoPagamento();
+                    document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
+                    atualizarCarrinhoDOM();
+                    alert(d.mensagem || "Pedido online indisponível ou abaixo de R$ 50,00. ⚠️"); return;
+                }
+                if (d.id_mercado_pago) {
+                    pixChaveIdentificadora = String(d.id_mercado_pago).trim(); stringQrCodeBase64Salva = d.qrcode_imagem;
+                    box.className = "w-28 h-28 bg-white flex items-center justify-center border border-slate-300";
+                    box.innerHTML = `<img src="data:image/jpeg;base64,${stringQrCodeBase64Salva}" class="w-full h-full object-contain">`; btn.innerText = "Finalizar";
+                    setTimeout(() => { if (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) { btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; } }, 12000);
+                    iniciarMonitoramentoPixAutomatico();
+                } else throw new Error();
+            } catch (e) { alert("Falha ao gerar QR Code"); resetarEstadoPagamento(); }
+        }
+
+        function iniciarMonitoramentoPixAutomatico() {
+            if (intervaloPix) clearInterval(intervaloPix); loopEmExecucao = false;
+            intervaloPix = setInterval(async () => {
+                if (loopEmExecucao || !pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return;
+                if (Date.now() - timestampCriacaoPix > LIMITE_EXPIRACAO_PIX) { clearInterval(intervaloPix); alert("Tempo limite esgotado"); forçarFechamentoSistemico(); return; }
+                loopEmExecucao = true;
+                if (await consultarStatusMercadoPagoDireto()) { clearInterval(intervaloPix); aplicarDescontoEstoqueLocal(); enviarVendaNuvem(pixChaveIdentificadora, 'PIX'); }
+                loopEmExecucao = false;
+            }, TEMPO_CHECK_PIX);
+        }
+
+        async function consultarStatusMercadoPagoDireto() {
+            if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return false;
+            try {
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "CAIXA", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual) }) });
+                return r.ok && (await r.json()).pago === true;
+            } catch (erro) { return false; }
+        }
+
         function abrirOverlayCelular() { if (window.innerWidth < 1024 || modoResgateManual) { carrinhoBloqueado = true; renderizarProdutos(); document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; if (!modoResgateManual) resetarEstadoPagamento(); } }
         function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
-        function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true); }
-        function resetSistemicoTotal(http = true) { carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = []; document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; document.getElementById("titulo-checkout").className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200"; renderBotaoFlutuante("pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer select-none text-sm", `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center py-1">Pedido R$ 0,00 - Revisar e Pagar</div>`); resetarEstadoPagamento(); atualizarCarrinhoDOM(); document.getElementById("painel-fechamento").classList.add("hidden"); if (http) carregarEstoqueReal(); else renderizarProdutos(); }
-        async function diagnosticarInternetEstavel() { if (!navigator.onLine) return false; try { const c = new AbortController(); setTimeout(() => c.abort(), 2500); await fetch("https://www.google.com", { mode: "no-cors", signal: c.signal }); return true; } catch (e) { return false; } }
-        async function processarCliqueFinalizar() { /* lógica simplificada de envio... */ }
-        function selecionarPagamento(tipo) { formaPagamento = tipo; const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro"), inp = document.getElementById("input-recebido"); if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } carrinhoBloqueado = true; renderizarProdutos(); atualizarCarrinhoDOM(); btnDin.className = tipo === 'DINHEIRO' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO; btnPix.className = tipo === 'PIX' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO; document.getElementById("carrossel-pagamento").className = `w-[200%] h-full flex transition-transform duration-300 transform ${tipo === 'DINHEIRO' ? 'translate-x-0' : '-translate-x-1/2'}`; document.getElementById("secao-valores-dinheiro").className = `w-1/2 h-full space-y-3.5 transition-all duration-200 ${tipo === 'DINHEIRO' ? 'opacity-100 pointer-events-auto' : 'opacity-25 pointer-events-none'}`; inp.disabled = tipo !== 'DINHEIRO'; if (tipo === 'DINHEIRO') { inp.value = ""; inp.focus(); } validarEstadoFinalizar(); }
+
+        function forçarFechamentoSistemico(e) {
+            if(e) { e.stopPropagation(); e.preventDefault(); }
+            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } pixChaveIdentificadora = "";
+            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
+            document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true);
+        }
+
+        function resetSistemicoTotal(http = true) {
+            carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = [];
+            document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; document.getElementById("titulo-checkout").className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200";
+            renderBotaoFlutuante("pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer select-none text-sm", `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center py-1">Pedido R$ 0,00 - Revisar e Pagar</div>`);
+            resetarEstadoPagamento(); atualizarCarrinhoDOM(); document.getElementById("painel-fechamento").classList.add("hidden"); if (http) carregarEstoqueReal(); else renderizarProdutos();
+        }
+
+        function reabrirVisualBotaoFinalizar() { document.getElementById("btn-finalizar").innerText = "Finalizar"; validarEstadoFinalizar(); }
+        function activarModoBuscaPre(e) { if(e) { e.stopPropagation(); e.preventDefault(); } modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos(); renderBotaoFlutuante(`bg-slate-800 ${CSS_BASE_FLUTUANTE} cursor-default`, `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><input type="text" id="input-id-busca" placeholder="000000000000" class="bg-transparent text-white font-medium text-sm focus:outline-none flex-1 h-full px-2 text-center placeholder-white/30 min-w-0 select-text" maxlength="12" oninput="tratarDigitacaoIdBusca(this)"><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`, true); setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100); }
+        function tratarDigitacaoIdBusca(input) { input.value = input.value.replace(/\D/g, ""); if (input.value.length === 12) { input.disabled = true; carregarEstoqueReal(input.value); } }
+
+        function processarResultadoBuscaPedido(linhas, id) {
+            const lines = linhas.filter(l => String(l.ID_PAGAMENTO).trim() === String(id).trim());
+            if (lines.length === 0) { renderBotaoFlutuante("pointer-events-auto bg-rose-600 text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer select-none text-sm", `<span>Não encontrado</span>`); setTimeout(() => forçarFechamentoSistemico(), 2000); return; }
+            modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(id).trim();
+            cachePedidoOnlineOriginal = lines.map(l => ({ sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", produto: l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online", grandmother_id: parseInt(l.ID || l.id || l.GRANDMOTHER_ID || 0), quantidade: parseInt(l.QUANTIDADE) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0 }));
+            carrinhoBloqueado = true; renderizarProdutos();
+            document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; document.getElementById("titulo-checkout").className = "text-sm font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200";
+            document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; const cabId = document.getElementById("id-pedido-cabecalho"); cabId.innerText = `ID: ${id}`; cabId.classList.remove("hidden");
+            const btn = document.getElementById("btn-finalizar"); btn.disabled = false; btn.innerText = "Finalizar"; btn.className = CSS_FINALIZAR_HABILITADO;
+            const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valCons = 0;
+            lines.forEach(linha => {
+                const tot = parseFloat(linha.TOTAL) || 0; valCons += tot; let ent = (linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente") === "retirado";
+                if (ent) { btn.disabled = true; btn.innerText = "Produto Entregue!"; btn.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; }
+                lista.innerHTML += `<div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-200 shadow-sm font-sistema"><div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO || linha.produto}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(linha.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div><div class="text-right flex-shrink-0 pl-2"><p class="font-semibold text-slate-700 text-[16px]">R$ ${formatarMoeda(tot)}</p>${ent ? '<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>' : '<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>'}</div></div>`;
+            });
+            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valCons)}`; totalAtual = valCons;
+            if (window.innerWidth >= 1024) renderBotaoFlutuante(`bg-slate-800 ${CSS_BASE_FLUTUANTE} cursor-default`, `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${id}</div><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`, true);
+            else abrirOverlayCelular();
+        }
+
+        async function executingBaixaPedidoEntregue() { try { await enviarVendaNuvem(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Produto Entregue!"); } catch (e) { exibirFalhaProcessamento(); } }
+        function salvarNoCacheContingencia(id, forma, tipo, pronto) { let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; fila.push({ id_pagamento: id, pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), contingencia: true, itens: pronto }); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); }
+
+        function iniciarMotorSincronizacaoOculto() {
+            setInterval(async () => {
+                let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; if (fila.length === 0 || !(await diagnosticarInternetEstavel())) return;
+                try {
+                    const pacote = { id_pagamento: String(fila[0].id_pagamento), pagamento: String(fila[0].pagamento), tipo_venda: String(fila[0].tipo_venda), status_retirada: "retirado", total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado), transaction_amount: parseFloat(fila[0].transaction_amount), contingencia: true, itens: extrairItensParaEnvio(fila[0].itens) };
+                    const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacote) });
+                    if (r.ok) { fila.shift(); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); }
+                } catch (err) { console.error("Erro na sincronização.", err); }
+            }, 30000);
+        }
     </script>
 </body>
 </html>
