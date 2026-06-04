@@ -443,6 +443,15 @@
 
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
+                
+                if (d.id_mercado_pago === "BLOQUEADO" || d.mensagem && d.mensagem !== "novo") {
+                    box.className = "w-28 h-28 bg-slate-300 border border-slate-400 flex items-center justify-center text-center p-1 select-none pointer-events-none";
+                    box.innerHTML = `<span class="text-[10px] font-bold text-slate-600 uppercase tracking-tight leading-tight">Pedido<br>Bloqueado</span>`;
+                    reabrirVisualBotaoFinalizar();
+                    alert(d.mensagem || "Pedido online indisponível ou abaixo de R$ 50,00. ⚠️");
+                    return;
+                }
+
                 if (d.id_mercado_pago) { 
                     pixChaveIdentificadora = String(d.id_mercado_pago).trim(); stringQrCodeBase64Salva = d.qrcode_imagem;
                     box.className = "w-28 h-28 bg-white flex items-center justify-center border border-slate-300"; 
@@ -549,7 +558,7 @@
             modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(idDigitado).trim();
             cachePedidoOnlineOriginal = lines.map(l => ({
                 sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", produto: l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online",
-                grandmother_id: parseInt(l.ID || l.id || l.GRANDMOTHER_ID || 0), quantidade: parseInt(l.QUANTIDADE) || parseInt(l.quantidade) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0
+                grandmother_id: parseInt(l.ID || l.id || l.GRANDMOTHER_ID || 0), grandmother_id: parseInt(l.ID || l.id || l.GRANDMOTHER_ID || 0), quantidade: parseInt(l.QUANTIDADE) || parseInt(l.quantidade) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0
             }));
 
             renderizarProdutos();
