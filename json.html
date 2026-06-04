@@ -140,13 +140,16 @@
             const btn = document.getElementById("btn-gerar"), comp = document.getElementById("comprador").value.trim(), cpfC = document.getElementById("cpf-comprador").value.trim(), tel = document.getElementById("telefone").value.trim();
             if (!comp || !validarCPF(cpfC) || tel.length < 14) { alert("Preencha os dados corretamente"); document.getElementById("cpf-comprador").classList.add("input-erro"); return; }
             
-            const inN = document.querySelectorAll(".nome-ing"), inC = document.querySelectorAll(".cpf-ing"), todosCpfs = [cpfC, ...Array.from(inC).map(i => i.value.trim())];
+            const inN = document.querySelectorAll(".nome-ing"), inC = document.querySelectorAll(".cpf-ing");
             if (Array.from(inC).some((input, i) => !inN[i].value.trim() || !validarCPF(input.value.trim()))) { alert("Preencha os dados corretamente"); return; }
-            if (new Set(todosCpfs).size !== todosCpfs.length) { alert("Atenção: Existem CPFs duplicados no formulário!"); return; }
+            
+            const cpfsConvidados = Array.from(inC).map(i => i.value.trim());
+            if (new Set(cpfsConvidados).size !== cpfsConvidados.length) { alert("Atenção: Existem CPFs duplicados nos campos de ingressos!"); return; }
+            if (cpfsConvidados.filter(cpf => cpf === cpfC).length > 1) { alert("Atenção: O CPF do Comprador não pode ser repetido nos ingressos!"); return; }
 
             btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...`;
             try {
-                const r = await fetch(URL_GERAR_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ "COMPRADOR": comp, "CPF_COMPRADOR": cpfC, "TELEFONE": tel, "QUANTIDADE": selectQtde.value, "INGRESSOS": Array.from(inC).map((input, i) => ({"NOME_INGRESSO": inN[i].value.trim(), "CPF_INGRESSO": input.value.trim()})) }) });
+                const r = await fetch(URL_GERAR_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ "COMPRADOR": comp, "CPF_COMPRAPOR": cpfC, "TELEFONE": tel, "QUANTIDADE": selectQtde.value, "INGRESSOS": Array.from(inC).map((input, i) => ({"NOME_INGRESSO": inN[i].value.trim(), "CPF_INGRESSO": input.value.trim()})) }) });
                 if (r.ok) {
                     const d = await r.json();
                     if (d.status === "bloqueado") {
