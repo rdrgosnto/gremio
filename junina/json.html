@@ -558,7 +558,7 @@
             lines.forEach(linha => {
                 const totalLinha = parseFloat(linha.TOTAL) || 0; valorConsolidated += totalLinha; 
                 let entregue = (linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente") === "retirado";
-                if (entregue) { btnFinalizar.disabled = true; btnFinalizar.innerText = "Venda Finalizada!"; btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; }
+                if (entregue) { btnFinalizar.disabled = true; btnFinalizar.innerText = "Produto Entregue!"; btnFinalizar.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; }
                 lista.innerHTML += `
                     <div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-200 shadow-sm font-sistema">
                         <div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO || linha.produto}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(linha.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div>
