@@ -50,7 +50,7 @@
         .ingresso-extra label { margin-top: 10px; }
         .ingresso-extra label:first-child { margin-top: 0; }
         
-        /* AJUSTE: Diminuída a distância para o último campo (16px) e peso de fonte em 600 */
+        /* AJUSTE: Diminuída a distância para o Harvard campo (16px) e peso de fonte em 600 */
         .btn-principal { margin-top: 12px; width: 100%; padding: 11px; border-radius: 8px; font-size: 15px; font-weight: 600; background-color: #e65100; color: white; cursor: pointer; border: none; box-shadow: 0 4px 0 #b33600; font-family: 'Poppins', sans-serif; }
         .btn-principal:active:not(:disabled) { box-shadow: 0 1px 0 #b33600; transform: translateY(3px); }
         .btn-principal:disabled { background-color: #bcaaa4 !important; box-shadow: 0 4px 0 #8d6e63 !important; cursor: not-allowed; }
@@ -152,13 +152,13 @@
     </div>
 
     <script>
-        const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/338235de46b04ea9b3674fca6e95360c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=JjqfJbr7Cf3Qq-KoNP1GQPPrMBkT9DIhSrIkvkFAGRk";
+        const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a063adafceca4d0f875b1670147f0a5c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=NqKmXn8VkjMrHRRYpsnT0Cf85aFwG0oVLM6bjbVwFbE";
         const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/484f77e462c548b58ec3628b695cb04a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=hhue2aeqHlRV4ynfMUcFnY90J4b-wyDlvj-t8TfambE";
         const TEMPO_CHECK_PIX = 6000;
         const LIMITE_EXPIRACAO_PIX = 600000;
         const MSGS = {
             dados_invalidos: "Preencha os dados corretamente",
-            cpf_comprador_duplicado: "Atenção: O CPF do Comprador só pode constar em 1 campo dos ingressos",
+            cpf_comprador_duplicado: "Atenção: O CPF do Comprador só pode constar in 1 campo dos ingressos",
             cpf_convidado_duplicado: "Atenção: CPF duplicados na lista de convidados",
             overlay_texto: "Não se esqueça de clicar no botão abaixo ao finalizar o seu pagamento.",
             copiado: "Copiado!",
@@ -281,7 +281,37 @@
                 if (r.ok) {
                     const d = await r.json();
                     if (d.status === "bloqueado") {
-                        alert("⚠️ BLOQUEIO: " + d.mensagem); btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; return;
+                        alert("⚠️ BLOQUEIO: " + d.mensagem);
+                        
+                        const indicesBloqueados = d.variavel.split(',').map(i => i.trim()).filter(i => i !== "");
+                        
+                        // LIMPAR ERROS ANTIGOS DO COMPRADOR
+                        const compCpfInput = document.getElementById("cpf-comprador");
+                        if (compCpfInput.nextElementSibling?.classList.contains('msg-erro-cpf')) compCpfInput.nextElementSibling.remove();
+                        
+                        // SE O COMPRADOR ESTIVER NO ARRAY DO FLUXO COMO BLOQUEADO, ELE SERÁ O ÍNDICE "0" NA LISTA BRUTA DO SELECIONAR? NÃO, O SELECIONAR SÓ VALIDA O ARRAY DE INGRESSOS EXTRAS.
+                        // ENTÃO SÍNCRONIZAMOS: O MAP DOS INDICES VAI OLHAR APENAS PARA OS CAMPOS DE CONVIDADOS (.cpf-ing)
+                        const camposConvidados = document.querySelectorAll(".cpf-ing");
+                        
+                        camposConvidados.forEach((input, index) => {
+                            const ex = input.nextElementSibling;
+                            if (ex && ex.classList.contains('msg-erro-cpf')) ex.remove();
+                            
+                            // Se o índice vindo do Power Automate bater certinho com a posição do convidado
+                            if (indicesBloqueados.includes(String(index))) {
+                                input.classList.remove("input-sucesso");
+                                input.classList.add("input-erro");
+                                
+                                const s = document.createElement("span");
+                                s.className = "msg-erro-cpf";
+                                s.innerText = "Limite de compra atingido para o CPF informado";
+                                input.after(s);
+                            }
+                        });
+                        
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`;
+                        return;
                     }
                     idPagamentoAtual = d.pagamento_id || d.id || d.id_pagamento || "";
                     document.getElementById("img-qr").src = `data:image/png;base64,${d.pix_qr_code_base64}`;
