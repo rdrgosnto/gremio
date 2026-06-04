@@ -197,6 +197,7 @@
                     else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
                     else if (v.length > 2) v = v.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
                     else if (v.length > 0) v = v.replace(/^(\d{0,2})/, "($1");
+                    groupElementValue = v;
                     e.target.value = v;
                 });
             }
@@ -281,7 +282,27 @@
                 if (r.ok) {
                     const d = await r.json();
                     if (d.status === "bloqueado") {
-                        alert("⚠️ BLOQUEIO: " + d.mensagem); btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; return;
+                        alert("⚠️ BLOQUEIO: " + d.mensagem);
+                        
+                        const todosCpfInputs = document.querySelectorAll("#cpf-comprador, .cpf-ing");
+                        todosCpfInputs.forEach(input => {
+                            const ex = input.nextElementSibling;
+                            if (ex && ex.classList.contains('msg-erro-cpf')) ex.remove();
+                            
+                            if (input.value.trim() !== "") {
+                                input.classList.remove("input-sucesso");
+                                input.classList.add("input-erro");
+                                
+                                const s = document.createElement("span");
+                                s.className = "msg-erro-cpf";
+                                s.innerText = "Limite de compra atingido para o CPF informado";
+                                input.after(s);
+                            }
+                        });
+                        
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`;
+                        return;
                     }
                     idPagamentoAtual = d.pagamento_id || d.id || d.id_pagamento || "";
                     document.getElementById("img-qr").src = `data:image/png;base64,${d.pix_qr_code_base64}`;
@@ -346,7 +367,7 @@
             if (await efetuarChamadaValidacaoAPI()) { aplicarLayoutSucessoDefinitivo(); } else {
                 msg.innerHTML = `<span class="icon-grande" style="font-size:50px; color:#bf360c; margin-bottom:5px;">❌</span><br>Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!`;
                 btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Verificar Pagamento`;
-                iniciarMonitoramentoPixAutomatico();
+                gridDataMonitor = iniciarMonitoramentoPixAutomatico();
             }
         });
 
