@@ -35,7 +35,7 @@
                     <div class="flex-1 flex flex-col min-h-0">
                         <div class="flex justify-between items-center mb-1.5 w-full px-0.5 h-4">
                             <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Resumo:</h4>
-                            <button id="btn-limpar-carrinho" onclick="limparCarrinhoCompleto()" class="hidden text-xs font-semibold text-slate-400 uppercase tracking-wider pr-1 hover:text-slate-600 transition-colors">Limpar</button>
+                            <button id="btn-limpar-carrinho" onclick="limparCarrinhoCompleto()" class="text-xs font-semibold text-slate-400 uppercase tracking-wider pr-1 hover:text-slate-600 transition-colors">Limpar</button>
                             <span id="id-pedido-cabecalho" class="text-xs font-medium text-slate-400 tracking-wide ml-auto hidden"></span>
                         </div>
                         <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1 relative scroll-celular-perfeito">
@@ -171,7 +171,18 @@
         }
 
         function removerItemDoCarrinhoCompleto(id) { if (!carrinhoBloqueado && carrinho[id]) { delete carrinho[id]; renderizarProdutos(); atualizarCarrinhoDOM(); } }
-        function limparCarrinhoCompleto() { if (!carrinhoBloqueado) { carrinho = {}; renderizarProdutos(); atualizarCarrinhoDOM(); } }
+        
+        function limparCarrinhoCompleto() { 
+            carrinho = {}; 
+            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
+            pixChaveIdentificadora = stringQrCodeBase64Salva = ""; 
+            timestampCriacaoPix = 0;
+            carrinhoBloqueado = false; 
+            renderizarProdutos(); 
+            resetarEstadoPagamento();
+            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
+            atualizarCarrinhoDOM(); 
+        }
 
         function construirMensagemFichas(arr) {
             let copia = [...arr]; copia.sort((a, b) => a.produto.localeCompare(b.produto));
@@ -205,13 +216,12 @@
                 lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
                 bloco.className = "space-y-4 pt-1 border-t opacity-40 pointer-events-none";
                 btnDin.disabled = btnPix.disabled = true; btnDin.classList.remove("opacity-100", "bg-white"); btnDin.classList.add("opacity-40", "bg-slate-100");
-                btnLimpar.classList.add("hidden"); cabId.classList.add("hidden"); resetarEstadoPagamento();
+                cabId.classList.add("hidden"); resetarEstadoPagamento();
             } else {
                 bloco.className = "space-y-4 pt-1 border-t opacity-100 pointer-events-auto"; btnPix.disabled = false;
                 const lib = ehVendaLiberadaDinheiro(); btnDin.disabled = !lib;
                 if (lib) { btnDin.classList.remove("opacity-40", "bg-slate-100"); btnDin.classList.add("opacity-100", "bg-white"); }
                 else { btnDin.classList.remove("opacity-100", "bg-white"); btnDin.classList.add("opacity-40", "bg-slate-100"); }
-                if (carrinhoBloqueado) btnLimpar.classList.add("hidden"); else btnLimpar.classList.remove("hidden");
                 cabId.classList.add("hidden"); configuringMatrizGestos();
             }
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
@@ -257,7 +267,7 @@
         }
 
         const extrairItensParaEnvio = (pronto = null) => {
-            if (pronto) return pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) }));
+            if (pronto) return pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), grandmother_id: parseInt(i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) }));
             return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
         };
 
@@ -340,7 +350,15 @@
                 if (d.id_mercado_pago === "BLOQUEADO" || d.mensagem && d.mensagem !== "novo") {
                     box.className = "w-28 h-28 bg-slate-300 border border-slate-400 flex items-center justify-center text-center p-1 select-none pointer-events-none";
                     box.innerHTML = `<span class="text-[10px] font-bold text-slate-600 uppercase tracking-tight leading-tight">Pedido<br>Bloqueado</span>`;
-                    carrinhoBloqueado = false; resetarEstadoPagamento(); fecharOverlay();
+                    
+                    if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
+                    pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
+                    carrinhoBloqueado = false; 
+                    renderizarProdutos(); 
+                    resetarEstadoPagamento();
+                    document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
+                    atualizarCarrinhoDOM();
+
                     alert(d.mensagem || "Pedido online indisponível ou abaixo de R$ 50,00. ⚠️"); return;
                 }
                 if (d.id_mercado_pago) {
