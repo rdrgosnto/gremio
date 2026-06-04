@@ -214,8 +214,8 @@
                 bloco.className = "space-y-4 pt-1 border-t opacity-100 pointer-events-auto";
                 btnPix.disabled = false;
                 btnDin.disabled = false;
-                btnDin.classList.remove("opacity-40", "bg-slate-100");
-                btnDin.classList.add("opacity-100", "bg-white");
+                btnDin.className = CSS_BTN_INATIVO;
+                btnPix.className = CSS_BTN_INATIVO;
                 cabId.classList.add("hidden");
             }
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
@@ -292,19 +292,20 @@
             renderizarProdutos();
             atualizarCarrinhoDOM();
 
+            btnDin.disabled = false;
+            btnPix.disabled = false;
+
             btnDin.className = tipo === 'DINHEIRO' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO;
             btnPix.className = tipo === 'PIX' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO;
 
-            document.getElementById("carrossel-pagamento").className =
-                `w-[200%] h-full flex transition-transform duration-300 transform ${tipo === 'DINHEIRO' ? 'translate-x-0' : '-translate-x-1/2'}`;
+            document.getElementById("carrossel-pagamento").className = `w-[200%] h-full flex transition-transform duration-300 transform ${tipo === 'DINHEIRO' ? 'translate-x-0' : '-translate-x-1/2'}`;
 
-            document.getElementById("secao-valores-dinheiro").className =
-                `w-1/2 h-full space-y-3.5 transition-all duration-200 ${tipo === 'DINHEIRO' ? 'opacity-100 pointer-events-auto' : 'opacity-25 pointer-events-none'}`;
+            document.getElementById("secao-valores-dinheiro").className = `w-1/2 h-full space-y-3.5 transition-all duration-200 ${tipo === 'DINHEIRO' ? 'opacity-100 pointer-events-auto' : 'opacity-25 pointer-events-none'}`;
 
             inp.disabled = tipo !== 'DINHEIRO';
 
             if (tipo === 'DINHEIRO') {
-                inp.value = '';
+                inp.value = "";
                 setTimeout(() => inp.focus(), 50);
             }
 
@@ -369,11 +370,11 @@
             } catch (erro) { return false; }
         }
 
-        function abrirOverlayCelular() { if (window.innerWidth < 1024 || modoResgateManual) { carrinhoBloqueado = true; renderizarProdutos(); document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; if (!modoResgateManual) resetarEstadoPagamento(); } }
+        function abrirOverlayCelular() { if (window.innerWidth < 1024 || modoResgateManual) { carrinhoBloqueado = true; renderizarProdutos(); document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; } }
         function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
         function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true); }
         function resetSistemicoTotal(http = true) { carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = []; document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; document.getElementById("titulo-checkout").className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200"; renderBotaoFlutuante("pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer select-none text-sm", `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center py-1">Pedido R$ 0,00 - Revisar e Pagar</div>`); resetarEstadoPagamento(); atualizarCarrinhoDOM(); document.getElementById("painel-fechamento").classList.add("hidden"); if (http) carregarEstoqueReal(); else renderizarProdutos(); }
-        function resetarEstadoPagamento() { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } formaPagamento = null; pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0; reabrirVisualBotaoFinalizar(); document.getElementById("btn-pix").className = CSS_BTN_INATIVO; const btnDin = document.getElementById("btn-dinheiro"); btnDin.className = CSS_BTN_INATIVO; if (Object.keys(carrinho).length === 0) { btnDin.disabled = true; btnDin.classList.add("opacity-40", "bg-slate-100"); } else { btnDin.disabled = false; btnDin.classList.remove("opacity-40", "bg-slate-100"); btnDin.classList.add("bg-white"); } document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0"; document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200"; const inp = document.getElementById("input-recebido"); inp.disabled = true; inp.value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00"; const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 text-center p-2"; box.innerHTML = `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>`; validarEstadoFinalizar(); }
+        function resetarEstadoPagamento() { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } formaPagamento = null; pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0; reabrirVisualBotaoFinalizar(); document.getElementById("btn-pix").className = CSS_BTN_INATIVO; const btnDin = document.getElementById("btn-dinheiro"); btnDin.className = CSS_BTN_INATIVO; if (Object.keys(carrinho).length === 0) { btnDin.disabled = true; document.getElementById("btn-pix").disabled = true; } else { btnDin.disabled = false; document.getElementById("btn-pix").disabled = false; } document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0"; document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200"; const inp = document.getElementById("input-recebido"); inp.disabled = true; inp.value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00"; const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 text-center p-2"; box.innerHTML = `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>`; validarEstadoFinalizar(); }
         function reabrirVisualBotaoFinalizar() { document.getElementById("btn-finalizar").innerText = "Finalizar"; validarEstadoFinalizar(); }
         function activarModoBuscaPre(e) { if(e) { e.stopPropagation(); e.preventDefault(); } modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos(); renderBotaoFlutuante(`bg-slate-800 ${CSS_BASE_FLUTUANTE} cursor-default`, `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><input type="text" id="input-id-busca" placeholder="000000000000" class="bg-transparent text-white font-medium text-sm focus:outline-none flex-1 h-full px-2 text-center placeholder-white/30 min-w-0 select-text" maxlength="12" oninput="tratarDigitacaoIdBusca(this)"><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`, true); setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100); }
         function tratarDigitacaoIdBusca(input) { input.value = input.value.replace(/\D/g, ""); if (input.value.length === 12) { input.disabled = true; carregarEstoqueReal(input.value); } }
