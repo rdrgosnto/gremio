@@ -147,13 +147,13 @@
             try {
                 const r = await fetch(URL_LEITURA, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(idParaBuscar).trim() }) });
                 const combo = await r.json();
-                if (combo && combo.produto) { // AJUSTADO: Lê a chave 'produto' vinda da ação Resposta do Power Automate
+                if (combo && combo.produto) { 
                     produtos = combo.produto.map(l => ({ 
-                        id: parseInt(l.ID || l.id), // AJUSTADO: Mapeia as colunas MAIÚSCULAS do Excel l.ID
-                        sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : (l.sigla ? String(l.sigla).trim().toUpperCase() : "??"), // l.SIGLA
-                        nome: l.PRODUTO || l.produto, // l.PRODUTO
-                        preco: parseFloat(l.PRECO || l.preco), // l.PRECO
-                        estoque: parseInt(l.ATUAL || l.estoque_atual) // AJUSTADO: Lê a coluna l.ATUAL recalculada pelo Excel automaticamente!
+                        id: parseInt(l.ID || l.id), 
+                        sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : (l.sigla ? String(l.sigla).trim().toUpperCase() : "??"), 
+                        nome: l.PRODUTO || l.produto, 
+                        preco: parseFloat(l.PRECO || l.preco), 
+                        estoque: parseInt(l.ATUAL || l.estoque_atual) 
                     }));
                     localStorage.setItem("festa_junina_cardapio", JSON.stringify(produtos)); renderizarProdutos();
                 }
@@ -242,10 +242,23 @@
                 lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
                 blocoPagamento.className = "space-y-4 pt-1 border-t opacity-40 pointer-events-none";
                 btnDinheiro.disabled = btnPix.disabled = true;
+                btnDinheiro.classList.remove("opacity-40", "bg-slate-100");
                 btnLimpar.classList.add("hidden"); cabecalhoId.classList.add("hidden"); resetarEstadoPagamento();
             } else {
                 blocoPagamento.className = "space-y-4 pt-1 border-t opacity-100 pointer-events-auto";
-                btnPix.disabled = false; btnDinheiro.disabled = !ehVendaLiberadaDinheiro();
+                btnPix.disabled = false; 
+                
+                // Valida o prazo do dinheiro e altera o visual da caixa dinamicamente
+                const liberado = ehVendaLiberadaDinheiro();
+                btnDinheiro.disabled = !liberado;
+                if (liberado) {
+                    btnDinheiro.classList.remove("opacity-40", "bg-slate-100");
+                    btnDinheiro.classList.add("opacity-100", "bg-white");
+                } else {
+                    btnDinheiro.classList.remove("opacity-100", "bg-white");
+                    btnDinheiro.classList.add("opacity-40", "bg-slate-100");
+                }
+                
                 btnLimpar.classList.remove("hidden"); cabecalhoId.classList.add("hidden"); configuringMatrizGestos();
             }
 
