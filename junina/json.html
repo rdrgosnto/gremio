@@ -51,7 +51,6 @@
                                 <button onclick="selecionarPagamento('PIX')" id="btn-pix" disabled class="py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 transition-all disabled:cursor-not-allowed">PIX</button>
                             </div>
                         </div>
-
                         <div class="w-full overflow-hidden border-t border-dashed pt-3 h-[130px] pb-1 relative">
                             <div id="carrossel-pagamento" class="w-[200%] h-full flex transition-transform duration-300 transform translate-x-0">
                                 <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200">
@@ -100,6 +99,11 @@
             if (cache) { produtos = JSON.parse(cache); renderizarProdutos(); }
             carregarEstoqueReal(); iniciarMotorSincronizacaoOculto();
         });
+
+        async function diagnosticarInternetEstavel() {
+            if (!navigator.onLine) return false;
+            try { const c = new AbortController(); setTimeout(() => c.abort(), 2500); await fetch("https://www.google.com", { mode: "no-cors", signal: c.signal }); return true; } catch (e) { return false; }
+        }
 
         async function carregarEstoqueReal(id = "") {
             try {
@@ -245,7 +249,7 @@
                 };
             });
         }
-
+        
         function resetarEstadoPagamento() {
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             formaPagamento = null; pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0; reabrirVisualBotaoFinalizar();
@@ -258,8 +262,11 @@
             box.innerHTML = `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>`; validarEstadoFinalizar();
         }
 
-        // --- MANTENHA AQUI SUAS FUNÇÕES ORIGINAIS ---
-        async function diagnosticarInternetEstavel() { if (!navigator.onLine) return false; try { const c = new AbortController(); setTimeout(() => c.abort(), 2500); await fetch("https://www.google.com", { mode: "no-cors", signal: c.signal }); return true; } catch (e) { return false; } }
+        // --- MANUTENÇÃO: TODAS AS DEMAIS FUNÇÕES DO SEU CÓDIGO ---
+        function aplicarDescontoEstoqueLocal() { Object.keys(carrinho).forEach(id => { const p = produtos.find(i => i.id == id); if (p) p.estoque = Math.max(0, p.estoque - carrinho[id]); }); renderizarProdutos(); }
+        const extrairItensParaEnvio = (pronto = null) => { if (pronto) return pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) })); return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; }); };
+        const gerarPayloadVenda = (id, forma, tipo = "CAIXA", pronto = null, cont = false) => { const obj = { id_pagamento: String(id).trim(), pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), itens: extrairItensParaEnvio(pronto) }; if (cont) obj.contingencia = true; return JSON.stringify(obj); };
+        function tratarContingenciaOffline(id, forma, tipo, itens, msg, sucesso = "Venda Finalizada!", cont = true) { if (confirm(msg)) { if (tipo === "CAIXA") aplicarDescontoEstoqueLocal(); const proc = extrairItensParaEnvio(itens); salvarNoCacheContingencia(id, forma, tipo, proc); alert(construirMensagemFichas(proc)); resetSistemicoTotal(false); return true; } reabrirVisualBotaoFinalizar(); return false; }
         async function enviarVendaNuvem(id, forma, tipo = "CAIXA", pronto = null) { try { const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(id, forma, tipo, pronto) }); if (!r.ok) throw new Error(); setTimeout(async () => { await carregarEstoqueReal(); alert(construirMensagemFichas(extrairItensParaEnvio(pronto))); resetSistemicoTotal(true); }, 1500); } catch (e) { exibirFalhaProcessamento(); } }
         async function processarCliqueFinalizar() { const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando..."; btn.className = CSS_FINALIZAR_DESABILITADO; const net = await diagnosticarInternetEstavel(); if (modoResgateManual) { if (!net) tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Sistema Offline\nConfirmar entrega?", "Produto Entregue!", true); else executingBaixaPedidoEntregue(); return; } if (formaPagamento === 'DINHEIRO') { let idDin = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`; if (!net) tratarContingenciaOffline(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true); else { aplicarDescontoEstoqueLocal(); enviarVendaNuvem(idDin, "DINHEIRO"); } } else if (formaPagamento === 'PIX') { if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) { alert("QR Code não foi gerado.\nNão é possível finalizar em contingência."); reabrirVisualBotaoFinalizar(); return; } if (!net) tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true); else if ((Date.now() - timestampCriacaoPix) >= LIMITE_TIMEOUT_BANCO_PIX) { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema lento\nFinalizar venda?", "Venda Finalizada!", true); } else { if (await consultarStatusMercadoPagoDireto()) { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } aplicarDescontoEstoqueLocal(); enviarVendaNuvem(pixChaveIdentificadora, 'PIX'); } else { alert("Pagamento Pendente"); reabrirVisualBotaoFinalizar(); } } } }
         function selecionarPagamento(tipo) { formaPagamento = tipo; const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro"), inp = document.getElementById("input-recebido"); if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } carrinhoBloqueado = true; renderizarProdutos(); atualizarCarrinhoDOM(); btnDin.className = tipo === 'DINHEIRO' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO; btnPix.className = tipo === 'PIX' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO; document.getElementById("carrossel-pagamento").className = `w-[200%] h-full flex transition-transform duration-300 transform ${tipo === 'DINHEIRO' ? 'translate-x-0' : '-translate-x-1/2'}`; document.getElementById("secao-valores-dinheiro").className = `w-1/2 h-full space-y-3.5 transition-all duration-200 ${tipo === 'DINHEIRO' ? 'opacity-100 pointer-events-auto' : 'opacity-25 pointer-events-none'}`; inp.disabled = tipo !== 'DINHEIRO'; if (tipo === 'DINHEIRO') { inp.value = ""; inp.focus(); } validarEstadoFinalizar(); }
