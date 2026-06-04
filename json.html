@@ -284,12 +284,20 @@
                         alert("⚠️ BLOQUEIO: " + d.mensagem);
                         
                         const indicesBloqueados = d.variavel.split(',').map(i => i.trim()).filter(i => i !== "");
-                        const todosCpfInputs = document.querySelectorAll("#cpf-comprador, .cpf-ing");
                         
-                        todosCpfInputs.forEach((input, index) => {
+                        // LIMPAR ERROS ANTIGOS DO COMPRADOR
+                        const compCpfInput = document.getElementById("cpf-comprador");
+                        if (compCpfInput.nextElementSibling?.classList.contains('msg-erro-cpf')) compCpfInput.nextElementSibling.remove();
+                        
+                        // SE O COMPRADOR ESTIVER NO ARRAY DO FLUXO COMO BLOQUEADO, ELE SERÁ O ÍNDICE "0" NA LISTA BRUTA DO SELECIONAR? NÃO, O SELECIONAR SÓ VALIDA O ARRAY DE INGRESSOS EXTRAS.
+                        // ENTÃO SÍNCRONIZAMOS: O MAP DOS INDICES VAI OLHAR APENAS PARA OS CAMPOS DE CONVIDADOS (.cpf-ing)
+                        const camposConvidados = document.querySelectorAll(".cpf-ing");
+                        
+                        camposConvidados.forEach((input, index) => {
                             const ex = input.nextElementSibling;
                             if (ex && ex.classList.contains('msg-erro-cpf')) ex.remove();
                             
+                            // Se o índice vindo do Power Automate bater certinho com a posição do convidado
                             if (indicesBloqueados.includes(String(index))) {
                                 input.classList.remove("input-sucesso");
                                 input.classList.add("input-erro");
