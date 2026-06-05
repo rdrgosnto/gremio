@@ -197,7 +197,7 @@
                         <div class="max-w-[75%] min-w-0 pointer-events-none w-full">
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 <p class="font-semibold text-slate-700 truncate text-[14px]">${p.nome}</p>
-                                <span onclick="removerItemDoCarrinhoCompleto(${id})" class="text-[11px] text-slate-400 font-normal cursor-pointer hover:text-rose-500 transition-colors pointer-events-auto p-1 -m-1 ${carrinhoBloqueado ? 'hidden' : ''}">Remover</span>
+                                <button type="button" data-action="remover" data-id="${id}" class="text-[11px] text-slate-400 font-normal cursor-pointer hover:text-rose-500 transition-colors pointer-events-auto p-1 -m-1 ${carrinhoBloqueado ? 'hidden' : ''}">Remover</button>
                             </div>
                             <p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(p.preco)}</p>
                         </div>
@@ -221,6 +221,15 @@
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
+
+        // Delegação de eventos para garantir clique no mobile
+        document.getElementById("lista-carrinho").addEventListener('touchstart', function(e) {
+            const target = e.target.closest('[data-action="remover"]');
+            if (target) {
+                e.preventDefault();
+                removerItemDoCarrinhoCompleto(target.dataset.id);
+            }
+        }, { passive: false });
 
         function aplicarDescontoEstoqueLocal() {
             Object.keys(carrinho).forEach(id => { const p = produtos.find(i => i.id == id); if (p) p.estoque = Math.max(0, p.estoque - carrinho[id]); });
@@ -274,41 +283,23 @@
         }
 
         function selecionarPagamento(tipo) {
-
             if (Object.keys(carrinho).length === 0) return;
-
             formaPagamento = tipo;
-
             const btnPix = document.getElementById("btn-pix");
             const btnDin = document.getElementById("btn-dinheiro");
             const inp = document.getElementById("input-recebido");
-
-            if (intervaloPix) {
-                clearInterval(intervaloPix);
-                intervaloPix = null;
-            }
-
+            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             carrinhoBloqueado = true;
             renderizarProdutos();
             atualizarCarrinhoDOM();
-
             btnDin.disabled = false;
             btnPix.disabled = false;
-
             btnDin.className = tipo === 'DINHEIRO' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO;
             btnPix.className = tipo === 'PIX' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO;
-
             document.getElementById("carrossel-pagamento").className = `w-[200%] h-full flex transition-transform duration-300 transform ${tipo === 'DINHEIRO' ? 'translate-x-0' : '-translate-x-1/2'}`;
-
             document.getElementById("secao-valores-dinheiro").className = `w-1/2 h-full space-y-3.5 transition-all duration-200 ${tipo === 'DINHEIRO' ? 'opacity-100 pointer-events-auto' : 'opacity-25 pointer-events-none'}`;
-
             inp.disabled = tipo !== 'DINHEIRO';
-
-            if (tipo === 'DINHEIRO') {
-                inp.value = "";
-                setTimeout(() => inp.focus(), 50);
-            }
-
+            if (tipo === 'DINHEIRO') { inp.value = ""; setTimeout(() => inp.focus(), 50); }
             validarEstadoFinalizar();
         }
 
