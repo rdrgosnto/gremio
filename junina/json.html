@@ -197,7 +197,7 @@
                         <div class="max-w-[75%] min-w-0 pointer-events-none w-full">
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 <p class="font-semibold text-slate-700 truncate text-[14px]">${p.nome}</p>
-                                <button type="button" data-action="remover" data-id="${id}" class="text-[11px] text-slate-400 font-normal cursor-pointer hover:text-rose-500 transition-colors pointer-events-auto p-1 -m-1 ${carrinhoBloqueado ? 'hidden' : ''}">Remover</button>
+                                <button type="button" onclick="removerItemDoCarrinhoCompleto(${id})" class="text-[11px] text-slate-400 font-normal cursor-pointer hover:text-rose-500 transition-colors pointer-events-auto p-1 -m-1 ${carrinhoBloqueado ? 'hidden' : ''}">Remover</button>
                             </div>
                             <p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(p.preco)}</p>
                         </div>
@@ -221,15 +221,6 @@
             if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
-
-        // Delegação de eventos para garantir clique no mobile
-        document.getElementById("lista-carrinho").addEventListener('touchstart', function(e) {
-            const target = e.target.closest('[data-action="remover"]');
-            if (target) {
-                e.preventDefault();
-                removerItemDoCarrinhoCompleto(target.dataset.id);
-            }
-        }, { passive: false });
 
         function aplicarDescontoEstoqueLocal() {
             Object.keys(carrinho).forEach(id => { const p = produtos.find(i => i.id == id); if (p) p.estoque = Math.max(0, p.estoque - carrinho[id]); });
