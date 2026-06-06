@@ -92,7 +92,19 @@
 
         setTimeout(() => { document.getElementById('btnFecharPopup').style.display = document.getElementById('btnXPopup').style.display = 'block'; }, 3000);
         function fecharPopup() { document.getElementById('popupOverlay').style.display = 'none'; }
-        function formatarNomeProprio(n) { return n.toLowerCase().replace(/(^\w|\s\w)/g, m => [" da ", " das ", " de ", " do ", " dos "].includes(m) ? m : m.toUpperCase()); }
+        
+        function formatarNomeProprio(n) {
+            if (!n) return "";
+            let nomeSemAcento = n.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+            let palavras = nomeSemAcento.toLowerCase().split(/\s+/);
+            const conectores = ["da", "das", "de", "do", "dos", "e"];
+            let palavrasFormatadas = palavras.map(palavra => {
+                if (conectores.includes(palavra)) return palavra;
+                return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+            });
+            return palavrasFormatadas.join(' ');
+        }
+        
         document.getElementById('comprador').addEventListener('blur', e => { if (e.target.value.trim()) e.target.value = formatarNomeProprio(e.target.value); });
 
         function aplicarMascaras() {
