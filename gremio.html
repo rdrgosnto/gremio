@@ -141,10 +141,19 @@
         }
 
         selectQtde.onchange = () => {
-            camposExtras.innerHTML = Array.from({length: parseInt(selectQtde.value)}, (_, i) => `<div class="ingresso-extra"><div style="font-weight:700; color:#bf360c; margin-bottom:5px; font-size:13px; text-transform:uppercase;"><i class="fa-solid fa-ticket"></i> Ingresso ${i+1}</div><label>Nome no Ingresso</label><input class="nome-ing" required placeholder="Nome do convidado"><label>CPF Convidado</label><input class="cpf-ing cpf-validar" required placeholder="000.000.000-00"></div>`).join('');
+            camposExtras.innerHTML = Array.from({length: parseInt(selectQtde.value)}, (_, i) => `
+                <div class="ingresso-extra">
+                    <div style="font-weight:700; color:#bf360c; margin-bottom:5px; font-size:13px; text-transform:uppercase;">
+                        <i class="fa-solid fa-ticket"></i> Ingresso ${i+1}
+                    </div>
+                    <label>Nome no Ingresso</label>
+                    <input class="nome-ing" required placeholder="Nome do convidado" onblur="if(this.value.trim()) this.value = formatarNomeProprio(this.value)">
+                    <label>CPF Convidado</label>
+                    <input class="cpf-ing cpf-validar" required placeholder="000.000.000-00">
+                </div>
+            `).join('');
             aplicarMascaras();
         };
-        camposExtras.onblur = e => { if (e.target.classList.contains('nome-ing') && e.target.value.trim()) e.target.value = formatarNomeProprio(e.target.value); };
         selectQtde.dispatchEvent(new Event('change'));
 
         async function processarEnvioFormulario(e) {
