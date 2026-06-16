@@ -68,7 +68,8 @@
                 </div>
                 <div class="flex flex-col items-center gap-1.5 mt-2 pt-2 border-t w-full">
                     <button onclick="processarCliqueFinalizar()" id="btn-finalizar" disabled class="w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed transition-all">Finalizar</button>
-                    <button onclick="fecharOverlay()" class="lg:hidden text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1">Voltar ao pedido</button>
+                    <!-- Removido o 'lg:hidden' para que o botão apareça tanto no computador quanto no celular -->
+                    <button onclick="fecharOverlay()" class="text-xs text-slate-400 hover:text-slate-600 underline font-medium py-1">Voltar ao pedido</button>
                 </div>
             </div>
         </section>
@@ -129,9 +130,7 @@
 
                 grid.innerHTML += `
                     <div onclick="alterarQuantidade(${p.id}, 1)" class="border rounded-lg p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cEstilo}">
-                        <!-- QUADRADO CINZA -->
                         <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${boxEstilo}">
-                            <!-- Fonte calibrada para text-[13px] no celular (maior e visível) e quebra estritamente nos espaços por padrão -->
                             <div class="text-center font-bold text-[13px] sm:text-[15px] md:text-base lg:text-lg xl:text-xl mt-1 px-1 flex items-center justify-center flex-1 select-none whitespace-normal break-normal leading-none w-full">${p.sigla}</div>
                             <div class="flex items-center justify-between w-full mt-auto">
                                 <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, -1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${qtd === 0 || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">-</button>
@@ -139,7 +138,6 @@
                                 <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, 1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${esg || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">+</button>
                             </div>
                         </div>
-                        <!-- Bloco inferior original alinhado abaixo do quadrado -->
                         <div class="min-w-0 flex flex-col justify-between flex-1">
                             <h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5 text-left">${p.nome}</h3>
                             <div class="flex items-center justify-between text-[13px] font-medium w-full"><span class="text-orange-600 font-semibold">R$ ${formatarMoeda(p.preco)}</span><div>E: <span class="${esg || p.estoque <= 10 ? 'text-rose-500 font-semibold' : 'text-orange-600 font-semibold'}">${p.estoque}</span></div></div>
