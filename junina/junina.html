@@ -127,25 +127,31 @@
                 if (modoBuscaAtivo || modoResgateManual) cEstilo = "bg-slate-50 border-slate-300 text-slate-300 select-none pointer-events-none opacity-40";
 
                 grid.innerHTML += `
-                    <div onclick="alterarQuantidade(${p.id}, 1)" class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cEstilo}">
-                        <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${boxEstilo}">
-                            <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">${p.sigla}</div>
+                    <div onclick="alterarQuantidade(${p.id}, 1)" class="border rounded-lg p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 ${cEstilo}">
+                        <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1.5 relative mb-2 ${boxEstilo}">
+                            <div class="text-center font-bold text-xl mt-1 flex items-center justify-center select-none leading-none">${p.sigla}</div>
+                            
+                            <div class="px-1 text-center w-full min-w-0 my-auto">
+                                <h3 class="font-semibold text-slate-700 text-[11px] sm:text-[13px] leading-tight break-words line-clamp-2">
+                                    ${p.nome}
+                                </h3>
+                            </div>
+
                             <div class="flex items-center justify-between w-full mt-auto">
                                 <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, -1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${qtd === 0 || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">-</button>
                                 <span class="text-xs font-bold text-center flex-1">${qtd > 0 ? `<span class="text-orange-600 text-base font-semibold">${qtd}</span>` : '-'}</span>
                                 <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, 1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm ${esg || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">+</button>
                             </div>
                         </div>
-                        <div class="min-w-0 flex flex-col justify-between flex-1">
-                            <h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5">${p.nome}</h3>
+                        <div class="min-w-0 flex flex-col justify-between">
                             <div class="flex items-center justify-between text-[13px] font-medium w-full"><span class="text-orange-600 font-semibold">R$ ${formatarMoeda(p.preco)}</span><div>E: <span class="${esg || p.estoque <= 10 ? 'text-rose-500 font-semibold' : 'text-orange-600 font-semibold'}">${p.estoque}</span></div></div>
                         </div>
                     </div>`;
             });
             let pre = modoBuscaAtivo || modoResgateManual;
             grid.innerHTML += `
-                <div class="border rounded-md p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-300">
-                    <div class="w-full aspect-square rounded-md flex flex-col justify-between p-1 relative mb-2 ${pre ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">
+                <div class="border rounded-lg p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-300">
+                    <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${pre ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}">
                         <div class="text-center font-bold text-xl mt-2.5 flex items-center justify-center flex-1 select-none">ON</div>
                         <div class="flex items-center justify-between w-full mt-auto">
                             <button onclick="forçarFechamentoSistemico(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 text-current font-bold text-sm ${!pre ? 'opacity-20 pointer-events-none' : ''}">-</button>
@@ -167,7 +173,7 @@
         }
 
         function removerItemDoCarrinhoCompleto(id) { if (!carrinhoBloqueado && carrinho[id]) { delete carrinho[id]; renderizarProdutos(); atualizarCarrinhoDOM(); } }
-        
+         
         function limparCarrinhoCompleto() { 
             carrinho = {}; 
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
@@ -317,7 +323,7 @@
             box.innerHTML = `<span>Carregando...</span>`; pixChaveIdentificadora = "mp_" + Date.now(); timestampCriacaoPix = Date.now();
             btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
+                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: generarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
                 if (d.id_mercado_pago === "BLOQUEADO" || d.mensagem && d.mensagem !== "novo") {
                     box.className = "w-28 h-28 bg-slate-300 border border-slate-400 flex items-center justify-center text-center p-1 select-none pointer-events-none";
                     box.innerHTML = `<span class="text-[10px] font-bold text-slate-600 uppercase tracking-tight leading-tight">Pedido<br>Bloqueado</span>`;
