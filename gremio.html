@@ -191,7 +191,7 @@
                     }
                     idPagamentoAtual = d.pagamento_id || d.id || d.id_pagamento || "";
                     document.getElementById("img-qr").src = `data:image/png;base64,${d.pix_qr_code_base64}`;
-                    document.getElementById("pix-codigo").value = d.pix_copia_e_cola;
+                    document.getElementById("pix-codigo").value = d.pix_copia_cola;
                     document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(d.variavel).toFixed(2).replace('.', ',')}`;
                     document.getElementById("sessao-formulario").style.display = "none";
                     document.getElementById("timer-expiracao").style.display = "block";
@@ -199,7 +199,7 @@
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
 
-                    if (!((d.status === "pending" || d.status === "pendente") && d.mensagem === "recuperar")) {
+                    if (!((d.status === "pending" || d.status === "pendente") && d.mensagem === "recuperado")) {
                         const ov = document.getElementById("pagamentoOverlay"), bV = document.getElementById("btn-validar");
                         document.getElementById("txtOverlay").innerText = "Não se esqueça de clicar no botão abaixo ao finalizar o seu pagamento.";
                         ov.style.display = "flex"; bV.style.zIndex = "6000"; setTimeout(() => { ov.style.display = "none"; bV.style.zIndex = "1"; }, 5000);
