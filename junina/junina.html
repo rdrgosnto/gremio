@@ -84,8 +84,8 @@
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/98221223b0c5414085d99db3124350bb/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sXkYuHLSdt1s6aiLFFkMc0fJKd27HDthp4nNRM2Qz20";
         
-        // Atualizado as classes de estilo para dar mais destaque de peso de fonte e sombreamento interno nos botões de pagamento ativos
-        const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-orange-500 bg-orange-50 text-orange-700 font-black tracking-wide text-sm text-center shadow-inner scale-[0.99] transition-all", CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 shadow-sm transition-all", CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95", CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed", CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs text-sm";
+        // Ajustado: O CSS_BTN_ATIVO agora usa 'font-bold' (em vez de font-black) mantendo o texto mais fino e limpo, apenas com o destaque laranja
+        const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-orange-500 bg-orange-50 text-orange-700 font-bold text-sm text-center shadow-sm transition-all", CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 shadow-sm transition-all", CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95", CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed", CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-between min-w-[240px] max-w-xs text-sm";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0, carrinhoBloqueado = false;
 
@@ -125,7 +125,6 @@
             produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
                 const qtd = carrinho[p.id] || 0, esg = p.estoque === 0;
                 
-                // Modificado: O card de fora agora ganha destaque laranja bem nítido (border-orange-400/70 shadow-md) se estiver no carrinho
                 let cardBordaEstilo = (qtd > 0 && !esg) ? "border-orange-400/70 shadow-md" : "border-slate-300 shadow-sm";
                 let cEstilo = (esg || carrinhoBloqueado) ? "bg-slate-100 text-slate-400 select-none pointer-events-none opacity-60" : `bg-white hover:border-slate-400 cursor-pointer ${cardBordaEstilo}`;
                 
@@ -137,9 +136,9 @@
                         <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${boxEstilo}">
                             <div class="text-center font-bold text-[13px] sm:text-[15px] md:text-base lg:text-lg xl:text-xl mt-1 px-1 flex items-center justify-center flex-1 select-none whitespace-normal break-normal leading-none w-full">${p.sigla}</div>
                             <div class="flex items-center justify-between w-full mt-auto">
-                                <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, -1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 active:scale-95 active:bg-black/15 font-bold text-sm ${qtd === 0 || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                                <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, -1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm active:scale-95 active:bg-black/15 ${qtd === 0 || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">-</button>
                                 <span class="text-xs font-bold text-center flex-1">${qtd > 0 ? `<span class="text-orange-600 text-base font-semibold">${qtd}</span>` : '-'}</span>
-                                <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, 1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 active:scale-95 active:bg-black/15 font-bold text-sm ${esg || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">+</button>
+                                <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, 1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm active:scale-95 active:bg-black/15 ${esg || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">+</button>
                             </div>
                         </div>
                         <div class="min-w-0 flex flex-col justify-between flex-1">
@@ -154,9 +153,9 @@
                     <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${pre ? 'bg-slate-800 text-white' : 'bg-slate-200 text-slate-600'}">
                         <div class="text-center font-bold text-[13px] sm:text-[15px] md:text-base lg:text-lg xl:text-xl mt-1 px-1 flex items-center justify-center flex-1 select-none whitespace-normal break-normal leading-none w-full">ON</div>
                         <div class="flex items-center justify-between w-full mt-auto">
-                            <button onclick="forçarFechamentoSistemico(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 active:scale-95 active:bg-black/15 text-current font-bold text-sm ${!pre ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                            <button onclick="forçarFechamentoSistemico(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 font-bold text-sm active:scale-95 active:bg-black/15 ${!pre ? 'opacity-20 pointer-events-none' : ''}">-</button>
                             <span class="text-[13px] font-semibold text-center flex-1">${pre ? 'ativo' : '-'}</span>
-                            <button onclick="activarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 active:scale-95 active:bg-black/15 text-current font-bold text-sm ${pre || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">+</button>
+                            <button onclick="activarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 font-bold text-sm active:scale-95 active:bg-black/15 ${pre || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">+</button>
                         </div>
                     </div>
                     <div class="min-w-0 flex flex-col justify-between flex-1"><h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5 text-left">Online</h3><div class="text-[13px] font-semibold text-orange-600">R$ 0,00</div></div>
