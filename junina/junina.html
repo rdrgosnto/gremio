@@ -281,10 +281,10 @@
                     <div data-id="${id}" class="flex justify-between items-center bg-slate-50 p-[6px] rounded-md border border-slate-100 relative ${carrinhoBloqueado ? 'opacity-60 pointer-events-none' : ''}">
                         <div class="min-w-0 pr-2 w-full">
                             <div class="flex items-center gap-1.5 w-full">
-                                <p class="font-semibold text-slate-700 truncate text-[13px] flex-shrink max-w-[calc(100%-55px)]">${p.nome}</p>
+                                <p class="font-semibold text-slate-700 truncate text-[13px] flex-shrink max-w-[calc(100%-55px)]">${p ? p.nome : "Produto"}</p>
                                 <button type="button" onclick="removerItemDoCarrinhoCompleto(${id})" class="text-[11px] text-slate-400 hover:text-rose-500 font-normal cursor-pointer flex-shrink-0 p-1 -m-1 ${carrinhoBloqueado ? 'hidden' : ''}">Remover</button>
                             </div>
-                            <p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(p.preco)}</p>
+                            <p class="text-[12px] text-slate-400 mt-0.5">${qtd}x R$ ${formatarMoeda(p ? p.preco : 0)}</p>
                         </div>
                         <span class="font-semibold text-slate-700 text-[15px] flex-shrink-0 pl-1 pointer-events-none">R$ ${formatarMoeda(sub)}</span>
                     </div>`;
@@ -310,7 +310,7 @@
             renderizarProdutos();
         }
 
-        // CORREÇÃO DA FUNÇÃO: Agora lida de forma segura com payloads locais e online sem travar com nulos
+        // CORREÇÃO CIRÚRGICA: Função blindada contra leituras nulas e quebras de script
         const extrairItensParaEnvio = (pronto = null) => {
             if (pronto && pronto.length > 0) {
                 return pronto.map(i => ({ 
@@ -358,8 +358,9 @@
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(id, forma, tipo, pronto) });
                 if (!r.ok) throw new Error();
                 
+                const processados = extrairItensParaEnvio(pronto);
                 setTimeout(() => {
-                    alert(construirMensagemFichas(extrairItensParaEnvio(pronto)));
+                    alert(construirMensagemFichas(processados));
                     resetSistemicoTotal(true); 
                 }, 100);
             } catch (e) { exibirFalhaProcessamento(); }
@@ -466,14 +467,22 @@
         function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
         function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) clearInterval(intervaloPix); intervaloPix = null; pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(false); }
         
+        // CORREÇÃO ESTRUTURAL DEFINITIVA: Força a limpeza sequencial das travas globais de renderização
         function resetSistemicoTotal(http = true) { 
-            carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; 
-            carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = []; 
+            carrinhoBloqueado = false;
+            modoResgateManual = false;
+            modoBuscaAtivo = false; 
+            carrinho = {}; 
+            totalAtual = 0; 
+            cachePedidoOnlineOriginal = []; 
+            
             document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; 
             document.getElementById("titulo-checkout").className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2"; 
             renderBotaoFlutuante("pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-6 rounded-full shadow-lg flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer text-sm", `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center py-1">Pedido R$ 0,00 - Revisar e Pagar</div>`); 
+            
             resetarEstadoPagamento(); 
             atualizarCarrinhoDOM(); 
+            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
             document.getElementById("painel-fechamento").classList.add("hidden"); 
             
             renderizarProdutos(); 
