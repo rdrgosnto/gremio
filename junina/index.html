@@ -19,14 +19,18 @@
         <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
     </header>
 
-    <main class="flex-1 max-w-[1800px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
-        <section class="lg:col-span-4 space-y-2">
+    <!-- Ajustado para 6 colunas no desktop para dar mais largura para a barra lateral do carrinho -->
+    <main class="flex-1 max-w-[1800px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-6 gap-4 items-start">
+        <!-- Produtos ocupam 5 das 6 colunas -->
+        <section class="lg:col-span-5 space-y-2">
             <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
-            <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-9 gap-2">
+            <!-- Ajustado para xl:grid-cols-8 (8 cards no computador) -->
+            <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-8 gap-2">
                 <p id="loading-txt" class="col-span-full text-center text-slate-400 italic py-8 text-sm">Carregando cardápio...</p>
             </div>
         </section>
 
+        <!-- Carrinho ocupa 1 das 6 colunas (ganhando o espaço horizontal necessário para manter as 2 linhas) -->
         <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
             <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-4 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
@@ -91,6 +95,7 @@
 
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
         const exibirFalhaProcessamento = () => { alert("Falha no processamento"); reabrirVisualBotaoFinalizar(); };
+        const liberarExibicaoSegura = () => { document.documentElement.style.visibility = document.body.style.visibility = "visible"; document.documentElement.style.opacity = document.body.style.opacity = "1"; };
         
         const renderBotaoFlutuante = (estilo, html, limpar = false) => { 
             const bf = document.getElementById("caixa-flutuante-base"); 
@@ -99,7 +104,6 @@
             bf.onclick = limpar ? null : executarCliqueOuArrasto; 
         };
 
-        // Inicia funções estruturais de forma limpa e sequencial
         window.addEventListener('DOMContentLoaded', () => {
             inicializarMecanicaBotaoArrastavel();
             const cache = localStorage.getItem("festa_junina_cardapio");
@@ -111,9 +115,9 @@
             }
             carregarEstoqueReal(); 
             iniciarMotorSincronizacaoOculto();
+            setTimeout(liberarExibicaoSegura, 2500);
         });
 
-        /* ENGENHARIA DE MOVIMENTAÇÃO DO BOTÃO (DRAGGABLE UNIFICADO) */
         let estaArrastando = false, xInicial = 0, yInicial = 0, distMovidaX = 0, distMovidaY = 0;
         const containerBotao = document.getElementById("container-botao-flutuante");
         const caixaFlutuante = document.getElementById("caixa-flutuante-base");
@@ -161,10 +165,10 @@
             document.addEventListener("touchmove", emMovimento, { passive: false });
             document.addEventListener("mouseup", noFim);
             document.addEventListener("touchend", noFim);
-            caixaFlutuante.onclick = executarCliqueOuArrasto;
+            caixaFlutuante.onclick = executingCliqueOuArrasto;
         }
 
-        function executarCliqueOuArrasto(e) {
+        function executingCliqueOuArrasto(e) {
             if (distMovidaX > 6 || distMovidaY > 6) {
                 if (e) { e.preventDefault(); e.stopPropagation(); }
                 return false;
@@ -194,7 +198,7 @@
                 console.error(e); 
                 if (id !== "") forçarFechamentoSistemico();
                 if (produtos.length === 0) document.getElementById("grid-produtos").innerHTML = `<p class="col-span-full text-center text-rose-500 py-8 text-sm">Falha ao carregar produtos. Verifique a rede.</p>`;
-            }
+            } finally { liberarExibicaoSegura(); }
         }
 
         function renderizarProdutos() {
@@ -344,7 +348,7 @@
                 if (!net) tratarContingenciaOffline(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline\nFinalizar venda?");
                 else { aplicarDescontoEstoqueLocal(); enviarVendaNuvem(idDin, "DINHEIRO"); }
             } else if (formaPagamento === 'PIX') {
-                if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) { alert("QR Code não foi gerado.\nNão é possível finalizar em contingência."); reabrirVisualBotaoFinalizar(); return; }
+                if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) { alert("QR Code não foi gerado.\nNão é possível finalizar in contingência."); reabrirVisualBotaoFinalizar(); return; }
                 if (!net) tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?");
                 else if ((Date.now() - timestampCriacaoPix) >= 59000) { if (intervaloPix) clearInterval(intervaloPix); intervaloPix = null; tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema lento\nFinalizar venda?"); }
                 else { if (await consultarStatusMercadoPagoDireto()) { if (intervaloPix) clearInterval(intervaloPix); intervaloPix = null; aplicarDescontoEstoqueLocal(); enviarVendaNuvem(pixChaveIdentificadora, 'PIX'); } else { alert("Pagamento Pendente"); reabrirVisualBotaoFinalizar(); } }
