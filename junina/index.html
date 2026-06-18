@@ -19,18 +19,14 @@
         <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
     </header>
 
-    <!-- Configurado para 5 colunas no LG (80% produtos / 20% checkout) -->
     <main class="flex-1 max-w-[1800px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
-        <!-- Produtos ocupam 4 das 5 colunas (80% da tela) -->
         <section class="lg:col-span-4 space-y-2">
             <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
-            <!-- Configurado para xl:grid-cols-8 (8 cards mantendo o tamanho físico ideal) -->
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-8 gap-2">
                 <p id="loading-txt" class="col-span-full text-center text-slate-400 italic py-8 text-sm">Carregando cardápio...</p>
             </div>
         </section>
 
-        <!-- Carrinho ocupa 1 das 5 colunas (20% da tela) -->
         <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
             <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-4 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
@@ -253,6 +249,11 @@
         function removerItemDoCarrinhoCompleto(id) { if (!carrinhoBloqueado && carrinho[id]) { delete carrinho[id]; renderizarProdutos(); atualizarCarrinhoDOM(); } }
          
         function limparCarrinhoCompleto() { 
+            // CORREÇÃO: Se estiver no modo de resgate online, o Limpar faz o reset completo imediatamente
+            if (modoResgateManual || modoBuscaAtivo) {
+                forçarFechamentoSistemico();
+                return;
+            }
             carrinho = {}; 
             if (intervaloPix) clearInterval(intervaloPix);
             intervaloPix = null; pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
@@ -277,7 +278,6 @@
             Object.keys(carrinho).forEach(id => {
                 const p = produtos.find(i => i.id == id), qtd = carrinho[id], sub = p.preco * qtd; totalAtual += sub; tItens += qtd;
                 
-                // Ajustado com Flexbox items-center e truncate para manter o preço centralizado e o layout em max 2 linhas
                 lista.innerHTML += `
                     <div data-id="${id}" class="flex justify-between items-center bg-slate-50 p-[6px] rounded-md border border-slate-100 relative ${carrinhoBloqueado ? 'opacity-60 pointer-events-none' : ''}">
                         <div class="min-w-0 pr-2 w-full">
@@ -312,7 +312,7 @@
         }
 
         const extrairItensParaEnvio = (pronto = null) => {
-            if (pronto) return pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) }));
+            if (pronto) return pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), grandmother_id: parseInt(i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) }));
             return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
         };
 
@@ -321,20 +321,31 @@
             if (cont) obj.contingencia = true; return JSON.stringify(obj);
         };
 
+        // CORREÇÃO: Nova estrutura de contingência limpa a tela instantaneamente após o clique do OK
         function tratarContingenciaOffline(id, forma, tipo, itens, msg) {
             if (confirm(msg)) {
                 if (tipo === "CAIXA") aplicarDescontoEstoqueLocal();
                 const proc = extrairItensParaEnvio(itens); salvarNoCacheContingencia(id, forma, tipo, proc);
-                alert(construirMensagemFichas(proc)); resetSistemicoTotal(false); return true;
+                setTimeout(() => {
+                    alert(construirMensagemFichas(proc)); 
+                    resetSistemicoTotal(false); // Renderiza instantâneo do local sem delay
+                }, 50);
+                return true;
             }
             reabrirVisualBotaoFinalizar(); return false;
         }
 
+        // CORREÇÃO: Modificado o encadeamento para disparar o alert com a tela acesa ao fundo e resetar após o OK
         async function enviarVendaNuvem(id, forma, tipo = "CAIXA", pronto = null) {
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(id, forma, tipo, pronto) });
                 if (!r.ok) throw new Error();
-                setTimeout(async () => { await carregarEstoqueReal(); alert(construirMensagemFichas(extrairItensParaEnvio(pronto))); resetSistemicoTotal(true); }, 1500);
+                
+                // Dispara o alert mantendo o fundo aceso. Ao clicar em OK, limpa na hora
+                setTimeout(() => {
+                    alert(construirMensagemFichas(extrairItensParaEnvio(pronto)));
+                    resetSistemicoTotal(true); // Faz o reset e roda a sincronização invisível em background
+                }, 100);
             } catch (e) { exibirFalhaProcessamento(); }
         }
 
@@ -437,8 +448,26 @@
         }
 
         function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
-        function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) clearInterval(intervaloPix); intervaloPix = null; pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true); }
-        function resetSistemicoTotal(http = true) { carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = []; document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; document.getElementById("titulo-checkout").className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2"; renderBotaoFlutuante("pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-6 rounded-full shadow-lg flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer text-sm", `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center py-1">Pedido R$ 0,00 - Revisar e Pagar</div>`); resetarEstadoPagamento(); atualizarCarrinhoDOM(); document.getElementById("painel-fechamento").classList.add("hidden"); if (http) carregarEstoqueReal(); else renderizarProdutos(); }
+        function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) clearInterval(intervaloPix); intervaloPix = null; pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(false); }
+        
+        // CORREÇÃO: Otimizado com Renderização Otimista. Destrava a tela na hora com dados locais e atualiza a API em background invisível
+        function resetSistemicoTotal(http = true) { 
+            carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; 
+            carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = []; 
+            document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; 
+            document.getElementById("titulo-checkout").className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2"; 
+            renderBotaoFlutuante("pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-6 rounded-full shadow-lg flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer text-sm", `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center py-1">Pedido R$ 0,00 - Revisar e Pagar</div>`); 
+            resetarEstadoPagamento(); 
+            atualizarCarrinhoDOM(); 
+            document.getElementById("painel-fechamento").classList.add("hidden"); 
+            
+            // Força a renderização local imediata na tela do operador (0ms de delay)
+            renderizarProdutos(); 
+            
+            // Dispara a busca pesada na internet de forma silenciosa e em segundo plano
+            if (http) setTimeout(carregarEstoqueReal, 50); 
+        }
+        
         function resetarEstadoPagamento() { if (intervaloPix) clearInterval(intervaloPix); intervaloPix = null; formaPagamento = null; pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0; reabrirVisualBotaoFinalizar(); document.getElementById("btn-pix").className = CSS_BTN_INATIVO; const btnDin = document.getElementById("btn-dinheiro"); btnDin.className = CSS_BTN_INATIVO; btnDin.disabled = document.getElementById("btn-pix").disabled = (Object.keys(carrinho).length === 0); document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0"; document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none"; const inp = document.getElementById("input-recebido"); inp.disabled = true; inp.value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00"; const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 text-center p-2"; box.innerHTML = `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>`; validarEstadoFinalizar(); }
         function reabrirVisualBotaoFinalizar() { document.getElementById("btn-finalizar").innerText = "Finalizar"; validarEstadoFinalizar(); }
         function activarModoBuscaPre(e) { if(e) { e.stopPropagation(); e.preventDefault(); } modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos(); renderBotaoFlutuante(`bg-slate-800 ${CSS_BASE_FLUTUANTE} cursor-default`, `<div class="text-left font-medium text-sm">ID do Pagamento:</div><input type="text" id="input-id-busca" placeholder="000000000000" class="bg-transparent text-white font-medium text-sm focus:outline-none flex-1 h-full px-2 text-center placeholder-white/30 min-w-0 select-text" maxlength="12" oninput="tratarDigitacaoIdBusca(this)"><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer transition-colors text-right">Sair</div>`, true); setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100); }
