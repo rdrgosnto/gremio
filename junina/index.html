@@ -12,7 +12,6 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         html, body { visibility: hidden; opacity: 0; background-color: #f8fafc; }
         .scroll-celular-perfeito { touch-action: pan-y !important; }
-        /* Garante toque limpo e sem comportamentos estranhos de scroll ao arrastar o botão */
         #container-botao-flutuante { touch-action: none; user-select: none; }
     </style>
 </head>
@@ -94,7 +93,6 @@
         const exibirFalhaProcessamento = () => { alert("Falha no processamento"); reabrirVisualBotaoFinalizar(); };
         const liberarExibicaoSegura = () => { document.documentElement.style.visibility = document.body.style.visibility = "visible"; document.documentElement.style.opacity = document.body.style.opacity = "1"; };
         
-        // Atualizado para manter os estilos inline de posição durante re-renderizações dinâmicas do botão
         const renderBotaoFlutuante = (estilo, html, limpar = false) => { 
             const bf = document.getElementById("caixa-flutuante-base"); 
             bf.className = estilo + " cursor-move"; 
@@ -107,9 +105,11 @@
             if (cache) { produtos = JSON.parse(cache); renderizarProdutos(); }
             carregarEstoqueReal(); iniciarMotorSincronizacaoOculto();
             inicializarMecanicaBotaoArrastavel();
+
+            // CORREÇÃO DE SEGURANÇA: Se o estoque online travar ou demorar, força a exibição da tela em 2.5 segundos
+            setTimeout(liberarExibicaoSegura, 2500);
         });
 
-        /* LÓGICA DE BOTÃO ARRASTÁVEL COMPATÍVEL COM MOUSE E TOQUE (MOBILE) */
         let estaArrastando = false, xInicial = 0, yInicial = 0, xAtual = 0, yAtual = 0, distMovidaX = 0, distMovidaY = 0;
         const containerBotao = document.getElementById("container-botao-flutuante");
         const caixaFlutuante = document.getElementById("caixa-flutuante-base");
@@ -126,7 +126,6 @@
 
         function iniciarArrasto(e) {
             estaArrastando = true;
-            // Captura posição inicial considerando se é clique ou toque touch
             const clienteX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
             const clienteY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
             
@@ -139,7 +138,7 @@
 
         function arrastando(e) {
             if (!estaArrastando) return;
-            if (e.type === "touchmove") e.preventDefault(); // Evita scroll de fundo indesejado ao arrastar o elemento
+            if (e.type === "touchmove") e.preventDefault();
 
             const clienteX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
             const clienteY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
@@ -147,11 +146,9 @@
             xAtual = clienteX - xInicial;
             yAtual = clienteY - yInicial;
 
-            // Histórico de distância para validação de clique simples
             distMovidaX += Math.abs(xAtual - parseInt(containerBotao.style.left || 0));
             distMovidaY += Math.abs(yAtual - parseInt(containerBotao.style.top || 0));
 
-            // Limpa as propriedades padrões do Tailwind para evitar conflito de posições fixas
             containerBotao.style.bottom = "auto";
             containerBotao.style.right = "auto";
             containerBotao.style.margin = "0";
@@ -164,36 +161,31 @@
             if (!estaArrastando) return;
             estaArrastando = false;
 
-            // Limites físicos de segurança da janela atual do navegador
             const larguraTela = window.innerWidth;
             const alturaTela = window.innerHeight;
             const rectBotao = containerBotao.getBoundingClientRect();
-            const margemMinimaVisivel = 40; // Garante que pelo menos 40px fiquem expostos para resgate
+            const margemMinimaVisivel = 40;
 
             let novaPosiçãoX = rectBotao.left;
             let novaPosiçãoY = rectBotao.top;
 
-            // Validações de transbordo lateral (Esquerda / Direita)
             if (novaPosiçãoX < (margemMinimaVisivel - rectBotao.width)) {
                 novaPosiçãoX = margemMinimaVisivel - rectBotao.width;
             } else if (novaPosiçãoX > (larguraTela - margemMinimaVisivel)) {
                 novaPosiçãoX = larguraTela - margemMinimaVisivel;
             }
 
-            // Validações de transbordo vertical (Topo / Rodapé)
             if (novaPosiçãoY < 0) {
                 novaPosiçãoY = 0;
             } else if (novaPosiçãoY > (alturaTela - margemMinimaVisivel)) {
                 novaPosiçãoY = alturaTela - margemMinimaVisivel;
             }
 
-            // Aplica o travamento seguro definitivo na tela
             containerBotao.style.left = novaPosiçãoX + "px";
             containerBotao.style.top = novaPosiçãoY + "px";
         }
 
         function executarCliqueOuArrasto(e) {
-            // Se o botão se moveu mais de 6 pixels totais, cancela o evento de clique (foi um arrasto)
             if (distMovidaX > 6 || distMovidaY > 6) {
                 if (e) { e.preventDefault(); e.stopPropagation(); }
                 return false;
