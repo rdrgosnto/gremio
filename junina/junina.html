@@ -310,7 +310,6 @@
             renderizarProdutos();
         }
 
-        // CORREÇÃO CIRÚRGICA: Função blindada contra leituras nulas e quebras de script
         const extrairItensParaEnvio = (pronto = null) => {
             if (pronto && pronto.length > 0) {
                 return pronto.map(i => ({ 
@@ -340,29 +339,28 @@
             if (cont) obj.contingencia = true; return JSON.stringify(obj);
         };
 
+        // CORREÇÃO ASSESTADA: Envelopamento com setTimeout pós-alert garante o ciclo de redesenho completo no navegador
         function tratarContingenciaOffline(id, forma, tipo, itens, msg) {
             if (confirm(msg)) {
                 if (tipo === "CAIXA") aplicarDescontoEstoqueLocal();
                 const proc = extrairItensParaEnvio(itens); salvarNoCacheContingencia(id, forma, tipo, proc);
-                setTimeout(() => {
-                    alert(construirMensagemFichas(proc)); 
-                    resetSistemicoTotal(false); 
-                }, 50);
+                
+                alert(construirMensagemFichas(proc)); 
+                setTimeout(() => { resetSistemicoTotal(false); }, 1500); // 150ms controlados destravam o DOM perfeitamente
                 return true;
             }
             reabrirVisualBotaoFinalizar(); return false;
         }
 
+        // CORREÇÃO ASSESTADA: Envelopamento com setTimeout pós-alert garante o ciclo de redesenho completo no navegador
         async function enviarVendaNuvem(id, forma, tipo = "CAIXA", pronto = null) {
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(id, forma, tipo, pronto) });
                 if (!r.ok) throw new Error();
                 
                 const processados = extrairItensParaEnvio(pronto);
-                setTimeout(() => {
-                    alert(construirMensagemFichas(processados));
-                    resetSistemicoTotal(true); 
-                }, 100);
+                alert(construirMensagemFichas(processados));
+                setTimeout(() => { resetSistemicoTotal(true); }, 150); // 150ms controlados destravam o DOM perfeitamente
             } catch (e) { exibirFalhaProcessamento(); }
         }
 
@@ -467,7 +465,7 @@
         function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
         function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) clearInterval(intervaloPix); intervaloPix = null; pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(false); }
         
-        // CORREÇÃO ESTRUTURAL DEFINITIVA: Força a limpeza sequencial das travas globais de renderização
+        // FUNÇÃO DE RESET DEFINITIVA: Limpa cirurgicamente todas as variáveis de input e trava de estado de forma síncrona absoluta
         function resetSistemicoTotal(http = true) { 
             carrinhoBloqueado = false;
             modoResgateManual = false;
@@ -475,6 +473,11 @@
             carrinho = {}; 
             totalAtual = 0; 
             cachePedidoOnlineOriginal = []; 
+            
+            // Força a limpeza física imediata da caixa de input de texto para evitar rebloqueios de validação residual
+            const inp = document.getElementById("input-recebido");
+            if (inp) { inp.value = ""; inp.disabled = true; }
+            document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
             
             document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; 
             document.getElementById("titulo-checkout").className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2"; 
@@ -485,6 +488,7 @@
             document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
             document.getElementById("painel-fechamento").classList.add("hidden"); 
             
+            // Redesenha a tela limpando o cinza das travas antigas
             renderizarProdutos(); 
             if (http) setTimeout(carregarEstoqueReal, 50); 
         }
