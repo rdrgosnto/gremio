@@ -197,7 +197,12 @@
             } finally { liberarExibicaoSegura(); }
         }
 
+        // CORREÇÃO MÁXIMA (FORÇA BRUTA): Se o carrinho estiver vazio, a função se auto-destrava e força os cards brancos obrigatoriamente
         function renderizarProdutos() {
+            if (Object.keys(carrinho).length === 0 && !modoResgateManual && !modoBuscaAtivo) {
+                carrinhoBloqueado = false;
+            }
+
             const grid = document.getElementById("grid-produtos"); grid.innerHTML = "";
             if(produtos.length === 0) return;
             
@@ -256,9 +261,11 @@
             carrinho = {}; 
             if (intervaloPix) clearInterval(intervaloPix);
             intervaloPix = null; pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
-            carrinhoBloqueado = false; renderizarProdutos(); resetarEstadoPagamento();
+            carrinhoBloqueado = false; 
+            resetarEstadoPagamento();
             document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
-            atualizarCarrinhoDOM(); 
+            atualizarCarrinhoDOM();
+            renderizarProdutos();
         }
 
         function construirMensagemFichas(arr) {
@@ -339,20 +346,18 @@
             if (cont) obj.contingencia = true; return JSON.stringify(obj);
         };
 
-        // CORREÇÃO ASSESTADA: Envelopamento com setTimeout pós-alert garante o ciclo de redesenho completo no navegador
         function tratarContingenciaOffline(id, forma, tipo, itens, msg) {
             if (confirm(msg)) {
                 if (tipo === "CAIXA") aplicarDescontoEstoqueLocal();
                 const proc = extrairItensParaEnvio(itens); salvarNoCacheContingencia(id, forma, tipo, proc);
                 
                 alert(construirMensagemFichas(proc)); 
-                setTimeout(() => { resetSistemicoTotal(false); }, 1500); // 150ms controlados destravam o DOM perfeitamente
+                setTimeout(() => { resetSistemicoTotal(false); }, 150); 
                 return true;
             }
             reabrirVisualBotaoFinalizar(); return false;
         }
 
-        // CORREÇÃO ASSESTADA: Envelopamento com setTimeout pós-alert garante o ciclo de redesenho completo no navegador
         async function enviarVendaNuvem(id, forma, tipo = "CAIXA", pronto = null) {
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(id, forma, tipo, pronto) });
@@ -360,7 +365,7 @@
                 
                 const processados = extrairItensParaEnvio(pronto);
                 alert(construirMensagemFichas(processados));
-                setTimeout(() => { resetSistemicoTotal(true); }, 150); // 150ms controlados destravam o DOM perfeitamente
+                setTimeout(() => { resetSistemicoTotal(true); }, 150); 
             } catch (e) { exibirFalhaProcessamento(); }
         }
 
@@ -465,7 +470,6 @@
         function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
         function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) clearInterval(intervaloPix); intervaloPix = null; pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(false); }
         
-        // FUNÇÃO DE RESET DEFINITIVA: Limpa cirurgicamente todas as variáveis de input e trava de estado de forma síncrona absoluta
         function resetSistemicoTotal(http = true) { 
             carrinhoBloqueado = false;
             modoResgateManual = false;
@@ -474,7 +478,6 @@
             totalAtual = 0; 
             cachePedidoOnlineOriginal = []; 
             
-            // Força a limpeza física imediata da caixa de input de texto para evitar rebloqueios de validação residual
             const inp = document.getElementById("input-recebido");
             if (inp) { inp.value = ""; inp.disabled = true; }
             document.getElementById("valor-troco-txt").innerText = "R$ 0,00";
@@ -488,7 +491,6 @@
             document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
             document.getElementById("painel-fechamento").classList.add("hidden"); 
             
-            // Redesenha a tela limpando o cinza das travas antigas
             renderizarProdutos(); 
             if (http) setTimeout(carregarEstoqueReal, 50); 
         }
