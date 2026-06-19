@@ -171,7 +171,6 @@
 
         function removerItemDoCarrinhoCompleto(id) { if (!carrinhoBloqueado && carrinho[id]) { delete carrinho[id]; renderizarProdutos(); atualizarCarrinhoDOM(); } }
          
-        // AJUSTE 3: Caso clique em Limpar no modo busca/resgate ativo, força o reset total do ON
         function limparCarrinhoCompleto() { 
             if (modoBuscaAtivo || modoResgateManual) { forçarFechamentoSistemico(); return; }
             carrinho = {}; 
@@ -189,7 +188,6 @@
             return txt;
         }
 
-        // AJUSTE 2: Nova estrutura Flexbox inteligente de duas linhas precisas com preço centralizado
         function atualizarCarrinhoDOM() {
             if (modoResgateManual) return;
             const lista = document.getElementById("lista-carrinho"), bloco = document.getElementById("bloco-inferior-pagamento");
@@ -372,7 +370,7 @@
         function salvarNoCacheContingencia(id, forma, tipo, pronto) { let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; fila.push({ id_pagamento: id, pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), contingencia: true, itens: pronto }); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); }
         function iniciarMotorSincronizacaoOculto() { setInterval(async () => { let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; if (fila.length === 0 || !(await diagnosticarInternetEstavel())) return; try { const pacote = { id_pagamento: String(fila[0].id_pagamento), pagamento: String(fila[0].pagamento), tipo_venda: String(fila[0].tipo_venda), status_retirada: "retirado", total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado), transaction_amount: parseFloat(fila[0].transaction_amount), contingencia: true, itens: extrairItensParaEnvio(fila[0].itens) }; const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacote) }); if (r.ok) { fila.shift(); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); } } catch (err) { console.error("Erro na sincronização.", err); } }, 30000); }
 
-        // MÓDULO DRAGGABLE CORRIGIDO: Adicionado preventDefault contra overscroll elástico do celular
+        // MÓDULO DRAGGABLE COMPLETO: Configurado com travas laterais (48px) e respiro no fundo (16px)
         function configurarBotaoArrastavel() {
             const el = document.getElementById("container-botao-flutuante");
             const header = document.getElementById("barra-superior");
@@ -392,16 +390,20 @@
 
             const onMove = (e) => {
                 if (!iniciado) return;
-                e.preventDefault(); // AJUSTE: Mata o puxão elástico e a rolagem intrusiva da tela
+                e.preventDefault(); // Anula completamente os puxões elásticos da página para baixo
                 
                 const touch = e.type === "touchmove" ? e.touches[0] : e;
                 xAt = touch.clientX - xIni; yAt = touch.clientY - yIni;
 
-                const lMax = window.innerWidth - 48, aMax = window.innerHeight - el.offsetHeight;
+                // AJUSTES: Definição precisa das novas travas físicas (Laterais 48px e Rodapé com respiro de 16px)
+                const lMax = window.innerWidth - 48;
+                const aMax = window.innerHeight - el.offsetHeight - 16;
                 const hLim = header ? header.offsetHeight : 48;
 
-                if (xAt < -el.offsetWidth + 48) xAt = -el.offsetWidth + 48; if (xAt > lMax) xAt = lMax;
-                if (yAt < hLim) yAt = hLim; if (yAt > aMax) yAt = aMax;
+                if (xAt < -el.offsetWidth + 48) xAt = -el.offsetWidth + 48;
+                if (xAt > lMax) xAt = lMax;
+                if (yAt < hLim) yAt = hLim;
+                if (yAt > aMax) yAt = aMax;
 
                 el.style.left = xAt + "px"; el.style.top = yAt + "px";
             };
