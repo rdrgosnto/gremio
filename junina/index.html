@@ -61,7 +61,7 @@
                                     <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 transition-none select-none text-center p-2">
                                         <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>
                                     </div>
-                                </div>
+                                }
                             </div>
                         </div>
                     </div>
@@ -220,7 +220,13 @@
                 btnDin.className = CSS_BTN_INATIVO; btnPix.className = CSS_BTN_INATIVO;
                 cabId.classList.add("hidden");
             }
-            if (!modoBuscaAtivo) document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
+            if (!modoBuscaAtivo) {
+                const bf = document.getElementById("caixa-flutuante-base");
+                if (bf && !bf.classList.contains("cursor-default")) {
+                    const cfu = document.getElementById("conteudo-flutuante-unico");
+                    if (cfu) cfu.innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
+                }
+            }
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
@@ -356,6 +362,11 @@
             carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = []; 
             document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; 
             document.getElementById("titulo-checkout").className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200"; 
+            
+            const el = document.getElementById("container-botao-flutuante");
+            el.className = "fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex justify-center pointer-events-none touch-none whitespace-nowrap";
+            el.style.left = "50%"; el.style.top = "auto"; el.style.bottom = "16px"; el.style.right = "auto";
+            
             renderBotaoFlutuante("pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer select-none text-sm", `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center py-1">Pedido R$ 0,00 - Revisar e Pagar</div>`); 
             resetarEstadoPagamento(); atualizarCarrinhoDOM(); document.getElementById("painel-fechamento").classList.add("hidden"); 
             if (http) { renderizarProdutos(); setTimeout(() => { carregarEstoqueReal(); }, 50); } else { renderizarProdutos(); } 
@@ -370,7 +381,7 @@
         function salvarNoCacheContingencia(id, forma, tipo, pronto) { let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; fila.push({ id_pagamento: id, pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), contingencia: true, itens: pronto }); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); }
         function iniciarMotorSincronizacaoOculto() { setInterval(async () => { let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; if (fila.length === 0 || !(await diagnosticarInternetEstavel())) return; try { const pacote = { id_pagamento: String(fila[0].id_pagamento), pagamento: String(fila[0].pagamento), tipo_venda: String(fila[0].tipo_venda), status_retirada: "retirado", total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado), transaction_amount: parseFloat(fila[0].transaction_amount), contingencia: true, itens: extrairItensParaEnvio(fila[0].itens) }; const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacote) }); if (r.ok) { fila.shift(); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); } } catch (err) { console.error("Erro na sincronização.", err); } }, 30000); }
 
-        // MÓDULO DRAGGABLE COMPLETO: Configurado com travas laterais (48px) e respiro no fundo (16px)
+        // MÓDULO DRAGGABLE COMPLETO: Protegido contra rolagem através de inversão de âncoras dinâmicas
         function configurarBotaoArrastavel() {
             const el = document.getElementById("container-botao-flutuante");
             const header = document.getElementById("barra-superior");
@@ -380,22 +391,27 @@
                 if (e.target.id === "input-id-busca") return;
                 iniciado = true;
                 const touch = e.type === "touchstart" ? e.touches[0] : e;
-                if (!el.style.left || el.style.left.includes("%")) {
-                    const r = el.getBoundingClientRect();
-                    el.style.left = r.left + "px"; el.style.bottom = "auto"; el.style.top = r.top + "px";
-                    el.classList.remove("left-1/2", "-translate-x-1/2");
-                }
-                xIni = touch.clientX - el.offsetLeft; yIni = touch.clientY - el.offsetTop;
+                const r = el.getBoundingClientRect();
+                
+                // Sempre converte para top/left absoluto no início do arrasto para o dedo responder de forma imediata
+                el.style.left = r.left + "px"; 
+                el.style.top = r.top + "px";
+                el.style.bottom = "auto"; 
+                el.style.right = "auto";
+                el.classList.remove("left-1/2", "-translate-x-1/2");
+                
+                xIni = touch.clientX - el.offsetLeft; 
+                yIni = touch.clientY - el.offsetTop;
             };
 
             const onMove = (e) => {
                 if (!iniciado) return;
-                e.preventDefault(); // Anula completamente os puxões elásticos da página para baixo
+                e.preventDefault(); 
                 
                 const touch = e.type === "touchmove" ? e.touches[0] : e;
-                xAt = touch.clientX - xIni; yAt = touch.clientY - yIni;
+                xAt = touch.clientX - xIni; 
+                yAt = touch.clientY - yIni;
 
-                // AJUSTES: Definição precisa das novas travas físicas (Laterais 48px e Rodapé com respiro de 16px)
                 const lMax = window.innerWidth - 48;
                 const aMax = window.innerHeight - el.offsetHeight - 16;
                 const hLim = header ? header.offsetHeight : 48;
@@ -405,10 +421,24 @@
                 if (yAt < hLim) yAt = hLim;
                 if (yAt > aMax) yAt = aMax;
 
-                el.style.left = xAt + "px"; el.style.top = yAt + "px";
+                el.style.left = xAt + "px"; 
+                el.style.top = yAt + "px";
             };
 
-            const onEnd = () => iniciado = false;
+            const onEnd = () => {
+                if (!iniciado) return;
+                iniciado = false;
+
+                // INVERSÃO DE ÂNCORA: Trava permanentemente o botão usando bottom/right para ignorar rolagens da tela
+                const r = el.getBoundingClientRect();
+                const distFundo = window.innerHeight - r.bottom;
+                const distDireita = window.innerWidth - r.right;
+
+                el.style.top = "auto";
+                el.style.bottom = distFundo + "px";
+                el.style.left = "auto";
+                el.style.right = distDireita + "px";
+            };
 
             el.addEventListener("mousedown", onStart); window.addEventListener("mousemove", onMove); window.addEventListener("mouseup", onEnd);
             el.addEventListener("touchstart", onStart, { passive: false }); window.addEventListener("touchmove", onMove, { passive: false }); window.addEventListener("touchend", onEnd);
