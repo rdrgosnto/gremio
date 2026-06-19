@@ -397,10 +397,10 @@
                 const touch = e.type === "touchmove" ? e.touches[0] : e;
                 xAt = touch.clientX - xIni; yAt = touch.clientY - yIni;
 
-                const lMax = window.innerWidth - 24, aMax = window.innerHeight - el.offsetHeight;
+                const lMax = window.innerWidth - 48, aMax = window.innerHeight - el.offsetHeight;
                 const hLim = header ? header.offsetHeight : 48;
 
-                if (xAt < -el.offsetWidth + 24) xAt = -el.offsetWidth + 24; if (xAt > lMax) xAt = lMax;
+                if (xAt < -el.offsetWidth + 48) xAt = -el.offsetWidth + 48; if (xAt > lMax) xAt = lMax;
                 if (yAt < hLim) yAt = hLim; if (yAt > aMax) yAt = aMax;
 
                 el.style.left = xAt + "px"; el.style.top = yAt + "px";
