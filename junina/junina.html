@@ -123,7 +123,7 @@
         function renderizarProdutos() {
             const grid = document.getElementById("grid-produtos"); grid.innerHTML = "";
             produtos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(p => {
-                const qtd = carrinho[p.id] || 0, esg = p.estoque === 0;
+                const qtd = carrinho[p.id] || 0, esg = p.estoque <= 0; // CORREÇÃO: Estoque <= 0 bloqueia negatividades
                 let cardBordaEstilo = (qtd > 0 && !esg) ? "border-orange-400/70 shadow-md" : "border-slate-300 shadow-sm";
                 let cEstilo = (esg || carrinhoBloqueado) ? "bg-slate-100 text-slate-400 select-none pointer-events-none opacity-60" : `bg-white hover:border-slate-400 cursor-pointer ${cardBordaEstilo}`;
                 let boxEstilo = (qtd > 0 && !esg) ? "bg-orange-50 border border-orange-200 text-orange-700" : "bg-slate-200 text-slate-600";
@@ -141,7 +141,7 @@
                         </div>
                         <div class="min-w-0 flex flex-col justify-between flex-1">
                             <h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5 text-left">${p.nome}</h3>
-                            <div class="flex items-center justify-between text-[13px] font-medium w-full"><span class="text-orange-600 font-semibold">R$ ${formatarMoeda(p.preco)}</span><div>E: <span class="${esg || p.estoque <= 10 ? 'text-rose-500 font-semibold' : 'text-orange-600 font-semibold'}">${p.estoque}</span></div></div>
+                            <div class="flex items-center justify-between text-[13px] font-medium w-full"><span class="text-orange-600 font-semibold">R$ ${formatarMoeda(p.preco)}</span><div>E: <span class="${esg || p.estoque <= 10 ? 'text-rose-500 font-semibold' : 'text-orange-600 font-semibold'}">${p.estoque <= 0 ? 0 : p.estoque}</span></div></div>
                         </div>
                     </div>`;
             });
@@ -163,8 +163,11 @@
         function alterarQuantidade(id, d) {
             if (carrinhoBloqueado) return;
             const p = produtos.find(i => i.id == id); if (!p) return;
+            // CORREÇÃO DE SEGURANÇA: Bloqueia estoque negativo severamente
+            if (d > 0 && p.estoque <= 0) return; 
             const n = (carrinho[id] || 0) + d;
-            if (d > 0 && (carrinho[id] || 0) >= p.estoque) return;
+            if (d > 0 && n > p.estoque) return; 
+            
             if (n <= 0) delete carrinho[id]; else carrinho[id] = n;
             renderizarProdutos(); atualizarCarrinhoDOM();
         }
@@ -267,11 +270,18 @@
                 const d = new Date();
                 let idDin = `6${String(d.getFullYear()).slice(-2)}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}${String(d.getSeconds()).padStart(2,'0')}${String(d.getMilliseconds()).padStart(3,'0').slice(0,2)}`;
     
-                if (!net) tratarContingenciaOffline(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
-                else { aplicarDescontoEstoqueLocal(); enviarVendaNuvem(idDin, "DINHEIRO"); }
+                let lento = (botExecutando && document.getElementById("select-bot-cenario").value === "3");
+                if (!net || lento) {
+                    tratarContingenciaOffline(idDin, "DINHEIRO", "CAIXA", null, lento ? "Sistema lento\nFinalizar venda em contingência?" : "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
+                } else { 
+                    aplicarDescontoEstoqueLocal(); enviarVendaNuvem(idDin, "DINHEIRO"); 
+                }
             } else if (formaPagamento === 'PIX') {
                 if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) { alert("QR Code não foi gerado.\nNão é possível finalizar em contingência."); reabrirVisualBotaoFinalizar(); return; }
-                if (!net) tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
+                let lentoPix = (botExecutando && document.getElementById("select-bot-cenario").value === "8");
+                if (!net || lentoPix) {
+                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), lentoPix ? "Sistema lento\nFinalizar venda?" : "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
+                }
                 else if ((Date.now() - timestampCriacaoPix) >= 59000) { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema lento\nFinalizar venda?", "Venda Finalizada!", true); }
                 else { if (await consultarStatusMercadoPagoDireto()) { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } aplicarDescontoEstoqueLocal(); enviarVendaNuvem(pixChaveIdentificadora, 'PIX'); } else { alert("Pagamento Pendente"); reabrirVisualBotaoFinalizar(); } }
             }
@@ -372,6 +382,7 @@
         function salvarNoCacheContingencia(id, forma, tipo, pronto) { let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; fila.push({ id_pagamento: id, pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), contingencia: true, itens: pronto }); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); }
         function iniciarMotorSincronizacaoOculto() { setInterval(async () => { let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; if (fila.length === 0 || !(await diagnosticarInternetEstavel())) return; try { const pacote = { id_pagamento: String(fila[0].id_pagamento), pagamento: String(fila[0].pagamento), tipo_venda: String(fila[0].tipo_venda), status_retirada: "retirado", total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado), transaction_amount: parseFloat(fila[0].transaction_amount), contingencia: true, itens: extrairItensParaEnvio(fila[0].itens) }; const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacote) }); if (r.ok) { fila.shift(); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); } } catch (err) { console.error("Erro na sincronização.", err); } }, 30000); }
 
+        // TRAVA DE MOVIMENTO - BOTÃO FLUTUANTE
         function configurarBotaoArrastavel() {
             const el = document.getElementById("container-botao-flutuante");
             const header = document.getElementById("barra-superior");
@@ -394,15 +405,18 @@
                 e.preventDefault(); 
                 
                 const touch = e.type === "touchmove" ? e.touches[0] : e;
-                xAt = touch.clientX - xIni; yAt = touch.clientY - yIni;
+                let nL = touch.clientX - xIni; 
+                let nT = touch.clientY - yIni;
 
-                const lMax = window.innerWidth - 24, aMax = window.innerHeight - el.offsetHeight;
-                const hLim = header ? header.offsetHeight : 48;
+                // Margem de segurança de 16px para não sumir da tela
+                const lMax = window.innerWidth - el.offsetWidth - 16;
+                const aMax = window.innerHeight - el.offsetHeight - 16;
+                const hLim = header ? header.offsetHeight + 16 : 64;
 
-                if (xAt < -el.offsetWidth + 24) xAt = -el.offsetWidth + 24; if (xAt > lMax) xAt = lMax;
-                if (yAt < hLim) yAt = hLim; if (yAt > aMax) yAt = aMax;
+                if (nL < 16) nL = 16; if (nL > lMax) nL = lMax;
+                if (nT < hLim) nT = hLim; if (nT > aMax) nT = aMax;
 
-                el.style.left = xAt + "px"; el.style.top = yAt + "px";
+                el.style.left = nL + "px"; el.style.top = nT + "px";
             };
 
             const onEnd = () => iniciado = false;
@@ -412,16 +426,13 @@
         }
     </script>
     
-    <!-- ======================================================== -->
-    <!-- MOTOR DE TESTES INJETADO (NÃO INTERFERE NA LÓGICA BASE) -->
-    <!-- ======================================================== -->
     <style>
         .terminal-resize-handle { position: absolute; right: 0; bottom: 0; width: 12px; height: 12px; cursor: se-resize; background: linear-gradient(135deg, transparent 30%, #475569 30%, #475569 50%, transparent 50%, transparent 70%, #475569 70%); }
         .bot-clique-ativo { animation: flash-clique 0.25s ease-in-out; border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.4) !important; }
         @keyframes flash-clique { 0% { transform: scale(0.96); opacity: 0.85; } 50% { border-color: #f97316; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 
-    <div id="terminal-teste" class="fixed z-[99999] bg-slate-900/95 text-slate-200 border border-slate-700 rounded-lg shadow-2xl flex flex-col overflow-hidden backdrop-blur-md" style="width: 380px; height: 200px; bottom: 70px; left: calc(50% - 190px); touch-action: none;">
+    <div id="terminal-teste" class="fixed z-[100000] bg-slate-900/95 text-slate-200 border border-slate-700 rounded-lg shadow-2xl flex flex-col overflow-hidden backdrop-blur-md" style="width: 380px; height: 200px; bottom: 70px; left: calc(50% - 190px); touch-action: none;">
         <div id="terminal-header" class="bg-slate-800/90 border-b border-slate-700 px-3 py-2 flex items-center justify-between cursor-move select-none flex-shrink-0">
             <div class="flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
@@ -464,17 +475,14 @@
         <div id="terminal-console" class="flex-1 p-2 overflow-y-auto font-mono text-[11px] space-y-0.5 no-scrollbar bg-black/40">
             <div class="text-slate-500 italic">// Motor de automação acoplado com sucesso.</div>
         </div>
-        <div class="terminal-resize-handle" id="terminal-handle"></div>
+        <div class="terminal-resize-handle transition-opacity duration-200" id="terminal-handle"></div>
     </div>
 
     <script>
         // --- 1. APLICAÇÃO DINÂMICA DE MELHORIAS VISUAIS NO CÓDIGO BASE ---
         document.addEventListener("DOMContentLoaded", () => {
-            // Remove 'visibility: hidden' para carregar a página na hora
             document.documentElement.style.visibility = document.body.style.visibility = "visible";
             document.documentElement.style.opacity = document.body.style.opacity = "1";
-            
-            // Adiciona o botão do terminal e alinha
             const barra = document.getElementById("barra-superior");
             barra.classList.add("flex", "items-center", "justify-center", "relative");
             barra.innerHTML = '<h1 class="text-xl font-semibold tracking-wide mx-auto">Festa Junina</h1><button onclick="document.getElementById(\'terminal-teste\').classList.remove(\'hidden\')" class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] bg-orange-700 hover:bg-orange-800 px-2 py-1 rounded transition-all font-bold text-white shadow">TERMINAL</button>';
@@ -495,53 +503,13 @@
             return nativeConfirm(msg);
         };
 
-        // Sobrescrevendo o finalizar para incluir a ID 16 dígitos e o Teste do Dinheiro Lento
-        window.processarCliqueFinalizar = async function() {
-            const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando..."; btn.className = CSS_FINALIZAR_DESABILITADO;
-            const net = await diagnosticarInternetEstavel();
-            if (modoResgateManual) {
-                if (!net) tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Sistema Offline\nConfirmar entrega?", "Produto Entregue!", true);
-                else executingBaixaPedidoEntregue(); return;
-            }
-            if (formaPagamento === 'DINHEIRO') {
-                const d = new Date();
-                const idDin = `6${String(d.getFullYear()).slice(-2)}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}${String(d.getSeconds()).padStart(2,'0')}${String(d.getMilliseconds()).padStart(3,'0').slice(0,2)}`; 
-                
-                let lento = (botExecutando && document.getElementById("select-bot-cenario").value === "3");
-                
-                if (!net || lento) {
-                    tratarContingenciaOffline(idDin, "DINHEIRO", "CAIXA", null, lento ? "Sistema lento\nFinalizar venda em contingência?" : "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
-                } else { 
-                    aplicarDescontoEstoqueLocal(); enviarVendaNuvem(idDin, "DINHEIRO"); 
-                }
-            } else if (formaPagamento === 'PIX') {
-                if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) { alert("QR Code não foi gerado.\nNão é possível finalizar em contingência."); reabrirVisualBotaoFinalizar(); return; }
-                let lentoPix = (botExecutando && document.getElementById("select-bot-cenario").value === "8");
-                
-                if (!net || lentoPix) {
-                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), lentoPix ? "Sistema lento\nFinalizar venda?" : "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
-                }
-                else if ((Date.now() - timestampCriacaoPix) >= 59000) { 
-                    if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
-                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema lento\nFinalizar venda?", "Venda Finalizada!", true); 
-                }
-                else { 
-                    if (await consultarStatusMercadoPagoDireto()) { 
-                        if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
-                        aplicarDescontoEstoqueLocal(); enviarVendaNuvem(pixChaveIdentificadora, 'PIX'); 
-                    } else { alert("Pagamento Pendente"); reabrirVisualBotaoFinalizar(); } 
-                }
-            }
-        };
-
-        // Permite que o bot simule um Pix Aprovado sem esperar o cliente pagar
         const origConsultarPix = window.consultarStatusMercadoPagoDireto;
         window.consultarStatusMercadoPagoDireto = async function() {
             if (botExecutando && document.getElementById("select-bot-cenario").value === "6") return true; 
             return await origConsultarPix();
         };
 
-        // --- 3. FUNÇÕES VISUAIS DO TERMINAL ---
+        // --- 3. FUNÇÕES VISUAIS DO TERMINAL INTELIGENTE ---
         function logTerminal(texto, cor = "white") {
             const c = document.getElementById("terminal-console");
             let cl = "text-white"; if (cor === "green") cl = "text-emerald-400 font-medium"; if (cor === "orange") cl = "text-orange-400 font-medium"; if (cor === "rose") cl = "text-rose-400 font-medium";
@@ -550,29 +518,104 @@
 
         const delay = (ms) => new Promise(r => setTimeout(r, ms));
         function obterDelayBot() { return parseFloat(document.getElementById("select-bot-speed").value) * 1000; }
-        function ocultarTerminalPorCompleto() { pararBateriaTestes(); document.getElementById("terminal-teste").classList.add("hidden"); }
-
-        function minimizarTerminal() {
-            const t = document.getElementById("terminal-teste"), c = document.getElementById("terminal-controls"), cl = document.getElementById("terminal-console");
-            if (t.style.height !== "40px") { t.setAttribute("data-old-height", t.style.height); t.style.height = "40px"; c.classList.add("hidden"); cl.classList.add("hidden"); t.style.bottom = "16px"; t.style.left = "calc(50% - 190px)"; }
-            else { t.style.height = t.getAttribute("data-old-height") || "200px"; c.classList.remove("hidden"); cl.classList.remove("hidden"); t.style.bottom = "70px"; }
+        
+        function ocultarTerminalPorCompleto() { 
+            pararBateriaTestes(); 
+            document.getElementById("terminal-teste").classList.add("hidden"); 
         }
+
+        // VARIÁVEIS DE ESTADO DA JANELA
+        let termEstadoAnterior = null;
+        let isMaximized = false;
+        let isMinimized = false;
 
         function maximizarTerminal() {
             const t = document.getElementById("terminal-teste");
-            if (t.style.width === "100vw") { t.style.width = "380px"; t.style.height = "200px"; t.style.top = "auto"; t.style.left = "calc(50% - 190px)"; t.style.bottom = "70px"; }
-            else { t.style.width = "100vw"; t.style.height = "100vh"; t.style.top = "0"; t.style.left = "0"; t.style.bottom = "0"; }
+            const m = document.getElementById("terminal-handle");
+            const c = document.getElementById("terminal-controls");
+            const cl = document.getElementById("terminal-console");
+
+            if(isMinimized) { c.classList.remove("hidden"); cl.classList.remove("hidden"); isMinimized = false; }
+
+            if (!isMaximized) {
+                termEstadoAnterior = { w: t.style.width, h: t.style.height, t: t.style.top, l: t.style.left, b: t.style.bottom };
+                t.style.transition = "width 0.25s, height 0.25s, top 0.25s, left 0.25s";
+                t.style.width = "calc(100vw - 32px)";
+                t.style.height = "calc(100vh - 80px)"; 
+                t.style.top = "64px";
+                t.style.left = "16px";
+                t.style.bottom = "auto";
+                m.classList.add("pointer-events-none", "opacity-0");
+                isMaximized = true;
+            } else {
+                t.style.transition = "width 0.25s, height 0.25s, top 0.25s, left 0.25s";
+                t.style.width = termEstadoAnterior.w;
+                t.style.height = termEstadoAnterior.h;
+                t.style.top = termEstadoAnterior.t;
+                t.style.left = termEstadoAnterior.l;
+                t.style.bottom = termEstadoAnterior.b;
+                m.classList.remove("pointer-events-none", "opacity-0");
+                isMaximized = false;
+            }
+            setTimeout(() => t.style.transition = "", 250);
         }
 
+        function minimizarTerminal() {
+            const t = document.getElementById("terminal-teste");
+            const c = document.getElementById("terminal-controls");
+            const cl = document.getElementById("terminal-console");
+            const m = document.getElementById("terminal-handle");
+            
+            if (!isMinimized) {
+                if(!isMaximized) termEstadoAnterior = { w: t.style.width, h: t.style.height, t: t.style.top, l: t.style.left, b: t.style.bottom };
+                t.style.transition = "height 0.25s";
+                t.style.height = "40px";
+                c.classList.add("hidden"); cl.classList.add("hidden");
+                m.classList.add("pointer-events-none", "opacity-0");
+                isMinimized = true;
+            } else {
+                t.style.transition = "height 0.25s";
+                t.style.height = termEstadoAnterior.h;
+                c.classList.remove("hidden"); cl.classList.remove("hidden");
+                if(!isMaximized) m.classList.remove("pointer-events-none", "opacity-0");
+                isMinimized = false;
+            }
+            setTimeout(() => t.style.transition = "", 250);
+        }
+
+        // TRAVA DE MOVIMENTO - TERMINAL (Respeitando borda de 16px)
         function configurarTerminalArrastavelEResizable() {
             const t = document.getElementById("terminal-teste"), h = document.getElementById("terminal-header"), m = document.getElementById("terminal-handle");
             let dX = 0, dY = 0, iD = false, rX = 0, rY = 0, rW = 0, rH = 0, iR = false;
-            h.onmousedown = (e) => { iD = true; t.style.bottom = "auto"; dX = e.clientX - t.offsetLeft; dY = e.clientY - t.offsetTop; };
-            m.onmousedown = (e) => { e.preventDefault(); iR = true; rX = e.clientX; rY = e.clientY; rW = t.offsetWidth; rH = t.offsetHeight; };
-            window.onmousemove = (e) => { if (iD) { t.style.left = (e.clientX - dX) + "px"; t.style.top = (e.clientY - dY) + "px"; } if (iR) { t.style.width = Math.max(340, rW + (e.clientX - rX)) + "px"; t.style.height = Math.max(120, rH + (e.clientY - rY)) + "px"; } };
+            
+            const calcularLimites = (nL, nT) => {
+                const lMax = window.innerWidth - t.offsetWidth - 16;
+                const tMax = window.innerHeight - t.offsetHeight - 16;
+                if(nL < 16) nL = 16; if(nL > lMax) nL = lMax;
+                if(nT < 64) nT = 64; if(nT > tMax) nT = tMax;
+                return { l: nL, t: nT };
+            };
+
+            h.onmousedown = (e) => { if(isMaximized) return; iD = true; if(t.style.bottom !== "auto") { t.style.top = t.offsetTop + "px"; t.style.bottom = "auto"; } dX = e.clientX - t.offsetLeft; dY = e.clientY - t.offsetTop; };
+            m.onmousedown = (e) => { e.preventDefault(); if(isMaximized || isMinimized) return; iR = true; rX = e.clientX; rY = e.clientY; rW = t.offsetWidth; rH = t.offsetHeight; };
+            
+            window.onmousemove = (e) => { 
+                if (iD) { 
+                    let c = calcularLimites(e.clientX - dX, e.clientY - dY);
+                    t.style.left = c.l + "px"; t.style.top = c.t + "px"; 
+                } 
+                if (iR) { 
+                    let nW = Math.max(340, rW + (e.clientX - rX));
+                    let nH = Math.max(120, rH + (e.clientY - rY));
+                    if (t.offsetLeft + nW > window.innerWidth - 16) nW = window.innerWidth - 16 - t.offsetLeft;
+                    if (t.offsetTop + nH > window.innerHeight - 16) nH = window.innerHeight - 16 - t.offsetTop;
+                    t.style.width = nW + "px"; t.style.height = nH + "px"; 
+                } 
+            };
             window.onmouseup = () => { iD = iR = false; };
-            h.ontouchstart = (e) => { iD = true; t.style.bottom = "auto"; dX = e.touches[0].clientX - t.offsetLeft; dY = e.touches[0].clientY - t.offsetTop; };
-            h.ontouchmove = (e) => { if (!iD) return; t.style.left = (e.touches[0].clientX - dX) + "px"; t.style.top = (e.touches[0].clientY - dY) + "px"; };
+            
+            h.ontouchstart = (e) => { if(isMaximized) return; iD = true; if(t.style.bottom !== "auto") { t.style.top = t.offsetTop + "px"; t.style.bottom = "auto"; } dX = e.touches[0].clientX - t.offsetLeft; dY = e.touches[0].clientY - t.offsetTop; };
+            window.ontouchmove = (e) => { if (iD) { let c = calcularLimites(e.touches[0].clientX - dX, e.touches[0].clientY - dY); t.style.left = c.l + "px"; t.style.top = c.t + "px"; } };
             window.ontouchend = () => { iD = false; };
         }
         configurarTerminalArrastavelEResizable();
@@ -598,6 +641,18 @@
             return resultado;
         }
 
+        // ROBÔ REMOVEDOR DE ITEM
+        async function simularBotRemovendoItem() {
+            const ids = Object.keys(carrinho);
+            if (ids.length > 1) { 
+                const idAlvo = ids[Math.floor(Math.random() * ids.length)];
+                const p = produtos.find(i => i.id == idAlvo);
+                logTerminal(`Bot clicou em Remover no item: ${p.sigla}`, "rose");
+                removerItemDoCarrinhoCompleto(idAlvo);
+                await delay(obterDelayBot());
+            }
+        }
+
         // --- 4. EXECUÇÃO DOS 15 CENÁRIOS DE TESTE ---
         async function iniciarBateriaTestes() {
             botExecutando = true;
@@ -610,9 +665,8 @@
             if (esc === "TODOS") {
                 let cen = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"];
                 
-                // LOOP INFINITO: Só para quando apertar STOP
                 while (botExecutando) {
-                    cen.sort(() => Math.random() - 0.5); // Embaralha a cada nova rodada
+                    cen.sort(() => Math.random() - 0.5); 
                     for (let c of cen) { 
                         if (!botExecutando) break; 
                         await executarCenarioEspecifico(c); 
@@ -633,13 +687,13 @@
             
             let cesta = sortearProdutosAleatoriosMega(); if (cesta.length === 0 && produtos.length > 0) cesta = [{ produto: produtos[0], quantidade: 1 }];
             
-            // A ID válida de testes para todos os cenários de Busca ON
             let idBuscaOficial = "160829952160";
 
             switch(c) {
                 case "1":
                     logTerminal("--- CENÁRIO 1: Dinheiro Normal ---", "orange");
                     for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    if(Math.random() > 0.5) await simularBotRemovendoItem();
                     await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot());
                     let vRec = String((Math.ceil(totalAtual / 10) * 10) * 100); await emularDigitacaoInput("input-recebido", vRec); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
                     logTerminal("Enviando venda (ID 16 dígitos)...", "orange");
@@ -648,28 +702,32 @@
 
                 case "2":
                     logTerminal("--- CENÁRIO 2: Dinheiro Offline ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot()); await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot()); await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
                     logTerminal("Internet cai. Disparando contingência local.", "rose");
                     processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
                     break;
 
                 case "3":
                     logTerminal("--- CENÁRIO 3: Dinheiro Lento ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot()); await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot()); await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
                     logTerminal("Simulando lentidão absurda do servidor...", "orange");
                     processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
                     break;
 
                 case "4":
                     logTerminal("--- CENÁRIO 4: Dinheiro Desistência ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot());
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot());
                     logTerminal("Cliente desistiu. Limpando carrinho.", "white");
                     limparCarrinhoCompleto(); await delay(obterDelayBot());
                     break;
 
                 case "5":
                     logTerminal("--- CENÁRIO 5: Dinheiro Insuficiente ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot());
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot());
                     logTerminal(`Total é R$ ${totalAtual.toFixed(2)}. Digitando apenas R$ 1,00.`, "white");
                     await emularDigitacaoInput("input-recebido", "100"); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
                     logTerminal("Botão bloqueado por segurança com sucesso.", "green"); await delay(obterDelayBot());
@@ -677,31 +735,42 @@
 
                 case "6":
                     logTerminal("--- CENÁRIO 6: PIX Normal ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot());
-                    requisitarQrCodeReal(); await delay(4000); 
-                    logTerminal("Simulando aprovação rápida via rota de contingência para registro na planilha...", "green");
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    if(Math.random() > 0.5) await simularBotRemovendoItem();
+                    await delay(100); abrirOverlayCelular(); await delay(100); selecionarPagamento('PIX'); await delay(100);
+                    requisitarQrCodeReal(); 
+                    await delay(500); // <-- Otimização: Apenas meio segundo é suficiente para capturar a chave
+                    logTerminal("Simulando aprovação rápida via rota de contingência...", "green");
                     tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Finalizar simulação do PIX?", "Venda Finalizada!", true);
-                    await delay(obterDelayBot());
+                    await delay(100);
                     break;
 
                 case "7":
                     logTerminal("--- CENÁRIO 7: PIX Offline ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); requisitarQrCodeReal(); await delay(3000);
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); 
+                    requisitarQrCodeReal(); await delay(3000);
                     logTerminal("Sinal cai após QR Code. Acionando contingência.", "rose");
-                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true); await delay(obterDelayBot() + 2000);
+                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true); 
+                    await delay(obterDelayBot() + 2000);
                     break;
 
                 case "8":
                     logTerminal("--- CENÁRIO 8: PIX Lento ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); requisitarQrCodeReal(); await delay(4000);
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); 
+                    requisitarQrCodeReal(); await delay(4000);
                     logTerminal("Simulando Timeout Bancário.", "white");
                     processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
                     break;
 
                 case "9":
                     logTerminal("--- CENÁRIO 9: PIX Desistência ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); requisitarQrCodeReal(); await delay(3000);
-                    logTerminal("Limpando carrinho...", "white"); limparCarrinhoCompleto();
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); 
+                    requisitarQrCodeReal(); await delay(3000);
+                    logTerminal("Limpando carrinho...", "white"); 
+                    limparCarrinhoCompleto();
                     break;
 
                 case "10":
