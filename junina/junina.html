@@ -737,12 +737,11 @@
                     logTerminal("--- CENÁRIO 6: PIX Normal ---", "orange");
                     for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
                     if(Math.random() > 0.5) await simularBotRemovendoItem();
-                    await delay(100); abrirOverlayCelular(); await delay(100); selecionarPagamento('PIX'); await delay(100);
-                    requisitarQrCodeReal(); 
-                    await delay(500); // <-- Otimização: Apenas meio segundo é suficiente para capturar a chave
-                    logTerminal("Simulando aprovação rápida via rota de contingência...", "green");
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot());
+                    requisitarQrCodeReal(); await delay(4000); 
+                    logTerminal("Simulando aprovação rápida via rota de contingência para registro na planilha...", "green");
                     tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Finalizar simulação do PIX?", "Venda Finalizada!", true);
-                    await delay(100);
+                    await delay(obterDelayBot());
                     break;
 
                 case "7":
