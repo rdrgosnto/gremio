@@ -648,36 +648,40 @@
 
                 case "2":
                     logTerminal("--- CENÁRIO 2: Dinheiro Offline ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot()); await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot()); await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
                     logTerminal("Internet cai. Disparando contingência local.", "rose");
                     processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
                     break;
 
                 case "3":
-                    logTerminal("--- CENÁRIO 3: Dinheiro Lento ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot()); await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
-                    logTerminal("Simulando lentidão absurda do servidor...", "orange");
+                    logTerminal("--- CENÁRIO 2: Dinheiro Offline ---", "orange");
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot()); await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
+                    logTerminal("Internet cai. Disparando contingência local.", "rose");
                     processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
                     break;
 
                 case "4":
-                    logTerminal("--- CENÁRIO 4: Dinheiro Desistência ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot());
-                    logTerminal("Cliente desistiu. Limpando carrinho.", "white");
-                    limparCarrinhoCompleto(); await delay(obterDelayBot());
+                    logTerminal("--- CENÁRIO 2: Dinheiro Offline ---", "orange");
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot()); await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
+                    logTerminal("Internet cai. Disparando contingência local.", "rose");
+                    processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
                     break;
 
                 case "5":
-                    logTerminal("--- CENÁRIO 5: Dinheiro Insuficiente ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot());
-                    logTerminal(`Total é R$ ${totalAtual.toFixed(2)}. Digitando apenas R$ 1,00.`, "white");
-                    await emularDigitacaoInput("input-recebido", "100"); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
-                    logTerminal("Botão bloqueado por segurança com sucesso.", "green"); await delay(obterDelayBot());
+                    logTerminal("--- CENÁRIO 2: Dinheiro Offline ---", "orange");
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot()); await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
+                    logTerminal("Internet cai. Disparando contingência local.", "rose");
+                    processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
                     break;
 
                 case "6":
                     logTerminal("--- CENÁRIO 6: PIX Normal ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot());
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot());
                     requisitarQrCodeReal(); await delay(4000); 
                     logTerminal("Simulando aprovação rápida via rota de contingência para registro na planilha...", "green");
                     tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Finalizar simulação do PIX?", "Venda Finalizada!", true);
@@ -686,22 +690,30 @@
 
                 case "7":
                     logTerminal("--- CENÁRIO 7: PIX Offline ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); requisitarQrCodeReal(); await delay(3000);
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); 
+                    requisitarQrCodeReal(); await delay(3000);
                     logTerminal("Sinal cai após QR Code. Acionando contingência.", "rose");
-                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true); await delay(obterDelayBot() + 2000);
+                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true); 
+                    await delay(obterDelayBot() + 2000);
                     break;
 
                 case "8":
                     logTerminal("--- CENÁRIO 8: PIX Lento ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); requisitarQrCodeReal(); await delay(4000);
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); 
+                    requisitarQrCodeReal(); await delay(4000);
                     logTerminal("Simulando Timeout Bancário.", "white");
                     processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
                     break;
 
                 case "9":
                     logTerminal("--- CENÁRIO 9: PIX Desistência ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); requisitarQrCodeReal(); await delay(3000);
-                    logTerminal("Limpando carrinho...", "white"); limparCarrinhoCompleto();
+                    for (let cx of cesta) { if (!botExecutando) return; for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); 
+                    requisitarQrCodeReal(); await delay(3000);
+                    logTerminal("Limpando carrinho...", "white"); 
+                    limparCarrinhoCompleto();
                     break;
 
                 case "10":
