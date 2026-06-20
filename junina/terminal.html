@@ -473,10 +473,6 @@
             const barra = document.getElementById("barra-superior");
             barra.classList.add("flex", "items-center", "justify-center", "relative");
             barra.innerHTML = '<h1 class="text-xl font-semibold tracking-wide mx-auto">Festa Junina</h1><button onclick="document.getElementById(\'terminal-teste\').classList.remove(\'hidden\')" class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] bg-orange-700 hover:bg-orange-800 px-2 py-1 rounded transition-all font-bold text-white shadow">TERMINAL</button>';
-            
-            // Trava o carrinho no topo da tela do PC (não desce ao clicar)
-            const painel = document.getElementById("painel-fechamento");
-            painel.classList.add("lg:items-start", "lg:pt-6");
         });
 
         // --- 2. HIJACK DAS FUNÇÕES PRINCIPAIS PARA O MOTOR ---
