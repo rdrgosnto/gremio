@@ -126,7 +126,7 @@
         </div>
         <div id="terminal-controls" class="bg-slate-950/40 p-2 border-b border-slate-800 flex items-center gap-1.5 flex-shrink-0 text-[11px] overflow-x-auto no-scrollbar">
             <button id="btn-bot-start" onclick="iniciarBateriaTestes()" class="w-14 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-1 rounded shadow transition-all uppercase tracking-wider text-[10px] text-center">Start</button>
-            <button id="btn-bot-stop" onclick="pararBateriaTestes()" disabled class="w-14 bg-slate-700 text-slate-400 font-medium py-1 rounded cursor-not-allowed transition-all uppercase tracking-wider text-[10px] text-center">Stop</button>
+            <button id="btn-bot-stop" onclick="pararBateriaTestes()" disabled class="w-14 bg-rose-600 text-white font-medium py-1 rounded shadow transition-all uppercase tracking-wider text-[10px] text-center">Stop</button>
             
             <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
             
@@ -170,6 +170,7 @@
 
         // Controle Geral do Motor Automático
         let botExecutando = false, botVelocidadeFator = 1, internetFicticiaStatus = true, forcarPixSucessoFake = false, modalResolverPendente = null;
+        let fecharAlertaPromessaResolver = null; // Gancho para travar as rotinas de rede
         const RESERVADOS = Array.from({length: 9}, (_, i) => String(999000000001 + i));
 
         const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
@@ -177,7 +178,7 @@
         const liberarExibicaoSegura = () => { document.documentElement.style.visibility = document.body.style.visibility = "visible"; document.documentElement.style.opacity = document.body.style.opacity = "1"; };
         const renderBotaoFlutuante = (estilo, html, limpar = false) => { const bf = document.getElementById("caixa-flutuante-base"); bf.className = estilo; bf.innerHTML = html; bf.onclick = limpar ? null : abrirOverlayCelular; };
 
-        // REESCRITA DOS DIÁLOGOS EM MODO ASSÍNCRONO CONTROLADO POR PROMESSAS
+        // MODAL COM TRAVA RETORNANDO PROMISE (OBRIGA O BOT A ESPERAR O FECHAMENTO)
         window.alert = function(mensagem) {
             logTerminal(mensagem, "white");
             return new Promise((resolve) => {
@@ -190,6 +191,7 @@
                 btnOk.onclick = function() {
                     container.classList.add("hidden");
                     resolve();
+                    if(fecharAlertaPromessaResolver) { fecharAlertaPromessaResolver(); fecharAlertaPromessaResolver = null; }
                 };
                 modalResolverPendente = btnOk.onclick;
             });
@@ -212,6 +214,7 @@
                 btnCancel.onclick = function() {
                     container.classList.add("hidden");
                     resolve(false);
+                    if(fecharAlertaPromessaResolver) { fecharAlertaPromessaResolver(); fecharAlertaPromessaResolver = null; }
                 };
                 modalResolverPendente = btnOk.onclick;
             });
@@ -377,41 +380,81 @@
             if (cont) obj.contingencia = true; return JSON.stringify(obj);
         };
 
-        async function tratarContingenciaOffline(id, forma, tipo, itens, msg, sucesso = "Venda Finalizada!", cont = true) {
-            const conf = await window.confirm(msg);
-            if (conf) {
-                if (tipo === "CAIXA") aplicarDescontoEstoqueLocal();
-                const proc = extrairItensParaEnvio(itens); salvarNoCacheContingencia(id, forma, tipo, proc);
-                await window.alert(construirMensagemFichas(proc)); resetSistemicoTotal(false); return true;
-            }
-            reabrirVisualBotaoFinalizar(); return false;
+        // ENGENHARIA DE PROMISES INTEGRADAS PARA TRAVAR O FLUXO DO BOT
+        function tratarContingenciaOffline(id, forma, tipo, itens, msg, sucesso = "Venda Finalizada!", cont = true) {
+            return new Promise(async (resolveMain) => {
+                const conf = await window.confirm(msg);
+                if (conf) {
+                    if (tipo === "CAIXA") aplicarDescontoEstoqueLocal();
+                    const proc = extrairItensParaEnvio(itens); salvarNoCacheContingencia(id, forma, tipo, proc);
+                    await window.alert(construirMensagemFichas(proc)); 
+                    resetSistemicoTotal(false); 
+                    resolveMain(true);
+                } else {
+                    reabrirVisualBotaoFinalizar(); 
+                    resolveMain(false);
+                }
+            });
         }
 
-        async function enviarVendaNuvem(id, forma, tipo = "CAIXA", pronto = null) {
-            try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(id, forma, tipo, pronto) });
-                if (!r.ok) throw new Error();
-                setTimeout(async () => { await carregarEstoqueReal(); await window.alert(construirMensagemFichas(extrairItensParaEnvio(pronto))); resetSistemicoTotal(true); }, 1500);
-            } catch (e) { exibirFalhaProcessamento(); }
+        function enviarVendaNuvem(id, forma, tipo = "CAIXA", pronto = null) {
+            return new Promise(async (resolveMain) => {
+                try {
+                    const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(id, forma, tipo, pronto) });
+                    if (!r.ok) throw new Error();
+                    
+                    // Converte o timeout em Promise para manter o bot travado aguardando o fechamento do alert
+                    setTimeout(async () => { 
+                        await carregarEstoqueReal(); 
+                        await window.alert(construirMensagemFichas(extrairItensParaEnvio(pronto))); 
+                        resetSistemicoTotal(true); 
+                        resolveMain(true);
+                    }, 1500);
+                } catch (e) { 
+                    exibirFalhaProcessamento(); 
+                    resolveMain(false);
+                }
+            });
         }
 
-        async function processarCliqueFinalizar() {
-            const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando..."; btn.className = CSS_FINALIZAR_DESABILITADO;
-            const net = await diagnosticarInternetEstavel();
-            if (modoResgateManual) {
-                if (!net) await tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Sistema Offline\nConfirmar entrega?", "Produto Entregue!", true);
-                else executingBaixaPedidoEntregue(); return;
-            }
-            if (formaPagamento === 'DINHEIRO') {
-                let idDin = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`;
-                if (!net) await tratarContingenciaOffline(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
-                else { aplicarDescontoEstoqueLocal(); enviarVendaNuvem(idDin, "DINHEIRO"); }
-            } else if (formaPagamento === 'PIX') {
-                if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) { await window.alert("QR Code não foi gerado.\nNão é possível finalizar em contingência."); reabrirVisualBotaoFinalizar(); return; }
-                if (!net) await tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
-                else if ((Date.now() - timestampCriacaoPix) >= 59000) { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } await tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema lento\nFinalizar venda?", "Venda Finalizada!", true); }
-                else { if (await consultarStatusMercadoPagoDireto()) { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } aplicarDescontoEstoqueLocal(); enviarVendaNuvem(pixChaveIdentificadora, 'PIX'); } else { await window.alert("Pagamento Pendente"); reabrirVisualBotaoFinalizar(); } }
-            }
+        function processarCliqueFinalizar() {
+            return new Promise(async (resolveFinal) => {
+                // Compartilha o resolve com o clique do botão OK do modal customizado
+                fecharAlertaPromessaResolver = resolveFinal;
+
+                const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando..."; btn.className = CSS_FINALIZAR_DESABILITADO;
+                const net = await diagnosticarInternetEstavel();
+                if (modoResgateManual) {
+                    if (!net) await tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Sistema Offline\nConfirmar entrega?", "Produto Entregue!", true);
+                    else executingBaixaPedidoEntregue(); 
+                    return;
+                }
+                if (formaPagamento === 'DINHEIRO') {
+                    let idDin = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`;
+                    if (!net) await tratarContingenciaOffline(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
+                    else { aplicarDescontoEstoqueLocal(); await enviarVendaNuvem(idDin, "DINHEIRO"); }
+                } else if (formaPagamento === 'PIX') {
+                    if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) { 
+                        await window.alert("QR Code não foi gerado.\nNão é possível finalizar em contingência."); 
+                        reabrirVisualBotaoFinalizar(); 
+                        return; 
+                    }
+                    if (!net) await tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
+                    else if ((Date.now() - timestampCriacaoPix) >= 59000) { 
+                        if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
+                        await tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema lento\nFinalizar venda?", "Venda Finalizada!", true); 
+                    } else { 
+                        if (await consultarStatusMercadoPagoDireto()) { 
+                            if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
+                            aplicarDescontoEstoqueLocal(); 
+                            await enviarVendaNuvem(pixChaveIdentificadora, 'PIX'); 
+                        } else { 
+                            await window.alert("Pagamento Pendente"); 
+                            reabrirVisualBotaoFinalizar(); 
+                        } 
+                    }
+                }
+            });
         }
 
         function selecionarPagamento(tipo) {
@@ -474,13 +517,13 @@
                 if (loopEmExecucao || !pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return;
                 if (Date.now() - timestampCriacaoPix > 600000) { clearInterval(intervaloPix); await window.alert("Tempo limite esgotado"); forçarFechamentoSistemico(); return; }
                 loopEmExecucao = true;
-                if (await consultarStatusMercadoPagoDireto()) { clearInterval(intervaloPix); aplicarDescontoEstoqueLocal(); enviarVendaNuvem(pixChaveIdentificadora, 'PIX'); }
+                if (await consultarStatusMercadoPagoDireto()) { clearInterval(intervaloPix); aplicarDescontoEstoqueLocal(); await processarCliqueFinalizar(); }
                 loopEmExecucao = false;
             }, 6000);
         }
 
         async function consultarStatusMercadoPagoDireto() {
-            if (forcarPixSucessoFake) { logTerminal("[MOCK] Interceptação Ativa: Simulando aprovação de pagamento via Pix.", "green"); return true; }
+            if (forcarPixSucessoFake) { logTerminal("[MOCK NET] Transação Pix liquidada pelo sandbox interno.", "green"); return true; }
             if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return false;
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "CAIXA", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual) }) });
@@ -584,7 +627,7 @@
         }
 
         // ========================================================
-        // ENGENHARIA DE AUTOMAÇÃO E ENGINE DE TESTE DO TERMINAL
+        // ENGINE DE TESTE DO TERMINAL AUTOMÁTICO
         // ========================================================
         
         function logTerminal(texto, cor = "white") {
@@ -742,23 +785,34 @@
         async function gerenciarFechamentoModalComTrava() {
             const container = document.getElementById("custom-modal-container");
             if (!container.classList.contains("hidden") && modalResolverPendente) {
-                await delay(2000); // Delay de visualização humana de 2s
-                logTerminal("[BOT SINC] Confirmando ação no diálogo modal.", "orange");
+                await delay(1500); 
+                logTerminal("[BOT SINC] Confirmando fechamento do alerta.", "orange");
                 modalResolverPendente();
-                await delay(500); // Garante fechamento
+                await delay(400); 
             }
         }
 
-        // RETORNA UM MIX ALEATÓRIO DE PRODUTOS PARA MONTAR O CARRINHO
-        function sortearProdutosAleatorios(maxDiferentes = 3) {
-            let disponiveis = produtos.filter(p => p.estoque > 2);
+        // SORTEADOR EXPANDIDO (DE 1 A 20 PRODUTOS COM 1 A 10 QUANTIDADES)
+        function sortearProdutosAleatoriosMega() {
+            let disponiveis = produtos.filter(p => p.estoque > 1);
             if (disponiveis.length === 0) return [];
-            let sorteados = [];
-            let qtdDiferentes = Math.floor(Math.random() * maxDiferentes) + 1;
             
-            for(let i=0; i<qtdDiferentes; i++) {
-                let p = disponiveis[Math.floor(Math.random() * disponiveis.length)];
-                if(!sorteados.includes(p)) sorteados.push(p);
+            let sorteados = [];
+            // Sorteia de 1 a 20 produtos diferentes baseados no tamanho real do cardápio
+            let limiteDiferentes = Math.min(disponiveis.length, Math.floor(Math.random() * 20) + 1);
+            
+            // Embaralha para pegar itens aleatórios
+            let embaralhado = [...disponiveis].sort(() => 0.5 - Math.random());
+            
+            for(let i=0; i<limiteDiferentes; i++) {
+                let p = embaralhado[i];
+                // Sorteia de 1 a 10 quantidades para o mesmo item (travando no estoque)
+                let qtdDesejada = Math.floor(Math.random() * 10) + 1;
+                let qtdFinal = Math.min(qtdDesejada, p.estoque);
+                
+                if (qtdFinal > 0) {
+                    sorteados.push({ produto: p, quantidade: qtdFinal });
+                }
             }
             return sorteados;
         }
@@ -774,20 +828,30 @@
                 await carregarEstoqueReal(); await delay(1000);
             }
 
-            let cestaMock = sortearProdutosAleatorios(3);
-            if(cestaMock.length === 0) cestaMock = [produtos[0]];
+            // Gera a super cesta mista para o pedido
+            let cestaMega = sortearProdutosAleatoriosMega();
+            if(cestaMega.length === 0) cestaMega = [{ produto: produtos[0], quantidade: 1 }];
 
             switch(c) {
                 case "1":
-                    logTerminal("--- CENÁRIO 1: Caixa Dinheiro Ideal (Multi-itens) ---", "orange");
-                    for (let item of cestaMock) {
-                        let qtdSorteada = Math.floor(Math.random() * 2) + 1;
-                        logTerminal(`Adicionando ${qtdSorteada}x ${item.nome}`, "white");
-                        for(let i=0; i<qtdSorteada; i++) { emularCliqueVisual(`product-card-${item.id}`); alterarQuantidade(item.id, 1); await delay(150); }
+                    logTerminal("--- CENÁRIO 1: Caixa Dinheiro Ideal (Combo Misto) ---", "orange");
+                    logTerminal(`Sorteado mix de ${cestaMega.length} itens distintos no pedido.`, "white");
+                    
+                    for (let cax of cestaMega) {
+                        if(!botExecutando) return;
+                        logTerminal(`Adicionando no PDV: ${cax.quantidade}x ${cax.produto.nome}`, "white");
+                        for(let i=0; i<cax.quantidade; i++) { 
+                            emularCliqueVisual(`product-card-${cax.produto.id}`); 
+                            alterarQuantidade(cax.produto.id, 1); 
+                            await delay(150); 
+                        }
                     }
                     await delay(3000); if(!botExecutando) return;
 
+                    logTerminal("Abrindo painel lateral de conferência.", "white");
                     abrirOverlayCelular(); await delay(3000); if(!botExecutando) return;
+                    
+                    logTerminal("Selecionando método: DINHEIRO", "white");
                     selecionarPagamento('DINHEIRO'); await delay(3000); if(!botExecutando) return;
 
                     let valorRecebidoCalculado = String((Math.ceil(totalAtual / 10) * 10) * 100);
@@ -796,16 +860,16 @@
                     tratarMascaraDinheiro(document.getElementById("input-recebido"));
                     await delay(3000); if(!botExecutando) return;
 
-                    logTerminal("Enviando dados da venda para API mãe...", "white");
-                    processarCliqueFinalizar();
-                    await gerenciarFechamentoModalComTrava();
+                    logTerminal("Enviando dados da venda... Travando execução.", "orange");
+                    await processarCliqueFinalizar();
+                    logTerminal("Venda concluída e liberada do travamento.", "green");
                     break;
 
                 case "2":
                     logTerminal("--- CENÁRIO 2: Dinheiro Offline (Contingência) ---", "orange");
-                    let pSingle = cestaMock[0];
-                    logTerminal(`Incluindo 1x ${pSingle.nome} para contingência`, "white");
-                    emularCliqueVisual(`product-card-${pSingle.id}`); alterarQuantidade(pSingle.id, 1);
+                    let caxOff = cestaMega[0];
+                    logTerminal(`Incluindo ${caxOff.quantidade}x ${caxOff.produto.nome} para contingência`, "white");
+                    for(let i=0; i<caxOff.quantidade; i++) { emularCliqueVisual(`product-card-${caxOff.produto.id}`); alterarQuantidade(caxOff.produto.id, 1); await delay(150); }
                     await delay(3000); if(!botExecutando) return;
 
                     abrirOverlayCelular(); await delay(3000); if(!botExecutando) return;
@@ -818,14 +882,13 @@
                     logTerminal("[INTERRUPÇÃO REDE] Isolando aplicação localmente.", "rose");
                     internetFicticiaStatus = false;
                     
-                    processarCliqueFinalizar();
-                    await gerenciarFechamentoModalComTrava(); // Confirma contingência
-                    await gerenciarFechamentoModalComTrava(); // Confirma impressão/fichas
+                    await processarCliqueFinalizar();
+                    logTerminal("Fluxo de contingência local validado com trava.", "green");
                     break;
 
                 case "3":
                     logTerminal("--- CENÁRIO 3: Dinheiro com Correção de Itens ---", "orange");
-                    let pCorr = cestaMock[0];
+                    let pCorr = cestaMega[0].produto;
                     logTerminal(`Adicionando volume alto: 4x unidades de ${pCorr.nome}`, "white");
                     for(let i=0; i<4; i++) { emularCliqueVisual(`product-card-${pCorr.id}`); alterarQuantidade(pCorr.id, 1); await delay(150); }
                     await delay(3000); if(!botExecutando) return;
@@ -845,14 +908,16 @@
                     await emularDigitacaoInput("input-recebido", String(totalAtual * 100));
                     tratarMascaraDinheiro(document.getElementById("input-recebido"));
                     await delay(3000); if(!botExecutando) return;
-                    processarCliqueFinalizar();
-                    await gerenciarFechamentoModalComTrava();
+                    await processarCliqueFinalizar();
                     break;
 
                 case "4":
-                    logTerminal("--- CENÁRIO 4: Pix Canal Normal com Interceptação ---", "orange");
-                    let pPix = cestaMock[0];
-                    emularCliqueVisual(`product-card-${pPix.id}`); alterarQuantidade(pPix.id, 1);
+                    logTerminal("--- CENÁRIO 4: Pix Canal Normal Misto Interceptado ---", "orange");
+                    logTerminal(`Montando carrinho misto com ${cestaMega.length} tipos de itens.`, "white");
+                    for (let cax of cestaMega) {
+                        if(!botExecutando) return;
+                        alterarQuantidade(cax.produto.id, 1); await delay(150);
+                    }
                     await delay(3000); if(!botExecutando) return;
 
                     abrirOverlayCelular(); await delay(3000); if(!botExecutando) return;
@@ -860,18 +925,17 @@
 
                     logTerminal("Gerando QR Code Pix na API do Mercado Pago...", "white");
                     requisitarQrCodeReal();
-                    await delay(3000); if(!botExecutando) return;
+                    await delay(3500); if(!botExecutando) return;
 
-                    logTerminal("[OPÇÃO 1 ACTIVATED] Injetando retorno 'true' de liquidação.", "green");
+                    logTerminal("[OPÇÃO 1 ACTIVATED] Injetando aprovação fake no pooling.", "green");
                     forcarPixSucessoFake = true;
-                    // Aguarda pooling capturar o sinal
-                    await delay(7000);
-                    await gerenciarFechamentoModalComTrava();
+                    // O loop automático do PIX chama processarCliqueFinalizar() quando forcarPixSucessoFake é verdadeiro
+                    await delay(7000); 
                     break;
 
                 case "5":
                     logTerminal("--- CENÁRIO 5: Pix com Abandono / Desistência ---", "orange");
-                    emularCliqueVisual(`product-card-${cestaMock[0].id}`); alterarQuantidade(cestaMock[0].id, 1);
+                    emularCliqueVisual(`product-card-${cestaMega[0].produto.id}`); alterarQuantidade(cestaMega[0].produto.id, 1);
                     await delay(3000); if(!botExecutando) return;
 
                     abrirOverlayCelular(); await delay(3000); if(!botExecutando) return;
@@ -886,7 +950,7 @@
 
                 case "6":
                     logTerminal("--- CENÁRIO 6: Pix Lento / Timeout de Conexão ---", "orange");
-                    emularCliqueVisual(`product-card-${cestaMock[0].id}`); alterarQuantidade(cestaMock[0].id, 1);
+                    emularCliqueVisual(`product-card-${cestaMega[0].produto.id}`); alterarQuantidade(cestaMega[0].produto.id, 1);
                     await delay(3000); if(!botExecutando) return;
 
                     abrirOverlayCelular(); await delay(3000); if(!botExecutando) return;
@@ -899,9 +963,7 @@
                     await delay(2000);
 
                     logTerminal("Forçando transição manual para contingência.", "white");
-                    processarCliqueFinalizar();
-                    await gerenciarFechamentoModalComTrava(); // Alerta gateway lento
-                    await gerenciarFechamentoModalComTrava(); // Alerta fechamento fichas
+                    await processarCliqueFinalizar();
                     break;
 
                 case "7":
@@ -915,9 +977,8 @@
                     tratarDigitacaoIdBusca(document.getElementById("input-id-busca"));
                     
                     await delay(4000); if(!botExecutando) return;
-                    logTerminal("Efetuando a entrega do pedido online...", "white");
-                    processarCliqueFinalizar();
-                    await gerenciarFechamentoModalComTrava();
+                    logTerminal("Efetuando a entrega do pedido online com amarra...", "white");
+                    await processarCliqueFinalizar();
                     break;
 
                 case "8":
@@ -946,13 +1007,12 @@
                     logTerminal("Cortando internet para forçar baixa offline.", "rose");
                     internetFicticiaStatus = false;
 
-                    processarCliqueFinalizar();
-                    await gerenciarFechamentoModalComTrava(); // Aceita confirm offline
+                    await processarCliqueFinalizar();
                     break;
 
                 case "10":
                     logTerminal("--- CENÁRIO 10: Bloqueio Visível de Item Esgotado ---", "orange");
-                    let pZera = cestaMock[0];
+                    let pZera = cestaMega[0].produto;
                     logTerminal(`Forçando estoque zero na memória para o item: ${pZera.nome}`, "rose");
                     let estoqueSalvo = pZera.estoque;
                     pZera.estoque = 0;
@@ -974,8 +1034,8 @@
                     internetFicticiaStatus = false;
 
                     for(let k = 1; k <= 3; k++) {
-                        let itemBatch = cestaMock[k % cestaMock.length];
-                        logTerminal(`[Lote Local] Registrando pedido #${k} de ${itemBatch.nome}`, "white");
+                        let itemBatch = cestaMega[k % cestaMega.length].produto;
+                        logTerminal(`[Lote Local] Registrando pedido #${k} contendo ${itemBatch.nome}`, "white");
                         carrinho[itemBatch.id] = 1; totalAtual = itemBatch.preco;
                         let idBatch = `STRESS-PDV-${k}-${Date.now().toString().slice(-4)}`;
                         salvarNoCacheContingencia(idBatch, "DINHEIRO", "CAIXA", extrairItensParaEnvio());
@@ -984,10 +1044,10 @@
                     
                     logTerminal("Restaurando conexão! Canal liberado.", "green");
                     internetFicticiaStatus = true;
-                    logTerminal("Monitore o console. O loop em background sincronizará o lote em instantes.", "orange");
+                    logTerminal("Monitore o console. O loop de background enviará o lote.", "orange");
                     break;
             }
-            logTerminal(`Fluxo do Cenário ${c} executado.`, "green");
+            logTerminal(`Fluxo do Cenário ${c} finalizado com sucesso estrutural.`, "green");
         }
     </script>
 </body>
