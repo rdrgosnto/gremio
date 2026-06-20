@@ -669,8 +669,12 @@
                 case "6":
                     logTerminal("--- CENÁRIO 6: PIX Normal ---", "orange");
                     alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot());
-                    requisitarQrCodeReal(); await delay(4000); logTerminal("[MOCK] Validação Automática pela Nuvem em andamento.", "green");
-                    await delay(18000);
+                    requisitarQrCodeReal(); await delay(4000); 
+    
+                    logTerminal("Simulando aprovação rápida via rota de contingência para registro na planilha...", "green");
+                    // TRUQUE: Força a gravação local e deixa o sincronizador em background mandar para a planilha
+                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Finalizar simulação do PIX?", "Venda Finalizada!", true);
+                    await delay(obterDelayBot());
                     break;
 
                 case "7":
