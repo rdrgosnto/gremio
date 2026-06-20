@@ -14,23 +14,22 @@
         .scroll-celular-perfeito { touch-action: pan-y !important; }
     </style>
 </head>
-<body class="bg-slate-50 font-sistema h-screen overflow-hidden flex flex-col antialiased text-slate-800 select-none">
+<body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800 select-none">
 
-    <header id="barra-superior" class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50 flex-shrink-0">
+    <header id="barra-superior" class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
         <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
     </header>
 
-    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start h-[calc(100vh-44px)] overflow-hidden">
-        
-        <!-- SEÇÃO DE PRODUTOS: Agora rola de forma independente -->
-        <section class="lg:col-span-3 space-y-2 h-full overflow-y-auto pr-1 no-scrollbar pb-10">
-            <div class="border-b border-slate-200 pb-1 sticky top-0 bg-slate-50 z-10"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
+    <!-- Mudamos apenas de items-start para items-stretch para o container do checkout acompanhar a altura total do grid e travar no topo -->
+    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-stretch">
+        <section class="lg:col-span-3 space-y-2">
+            <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
 
-        <!-- SEÇÃO DO CARRINHO: Fixa e ajustada à altura da janela de visualização -->
-        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
-            <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-5 flex flex-col justify-between h-[85vh] lg:h-full">
+        <!-- Adicionado lg:h-full para que esta seção estique até o final da página, permitindo que o card interno use o sticky perfeitamente -->
+        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-full">
+            <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
                     <h3 id="titulo-checkout" class="text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200">PAGAMENTO</h3>
                     <div class="flex-1 flex flex-col min-h-0">
@@ -65,6 +64,7 @@
                                         <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>
                                     </div>
                                 </div>
+                                }
                             </div>
                         </div>
                     </div>
@@ -191,7 +191,6 @@
             return txt;
         }
 
-        // Alteração sutil para garantir conformidade de layout no preenchimento dinâmico
         function atualizarCarrinhoDOM() {
             if (modoResgateManual) return;
             const lista = document.getElementById("lista-carrinho"), bloco = document.getElementById("bloco-inferior-pagamento");
@@ -240,8 +239,8 @@
         }
 
         const extrairItensParaEnvio = (pronto = null) => {
-            if (pronto) return pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.id_produto || i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), grandmother_id: parseInt(i.id_produto || i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) }));
-            return Object.keys(carrinho).map(id => { const p = whites = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
+            if (pronto) return pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.id_produto || i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) }));
+            return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
         };
 
         const gerarPayloadVenda = (id, forma, tipo = "CAIXA", pronto = null, cont = false) => {
@@ -397,6 +396,7 @@
                 const touch = e.type === "touchstart" ? e.touches[0] : e;
                 const r = el.getBoundingClientRect();
                 
+                // Sempre converte para top/left absoluto no início do arrasto para o dedo responder de forma imediata
                 el.style.left = r.left + "px"; 
                 el.style.top = r.top + "px";
                 el.style.bottom = "auto"; 
@@ -432,13 +432,14 @@
                 if (!iniciado) return;
                 iniciado = false;
 
+                // INVERSÃO DE ÂNCORA: Trava permanentemente o botão usando bottom/right para ignorar rolagens da tela
                 const r = el.getBoundingClientRect();
                 const distFundo = window.innerHeight - r.bottom;
                 const distDireita = window.innerWidth - r.right;
 
                 el.style.top = "auto";
                 el.style.bottom = distFundo + "px";
-                el.style.left = "auto";
+               el.style.left = "auto";
                 el.style.right = distDireita + "px";
             };
 
