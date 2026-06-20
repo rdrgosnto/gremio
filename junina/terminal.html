@@ -17,11 +17,6 @@
             -ms-overflow-style: none; 
             scrollbar-width: none; 
         }
-        html, body { 
-            visibility: hidden; 
-            opacity: 0; 
-            background-color: #f8fafc; 
-        }
         .scroll-celular-perfeito { 
             touch-action: pan-y !important; 
         }
@@ -57,8 +52,10 @@
 </head>
 <body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800 select-none pb-24 lg:pb-0">
 
-    <header id="barra-superior" class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
-        <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
+    <header id="barra-superior" class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50 flex items-center justify-center relative">
+        <h1 class="text-xl font-semibold tracking-wide mx-auto">Festa Junina</h1>
+        <!-- Gatilho invisível/discreto caso queira reabrir o terminal ocultado -->
+        <button onclick="reabrirTerminalOcultado()" class="absolute right-4 text-xs bg-orange-600/50 hover:bg-orange-700 text-white/90 px-2 py-1 rounded transition-all">Abrir Terminal</button>
     </header>
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
@@ -69,8 +66,9 @@
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
 
-        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:fixed lg:top-14 lg:right-[calc((100vw-1600px)/2+12px)] lg:left-auto lg:w-[calc((100%-(100vw-1600px))/4-12px)] xl:w-[385px] bg-black/75 lg:bg-transparent z-50 lg:z-10 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]">
-            <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
+        <!-- POSICIONAMENTO DO CHECKOUT CORRIGIDO PARA EVITAR DESLOCAMENTOS A DIREITA -->
+        <section id="painel-fechamento" class="hidden lg:flex lg:relative lg:top-0 lg:right-0 lg:w-full bg-black/75 lg:bg-transparent z-50 lg:z-10 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-auto">
+            <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-85px)] lg:sticky lg:top-16">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
                     <h3 id="titulo-checkout" class="text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200">PAGAMENTO</h3>
                     <div class="flex-1 flex flex-col min-h-0">
@@ -134,20 +132,21 @@
         </div>
     </div>
 
-    <!-- PAINEL DO TERMINAL COMPACTO DE CONTROLE (ALTURA INICIAL EM 200PX) -->
+    <!-- PAINEL DO TERMINAL DE CONTROLE (ALTURA INICIAL EM 200PX) -->
     <div id="terminal-teste" class="fixed z-[9999] bg-slate-900/95 text-slate-200 border border-slate-700 rounded-lg shadow-2xl flex flex-col overflow-hidden backdrop-blur-md" style="width: 380px; height: 200px; bottom: 70px; left: calc(50% - 190px);">
-        <!-- Cabeçalho -->
+        <!-- Cabeçalho com Botão Fechar Real Integrado -->
         <div id="terminal-header" class="bg-slate-800/90 border-b border-slate-700 px-3 py-2 flex items-center justify-between cursor-move select-none flex-shrink-0">
             <div class="flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
                 <span class="text-xs font-semibold text-orange-500 uppercase tracking-wider">TERMINAL</span>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="minimizarTerminal()" class="text-slate-400 hover:text-white text-xs px-1 select-none">─</button>
-                <button onclick="maximizarTerminal()" class="text-slate-400 hover:text-white text-xs px-1 select-none">⬜</button>
+            <div class="flex items-center gap-3 select-none">
+                <button onclick="minimizarTerminal()" class="text-slate-400 hover:text-white text-xs font-bold px-1" title="Minimizar">─</button>
+                <button onclick="maximizarTerminal()" class="text-slate-400 hover:text-white text-xs font-bold px-1" title="Maximizar">⬜</button>
+                <button onclick="ocultarTerminalPorCompleto()" class="text-slate-400 hover:text-rose-500 text-xs font-bold px-1 text-center" title="Fechar Terminal">✖</button>
             </div>
         </div>
-        <!-- Painel de botões unificado em uma única linha horizontal -->
+        <!-- Painel de botões em uma única linha horizontal -->
         <div id="terminal-controls" class="bg-slate-950/40 p-2 border-b border-slate-800 flex items-center gap-1.5 flex-shrink-0 text-[11px] overflow-x-auto no-scrollbar">
             <button id="btn-bot-start" onclick="iniciarBateriaTestes()" class="w-14 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-1 rounded shadow transition-all uppercase tracking-wider text-[10px] text-center">Start</button>
             <button id="btn-bot-stop" onclick="pararBateriaTestes()" disabled class="w-14 bg-rose-600 text-white font-medium py-1 rounded shadow transition-all uppercase tracking-wider text-[10px] text-center">Stop</button>
@@ -192,7 +191,7 @@
     </div>
 
     <script>
-        // CONFIGURAÇÕES GERAIS DAS ENDPOINTS DO SEU POWER AUTOMATE
+        // CONFIGURAÇÕES DAS ENDPOINTS DO SEU POWER AUTOMATE
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/98221223b0c5414085d99db3124350bb/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sXkYuHLSdt1s6aiLFFkMc0fJKd27HDthp4nNRM2Qz20";
         
@@ -202,7 +201,7 @@
         const CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
         const CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-between min-w-[240px] max-w-xs text-sm";
 
-        // VARIÁVEIS DE ESTADO DA APLICAÇÃO CARDÁPIO
+        // VARIÁVEIS DE ESTADO DO CARDÁPIO
         let produtos = [];
         let carrinho = {};
         let formaPagamento = null;
@@ -217,18 +216,18 @@
         let timestampCriacaoPix = 0;
         let carrinhoBloqueado = false;
 
-        // VARIÁVEIS DE CONTROLE EXCLUSIVAS DO MOTOR DO ROBÔ
+        // VARIÁVEIS DO MOTOR DO ROBÔ
         let botExecutando = false;
         let internetFicticiaStatus = true;
         let forcarPixSucessoFake = false;
         let modalResolverPendente = null;
         let fecharAlertaPromessaResolver = null;
 
-        // GATILHOS DE SUBSTITUIÇÃO DO ALERT E CONFIRM SÍNCRONOS
+        // DIÁLOGOS EM MODO ASSÍNCRONO CONTROLADO POR PROMESSAS (MODAL CUSTOMIZADO)
         window.alert = function(mensagem) {
             logTerminal(mensagem, "white");
             return new Promise(function(resolve) {
-                document.getElementById("custom-modal-text").innerText = mensaje = mensagem;
+                document.getElementById("custom-modal-text").innerText = mensagem;
                 document.getElementById("custom-modal-btn-cancel").classList.add("hidden");
                 document.getElementById("custom-modal-container").classList.remove("hidden");
                 
@@ -271,8 +270,11 @@
             });
         };
 
-        // INICIALIZADORES DO SISTEMA BASE
+        // EXCLUSÃO DO BLOQUEIO VISUAL DO BODY: O PROCESSO AGORA RENDERIZA DE IMEDIATO
         window.addEventListener('DOMContentLoaded', function() { 
+            document.documentElement.style.visibility = document.body.style.visibility = "visible"; 
+            document.documentElement.style.opacity = document.body.style.opacity = "1"; 
+            
             const cache = localStorage.getItem("festa_junina_cardapio"); 
             if (cache) { 
                 produtos = JSON.parse(cache); 
@@ -283,11 +285,6 @@
             configurarBotaoArrastavel(); 
             configurarTerminalArrastavelEResizable(); 
         });
-
-        const liberarExibicaoSegura = function() { 
-            document.documentElement.style.visibility = document.body.style.visibility = "visible"; 
-            document.documentElement.style.opacity = document.body.style.opacity = "1"; 
-        };
 
         async function diagnosticarInternetEstavel() { 
             if (!internetFicticiaStatus || !navigator.onLine) {
@@ -332,9 +329,7 @@
                 if (id !== "") {
                     forçarFechamentoSistemico(); 
                 }
-            } { 
-                liberarExibicaoSegura(); 
-            } 
+            }
         }
 
         function renderizarProdutos() {
@@ -407,68 +402,19 @@
                 btnPix.className = CSS_BTN_INATIVO; 
                 cabId.classList.add("hidden"); 
             }
-            if (!modoBuscaAtivo) {
-                document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
-            }
+            document.getElementById("conteudo-flutuante-unico").innerText = `Pedido R$ ${formatarMoeda(totalAtual)} - Revisar e Pagar`;
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; 
             validarEstadoFinalizar();
         }
 
-        const renderBotaoFlutuanteVisual = function(estilo, html) {
-            renderBotaoFlutuante(estilo, html, true);
-        };
+        const extrairItensParaEnvio = (pronto = null) => pronto ? pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.id_produto || i.GRANDMOTHER_ID || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) })) : Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
+        function aplicarDescontoEstoqueLocal() { Object.keys(carrinho).forEach(id => { const p = produtos.find(i => i.id == id); if (p) p.estoque = Math.max(0, p.estoque - carrinho[id]); }); renderizarProdutos(); }
+        function salvarNoCacheContingencia(id, forma, tipo, pronto) { let f = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; f.push({ id_pagamento: id, pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), contingencia: true, itens: pronto }); localStorage.setItem("festa_junina_contingencia", JSON.stringify(f)); logTerminal(`[CONTINGÊNCIA] Pedido offline gravado localmente: ${id}`, "orange"); }
 
-        function processarResultadoBuscaPedido(linhas, id) { 
-            const lines = linhas.filter(l => String(l.ID_PAGAMENTO).trim() === String(id).trim()); 
-            if (lines.length === 0) { 
-                renderBotaoFlutuanteVisual("pointer-events-auto bg-rose-600 text-white font-semibold h-10 px-6 rounded-full shadow-lg flex items-center justify-center min-w-[240px] text-sm", `<span>Não encontrado</span>`); 
-                setTimeout(function() { forçarFechamentoSistemico(); }, 2000); 
-                return; 
-            } 
-            modoResgateManual = true; 
-            modoBuscaAtivo = false; 
-            pixChaveIdentificadora = String(id).trim(); 
-            cachePedidoOnlineOriginal = lines.map(l => ({ sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", produto: l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online", grandmother_id: parseInt(l.id_produto || l.GRANDMOTHER_ID || 0), quantidade: parseInt(l.QUANTIDADE) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0 })); 
-            carrinhoBloqueado = true; 
-            renderizarProdutos(); 
-            
-            document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; 
-            document.getElementById("titulo-checkout").className = "text-sm font-semibold text-slate-700 text-center border-b pb-2"; 
-            document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; 
-            
-            const cabId = document.getElementById("id-pedido-cabecalho"); 
-            cabId.innerText = `ID: ${id}`; 
-            cabId.classList.remove("hidden"); 
-            
-            const btn = document.getElementById("btn-finalizar"); 
-            btn.disabled = false; 
-            btn.innerText = "Finalizar"; 
-            btn.className = CSS_FINALIZAR_HABILITADO; 
-            
-            const lista = document.getElementById("lista-carrinho"); 
-            lista.innerHTML = ""; 
-            let valCons = 0; 
-            
-            lines.forEach(linha => { 
-                const tot = parseFloat(linha.TOTAL) || 0; 
-                valCons += tot; 
-                let ent = (linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente") === "retirado"; 
-                if (ent) { 
-                    btn.disabled = true; 
-                    btn.innerText = "Produto Entregue!"; 
-                    btn.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded text-center text-base cursor-not-allowed"; 
-                } 
-                lista.innerHTML += `<div class="flex justify-between items-center bg-white p-[6px] rounded border border-slate-200 shadow-sm"><div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO || linha.produto}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(linha.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div><div class="text-right flex-shrink-0 pl-2"><p class="font-semibold text-slate-700 text-[16px]">R$ ${formatarMoeda(tot)}</p>${ent ? '<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>' : '<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>'}</div></div>`; 
-            }); 
-            
-            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valCons)}`; 
-            totalAtual = valCons; 
-            if (window.innerWidth >= 1024) {
-                renderBotaoFlutuante(`bg-slate-800 ${CSS_BASE_FLUTUANTE} cursor-default`, `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${id}</div><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none text-right">Sair</div>`, true); 
-            } else {
-                abrirOverlayCelular(); 
-            }
-        }
+        function tratarContingenciaOffline(id, forma, tipo, itens, msg) { return new Promise(async (res) => { const c = await window.confirm(msg); if (c) { if (tipo === "CAIXA") aplicarDescontoEstoqueLocal(); const p = extrairItensParaEnvio(itens); salvarNoCacheContingencia(id, forma, tipo, p); await window.alert(construirMensagemFichas(p)); resetSistemicoTotal(false); res(true); } else { reabrirVisualBotaoFinalizar(); res(false); } }); }
+        function enviarVendaNuvem(id, forma, tipo = "CAIXA", pronto = null) { return new Promise(async (res) => { try { const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(id, forma, tipo, pronto) }); if (!r.ok) throw new Error(); setTimeout(async () => { await carregarEstoqueReal(); await window.alert(construirMensagemFichas(extrairItensParaEnvio(pronto))); resetSistemicoTotal(true); res(true); }, 1500); } catch (e) { exibirFalhaProcessamento(); res(false); } }); }
+
+        function processarCliqueFinalizar() { return new Promise(async (res) => { fecharAlertaPromessaResolver = res; const btn = document.getElementById("btn-finalizar"); btn.disabled = true; btn.innerText = "Processando..."; btn.className = CSS_FINALIZAR_DESABILITADO; const net = await diagnosticarInternetEstavel(); if (modoResgateManual) { if (!net) await tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Sistema Offline\nConfirmar entrega?"); else executingBaixaPedidoEntregue(); return; } if (formaPagamento === 'DINHEIRO') { let idDin = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`; if (!net) await tratarContingenciaOffline(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline\nFinalizar venda?"); else { aplicarDescontoEstoqueLocal(); await enviarVendaNuvem(idDin, "DINHEIRO"); } } else if (formaPagamento === 'PIX') { if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) { await window.alert("QR Code não gerado.\nNão é possível fechar em contingência."); reabrirVisualBotaoFinalizar(); return; } if (!net) await tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema offline\nFinalizar venda?"); else if ((Date.now() - timestampCriacaoPix) >= 59000) { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } await tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), "Sistema lento\nFinalizar venda?"); } else { if (await consultarStatusMercadoPagoDireto()) { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } aplicarDescontoEstoqueLocal(); await enviarVendaNuvem(pixChaveIdentificadora, 'PIX'); } else { await window.alert("Pagamento Pendente"); reabrirVisualBotaoFinalizar(); } } } }); }
 
         function selecionarPagamento(tipo) { if (Object.keys(carrinho).length === 0) return; formaPagamento = tipo; const bP = document.getElementById("btn-pix"), bD = document.getElementById("btn-dinheiro"), inp = document.getElementById("input-recebido"); if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } carrinhoBloqueado = true; renderizarProdutos(); atualizarCarrinhoDOM(); bD.disabled = bP.disabled = false; bD.className = tipo === 'DINHEIRO' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO; bP.className = tipo === 'PIX' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO; document.getElementById("carrossel-pagamento").className = `w-[200%] h-full flex transition-transform duration-300 transform ${tipo === 'DINHEIRO' ? 'translate-x-0' : '-translate-x-1/2'}`; document.getElementById("secao-valores-dinheiro").className = `w-1/2 h-full space-y-3.5 transition-all duration-200 ${tipo === 'DINHEIRO' ? 'opacity-100 pointer-events-auto' : 'opacity-25 pointer-events-none'}`; inp.disabled = tipo !== 'DINHEIRO'; if (tipo === 'DINHEIRO') { inp.value = ""; setTimeout(() => inp.focus(), 50); } validarEstadoFinalizar(); }
         function validarEstadoFinalizar() { if (modoResgateManual) return; const btn = document.getElementById("btn-finalizar"), rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0; btn.disabled = formaPagamento === 'PIX' ? !(pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) : !(Object.keys(carrinho).length > 0 && formaPagamento === 'DINHEIRO' && rec >= totalAtual); btn.className = btn.disabled ? CSS_FINALIZAR_DESABILITADO : CSS_FINALIZAR_HABILITADO; }
@@ -480,7 +426,7 @@
         function abrirOverlayCelular() { if (window.innerWidth < 1024 || modoResgateManual) { document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; } }
         function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
         function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true); }
-        function resetSistemicoTotal(http = true) { carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = []; document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; document.getElementById("titulo-checkout").className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200"; renderBotaoFlutuante("pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer select-none text-sm", `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center py-1">Pedido R$ 0,00 - Revisar e Pagar</div>`); resetarEstadoPagamento(); atualizarCarrinhoDOM(); document.getElementById("painel-fechamento").classList.add("hidden"); if (http) { renderizarProdutos(); setTimeout(() => { carregarEstoqueReal(); }, 50); } else { renderizarProdutos(); } }
+        function resetSistemicoTotal(http = true) { carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = []; document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; document.getElementById("titulo-checkout").className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200"; resetarEstadoPagamento(); atualizarCarrinhoDOM(); document.getElementById("painel-fechamento").classList.add("hidden"); if (http) { renderizarProdutos(); setTimeout(() => { carregarEstoqueReal(); }, 50); } else { renderizarProdutos(); } }
         function resetarEstadoPagamento() { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } formaPagamento = null; pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0; reabrirVisualBotaoFinalizar(); document.getElementById("btn-pix").className = CSS_BTN_INATIVO; const bD = document.getElementById("btn-dinheiro"); bD.className = CSS_BTN_INATIVO; if (Object.keys(carrinho).length === 0) { bD.disabled = true; document.getElementById("btn-pix").disabled = true; } else { bD.disabled = false; document.getElementById("btn-pix").disabled = false; } document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0"; document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200"; const inp = document.getElementById("input-recebido"); inp.disabled = true; inp.value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00"; const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 text-center p-2"; box.innerHTML = `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>`; validarEstadoFinalizar(); }
         function reabrirVisualBotaoFinalizar() { document.getElementById("btn-finalizar").innerText = "Finalizar"; validarEstadoFinalizar(); }
         function activarModoBuscaPre(e) { if(e) { e.stopPropagation(); e.preventDefault(); } modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos(); renderBotaoFlutuante(`bg-slate-800 ${CSS_BASE_FLUTUANTE} cursor-default`, `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><input type="text" id="input-id-busca" placeholder="000000000000" class="bg-transparent text-white font-medium text-sm focus:outline-none flex-1 h-full px-2 text-center placeholder-white/30 min-w-0 select-text" maxlength="12" oninput="tratarDigitacaoIdBusca(this)"><div id="btn-sair-online-busca" onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`, true); setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100); }
@@ -488,8 +434,24 @@
         async function executingBaixaPedidoEntregue() { try { await enviarVendaNuvem(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal); } catch (e) { exibirFalhaProcessamento(); } }
         function iniciarMotorSincronizacaoOculto() { setInterval(async () => { let f = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; if (f.length === 0 || !(await diagnosticarInternetEstavel())) return; try { logTerminal(`[SINCRONIZADOR] Descarregando da fila local: ${f[0].id_pagamento}`, "orange"); const p = { id_pagamento: String(f[0].id_pagamento), pagamento: String(f[0].pagamento), tipo_venda: String(f[0].tipo_venda), status_retirada: "retirado", total_pedido_consolidado: parseFloat(f[0].total_pedido_consolidado), transaction_amount: parseFloat(f[0].transaction_amount), contingencia: true, itens: extrairItensParaEnvio(f[0].itens) }; const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(p) }); if (r.ok) { logTerminal(`[SUCESSO NUVEM] Integrado com sucesso: ${f[0].id_pagamento}`, "green"); f.shift(); localStorage.setItem("festa_junina_contingencia", JSON.stringify(f)); } } catch (err) { console.error(err); } }, 30000); }
 
+        function processarResultadoBuscaPedido(linhas, id) { 
+            const lines = linhas.filter(l => String(l.ID_PAGAMENTO).trim() === String(id).trim()); 
+            if (lines.length === 0) { renderBotaoFlutuante("pointer-events-auto bg-rose-600 text-white font-semibold h-10 px-6 rounded-full shadow-lg flex items-center justify-center min-w-[240px] text-sm", `<span>Não encontrado</span>`); setTimeout(() => forçarFechamentoSistemico(), 2000); return; } 
+            modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(id).trim(); cachePedidoOnlineOriginal = lines.map(l => ({ sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", produto: l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online", grandmother_id: parseInt(l.id_produto || l.GRANDMOTHER_ID || 0), quantidade: parseInt(l.QUANTIDADE) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0 })); carrinhoBloqueado = true; renderizarProdutos(); 
+            document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; document.getElementById("titulo-checkout").className = "text-sm font-semibold text-slate-700 text-center border-b pb-2"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; const cabId = document.getElementById("id-pedido-cabecalho"); cabId.innerText = `ID: ${id}`; cabId.classList.remove("hidden"); const btn = document.getElementById("btn-finalizar"); btn.disabled = false; btn.innerText = "Finalizar"; btn.className = CSS_FINALIZAR_HABILITADO; const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valCons = 0; 
+            lines.forEach(linha => { const tot = parseFloat(linha.TOTAL) || 0; valCons += tot; let ent = (linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente") === "retirado"; if (ent) { btn.disabled = true; btn.innerText = "Produto Entregue!"; btn.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded text-center text-base cursor-not-allowed"; } lista.innerHTML += `<div class="flex justify-between items-center bg-white p-[6px] rounded border border-slate-200 shadow-sm"><div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO || linha.produto}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(linha.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div><div class="text-right flex-shrink-0 pl-2"><p class="font-semibold text-slate-700 text-[16px]">R$ ${formatarMoeda(tot)}</p>${ent ? '<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>' : '<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>'}</div></div>`; }); 
+            document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valCons)}`; totalAtual = valCons; if (window.innerWidth >= 1024) renderBotaoFlutuante(`bg-slate-800 ${CSS_BASE_FLUTUANTE} cursor-default`, `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${id}</div><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none text-right">Sair</div>`, true); else abrirOverlayCelular(); 
+        }
+
+        function configurarBotaoArrastavel() {
+            const el = document.getElementById("container-botao-flutuante"), h = document.getElementById("barra-superior"); let ini = false, xAt = 0, yAt = 0, xIni = 0, yIni = 0;
+            const onStart = (e) => { if (e.target.id === "input-id-busca") return; ini = true; const t = e.type === "touchstart" ? e.touches[0] : e; if (!el.style.left || el.style.left.includes("%")) { const r = el.getBoundingClientRect(); el.style.left = r.left + "px"; el.style.bottom = "auto"; el.style.top = r.top + "px"; el.classList.remove("left-1/2", "-translate-x-1/2"); } xIni = t.clientX - el.offsetLeft; yIni = t.clientY - el.offsetTop; };
+            const onMove = (e) => { if (!ini) return; e.preventDefault(); const t = e.type === "touchmove" ? e.touches[0] : e; xAt = t.clientX - xIni; yAt = t.clientY - yIni; const lMax = window.innerWidth - 24, aMax = window.innerHeight - el.offsetHeight, hLim = h ? h.offsetHeight : 48; if (xAt < -el.offsetWidth + 24) xAt = -el.offsetWidth + 24; if (xAt > lMax) xAt = lMax; if (yAt < hLim) yAt = hLim; if (yAt > aMax) yAt = aMax; el.style.left = xAt + "px"; el.style.top = yAt + "px"; };
+            el.addEventListener("mousedown", onStart); window.addEventListener("mousemove", onMove); window.addEventListener("mouseup", () => ini = false); el.addEventListener("touchstart", onStart, { passive: false }); window.addEventListener("touchmove", onMove, { passive: false }); window.addEventListener("touchend", () => ini = false);
+        }
+
         // ========================================================
-        // ENGENHARIA DE OPERAÇÃO EXPANDIDA DO MOTOR DO ROBÔ
+        // OPERAÇÃO E LÓGICA DO TERMINAL DO BOT
         // ========================================================
         
         function logTerminal(texto, cor = "white") {
@@ -508,23 +470,29 @@
             const el = document.getElementById(idElemento);
             if (el) {
                 el.classList.add("bot-clique-ativo");
-                setTimeout(function() {
-                    el.classList.remove("bot-clique-ativo");
-                }, 250);
+                setTimeout(function() { el.classList.remove("bot-clique-ativo"); }, 250);
             }
         }
 
         function emularCliqueRemoverVisual(idElemento) {
             const el = document.getElementById(idElemento);
-            if (el) {
-                el.classList.add("bot-remover-ativo");
-            }
+            if (el) { el.classList.add("bot-remover-ativo"); }
         }
 
         function obterDelayBot() {
             const selectVel = document.getElementById("select-bot-speed");
             const segundos = parseFloat(selectVel.value) || 3;
             return segundos * 1000;
+        }
+
+        function ocultarTerminalPorCompleto() {
+            pararBateriaTestes();
+            document.getElementById("terminal-teste").classList.add("hidden");
+        }
+
+        function reabrirTerminalOcultado() {
+            document.getElementById("terminal-teste").classList.remove("hidden");
+            logTerminal("Terminal restaurado pelo menu superior.", "green");
         }
 
         function minimizarTerminal() {
@@ -617,9 +585,7 @@
                 term.style.top = (e.touches[0].clientY - dragIniY) + "px";
             };
 
-            window.ontouchend = function() {
-                isDragging = false;
-            };
+            window.ontouchend = function() { isDragging = false; };
         }
 
         function pararBateriaTestes() {
@@ -632,10 +598,8 @@
         }
 
         async function emularDigitacaoInput(idInput, valor) {
-            const inp = document.getElementById(idInput);
-            if (!inp) return;
-            inp.focus();
-            inp.value = "";
+            const inp = document.getElementById(idInput); if (!inp) return;
+            inp.focus(); inp.value = "";
             for (let i = 0; i < valor.length; i++) {
                 if (!botExecutando) return;
                 inp.value += valor[i];
@@ -691,7 +655,7 @@
                     await executarCenarioEspecifico(c);
                     await new Promise(r => setTimeout(r, obterDelayBot() + 1000));
                 }
-                if (botExecutando) logTerminal("BATERIA COMPLETA CONCLUÍDA COM SUCESSO!", "green");
+                if (botExecutando) logTerminal("BATERIA COMPLETA CONCLUÍDA!", "green");
                 pararBateriaTestes();
             } else {
                 await executarCenarioEspecifico(escolha);
@@ -701,9 +665,7 @@
 
         async function executarCenarioEspecifico(c) {
             if (!botExecutando) return;
-            internetFicticiaStatus = true;
-            forcarPixSucessoFake = false;
-            limparCarrinhoCompleto();
+            internetFicticiaStatus = true; forcarPixSucessoFake = false; limparCarrinhoCompleto();
             if (window.innerWidth < 1024) fecharOverlay();
             
             if (produtos.length === 0) {
@@ -713,9 +675,7 @@
             }
             
             let cesta = sortearProdutosAleatoriosMega();
-            if (cesta.length === 0) {
-                cesta = [{ produto: produtos[0], quantidade: 1 }];
-            }
+            if (cesta.length === 0) { cesta = [{ produto: produtos[0], quantidade: 1 }]; }
             
             let arrayIdsDisponiveis = ["999000000001", "999000000002", "999000000003", "999000000005", "999000000006"];
             let idFiltroReal = arrayIdsDisponiveis[Math.floor(Math.random() * arrayIdsDisponiveis.length)];
@@ -732,34 +692,24 @@
                             await new Promise(r => setTimeout(r, 150));
                         }
                     }
+                    await new Promise(r => setTimeout(r, obterDelayBot())); abrirOverlayCelular();
+                    await new Promise(r => setTimeout(r, obterDelayBot())); selecionarPagamento('DINHEIRO');
                     await new Promise(r => setTimeout(r, obterDelayBot()));
-                    abrirOverlayCelular();
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    selecionarPagamento('DINHEIRO');
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    
                     let vRec = String((Math.ceil(totalAtual / 10) * 10) * 100);
-                    await emularDigitacaoInput("input-recebido", vRec);
-                    tratarMascaraDinheiro(document.getElementById("input-recebido"));
+                    await emularDigitacaoInput("input-recebido", vRec); tratarMascaraDinheiro(document.getElementById("input-recebido"));
                     await new Promise(r => setTimeout(r, obterDelayBot()));
-                    
                     logTerminal("Finalizando venda e travando linha do tempo...", "orange");
                     await processarCliqueFinalizar();
                     break;
 
                 case "2":
                     logTerminal("--- CENÁRIO 2: Dinheiro Offline ---", "orange");
-                    emularCliqueVisual(`product-card-${cesta[0].produto.id}`);
-                    alterarQuantidade(cesta[0].produto.id, 1);
+                    emularCliqueVisual(`product-card-${cesta[0].produto.id}`); alterarQuantidade(cesta[0].produto.id, 1);
+                    await new Promise(r => setTimeout(r, obterDelayBot())); abrirOverlayCelular();
+                    await new Promise(r => setTimeout(r, obterDelayBot())); selecionarPagamento('DINHEIRO');
                     await new Promise(r => setTimeout(r, obterDelayBot()));
-                    abrirOverlayCelular();
+                    await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido"));
                     await new Promise(r => setTimeout(r, obterDelayBot()));
-                    selecionarPagamento('DINHEIRO');
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    await emularDigitacaoInput("input-recebido", String(totalAtual * 100));
-                    tratarMascaraDinheiro(document.getElementById("input-recebido"));
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    
                     internetFicticiaStatus = false;
                     logTerminal("[SINAL QUEDA] Operando localmente em contingência.", "rose");
                     await processarCliqueFinalizar();
@@ -767,46 +717,26 @@
 
                 case "3":
                     logTerminal("--- CENÁRIO 3: Dinheiro com Correção de Qtd ---", "orange");
-                    for (let i = 0; i < 4; i++) {
-                        alterarQuantidade(cesta[0].produto.id, 1);
-                        await new Promise(r => setTimeout(r, 150));
-                    }
+                    for (let i = 0; i < 4; i++) { alterarQuantidade(cesta[0].produto.id, 1); await new Promise(r => setTimeout(r, 150)); }
+                    await new Promise(r => setTimeout(r, obterDelayBot())); abrirOverlayCelular();
+                    await new Promise(r => setTimeout(r, obterDelayBot())); fecharOverlay();
                     await new Promise(r => setTimeout(r, obterDelayBot()));
-                    abrirOverlayCelular();
+                    for (let i = 0; i < 2; i++) { emularCliqueVisual(`btn-minus-${cesta[0].produto.id}`); alterarQuantidade(cesta[0].produto.id, -1); await new Promise(r => setTimeout(r, 150)); }
+                    await new Promise(r => setTimeout(r, obterDelayBot())); abrirOverlayCelular();
+                    await new Promise(r => setTimeout(r, obterDelayBot())); selecionarPagamento('DINHEIRO');
                     await new Promise(r => setTimeout(r, obterDelayBot()));
-                    fecharOverlay();
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    for (let i = 0; i < 2; i++) {
-                        emularCliqueVisual(`btn-minus-${cesta[0].produto.id}`);
-                        alterarQuantidade(cesta[0].produto.id, -1);
-                        await new Promise(r => setTimeout(r, 150));
-                    }
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    abrirOverlayCelular();
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    selecionarPagamento('DINHEIRO');
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    await emularDigitacaoInput("input-recebido", String(totalAtual * 100));
-                    tratarMascaraDinheiro(document.getElementById("input-recebido"));
+                    await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido"));
                     await new Promise(r => setTimeout(r, obterDelayBot()));
                     await processarCliqueFinalizar();
                     break;
 
                 case "4":
                     logTerminal("--- CENÁRIO 4: Pix com Sandbox Automático ---", "orange");
-                    for (let cx of cesta) {
-                        if (!botExecutando) return;
-                        alterarQuantidade(cx.produto.id, 1);
-                        await new Promise(r => setTimeout(r, 150));
-                    }
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    abrirOverlayCelular();
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    selecionarPagamento('PIX');
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    requisitarQrCodeReal();
+                    for (let cx of cesta) { if (!botExecutando) return; alterarQuantidade(cx.produto.id, 1); await new Promise(r => setTimeout(r, 150)); }
+                    await new Promise(r => setTimeout(r, obterDelayBot())); abrirOverlayCelular();
+                    await new Promise(r => setTimeout(r, obterDelayBot())); selecionarPagamento('PIX');
+                    await new Promise(r => setTimeout(r, obterDelayBot())); requisitarQrCodeReal();
                     await new Promise(r => setTimeout(r, 3500));
-                    
                     forcarPixSucessoFake = true;
                     logTerminal("[MOCK] Injetando pagamento aprovado pelo sandbox.", "green");
                     await new Promise(r => setTimeout(r, 7000));
@@ -814,58 +744,41 @@
 
                 case "5":
                     logTerminal("--- CENÁRIO 5: Pix Desistência ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1);
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    abrirOverlayCelular();
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    selecionarPagamento('PIX');
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    requisitarQrCodeReal();
-                    await new Promise(r => setTimeout(r, 3000));
+                    alterarQuantidade(cesta[0].produto.id, 1); await new Promise(r => setTimeout(r, obterDelayBot()));
+                    abrirOverlayCelular(); await new Promise(r => setTimeout(r, obterDelayBot()));
+                    selecionarPagamento('PIX'); await new Promise(r => setTimeout(r, obterDelayBot()));
+                    requisitarQrCodeReal(); await new Promise(r => setTimeout(r, 3000));
                     logTerminal("Cancelando operação e limpando checkout.", "white");
-                    emularCliqueVisual("btn-limpar-carrinho");
-                    limparCarrinhoCompleto();
+                    emularCliqueVisual("btn-limpar-carrinho"); limparCarrinhoCompleto();
                     break;
 
                 case "6":
                     logTerminal("--- CENÁRIO 6: Pix Lento / Timeout contingência ---", "orange");
-                    alterarQuantidade(cesta[0].produto.id, 1);
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    abrirOverlayCelular();
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    selecionarPagamento('PIX');
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    requisitarQrCodeReal();
-                    await new Promise(r => setTimeout(r, 4000));
-                    timestampCriacaoPix = Date.now() - 65000;
-                    await new Promise(r => setTimeout(r, 2000));
+                    alterarQuantidade(cesta[0].produto.id, 1); await new Promise(r => setTimeout(r, obterDelayBot()));
+                    abrirOverlayCelular(); await new Promise(r => setTimeout(r, obterDelayBot()));
+                    selecionarPagamento('PIX'); await new Promise(r => setTimeout(r, obterDelayBot()));
+                    requisitarQrCodeReal(); await new Promise(r => setTimeout(r, 4000));
+                    timestampCriacaoPix = Date.now() - 65000; await new Promise(r => setTimeout(r, 2000));
                     logTerminal("Acionando fechamento alternativo por lentidão de rede.", "white");
                     await processarCliqueFinalizar();
                     break;
 
                 case "7":
                     logTerminal("--- CENÁRIO 7: Busca ON - Resgate Nuvem Real (IDs Livres) ---", "orange");
-                    activarModoBuscaPre();
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
+                    activarModoBuscaPre(); await new Promise(r => setTimeout(r, obterDelayBot()));
                     logTerminal(`Consultando registro real indexado na planilha: ${idFiltroReal}`, "white");
-                    await emularDigitacaoInput("input-id-busca", idFiltroReal);
-                    tratarDigitacaoIdBusca(document.getElementById("input-id-busca"));
+                    await emularDigitacaoInput("input-id-busca", idFiltroReal); tratarDigitacaoIdBusca(document.getElementById("input-id-busca"));
                     await new Promise(r => setTimeout(r, 5000));
-                    if (!modoResgateManual) {
-                        logTerminal("ID consta como vazia ou erro na planilha.", "rose");
-                        return;
-                    }
+                    if (!modoResgateManual) { logTerminal("ID consta como vazia ou erro na planilha.", "rose"); return; }
                     logTerminal("Enviando comando de baixa do pedido entregue com trava...", "white");
                     await processarCliqueFinalizar();
                     break;
 
                 case "8":
                     logTerminal("--- CENÁRIO 8: Busca ON - Proteção Dupla Retirada (ID 4) ---", "orange");
-                    activarModoBuscaPre();
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
+                    activarModoBuscaPre(); await new Promise(r => setTimeout(r, obterDelayBot()));
                     logTerminal("Consultando ID com final 4 setada como RETIRADO na planilha.", "white");
-                    await emularDigitacaoInput("input-id-busca", "999000000004");
-                    tratarDigitacaoIdBusca(document.getElementById("input-id-busca"));
+                    await emularDigitacaoInput("input-id-busca", "999000000004"); tratarDigitacaoIdBusca(document.getElementById("input-id-busca"));
                     await new Promise(r => setTimeout(r, 5000));
                     logTerminal("Validando bloqueio físico do botão de baixa pelo status retirado do Excel.", "green");
                     await new Promise(r => setTimeout(r, obterDelayBot()));
@@ -875,10 +788,8 @@
 
                 case "9":
                     logTerminal("--- CENÁRIO 9: Busca ON - Retirada Offline ---", "orange");
-                    activarModoBuscaPre();
-                    await new Promise(r => setTimeout(r, obterDelayBot()));
-                    await emularDigitacaoInput("input-id-busca", idFiltroReal);
-                    tratarDigitacaoIdBusca(document.getElementById("input-id-busca"));
+                    activarModoBuscaPre(); await new Promise(r => setTimeout(r, obterDelayBot()));
+                    await emularDigitacaoInput("input-id-busca", idFiltroReal); tratarDigitacaoIdBusca(document.getElementById("input-id-busca"));
                     await new Promise(r => setTimeout(r, 5000));
                     if (!modoResgateManual) return;
                     internetFicticiaStatus = false;
@@ -888,16 +799,11 @@
 
                 case "10":
                     logTerminal("--- CENÁRIO 10: Trava de Estoque Zerado ---", "orange");
-                    let pZ = cesta[0].produto;
-                    let est = pZ.estoque;
-                    pZ.estoque = 0;
-                    renderizarProdutos();
+                    let pZ = cesta[0].produto; let est = pZ.estoque; pZ.estoque = 0; renderizarProdutos();
                     await new Promise(r => setTimeout(r, obterDelayBot()));
                     logTerminal(`Tentando vender item esgotado em memória: ${pZ.nome}`, "white");
-                    emularCliqueVisual(`product-card-${pZ.id}`);
-                    await new Promise(r => setTimeout(r, 2000));
-                    pZ.estoque = est;
-                    renderizarProdutos();
+                    emularCliqueVisual(`product-card-${pZ.id}`); await new Promise(r => setTimeout(r, 2000));
+                    pZ.estoque = est; renderizarProdutos();
                     break;
 
                 case "11":
@@ -906,8 +812,7 @@
                     for (let k = 1; k <= 3; k++) {
                         let iB = cesta[k % cesta.length].produto;
                         logTerminal(`Acumulando pedido #${k} offline para ${iB.nome}`, "white");
-                        carrinho[iB.id] = 1;
-                        totalAtual = iB.preco;
+                        carrinho[iB.id] = 1; totalAtual = iB.preco;
                         let CacheContingenciaEstresse = `STRESS-${k}-${Date.now().toString().slice(-4)}`;
                         salvarNoCacheContingencia(CacheContingenciaEstresse, "DINHEIRO", "CAIXA", extrairItensParaEnvio());
                         await new Promise(r => setTimeout(r, 1500));
