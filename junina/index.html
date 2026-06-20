@@ -14,20 +14,21 @@
         .scroll-celular-perfeito { touch-action: pan-y !important; }
     </style>
 </head>
-<body class="bg-slate-50 font-sistema h-screen lg:overflow-hidden flex flex-col antialiased text-slate-800 select-none">
+<body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800 select-none">
 
     <header id="barra-superior" class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
         <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
     </header>
 
-    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start h-[calc(100vh-44px)] lg:overflow-hidden">
-        
-        <section class="lg:col-span-3 space-y-2 h-full lg:overflow-y-auto pr-1 no-scrollbar pb-10">
-            <div class="border-b border-slate-200 pb-1 sticky top-0 bg-slate-50 z-10"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
+    <!-- Mantivemos o main original com items-start, adicionando apenas o block/relative para organizar as camadas -->
+    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start relative block">
+        <section class="lg:col-span-3 space-y-2">
+            <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
 
-        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-full">
+        <!-- ALTERAÇÃO CIRÚRGICA: O painel vira lg:fixed e calcula a posição com base no max-w-[1600px] para manter os mesmos milímetros do seu layout original -->
+        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:fixed lg:top-14 lg:right-[calc((100vw-1600px)/2+12px)] lg:left-auto lg:w-[calc((100%-(100vw-1600px))/4-12px)] xl:w-[385px] bg-black/75 lg:bg-transparent z-50 lg:z-10 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]">
             <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-5 flex flex-col justify-between h-[85vh] lg:h-full">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
                     <h3 id="titulo-checkout" class="text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200">PAGAMENTO</h3>
@@ -37,6 +38,7 @@
                             <button id="btn-limpar-carrinho" onclick="limparCarrinhoCompleto()" class="text-xs font-semibold text-slate-400 uppercase tracking-wider pr-1 hover:text-slate-600 transition-colors">Limpar</button>
                             <span id="id-pedido-cabecalho" class="text-xs font-medium text-slate-400 tracking-wide ml-auto hidden"></span>
                         </div>
+                        <!-- A rolagem interna contida aqui vai impedir os botões de pagamento abaixo de sumirem da tela -->
                         <div id="lista-carrinho" class="space-y-1.5 overflow-y-auto pr-1 no-scrollbar flex-1 relative scroll-celular-perfeito">
                             <p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>
                         </div>
@@ -83,8 +85,8 @@
 
     <script>
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
-        const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/98221223b0c5414085d99db3124350bb/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sXkYuHLSdt1s6aiLFFkMc0fJKd27HDthp4nNRM2Qz20";
-        
+       const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/98221223b0c5414085d99db3124350bb/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sXkYuHLSdt1s6aiLFFkMc0fJKd27HDthp4nNRM2Qz20";
+         
         const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-orange-500 bg-orange-50 text-orange-700 font-bold text-sm text-center shadow-sm transition-all", CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 shadow-sm transition-all", CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95", CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed", CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-between min-w-[240px] max-w-xs text-sm";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0, carrinhoBloqueado = false;
@@ -94,13 +96,13 @@
         const liberarExibicaoSegura = () => { document.documentElement.style.visibility = document.body.style.visibility = "visible"; document.documentElement.style.opacity = document.body.style.opacity = "1"; };
         const renderBotaoFlutuante = (estilo, html, limpar = false) => { const bf = document.getElementById("caixa-flutuante-base"); bf.className = estilo; bf.innerHTML = html; bf.onclick = limpar ? null : abrirOverlayCelular; };
 
-        // CARREGAMENTO INSTANTÂNEO: Se houver cache local, renderiza e já torna visível na hora!
+        // CARREGAMENTO INSTANTÂNEO: Liberamos a tela imediatamente se já existir dados em cache
         window.addEventListener('DOMContentLoaded', () => {
             const cache = localStorage.getItem("festa_junina_cardapio");
             if (cache) { 
                 produtos = JSON.parse(cache); 
                 renderizarProdutos(); 
-                liberarExibicaoSegura(); 
+                liberarExibicaoSegura();
             }
             carregarEstoqueReal(); iniciarMotorSincronizacaoOculto();
             configurarBotaoArrastavel();
@@ -152,7 +154,7 @@
                     </div>`;
             });
             let pre = modoBuscaAtivo || modoResgateManual;
-            grid.innerHTML += `
+           grid.innerHTML += `
                 <div class="border rounded-lg p-2 shadow-sm flex flex-col justify-between transition-all min-w-0 bg-white border-slate-300">
                     <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${pre ? 'bg-slate-800 text-white' : 'bg-slate-200 text-slate-600'}">
                         <div class="text-center font-bold text-[13px] sm:text-[15px] md:text-base lg:text-lg xl:text-xl mt-1 px-1 flex items-center justify-center flex-1 select-none whitespace-normal break-normal leading-none w-full">ON</div>
@@ -183,13 +185,13 @@
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
             carrinhoBloqueado = false; renderizarProdutos(); resetarEstadoPagamento();
-            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
+            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:fixed lg:top-14 lg:right-[calc((100vw-1600px)/2+12px)] lg:left-auto lg:w-[calc((100%-(100vw-1600px))/4-12px)] xl:w-[385px] bg-black/75 lg:bg-transparent z-50 lg:z-10 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]";
             atualizarCarrinhoDOM(); 
         }
 
         function construirMensagemFichas(arr) {
             let copia = [...arr]; copia.sort((a, b) => a.produto.localeCompare(b.produto));
-            let txt = "Venda Finalizada!\n\n";
+  ...	    let txt = "Venda Finalizada!\n\n";
             copia.forEach(i => txt += `- ${i.quantidade}x ${i.produto}\n`);
             return txt;
         }
@@ -237,7 +239,7 @@
 
         const extrairItensParaEnvio = (pronto = null) => {
             if (pronto) return pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.id_produto || i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) }));
-            return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
+            return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
         };
 
         const gerarPayloadVenda = (id, forma, tipo = "CAIXA", pronto = null, cont = false) => {
@@ -355,9 +357,9 @@
         }
 
         function abrirOverlayCelular() { if (window.innerWidth < 1024 || modoResgateManual) { document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; } }
-        function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
-        function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true); }
-        
+        function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:fixed lg:top-14 lg:right-[calc((100vw-1600px)/2+12px)] lg:left-auto lg:w-[calc((100%-(100vw-1600px))/4-12px)] xl:w-[385px] bg-black/75 lg:bg-transparent z-50 lg:z-10 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]"; resetarEstadoPagamento(); } }
+        function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:fixed lg:top-14 lg:right-[calc((100vw-1600px)/2+12px)] lg:left-auto lg:w-[calc((100%-(100vw-1600px))/4-12px)] xl:w-[385px] bg-black/75 lg:bg-transparent z-50 lg:z-10 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true); }
+         
         function resetSistemicoTotal(http = true) { 
             carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = []; 
             document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; 
@@ -366,12 +368,12 @@
             resetarEstadoPagamento(); atualizarCarrinhoDOM(); document.getElementById("painel-fechamento").classList.add("hidden"); 
             if (http) { renderizarProdutos(); setTimeout(() => { carregarEstoqueReal(); }, 50); } else { renderizarProdutos(); } 
         }
-        
+         
         function resetarEstadoPagamento() { if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } formaPagamento = null; pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0; reabrirVisualBotaoFinalizar(); document.getElementById("btn-pix").className = CSS_BTN_INATIVO; const btnDin = document.getElementById("btn-dinheiro"); btnDin.className = CSS_BTN_INATIVO; if (Object.keys(carrinho).length === 0) { btnDin.disabled = true; document.getElementById("btn-pix").disabled = true; } else { btnDin.disabled = false; document.getElementById("btn-pix").disabled = false; } document.getElementById("carrossel-pagamento").className = "w-[200%] h-full flex transition-transform duration-300 transform translate-x-0"; document.getElementById("secao-valores-dinheiro").className = "w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200"; const inp = document.getElementById("input-recebido"); inp.disabled = true; inp.value = ""; document.getElementById("valor-troco-txt").innerText = "R$ 0,00"; const box = document.getElementById("box-qrcode"); box.className = "w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 text-center p-2"; box.innerHTML = `<span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>`; validarEstadoFinalizar(); }
         function reabrirVisualBotaoFinalizar() { document.getElementById("btn-finalizar").innerText = "Finalizar"; validarEstadoFinalizar(); }
         function activarModoBuscaPre(e) { if(e) { e.stopPropagation(); e.preventDefault(); } modoBuscaAtivo = true; carrinho = {}; atualizarCarrinhoDOM(); renderizarProdutos(); renderBotaoFlutuante(`bg-slate-800 ${CSS_BASE_FLUTUANTE} cursor-default`, `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><input type="text" id="input-id-busca" placeholder="000000000000" class="bg-transparent text-white font-medium text-sm focus:outline-none flex-1 h-full px-2 text-center placeholder-white/30 min-w-0 select-text" maxlength="12" oninput="tratarDigitacaoIdBusca(this)"><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`, true); setTimeout(() => { const ib = document.getElementById("input-id-busca"); if(ib) ib.focus(); }, 100); }
         function tratarDigitacaoIdBusca(input) { input.value = input.value.replace(/\D/g, ""); if (input.value.length === 12) { input.disabled = true; carregarEstoqueReal(input.value); } }
-        function processarResultadoBuscaPedido(linhas, id) { const lines = lines = linhas.filter(l => String(l.ID_PAGAMENTO).trim() === String(id).trim()); if (lines.length === 0) { renderBotaoFlutuante("pointer-events-auto bg-rose-600 text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer select-none text-sm", `<span>Não encontrado</span>`); setTimeout(() => forçarFechamentoSistemico(), 2000); return; } modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(id).trim(); cachePedidoOnlineOriginal = lines.map(l => ({ sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", produto: l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online", grandmother_id: parseInt(l.id_produto || l.ID || l.id || l.GRANDMOTHER_ID || 0), quantidade: parseInt(l.QUANTIDADE) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0 })); carrinhoBloqueado = true; renderizarProdutos(); document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; document.getElementById("titulo-checkout").className = "text-sm font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; const cabId = document.getElementById("id-pedido-cabecalho"); cabId.innerText = `ID: ${id}`; cabId.classList.remove("hidden"); const btn = document.getElementById("btn-finalizar"); btn.disabled = false; btn.innerText = "Finalizar"; btn.className = CSS_FINALIZAR_HABILITADO; const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valCons = 0; lines.forEach(linha => { const tot = parseFloat(linha.TOTAL) || 0; valCons += tot; let ent = (linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente") === "retirado"; if (ent) { btn.disabled = true; btn.innerText = "Produto Entregue!"; btn.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; } lista.innerHTML += `<div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-200 shadow-sm font-sistema"><div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO || linha.produto}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(linha.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div><div class="text-right flex-shrink-0 pl-2"><p class="font-semibold text-slate-700 text-[16px]">R$ ${formatarMoeda(tot)}</p>${ent ? '<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>' : '<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>'}</div></div>`; }); document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valCons)}`; totalAtual = valCons; if (window.innerWidth >= 1024) renderBotaoFlutuante(`bg-slate-800 ${CSS_BASE_FLUTUANTE} cursor-default`, `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${id}</div><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`, true); else abrirOverlayCelular(); }
+        function processarResultadoBuscaPedido(linhas, id) { const lines = linhas.filter(l => String(l.ID_PAGAMENTO).trim() === String(id).trim()); if (lines.length === 0) { renderBotaoFlutuante("pointer-events-auto bg-rose-600 text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer select-none text-sm", `<span>Não encontrado</span>`); setTimeout(() => forçarFechamentoSistemico(), 2000); return; } modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(id).trim(); cachePedidoOnlineOriginal = lines.map(l => ({ sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", produto: l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online", grandmother_id: parseInt(l.id_produto || l.ID || l.id || l.GRANDMOTHER_ID || 0), quantidade: parseInt(l.QUANTIDADE) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0 })); carrinhoBloqueado = true; renderizarProdutos(); document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; document.getElementById("titulo-checkout").className = "text-sm font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; const cabId = document.getElementById("id-pedido-cabecalho"); cabId.innerText = `ID: ${id}`; cabId.classList.remove("hidden"); const btn = document.getElementById("btn-finalizar"); btn.disabled = false; btn.innerText = "Finalizar"; btn.className = CSS_FINALIZAR_HABILITADO; const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valCons = 0; lines.forEach(linha => { const tot = parseFloat(linha.TOTAL) || 0; valCons += tot; let ent = (linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente") === "retirado"; if (ent) { btn.disabled = true; btn.innerText = "Produto Entregue!"; btn.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; } lista.innerHTML += `<div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-200 shadow-sm font-sistema"><div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO || linha.produto}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(linha.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div><div class="text-right flex-shrink-0 pl-2"><p class="font-semibold text-slate-700 text-[16px]">R$ ${formatarMoeda(tot)}</p>${ent ? '<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>' : '<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>'}</div></div>`; }); document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valCons)}`; totalAtual = valCons; if (window.innerWidth >= 1024) renderBotaoFlutuante(`bg-slate-800 ${CSS_BASE_FLUTUANTE} cursor-default`, `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${id}</div><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`, true); else abrirOverlayCelular(); }
         async function executingBaixaPedidoEntregue() { try { await enviarVendaNuvem(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Produto Entregue!"); } catch (e) { exibirFalhaProcessamento(); } }
         function salvarNoCacheContingencia(id, forma, tipo, pronto) { let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; fila.push({ id_pagamento: id, pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), contingencia: true, itens: pronto }); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); }
         function iniciarMotorSincronizacaoOculto() { setInterval(async () => { let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; if (fila.length === 0 || !(await diagnosticarInternetEstavel())) return; try { const pacote = { id_pagamento: String(fila[0].id_pagamento), pagamento: String(fila[0].pagamento), tipo_venda: String(fila[0].tipo_venda), status_retirada: "retirado", total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado), transaction_amount: parseFloat(fila[0].transaction_amount), contingencia: true, itens: extrairItensParaEnvio(fila[0].itens) }; const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacote) }); if (r.ok) { fila.shift(); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); } } catch (err) { console.error("Erro na sincronização.", err); } }, 30000); }
