@@ -20,14 +20,14 @@
         <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
     </header>
 
-    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start relative block">
         <section class="lg:col-span-3 space-y-2">
             <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
 
-        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
-            <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
+        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:fixed lg:top-14 lg:right-[calc((100vw-1600px)/2+12px)] lg:left-auto lg:w-[calc((100%-(100vw-1600px))/4-12px)] xl:w-[385px] bg-black/75 lg:bg-transparent z-50 lg:z-10 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]">
+            <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-5 flex flex-col justify-between h-[85vh] lg:h-full">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
                     <h3 id="titulo-checkout" class="text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200">PAGAMENTO</h3>
                     <div class="flex-1 flex flex-col min-h-0">
@@ -55,7 +55,7 @@
                                 <div id="secao-valores-dinheiro" class="w-1/2 h-full space-y-3.5 opacity-25 pointer-events-none transition-all duration-200">
                                     <div class="flex justify-between items-center text-base"><span class="text-slate-500 font-medium">Pedido</span><span id="valor-pedido-txt" class="font-bold text-slate-700">R$ 0,00</span></div>
                                     <div class="flex justify-between items-center text-base"><span class="text-slate-500 font-medium">Recebido</span><div class="relative w-36"><span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">R$</span><input type="text" id="input-recebido" placeholder="0,00" disabled oninput="tratarMascaraDinheiro(this)" class="w-full pl-7 pr-2.5 py-0.5 border border-slate-300 rounded-md text-right font-bold text-slate-800 focus:outline-none focus:border-orange-500 text-base disabled:bg-slate-50 select-text"></div></div>
-                                    <div class="flex justify-between items-center text-base border-t border-slate-100 pt-1.5"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-orange-600">R$ 0,00</span></div>
+                                   <div class="flex justify-between items-center text-base border-t border-slate-100 pt-1.5"><span class="text-slate-500 font-medium">Troco</span><span id="valor-troco-txt" class="font-bold text-orange-600">R$ 0,00</span></div>
                                 </div>
                                 <div id="secao-valores-pix" class="w-1/2 h-full flex items-center justify-center">
                                     <div id="box-qrcode" onclick="requisitarQrCodeReal()" class="w-28 h-28 bg-slate-100 border border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-95 transition-none select-none text-center p-2">
@@ -83,7 +83,7 @@
     <script>
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/98221223b0c5414085d99db3124350bb/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sXkYuHLSdt1s6aiLFFkMc0fJKd27HDthp4nNRM2Qz20";
-        
+         
         const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-orange-500 bg-orange-50 text-orange-700 font-bold text-sm text-center shadow-sm transition-all", CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 shadow-sm transition-all", CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95", CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed", CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-between min-w-[240px] max-w-xs text-sm";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0, carrinhoBloqueado = false;
@@ -95,7 +95,11 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             const cache = localStorage.getItem("festa_junina_cardapio");
-            if (cache) { produtos = JSON.parse(cache); renderizarProdutos(); }
+            if (cache) { 
+                produtos = JSON.parse(cache); 
+                renderizarProdutos(); 
+                liberarExibicaoSegura();
+            }
             carregarEstoqueReal(); iniciarMotorSincronizacaoOculto();
             configurarBotaoArrastavel();
         });
@@ -166,19 +170,18 @@
             const n = (carrinho[id] || 0) + d;
             if (d > 0 && (carrinho[id] || 0) >= p.estoque) return;
             if (n <= 0) delete carrinho[id]; else carrinho[id] = n;
-            renderizarProdutos(); atualizarCarrinhoDOM();
+           renderizarProdutos(); atualizarCarrinhoDOM();
         }
 
         function removerItemDoCarrinhoCompleto(id) { if (!carrinhoBloqueado && carrinho[id]) { delete carrinho[id]; renderizarProdutos(); atualizarCarrinhoDOM(); } }
          
-        // AJUSTE 3: Caso clique em Limpar no modo busca/resgate ativo, força o reset total do ON
         function limparCarrinhoCompleto() { 
             if (modoBuscaAtivo || modoResgateManual) { forçarFechamentoSistemico(); return; }
             carrinho = {}; 
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
             carrinhoBloqueado = false; renderizarProdutos(); resetarEstadoPagamento();
-            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
+            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:fixed lg:top-14 lg:right-[calc((100vw-1600px)/2+12px)] lg:left-auto lg:w-[calc((100%-(100vw-1600px))/4-12px)] xl:w-[385px] bg-black/75 lg:bg-transparent z-50 lg:z-10 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]";
             atualizarCarrinhoDOM(); 
         }
 
@@ -189,7 +192,6 @@
             return txt;
         }
 
-        // AJUSTE 2: Nova estrutura Flexbox inteligente de duas linhas precisas com preço centralizado
         function atualizarCarrinhoDOM() {
             if (modoResgateManual) return;
             const lista = document.getElementById("lista-carrinho"), bloco = document.getElementById("bloco-inferior-pagamento");
@@ -208,7 +210,7 @@
                             <p class="text-[12px] text-slate-400 mt-0.5 leading-none">${qtd}x R$ ${formatarMoeda(p.preco)}</p>
                         </div>
                         <span class="w-[30%] font-bold text-slate-800 text-[15px] text-right flex-shrink-0 pl-1 my-auto leading-none">R$ ${formatarMoeda(sub)}</span>
-                    </div>`;
+                  </div>`;
             });
 
             if (tItens === 0) {
@@ -218,7 +220,7 @@
                 cabId.classList.add("hidden"); resetarEstadoPagamento();
             } else {
                 bloco.className = "space-y-4 pt-1 border-t opacity-100 pointer-events-auto";
-                btnPix.disabled = false; btnDin.disabled = false;
+max-w-xs            btnPix.disabled = false; btnDin.disabled = false;
                 btnDin.className = CSS_BTN_INATIVO; btnPix.className = CSS_BTN_INATIVO;
                 cabId.classList.add("hidden");
             }
@@ -284,7 +286,7 @@
             carrinhoBloqueado = true; renderizarProdutos(); atualizarCarrinhoDOM();
             btnDin.disabled = btnPix.disabled = false;
             btnDin.className = tipo === 'DINHEIRO' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO;
-            btnPix.className = tipo === 'PIX' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO;
+max-w-xs            btnPix.className = tipo === 'PIX' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO;
             document.getElementById("carrossel-pagamento").className = `w-[200%] h-full flex transition-transform duration-300 transform ${tipo === 'DINHEIRO' ? 'translate-x-0' : '-translate-x-1/2'}`;
             document.getElementById("secao-valores-dinheiro").className = `w-1/2 h-full space-y-3.5 transition-all duration-200 ${tipo === 'DINHEIRO' ? 'opacity-100 pointer-events-auto' : 'opacity-25 pointer-events-none'}`;
             inp.disabled = tipo !== 'DINHEIRO';
@@ -351,8 +353,8 @@
         }
 
         function abrirOverlayCelular() { if (window.innerWidth < 1024 || modoResgateManual) { document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; } }
-        function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
-        function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true); }
+        function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:fixed lg:top-14 lg:right-[calc((100vw-1600px)/2+12px)] lg:left-auto lg:w-[calc((100%-(100vw-1600px))/4-12px)] xl:w-[385px] bg-black/75 lg:bg-transparent z-50 lg:z-10 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]"; resetarEstadoPagamento(); } }
+        function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:fixed lg:top-14 lg:right-[calc((100vw-1600px)/2+12px)] lg:left-auto lg:w-[calc((100%-(100vw-1600px))/4-12px)] xl:w-[385px] bg-black/75 lg:bg-transparent z-50 lg:z-10 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true); }
         
         function resetSistemicoTotal(http = true) { 
             carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = []; 
@@ -392,7 +394,7 @@
 
             const onMove = (e) => {
                 if (!iniciado) return;
-                e.preventDefault(); // AJUSTE: Mata o puxão elástico e a rolagem intrusiva da tela
+                e.preventDefault(); 
                 
                 const touch = e.type === "touchmove" ? e.touches[0] : e;
                 xAt = touch.clientX - xIni; yAt = touch.clientY - yIni;
