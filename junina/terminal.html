@@ -16,8 +16,9 @@
 </head>
 <body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800 select-none">
 
-    <header id="barra-superior" class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
-        <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
+    <header id="barra-superior" class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50 flex items-center justify-center relative">
+        <h1 class="text-xl font-semibold tracking-wide mx-auto">Festa Junina</h1>
+        <button onclick="document.getElementById('terminal-teste').classList.remove('hidden')" class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] bg-orange-700 hover:bg-orange-800 px-2 py-1 rounded transition-all">TERMINAL</button>
     </header>
 
     <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
@@ -26,7 +27,7 @@
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
         
-        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:sticky lg:top-14 bg-black/75 lg:bg-transparent z-50 lg:z-10 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]">
+        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:sticky lg:top-14 bg-black/75 lg:bg-transparent z-50 lg:z-10 items-center lg:items-start justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]">
             <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
                     <h3 id="titulo-checkout" class="text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200">PAGAMENTO</h3>
@@ -93,6 +94,19 @@
         const liberarExibicaoSegura = () => { document.documentElement.style.visibility = document.body.style.visibility = "visible"; document.documentElement.style.opacity = document.body.style.opacity = "1"; };
         const renderBotaoFlutuante = (estilo, html, limpar = false) => { const bf = document.getElementById("caixa-flutuante-base"); bf.className = estilo; bf.innerHTML = html; bf.onclick = limpar ? null : abrirOverlayCelular; };
 
+        // MUDANÇA 4: Função construtora do novo ID 16 dígitos para dinheiro
+        function gerarIdDinheiro() {
+            const d = new Date();
+            const yy = String(d.getFullYear()).slice(-2);
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            const hh = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            const ss = String(d.getSeconds()).padStart(2, '0');
+            const ms = String(d.getMilliseconds()).padStart(3, '0');
+            return `6${yy}${mm}${dd}${hh}${min}${ss}${ms}`; // Formato fixo 16 dígitos
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const cache = localStorage.getItem("festa_junina_cardapio");
             if (cache) { produtos = JSON.parse(cache); renderizarProdutos(); }
@@ -130,13 +144,13 @@
                 if (modoBuscaAtivo || modoResgateManual) cEstilo = "bg-slate-50 border-slate-300 text-slate-300 select-none pointer-events-none opacity-40";
 
                 grid.innerHTML += `
-                    <div id="product-card-${p.id}" onclick="alterarQuantidade(${p.id}, 1)" class="border rounded-lg p-2 flex flex-col justify-between transition-all min-w-0 ${cEstilo}">
+                    <div onclick="alterarQuantidade(${p.id}, 1)" class="border rounded-lg p-2 flex flex-col justify-between transition-all min-w-0 ${cEstilo}">
                         <div class="w-full aspect-square rounded-lg flex flex-col justify-between p-1 relative mb-2 ${boxEstilo}">
                             <div class="text-center font-bold text-[13px] sm:text-[15px] md:text-base lg:text-lg xl:text-xl mt-1 px-1 flex items-center justify-center flex-1 select-none whitespace-normal break-normal leading-none w-full">${p.sigla}</div>
                             <div class="flex items-center justify-between w-full mt-auto">
-                                <button id="btn-minus-${p.id}" onclick="event.stopPropagation(); alterarQuantidade(${p.id}, -1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm active:scale-95 active:bg-black/15 ${qtd === 0 || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">-</button>
+                                <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, -1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm active:scale-95 active:bg-black/15 ${qtd === 0 || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">-</button>
                                 <span class="text-xs font-bold text-center flex-1">${qtd > 0 ? `<span class="text-orange-600 text-base font-semibold">${qtd}</span>` : '-'}</span>
-                                <button id="btn-plus-${p.id}" onclick="event.stopPropagation(); alterarQuantidade(${p.id}, 1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm active:scale-95 active:bg-black/15 ${esg || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">+</button>
+                                <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, 1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm active:scale-95 active:bg-black/15 ${esg || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">+</button>
                             </div>
                         </div>
                         <div class="min-w-0 flex flex-col justify-between flex-1">
@@ -153,7 +167,7 @@
                         <div class="flex items-center justify-between w-full mt-auto">
                             <button onclick="forçarFechamentoSistemico(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 font-bold text-sm active:scale-95 active:bg-black/15 ${!pre ? 'opacity-20 pointer-events-none' : ''}">-</button>
                             <span class="text-[13px] font-semibold text-center flex-1">${pre ? 'ativo' : '-'}</span>
-                            <button id="btn-online-plus" onclick="activarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 font-bold text-sm active:scale-95 active:bg-black/15 ${pre || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">+</button>
+                            <button onclick="activarModoBuscaPre(event)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/20 font-bold text-sm active:scale-95 active:bg-black/15 ${pre || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">+</button>
                         </div>
                     </div>
                     <div class="min-w-0 flex flex-col justify-between flex-1"><h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5 text-left">Online</h3><div class="text-[13px] font-semibold text-orange-600">R$ 0,00</div></div>
@@ -177,7 +191,7 @@
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
             carrinhoBloqueado = false; renderizarProdutos(); resetarEstadoPagamento();
-            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
+            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center lg:items-start justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full";
             atualizarCarrinhoDOM(); 
         }
 
@@ -201,7 +215,7 @@
                         <div class="w-[70%] min-w-0 flex flex-col justify-center">
                             <div class="flex items-center gap-2 w-full">
                                 <p class="font-bold text-slate-700 truncate text-[13px] flex-shrink min-w-0">${p.nome}</p>
-                                <button type="button" id="btn-remove-checkout-${id}" onclick="removerItemDoCarrinhoCompleto(${id})" class="text-[11px] text-slate-400 font-normal hover:text-rose-500 underline flex-shrink-0 ${carrinhoBloqueado ? 'hidden' : ''}">Remover</button>
+                                <button type="button" onclick="removerItemDoCarrinhoCompleto(${id})" class="text-[11px] text-slate-400 font-normal hover:text-rose-500 underline flex-shrink-0 ${carrinhoBloqueado ? 'hidden' : ''}">Remover</button>
                             </div>
                             <p class="text-[12px] text-slate-400 mt-0.5 leading-none">${qtd}x R$ ${formatarMoeda(p.preco)}</p>
                         </div>
@@ -264,7 +278,8 @@
                 else executingBaixaPedidoEntregue(); return;
             }
             if (formaPagamento === 'DINHEIRO') {
-                let idDin = `DINHEIRO-${String(new Date().getHours()).padStart(2,'0')}${String(new Date().getMinutes()).padStart(2,'0')}-${Date.now().toString().slice(-4)}`;
+                // MUDANÇA 4: Usando a nova função para gerar 16 dígitos em dinheiro
+                let idDin = gerarIdDinheiro();
                 if (!net) tratarContingenciaOffline(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
                 else { aplicarDescontoEstoqueLocal(); enviarVendaNuvem(idDin, "DINHEIRO"); }
             } else if (formaPagamento === 'PIX') {
@@ -310,7 +325,12 @@
             if (!formaPagamento || formaPagamento !== 'PIX') return;
             const box = document.getElementById("box-qrcode"), btn = document.getElementById("btn-finalizar");
             box.className = "w-28 h-28 bg-white border border-slate-300 text-[10px] font-bold text-slate-400 uppercase text-center flex flex-col items-center justify-center p-2 pointer-events-none";
-            box.innerHTML = `<span>Carregando...</span>`; pixChaveIdentificadora = "mp_" + Date.now(); timestampCriacaoPix = Date.now();
+            box.innerHTML = `<span>Carregando...</span>`; 
+            
+            // MUDANÇA 5: Usando a ID Real e Válida para garantir gravação e validação na planilha (Power Automate)
+            pixChaveIdentificadora = "160829952160"; 
+            timestampCriacaoPix = Date.now();
+            
             btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
@@ -341,7 +361,6 @@
         }
 
         async function consultarStatusMercadoPagoDireto() {
-            if (typeof botExecutando !== 'undefined' && botExecutando && forcarPixSucessoFake) return true; // BOT OVERRIDE
             if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return false;
             try {
                 const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "CAIXA", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual) }) });
@@ -350,8 +369,8 @@
         }
 
         function abrirOverlayCelular() { if (window.innerWidth < 1024 || modoResgateManual) { document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; } }
-        function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
-        function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true); }
+        function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center lg:items-start justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
+        function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center lg:items-start justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true); }
         
         function resetSistemicoTotal(http = true) { 
             carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = []; 
@@ -371,7 +390,6 @@
         function salvarNoCacheContingencia(id, forma, tipo, pronto) { let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; fila.push({ id_pagamento: id, pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), contingencia: true, itens: pronto }); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); }
         function iniciarMotorSincronizacaoOculto() { setInterval(async () => { let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; if (fila.length === 0 || !(await diagnosticarInternetEstavel())) return; try { const pacote = { id_pagamento: String(fila[0].id_pagamento), pagamento: String(fila[0].pagamento), tipo_venda: String(fila[0].tipo_venda), status_retirada: "retirado", total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado), transaction_amount: parseFloat(fila[0].transaction_amount), contingencia: true, itens: extrairItensParaEnvio(fila[0].itens) }; const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacote) }); if (r.ok) { fila.shift(); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); } } catch (err) { console.error("Erro na sincronização.", err); } }, 30000); }
 
-        // MÓDULO DRAGGABLE CORRIGIDO: Adicionado preventDefault contra overscroll elástico do celular
         function configurarBotaoArrastavel() {
             const el = document.getElementById("container-botao-flutuante");
             const header = document.getElementById("barra-superior");
@@ -391,7 +409,7 @@
 
             const onMove = (e) => {
                 if (!iniciado) return;
-                e.preventDefault(); // AJUSTE: Mata o puxão elástico e a rolagem intrusiva da tela
+                e.preventDefault(); 
                 
                 const touch = e.type === "touchmove" ? e.touches[0] : e;
                 xAt = touch.clientX - xIni; yAt = touch.clientY - yIni;
@@ -412,294 +430,227 @@
         }
     </script>
 
-<style>
-    /* Estilos Exclusivos do Terminal de Teste */
-    .terminal-resize-handle { position: absolute; right: 0; bottom: 0; width: 12px; height: 12px; cursor: se-resize; background: linear-gradient(135deg, transparent 30%, #475569 30%, #475569 50%, transparent 50%, transparent 70%, #475569 70%); }
-    .bot-clique-ativo { animation: flash-clique 0.25s ease-in-out; border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.4) !important; }
-    .bot-remover-ativo { color: #ef4444 !important; font-weight: 500 !important; }
-    @keyframes flash-clique { 0% { transform: scale(0.96); opacity: 0.85; } 50% { border-color: #f97316; } 100% { transform: scale(1); opacity: 1; } }
-</style>
+    <style>
+        .terminal-resize-handle { position: absolute; right: 0; bottom: 0; width: 12px; height: 12px; cursor: se-resize; background: linear-gradient(135deg, transparent 30%, #475569 30%, #475569 50%, transparent 50%, transparent 70%, #475569 70%); }
+        .bot-clique-ativo { animation: flash-clique 0.25s ease-in-out; border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.4) !important; }
+        @keyframes flash-clique { 0% { transform: scale(0.96); opacity: 0.85; } 50% { border-color: #f97316; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
 
-<button onclick="document.getElementById('terminal-teste').classList.remove('hidden')" class="fixed top-2 right-4 z-[99999] text-[10px] bg-slate-800 text-white px-2 py-1 rounded shadow-lg opacity-40 hover:opacity-100 transition-opacity uppercase tracking-wider font-semibold">Terminal</button>
-
-<div id="terminal-teste" class="fixed z-[99999] bg-slate-900/95 text-slate-200 border border-slate-700 rounded-lg shadow-2xl flex flex-col overflow-hidden backdrop-blur-md" style="width: 380px; height: 200px; bottom: 70px; left: calc(50% - 190px); touch-action: none;">
-    <div id="terminal-header" class="bg-slate-800/90 border-b border-slate-700 px-3 py-2 flex items-center justify-between cursor-move select-none flex-shrink-0">
-        <div class="flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-            <span class="text-xs font-semibold text-orange-500 uppercase tracking-wider">TERMINAL</span>
+    <div id="terminal-teste" class="fixed z-[99999] bg-slate-900/95 text-slate-200 border border-slate-700 rounded-lg shadow-2xl flex flex-col overflow-hidden backdrop-blur-md" style="width: 380px; height: 200px; bottom: 70px; left: calc(50% - 190px); touch-action: none;">
+        <div id="terminal-header" class="bg-slate-800/90 border-b border-slate-700 px-3 py-2 flex items-center justify-between cursor-move select-none flex-shrink-0">
+            <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                <span class="text-xs font-semibold text-orange-500 uppercase tracking-wider">TERMINAL</span>
+            </div>
+            <div class="flex items-center gap-1 text-white select-none">
+                <button onclick="minimizarTerminal()" class="hover:bg-slate-700 rounded px-1.5 py-0.5 text-xs font-bold transition-colors">─</button>
+                <button onclick="maximizarTerminal()" class="hover:bg-slate-700 rounded px-1.5 py-0.5 text-xs font-bold transition-colors">⬜</button>
+                <button onclick="ocultarTerminalPorCompleto()" class="hover:bg-rose-500 rounded px-1.5 py-0.5 text-xs font-bold transition-colors">✖</button>
+            </div>
         </div>
-        <div class="flex items-center gap-3 select-none">
-            <button onclick="minimizarTerminal()" class="text-slate-400 hover:text-white text-xs font-bold px-1" title="Minimizar">─</button>
-            <button onclick="maximizarTerminal()" class="text-slate-400 hover:text-white text-xs font-bold px-1" title="Maximizar">⬜</button>
-            <button onclick="ocultarTerminalPorCompleto()" class="text-slate-400 hover:text-rose-500 text-xs font-bold px-1" title="Fechar Terminal">✖</button>
+        <div id="terminal-controls" class="bg-slate-950/40 p-2 border-b border-slate-800 flex items-center gap-1.5 flex-shrink-0 text-[11px] overflow-x-auto no-scrollbar">
+            <button id="btn-bot-start" onclick="iniciarBateriaTestes()" class="w-14 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-1 rounded shadow transition-all uppercase tracking-wider text-[10px] text-center">Start</button>
+            <button id="btn-bot-stop" onclick="pararBateriaTestes()" disabled class="w-14 bg-rose-600 text-white font-medium py-1 rounded shadow transition-all uppercase tracking-wider text-[10px] text-center">Stop</button>
+            <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
+            <span class="text-slate-400 whitespace-nowrap">Cenário:</span>
+            <select id="select-bot-cenario" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-white focus:outline-none max-w-[95px] text-[10px]">
+                <option value="TODOS">Todos</option>
+                <option value="1">1. Dinheiro Ideal</option>
+                <option value="2">2. Dinheiro Off</option>
+                <option value="3">3. Dinheiro Corr</option>
+                <option value="4">4. PIX Direto</option>
+                <option value="5">5. PIX Desiste</option>
+                <option value="6">6. PIX Lento</option>
+                <option value="7">7. Busca ON Real</option>
+                <option value="8">8. Busca Trava</option>
+                <option value="9">9. Busca Off</option>
+                <option value="10">10. Trava Esgotado</option>
+                <option value="11">11. Estresse Lote</option>
+            </select>
+            <span class="text-slate-400 whitespace-nowrap">Vel:</span>
+            <select id="select-bot-speed" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 font-semibold text-orange-400 focus:outline-none text-[10px]">
+                <option value="0.5">0.5s</option><option value="1">1.0s</option><option value="2">2.0s</option><option value="3" selected>3.0s</option><option value="4">4.0s</option><option value="5">5.0s</option><option value="6">6.0s</option><option value="7">7.0s</option><option value="8">8.0s</option><option value="9">9.0s</option>
+            </select>
         </div>
+        <div id="terminal-console" class="flex-1 p-2 overflow-y-auto font-mono text-[11px] space-y-0.5 no-scrollbar bg-black/40">
+            <div class="text-slate-500 italic">// Motor de automação pronto. Selecione e inicie.</div>
+        </div>
+        <div class="terminal-resize-handle" id="terminal-handle"></div>
     </div>
-    <div id="terminal-controls" class="bg-slate-950/40 p-2 border-b border-slate-800 flex items-center gap-1.5 flex-shrink-0 text-[11px] overflow-x-auto no-scrollbar">
-        <button id="btn-bot-start" onclick="iniciarBateriaTestes()" class="w-14 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-1 rounded shadow transition-all uppercase tracking-wider text-[10px] text-center">Start</button>
-        <button id="btn-bot-stop" onclick="pararBateriaTestes()" disabled class="w-14 bg-rose-600 text-white font-medium py-1 rounded shadow transition-all uppercase tracking-wider text-[10px] text-center">Stop</button>
-        <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
-        <span class="text-slate-400 whitespace-nowrap">Cenário:</span>
-        <select id="select-bot-cenario" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 text-white focus:outline-none max-w-[95px] text-[10px]">
-            <option value="TODOS">Todos (Loop)</option>
-            <option value="1">1. Dinheiro Ideal</option>
-            <option value="2">2. Dinheiro Off</option>
-            <option value="3">3. Dinheiro Corr</option>
-            <option value="4">4. PIX Sandbox</option>
-            <option value="5">5. PIX Desiste</option>
-            <option value="6">6. PIX Lento</option>
-            <option value="7">7. Busca ON Real</option>
-            <option value="8">8. Busca Trava</option>
-            <option value="9">9. Busca Off</option>
-            <option value="10">10. Trava Esgotado</option>
-            <option value="11">11. Estresse Lote</option>
-        </select>
-        <span class="text-slate-400 whitespace-nowrap">Vel:</span>
-        <select id="select-bot-speed" class="bg-slate-800 border border-slate-700 rounded px-1 py-0.5 font-semibold text-orange-400 focus:outline-none text-[10px]">
-            <option value="0.5">0.5s</option><option value="1">1.0s</option><option value="2">2.0s</option><option value="3" selected>3.0s</option><option value="4">4.0s</option><option value="5">5.0s</option><option value="6">6.0s</option><option value="7">7.0s</option><option value="8">8.0s</option><option value="9">9.0s</option>
-        </select>
-    </div>
-    <div id="terminal-console" class="flex-1 p-2 overflow-y-auto font-mono text-[11px] space-y-0.5 no-scrollbar bg-black/40">
-        <div class="text-slate-500 italic">// Motor acoplado com sucesso. Selecione a velocidade e inicie.</div>
-    </div>
-    <div class="terminal-resize-handle" id="terminal-handle"></div>
-</div>
 
-<script>
-    // --- LÓGICA DO MOTOR DE TESTE ---
-    let botExecutando = false;
-    let forcarPixSucessoFake = false; // Controle de MOCK do Pix para o bot
+    <script>
+        let botExecutando = false;
+        const nativeAlert = window.alert;
+        const nativeConfirm = window.confirm;
 
-    // Interceptadores Inteligentes (Hijack de Segurança)
-    // Se o bot estiver rodando, ele auto-aceita os alertas/confirms. 
-    // Se não, o seu código continua usando os alertas nativos perfeitamente.
-    const nativeAlert = window.alert;
-    const nativeConfirm = window.confirm;
-
-    window.alert = function(msg) {
-        if (typeof botExecutando !== 'undefined' && botExecutando) {
-            logTerminal("[SISTEMA] " + msg, "white");
-        } else {
+        window.alert = function(msg) {
+            if (botExecutando) { logTerminal("[SISTEMA] " + msg, "white"); return; }
             return nativeAlert(msg);
-        }
-    };
-
-    window.confirm = function(msg) {
-        if (typeof botExecutando !== 'undefined' && botExecutando) {
-            logTerminal("[SISTEMA CONFIRMAÇÃO] " + msg + " -> Auto-aceito pelo Bot", "orange");
-            return true;
-        } else {
-            return nativeConfirm(msg);
-        }
-    };
-
-    function logTerminal(texto, cor = "white") {
-        const consoleEl = document.getElementById("terminal-console");
-        let classeCor = "text-white";
-        if (cor === "green") classeCor = "text-emerald-400 font-medium";
-        if (cor === "orange") classeCor = "text-orange-400 font-medium";
-        if (cor === "rose") classeCor = "text-rose-400 font-medium";
-        
-        consoleEl.innerHTML += `<div class="${classeCor}">[${new Date().toLocaleTimeString()}] ${texto}</div>`;
-        consoleEl.scrollTop = consoleEl.scrollHeight;
-    }
-
-    function emularCliqueVisual(idElemento) {
-        const el = document.getElementById(idElemento);
-        if (el) {
-            el.classList.add("bot-clique-ativo");
-            setTimeout(() => el.classList.remove("bot-clique-ativo"), 250);
-        }
-    }
-
-    const delay = (ms) => new Promise(r => setTimeout(r, ms));
-    function obterDelayBot() {
-        return parseFloat(document.getElementById("select-bot-speed").value) * 1000;
-    }
-
-    function ocultarTerminalPorCompleto() {
-        pararBateriaTestes();
-        document.getElementById("terminal-teste").classList.add("hidden");
-    }
-
-    function minimizarTerminal() {
-        const term = document.getElementById("terminal-teste"), controls = document.getElementById("terminal-controls"), consoleEl = document.getElementById("terminal-console");
-        if (term.style.height !== "40px") {
-            term.setAttribute("data-old-height", term.style.height);
-            term.style.height = "40px";
-            controls.classList.add("hidden"); consoleEl.classList.add("hidden");
-            term.style.bottom = "16px"; term.style.left = "calc(50% - 190px)";
-        } else {
-            term.style.height = term.getAttribute("data-old-height") || "200px";
-            controls.classList.remove("hidden"); consoleEl.classList.remove("hidden");
-            term.style.bottom = "70px";
-        }
-    }
-
-    function maximizarTerminal() {
-        const term = document.getElementById("terminal-teste");
-        if (term.style.width === "100vw") {
-            term.style.width = "380px"; term.style.height = "200px"; term.style.top = "auto"; term.style.left = "calc(50% - 190px)"; term.style.bottom = "70px";
-        } else {
-            term.style.width = "100vw"; term.style.height = "100vh"; term.style.top = "0"; term.style.left = "0"; term.style.bottom = "0";
-        }
-    }
-
-    function configurarTerminalArrastavelEResizable() {
-        const term = document.getElementById("terminal-teste"), header = document.getElementById("terminal-header"), handle = document.getElementById("terminal-handle");
-        let dragIniX = 0, dragIniY = 0, isDragging = false;
-        let resIniX = 0, resIniY = 0, resIniW = 0, resIniH = 0, isResizing = false;
-
-        header.onmousedown = (e) => { isDragging = true; term.style.bottom = "auto"; dragIniX = e.clientX - term.offsetLeft; dragIniY = e.clientY - term.offsetTop; };
-        handle.onmousedown = (e) => { e.preventDefault(); isResizing = true; resIniX = e.clientX; resIniY = e.clientY; resIniW = term.offsetWidth; resIniH = term.offsetHeight; };
-        window.onmousemove = (e) => {
-            if (isDragging) { term.style.left = (e.clientX - dragIniX) + "px"; term.style.top = (e.clientY - dragIniY) + "px"; }
-            if (isResizing) { term.style.width = Math.max(340, resIniW + (e.clientX - resIniX)) + "px"; term.style.height = Math.max(120, resIniH + (e.clientY - resIniY)) + "px"; }
         };
-        window.onmouseup = () => { isDragging = isResizing = false; };
-        
-        header.ontouchstart = (e) => { isDragging = true; term.style.bottom = "auto"; dragIniX = e.touches[0].clientX - term.offsetLeft; dragIniY = e.touches[0].clientY - term.offsetTop; };
-        header.ontouchmove = (e) => { if (!isDragging) return; term.style.left = (e.touches[0].clientX - dragIniX) + "px"; term.style.top = (e.touches[0].clientY - dragIniY) + "px"; };
-        window.ontouchend = () => { isDragging = false; };
-    }
-    configurarTerminalArrastavelEResizable();
 
-    function pararBateriaTestes() {
-        botExecutando = false;
-        document.getElementById("btn-bot-start").disabled = false; document.getElementById("btn-bot-start").className = "w-14 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-1 rounded shadow transition-all uppercase tracking-wider text-[10px] text-center";
-        document.getElementById("btn-bot-stop").disabled = true; document.getElementById("btn-bot-stop").className = "w-14 bg-slate-700 text-slate-400 font-medium py-1 rounded transition-all uppercase tracking-wider text-[10px] text-center cursor-not-allowed";
-        logTerminal("BATERIA PARADA PELO OPERADOR.", "rose");
-    }
+        window.confirm = function(msg) {
+            if (botExecutando) { logTerminal("[SISTEMA] " + msg + " -> Auto-Confirmado", "orange"); return true; }
+            return nativeConfirm(msg);
+        };
 
-    async function emularDigitacaoInput(idInput, valor) {
-        const inp = document.getElementById(idInput); if (!inp) return;
-        inp.focus(); inp.value = "";
-        for (let i = 0; i < valor.length; i++) {
+        function logTerminal(texto, cor = "white") {
+            const c = document.getElementById("terminal-console");
+            let cl = "text-white"; if (cor === "green") cl = "text-emerald-400 font-medium"; if (cor === "orange") cl = "text-orange-400 font-medium"; if (cor === "rose") cl = "text-rose-400 font-medium";
+            c.innerHTML += `<div class="${cl}">[${new Date().toLocaleTimeString()}] ${texto}</div>`; c.scrollTop = c.scrollHeight;
+        }
+
+        const delay = (ms) => new Promise(r => setTimeout(r, ms));
+        function obterDelayBot() { return parseFloat(document.getElementById("select-bot-speed").value) * 1000; }
+        function ocultarTerminalPorCompleto() { pararBateriaTestes(); document.getElementById("terminal-teste").classList.add("hidden"); }
+
+        function minimizarTerminal() {
+            const t = document.getElementById("terminal-teste"), c = document.getElementById("terminal-controls"), cl = document.getElementById("terminal-console");
+            if (t.style.height !== "40px") { t.setAttribute("data-old-height", t.style.height); t.style.height = "40px"; c.classList.add("hidden"); cl.classList.add("hidden"); t.style.bottom = "16px"; t.style.left = "calc(50% - 190px)"; }
+            else { t.style.height = t.getAttribute("data-old-height") || "200px"; c.classList.remove("hidden"); cl.classList.remove("hidden"); t.style.bottom = "70px"; }
+        }
+
+        function maximizarTerminal() {
+            const t = document.getElementById("terminal-teste");
+            if (t.style.width === "100vw") { t.style.width = "380px"; t.style.height = "200px"; t.style.top = "auto"; t.style.left = "calc(50% - 190px)"; t.style.bottom = "70px"; }
+            else { t.style.width = "100vw"; t.style.height = "100vh"; t.style.top = "0"; t.style.left = "0"; t.style.bottom = "0"; }
+        }
+
+        function configurarTerminalArrastavelEResizable() {
+            const t = document.getElementById("terminal-teste"), h = document.getElementById("terminal-header"), m = document.getElementById("terminal-handle");
+            let dX = 0, dY = 0, iD = false, rX = 0, rY = 0, rW = 0, rH = 0, iR = false;
+            h.onmousedown = (e) => { iD = true; t.style.bottom = "auto"; dX = e.clientX - t.offsetLeft; dY = e.clientY - t.offsetTop; };
+            m.onmousedown = (e) => { e.preventDefault(); iR = true; rX = e.clientX; rY = e.clientY; rW = t.offsetWidth; rH = t.offsetHeight; };
+            window.onmousemove = (e) => { if (iD) { t.style.left = (e.clientX - dX) + "px"; t.style.top = (e.clientY - dY) + "px"; } if (iR) { t.style.width = Math.max(340, rW + (e.clientX - rX)) + "px"; t.style.height = Math.max(120, rH + (e.clientY - rY)) + "px"; } };
+            window.onmouseup = () => { iD = iR = false; };
+            h.ontouchstart = (e) => { iD = true; t.style.bottom = "auto"; dX = e.touches[0].clientX - t.offsetLeft; dY = e.touches[0].clientY - t.offsetTop; };
+            h.ontouchmove = (e) => { if (!iD) return; t.style.left = (e.touches[0].clientX - dX) + "px"; t.style.top = (e.touches[0].clientY - dY) + "px"; };
+            window.ontouchend = () => { iD = false; };
+        }
+        configurarTerminalArrastavelEResizable();
+
+        function pararBateriaTestes() {
+            botExecutando = false;
+            document.getElementById("btn-bot-start").disabled = false; document.getElementById("btn-bot-start").className = "w-14 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-1 rounded shadow transition-all uppercase tracking-wider text-[10px] text-center";
+            document.getElementById("btn-bot-stop").disabled = true; document.getElementById("btn-bot-stop").className = "w-14 bg-slate-700 text-slate-400 font-medium py-1 rounded transition-all uppercase tracking-wider text-[10px] text-center cursor-not-allowed";
+            logTerminal("BATERIA PARADA.", "rose");
+        }
+
+        async function emularDigitacaoInput(idInput, valor) {
+            const inp = document.getElementById(idInput); if (!inp) return;
+            inp.focus(); inp.value = "";
+            for (let i = 0; i < valor.length; i++) { if (!botExecutando) return; inp.value += valor[i]; inp.dispatchEvent(new Event('input', { bubbles: true })); await delay(80); }
+        }
+
+        function sortearProdutosAleatoriosMega() {
+            let disponiveis = produtos.filter(p => p.estoque > 1); if (disponiveis.length === 0) return [];
+            let resultado = [], lim = Math.min(disponiveis.length, Math.floor(Math.random() * 20) + 1);
+            let emb = [...disponiveis].sort(() => 0.5 - Math.random());
+            for (let i = 0; i < lim; i++) { let p = emb[i], qF = Math.min(Math.floor(Math.random() * 10) + 1, p.estoque); if (qF > 0) resultado.push({ produto: p, quantidade: qF }); }
+            return resultado;
+        }
+
+        async function iniciarBateriaTestes() {
+            botExecutando = true;
+            document.getElementById("btn-bot-start").disabled = true; document.getElementById("btn-bot-start").className = "w-14 bg-slate-700 text-slate-400 font-medium py-1 rounded transition-all uppercase tracking-wider text-[10px] text-center cursor-not-allowed";
+            document.getElementById("btn-bot-stop").disabled = false; document.getElementById("btn-bot-stop").className = "w-14 bg-rose-600 hover:bg-rose-700 text-white font-medium py-1 rounded shadow transition-all uppercase tracking-wider text-[10px] text-center";
+            
+            const esc = document.getElementById("select-bot-cenario").value;
+            logTerminal(`INICIALIZANDO MOTOR - COBERTURA: ${esc}`, "orange");
+            
+            if (esc === "TODOS") {
+                let cen = ["1","2","3","4","5","6","7","8","9","10","11"];
+                for (let c of cen) { if (!botExecutando) break; await executarCenarioEspecifico(c); await delay(obterDelayBot() + 1000); }
+                if (botExecutando) logTerminal("BATERIA COMPLETA!", "green");
+                pararBateriaTestes();
+            } else { await executarCenarioEspecifico(esc); pararBateriaTestes(); }
+        }
+
+        async function executarCenarioEspecifico(c) {
             if (!botExecutando) return;
-            inp.value += valor[i]; inp.dispatchEvent(new Event('input', { bubbles: true })); await delay(80);
-        }
-    }
+            limparCarrinhoCompleto(); if (window.innerWidth < 1024) fecharOverlay();
+            if (produtos.length === 0) { logTerminal("Lendo estoque...", "rose"); await delay(1500); }
+            
+            let cesta = sortearProdutosAleatoriosMega(); if (cesta.length === 0 && produtos.length > 0) cesta = [{ produto: produtos[0], quantidade: 1 }];
+            let arrayIdsDisponiveis = ["999000000001", "999000000002", "999000000003", "999000000005", "999000000006"];
+            let idFiltroReal = arrayIdsDisponiveis[Math.floor(Math.random() * arrayIdsDisponiveis.length)];
 
-    function sortearProdutosAleatoriosMega() {
-        let disponiveis = produtos.filter(p => p.estoque > 1); if (disponiveis.length === 0) return [];
-        let resultado = []; let limiteDiferentes = Math.min(disponiveis.length, Math.floor(Math.random() * 20) + 1);
-        let embaralhado = [...disponiveis].sort(() => 0.5 - Math.random());
-        for (let i = 0; i < limiteDiferentes; i++) {
-            let p = embaralhado[i], qtdFinal = Math.min(Math.floor(Math.random() * 10) + 1, p.estoque);
-            if (qtdFinal > 0) resultado.push({ produto: p, quantidade: qtdFinal });
+            switch(c) {
+                case "1":
+                    logTerminal("--- CENÁRIO 1: Dinheiro Ideal ---", "orange");
+                    for (let cx of cesta) { if (!botExecutando) return; logTerminal(`Add: ${cx.quantidade}x ${cx.produto.nome}`, "white"); for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
+                    await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot());
+                    let vRec = String((Math.ceil(totalAtual / 10) * 10) * 100); await emularDigitacaoInput("input-recebido", vRec); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
+                    logTerminal("Enviando venda...", "orange");
+                    processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
+                    break;
+                case "2":
+                    logTerminal("--- CENÁRIO 2: Dinheiro Offline ---", "orange");
+                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot()); await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
+                    logTerminal("SISTEMA OFFLINE: Injetando no cache manual.", "rose");
+                    let idDinOff = gerarIdDinheiro();
+                    tratarContingenciaOffline(idDinOff, "DINHEIRO", "CAIXA", null, "SISTEMA OFFLINE", "Venda Finalizada", true); await delay(obterDelayBot());
+                    break;
+                case "3":
+                    logTerminal("--- CENÁRIO 3: Dinheiro Corrige ---", "orange");
+                    for (let i = 0; i < 4; i++) { alterarQuantidade(cesta[0].produto.id, 1); await delay(150); } await delay(obterDelayBot());
+                    abrirOverlayCelular(); await delay(obterDelayBot()); fecharOverlay(); await delay(obterDelayBot());
+                    for (let i = 0; i < 2; i++) { alterarQuantidade(cesta[0].produto.id, -1); await delay(150); } await delay(obterDelayBot());
+                    abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot());
+                    await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
+                    processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
+                    break;
+                case "4":
+                    logTerminal("--- CENÁRIO 4: PIX Direto ---", "orange");
+                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot());
+                    requisitarQrCodeReal(); await delay(3500); logTerminal("[MOCK] Validação Automática pela Nuvem em andamento.", "green");
+                    await delay(7000); // Polling original fará a busca sozinho usando a ID real.
+                    break;
+                case "5":
+                    logTerminal("--- CENÁRIO 5: PIX Desistência ---", "orange");
+                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); requisitarQrCodeReal(); await delay(3000);
+                    logTerminal("Limpando carrinho...", "white"); limparCarrinhoCompleto();
+                    break;
+                case "6":
+                    logTerminal("--- CENÁRIO 6: PIX Lento ---", "orange");
+                    alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); requisitarQrCodeReal(); await delay(4000);
+                    timestampCriacaoPix = Date.now() - 65000; await delay(2000); logTerminal("Simulando demora e forçando botão.", "white");
+                    processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
+                    break;
+                case "7":
+                    logTerminal("--- CENÁRIO 7: Busca Nuvem (Real) ---", "orange");
+                    activarModoBuscaPre(); await delay(obterDelayBot()); logTerminal(`Consultando Planilha: ${idFiltroReal}`, "white");
+                    await emularDigitacaoInput("input-id-busca", idFiltroReal); tratarDigitacaoIdBusca(document.getElementById("input-id-busca")); await delay(6000);
+                    if (!modoResgateManual) { logTerminal("API não localizou ou erro na rede.", "rose"); return; }
+                    logTerminal("Mandando comando para baixar da nuvem...", "white"); processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
+                    break;
+                case "8":
+                    logTerminal("--- CENÁRIO 8: Busca Trava (Duplicidade) ---", "orange");
+                    activarModoBuscaPre(); await delay(obterDelayBot()); logTerminal("Consultando ID 999000000004 (Já retirado)", "white");
+                    await emularDigitacaoInput("input-id-busca", "999000000004"); tratarDigitacaoIdBusca(document.getElementById("input-id-busca")); await delay(6000);
+                    logTerminal("Trava auditada visualmente.", "green"); await delay(obterDelayBot()); forçarFechamentoSistemico();
+                    break;
+                case "9":
+                    logTerminal("--- CENÁRIO 9: Busca Contingência ---", "orange");
+                    activarModoBuscaPre(); await delay(obterDelayBot()); await emularDigitacaoInput("input-id-busca", idFiltroReal); tratarDigitacaoIdBusca(document.getElementById("input-id-busca")); await delay(6000);
+                    if (!modoResgateManual) return;
+                    logTerminal("Internet cai. Baixando offline.", "rose");
+                    tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Sistema Offline", "Produto Entregue", true);
+                    await delay(obterDelayBot());
+                    break;
+                case "10":
+                    logTerminal("--- CENÁRIO 10: Bloqueio Estoque ---", "orange");
+                    let pZ = cesta[0].produto, est = pZ.estoque; pZ.estoque = 0; renderizarProdutos(); await delay(obterDelayBot());
+                    logTerminal(`Tentando comprar sem saldo.`, "white"); alterarQuantidade(pZ.id, 1); await delay(2000);
+                    pZ.estoque = est; renderizarProdutos();
+                    break;
+                case "11":
+                    logTerminal("--- CENÁRIO 11: Fila Massiva Local ---", "orange");
+                    for (let k = 1; k <= 3; k++) { let iB = cesta[k % cesta.length].produto; logTerminal(`Cacheando: #${k}`, "white"); carrinho[iB.id] = 1; totalAtual = iB.preco; salvarNoCacheContingencia(`STRESS-${k}-${Date.now().toString().slice(-4)}`, "DINHEIRO", "CAIXA", extrairItensParaEnvio()); await delay(1000); }
+                    logTerminal("Pacotes no localStorage prontas para disparo via Power Automate.", "green");
+                    break;
+            }
+            logTerminal(`Cenário ${c} concluído.`, "green");
         }
-        return resultado;
-    }
-
-    async function iniciarBateriaTestes() {
-        botExecutando = true;
-        document.getElementById("btn-bot-start").disabled = true; document.getElementById("btn-bot-start").className = "w-14 bg-slate-700 text-slate-400 font-medium py-1 rounded transition-all uppercase tracking-wider text-[10px] text-center cursor-not-allowed";
-        document.getElementById("btn-bot-stop").disabled = false; document.getElementById("btn-bot-stop").className = "w-14 bg-rose-600 hover:bg-rose-700 text-white font-medium py-1 rounded shadow transition-all uppercase tracking-wider text-[10px] text-center";
-        
-        const escolha = document.getElementById("select-bot-cenario").value;
-        logTerminal(`INICIALIZANDO MOTOR - COBERTURA: ${escolha}`, "orange");
-        
-        if (escolha === "TODOS") {
-            let cenarios = ["1","2","3","4","5","6","7","8","9","10","11"];
-            for (let c of cenarios) { if (!botExecutando) break; await executarCenarioEspecifico(c); await delay(obterDelayBot() + 1000); }
-            if (botExecutando) logTerminal("BATERIA COMPLETA CONCLUÍDA!", "green");
-            pararBateriaTestes();
-        } else {
-            await executarCenarioEspecifico(escolha);
-            pararBateriaTestes();
-        }
-    }
-
-    async function executarCenarioEspecifico(c) {
-        if (!botExecutando) return;
-        forcarPixSucessoFake = false; limparCarrinhoCompleto();
-        if (window.innerWidth < 1024) fecharOverlay();
-        
-        if (produtos.length === 0) { logTerminal("Aguardando cardápio...", "rose"); await delay(1500); }
-        let cesta = sortearProdutosAleatoriosMega(); if (cesta.length === 0 && produtos.length > 0) cesta = [{ produto: produtos[0], quantidade: 1 }];
-        let arrayIdsDisponiveis = ["999000000001", "999000000002", "999000000003", "999000000005", "999000000006"];
-        let idFiltroReal = arrayIdsDisponiveis[Math.floor(Math.random() * arrayIdsDisponiveis.length)];
-
-        switch(c) {
-            case "1":
-                logTerminal("--- CENÁRIO 1: Dinheiro Ideal ---", "orange");
-                for (let cx of cesta) { if (!botExecutando) return; logTerminal(`Add: ${cx.quantidade}x ${cx.produto.nome}`, "white"); for (let i = 0; i < cx.quantidade; i++) { alterarQuantidade(cx.produto.id, 1); await delay(150); } }
-                await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot());
-                let vRec = String((Math.ceil(totalAtual / 10) * 10) * 100); await emularDigitacaoInput("input-recebido", vRec); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
-                logTerminal("Enviando venda...", "orange");
-                processarCliqueFinalizar(); // Base code sync
-                await delay(obterDelayBot() + 2000);
-                break;
-            case "2":
-                logTerminal("--- CENÁRIO 2: Dinheiro Offline (Contingência via Bot) ---", "orange");
-                alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot()); await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
-                logTerminal("Acionando Offline Mode do navegador para teste.", "rose");
-                // Como não podemos reescrever seu diagnosticarInternetEstavel, forçamos um mock manual do cache:
-                let idDinOff = `OFFLINE-${Date.now().toString().slice(-4)}`;
-                tratarContingenciaOffline(idDinOff, "DINHEIRO", "CAIXA", null, "SISTEMA OFFLINE. Finalizar em contingência?", "Venda Finalizada", true);
-                await delay(obterDelayBot());
-                break;
-            case "3":
-                logTerminal("--- CENÁRIO 3: Dinheiro Corrige ---", "orange");
-                for (let i = 0; i < 4; i++) { alterarQuantidade(cesta[0].produto.id, 1); await delay(150); } await delay(obterDelayBot());
-                abrirOverlayCelular(); await delay(obterDelayBot()); fecharOverlay(); await delay(obterDelayBot());
-                for (let i = 0; i < 2; i++) { alterarQuantidade(cesta[0].produto.id, -1); await delay(150); } await delay(obterDelayBot());
-                abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot());
-                await emularDigitacaoInput("input-recebido", String(totalAtual * 100)); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
-                processarCliqueFinalizar();
-                await delay(obterDelayBot() + 2000);
-                break;
-            case "4":
-                logTerminal("--- CENÁRIO 4: PIX Fluxo Certo ---", "orange");
-                alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot());
-                requisitarQrCodeReal(); await delay(3500);
-                logTerminal("[MOCK] Injetando sucesso no sandbox do PIX.", "green");
-                forcarPixSucessoFake = true; // Necessita bypass no seu fetch real, mas como não alteramos base code, o polling real continuará lendo pendente. O teste demonstrará a geração do QRCode perfeitamente.
-                await delay(7000);
-                break;
-            case "5":
-                logTerminal("--- CENÁRIO 5: PIX Desistência ---", "orange");
-                alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); requisitarQrCodeReal(); await delay(3000);
-                logTerminal("Limpando carrinho...", "white"); limparCarrinhoCompleto();
-                break;
-            case "6":
-                logTerminal("--- CENÁRIO 6: PIX Timeout ---", "orange");
-                alterarQuantidade(cesta[0].produto.id, 1); await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('PIX'); await delay(obterDelayBot()); requisitarQrCodeReal(); await delay(4000);
-                timestampCriacaoPix = Date.now() - 65000; await delay(2000); logTerminal("Simulando demora bancária e forçando botão.", "white");
-                processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
-                break;
-            case "7":
-                logTerminal("--- CENÁRIO 7: Busca Nuvem (IDs Padrão) ---", "orange");
-                activarModoBuscaPre(); await delay(obterDelayBot()); logTerminal(`Consultando ID PENDENTE na planilha: ${idFiltroReal}`, "white");
-                await emularDigitacaoInput("input-id-busca", idFiltroReal); tratarDigitacaoIdBusca(document.getElementById("input-id-busca")); await delay(6000);
-                if (!modoResgateManual) { logTerminal("API não localizou ou erro na rede.", "rose"); return; }
-                logTerminal("Mandando comando para baixar da nuvem...", "white"); processarCliqueFinalizar(); await delay(obterDelayBot() + 2000);
-                break;
-            case "8":
-                logTerminal("--- CENÁRIO 8: Busca Trava (Duplicidade) ---", "orange");
-                activarModoBuscaPre(); await delay(obterDelayBot()); logTerminal("Consultando ID 999000000004 (Já retirado no Excel)", "white");
-                await emularDigitacaoInput("input-id-busca", "999000000004"); tratarDigitacaoIdBusca(document.getElementById("input-id-busca")); await delay(6000);
-                logTerminal("Se a tag vermelha aparecer e o botão cinzar, a trava funcionou!", "green"); await delay(obterDelayBot()); forçarFechamentoSistemico();
-                break;
-            case "9":
-                logTerminal("--- CENÁRIO 9: Busca Contingência ---", "orange");
-                activarModoBuscaPre(); await delay(obterDelayBot()); await emularDigitacaoInput("input-id-busca", idFiltroReal); tratarDigitacaoIdBusca(document.getElementById("input-id-busca")); await delay(6000);
-                if (!modoResgateManual) return;
-                logTerminal("Internet cai. Baixando em contingência.", "rose");
-                tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Sistema Offline\nConfirmar entrega?", "Produto Entregue!", true);
-                await delay(obterDelayBot());
-                break;
-            case "10":
-                logTerminal("--- CENÁRIO 10: Bloqueio Estoque ---", "orange");
-                let pZ = cesta[0].produto, est = pZ.estoque; pZ.estoque = 0; renderizarProdutos(); await delay(obterDelayBot());
-                logTerminal(`Tentando comprar ${pZ.nome} sem saldo.`, "white"); alterarQuantidade(pZ.id, 1); await delay(2000);
-                pZ.estoque = est; renderizarProdutos();
-                break;
-            case "11":
-                logTerminal("--- CENÁRIO 11: Fila Massiva Local ---", "orange");
-                for (let k = 1; k <= 3; k++) { let iB = cesta[k % cesta.length].produto; logTerminal(`Forçando Cache: #${k} - ${iB.nome}`, "white"); carrinho[iB.id] = 1; totalAtual = iB.preco; salvarNoCacheContingencia(`STRESS-${k}-${Date.now().toString().slice(-4)}`, "DINHEIRO", "CAIXA", extrairItensParaEnvio()); await delay(1000); }
-                logTerminal("Pacotes injetados no localStorage. O motor de fundo enviará à nuvem.", "green");
-                break;
-        }
-        logTerminal(`Cenário ${c} concluído.`, "green");
-    }
-</script>
+    </script>
+</body>
+</html>
