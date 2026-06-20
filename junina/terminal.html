@@ -117,17 +117,56 @@
         const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/161fb6d3f71245f187e74df0ae0616b8/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dxOAva-wcRMsB3WRw8zfGu6XMtuQsOZGgRGdQ5Waxh4";
         const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/98221223b0c5414085d99db3124350bb/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sXkYuHLSdt1s6aiLFFkMc0fJKd27HDthp4nNRM2Qz20";
         
-        const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-orange-500 bg-orange-50 text-orange-700 font-bold text-sm text-center shadow-sm transition-all", CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 shadow-sm transition-all", CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95", CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed", CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-between min-w-[240px] max-w-xs text-sm";
+        const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-orange-500 bg-orange-50 text-orange-700 font-bold text-sm text-center shadow-sm transition-all";
+        const CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 shadow-sm transition-all";
+        const CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95";
+        const CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
+        const CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-between min-w-[240px] max-w-xs text-sm";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0, carrinhoBloqueado = false;
         let botExecutando = false, botVelocidadeFator = 1, internetFicticiaStatus = true, forcarPixSucessoFake = false, modalResolverPendente = null, fecharAlertaPromessaResolver = null;
 
+        const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
+        const exibirFalhaProcessamento = () => { window.alert("Falha no processamento"); reabrirVisualBotaoFinalizar(); };
+        
+        // Função de Segurança: Garante a visibilidade imediata dos elementos
+        const liberarExibicaoSegura = () => { 
+            document.documentElement.style.visibility = document.body.style.visibility = "visible"; 
+            document.documentElement.style.opacity = document.body.style.opacity = "1"; 
+        };
+        
+        const renderBotaoFlutuante = (estilo, html, limpar = false) => { const bf = document.getElementById("caixa-flutuante-base"); bf.className = estilo; bf.innerHTML = html; bf.onclick = limpar ? null : abrirOverlayCelular; };
+
         window.alert = (msg) => { logTerminal(msg, "white"); return new Promise(r => { document.getElementById("custom-modal-text").innerText = msg; document.getElementById("custom-modal-btn-cancel").classList.add("hidden"); document.getElementById("custom-modal-container").classList.remove("hidden"); const b = document.getElementById("custom-modal-btn-ok"); b.onclick = () => { document.getElementById("custom-modal-container").classList.add("hidden"); r(); if(fecharAlertaPromessaResolver) { fecharAlertaPromessaResolver(); fecharAlertaPromessaResolver = null; } }; modalResolverPendente = b.onclick; }); };
         window.confirm = (msg) => { logTerminal("[CONFIRM] " + msg, "orange"); return new Promise(r => { document.getElementById("custom-modal-text").innerText = msg; document.getElementById("custom-modal-btn-cancel").classList.remove("hidden"); document.getElementById("custom-modal-container").classList.remove("hidden"); const b = document.getElementById("custom-modal-btn-ok"); b.onclick = () => { document.getElementById("custom-modal-container").classList.add("hidden"); r(true); }; document.getElementById("custom-modal-btn-cancel").onclick = () => { document.getElementById("custom-modal-container").classList.add("hidden"); r(false); if(fecharAlertaPromessaResolver) { fecharAlertaPromessaResolver(); fecharAlertaPromessaResolver = null; } }; modalResolverPendente = b.onclick; }); };
 
-        window.addEventListener('DOMContentLoaded', () => { const c = localStorage.getItem("festa_junina_cardapio"); if (c) { produtos = JSON.parse(c); renderizarProdutos(); } carregarEstoqueReal(); iniciarMotorSincronizacaoOculto(); configurarBotaoArrastavel(); configurarTerminalArrastavelEResizable(); });
+        window.addEventListener('DOMContentLoaded', () => { 
+            const c = localStorage.getItem("festa_junina_cardapio"); 
+            if (c) { produtos = JSON.parse(c); renderizarProdutos(); } 
+            carregarEstoqueReal(); 
+            iniciarMotorSincronizacaoOculto(); 
+            configurarBotaoArrastavel(); 
+            configurarTerminalArrastavelEResizable(); 
+        });
 
-        async function carregarEstoqueReal(id = "") { try { const r = await fetch(URL_LEITURA, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(id).trim() }) }); const combo = await r.json(); if (combo && combo.produto) { produtos = combo.produto.map(l => ({ id: parseInt(l.ID || l.id), sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??", nome: l.PRODUTO || l.produto, preco: parseFloat(l.PRECO || l.preco), estoque: parseInt(l.ATUAL || l.estoque_atual) })); localStorage.setItem("festa_junina_cardapio", JSON.stringify(produtos)); renderizarProdutos(); } if (id !== "" && combo && combo.pedido) processarResultadoBuscaPedido(combo.pedido, id); } catch (e) { console.error(e); if (id !== "") forçarFechamentoSistemico(); } finally { liberarExibicaoSegura(); } }
+        async function carregarEstoqueReal(id = "") { 
+            try { 
+                const r = await fetch(URL_LEITURA, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(id).trim() }) }); 
+                const combo = await r.json(); 
+                if (combo && combo.produto) { 
+                    produtos = combo.produto.map(l => ({ id: parseInt(l.ID || l.id), sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "??", nome: l.PRODUTO || l.produto, preco: parseFloat(l.PRECO || l.preco), estoque: parseInt(l.ATUAL || l.estoque_atual) })); 
+                    localStorage.setItem("festa_junina_cardapio", JSON.stringify(produtos)); 
+                    renderizarProdutos(); 
+                } 
+                if (id !== "" && combo && combo.pedido) processarResultadoBuscaPedido(combo.pedido, id); 
+            } catch (e) { 
+                console.error(e); 
+                if (id !== "") forçarFechamentoSistemico(); 
+            } finally { 
+                liberarExibicaoSegura(); 
+            } 
+        }
+        
         async function diagnosticarInternetEstavel() { if (!internetFicticiaStatus || !navigator.onLine) return false; try { const c = new AbortController(); setTimeout(() => c.abort(), 2500); await fetch("https://www.google.com", { mode: "no-cors", signal: c.signal }); return true; } catch (e) { return false; } }
 
         function renderizarProdutos() {
@@ -154,7 +193,7 @@
             document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(totalAtual)}`; validarEstadoFinalizar();
         }
 
-        const extrairItensParaEnvio = (pronto = null) => pronto ? pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.id_produto || i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) })) : Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
+        const extrairItensParaEnvio = (pronto = null) => pronto ? pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.id_produto || i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), grandmother_id: parseInt(i.id_produto || i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) })) : Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
         function aplicarDescontoEstoqueLocal() { Object.keys(carrinho).forEach(id => { const p = produtos.find(i => i.id == id); if (p) p.estoque = Math.max(0, p.estoque - carrinho[id]); }); renderizarProdutos(); }
         function salvarNoCacheContingencia(id, forma, tipo, pronto) { let f = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; f.push({ id_pagamento: id, pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), contingencia: true, itens: pronto }); localStorage.setItem("festa_junina_contingencia", JSON.stringify(f)); logTerminal(`[CONTINGÊNCIA] Pedido offline gravado localmente: ${id}`, "orange"); }
 
@@ -197,9 +236,6 @@
             el.addEventListener("mousedown", onStart); window.addEventListener("mousemove", onMove); window.addEventListener("mouseup", () => ini = false); el.addEventListener("touchstart", onStart, { passive: false }); window.addEventListener("touchmove", onMove, { passive: false }); window.addEventListener("touchend", () => ini = false);
         }
 
-        // ==========================================
-        // MOTOR DE TESTE ENXUTO DO TERMINAL
-        // ==========================================
         function logTerminal(txt, cor = "white") {
             const c = document.getElementById("terminal-console"); let cls = "text-white";
             if (cor === "green") cls = "text-emerald-400 font-medium"; if (cor === "orange") cls = "text-orange-400 font-medium"; if (cor === "rose") cls = "text-rose-400 font-medium";
@@ -254,9 +290,9 @@
             if (!botExecutando) return; internetFicticiaStatus = true; forcarPixSucessoFake = false; limparCarrinhoCompleto(); if (window.innerWidth < 1024) fecharOverlay();
             if (produtos.length === 0) { logTerminal("Lendo estoque na nuvem...", "rose"); await carregarEstoqueReal(); await delay(1000); }
             
-            let cesta = sortearProdutosAleatoriosMega(); if(cesta.length === 0) cesta = [{ produto: produtos[0], quantidade: 1 }];
-            // Sorteador cíclico das IDs que você cadastrou (final 1 a 6)
-            let idFiltroReal = String(999000000001 + (Math.floor(Math.random() * 6))); 
+            let cesta = sortearProdutosAleatoriosMega(); if(cesta.length === 0) cesta = [{ produto: produtos[0], quantity: 1 }];
+            let arrayIdsDisponiveis = ["999000000001", "999000000002", "999000000003", "999000000005", "999000000006"];
+            let idFiltroReal = arrayIdsDisponiveis[Math.floor(Math.random() * arrayIdsDisponiveis.length)];
 
             switch(c) {
                 case "1":
@@ -310,7 +346,7 @@
                     await processarCliqueFinalizar();
                     break;
                 case "7":
-                    logTerminal("--- CENÁRIO 7: Busca ON - Resgate Nuvem Real (ID 1-6) ---", "orange");
+                    logTerminal("--- CENÁRIO 7: Busca ON - Resgate Nuvem Real (IDs Livres) ---", "orange");
                     activarModoBuscaPre(); await delay(3000);
                     logTerminal(`Consultando registro real indexado na planilha: ${idFiltroReal}`, "white");
                     await emularDigitacaoInput("input-id-busca", idFiltroReal); tratarDigitacaoIdBusca(document.getElementById("input-id-busca"));
@@ -325,6 +361,9 @@
                     await emularDigitacaoInput("input-id-busca", "999000000004"); tratarDigitacaoIdBusca(document.getElementById("input-id-busca"));
                     await delay(5000);
                     logTerminal("Validando bloqueio físico do botão de baixa pelo status da planilha.", "green");
+                    await delay(3000);
+                    logTerminal("Efetuando cancelamento preventivo para liberar o PDV.", "white");
+                    forçarFechamentoSistemico();
                     break;
                 case "9":
                     logTerminal("--- CENÁRIO 9: Busca ON - Retirada Offline ---", "orange");
