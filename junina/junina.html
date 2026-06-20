@@ -20,13 +20,15 @@
         <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
     </header>
 
-        <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start relative">
+    <!-- Usamos um grid fixo onde a coluna da direita apenas reserva o espaço idêntico para o checkout não sobrepor os produtos -->
+    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start relative">
         <section class="lg:col-span-3 space-y-2">
             <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
 
-                <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:sticky lg:top-14 bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]">
+        <!-- A section ganha lg:fixed e calcula a posição perfeita com base no tamanho max-w-[1600px] para manter os mesmos milímetros do seu design -->
+        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:fixed lg:top-14 lg:right-[calc((100vw-1600px)/2+12px)] lg:left-auto lg:w-[calc((100%-(100vw-1600px))/4-12px)] xl:w-[385px] bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]">
             <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-5 flex flex-col justify-between h-[85vh] lg:h-full">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
                     <h3 id="titulo-checkout" class="text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200">PAGAMENTO</h3>
@@ -62,7 +64,6 @@
                                         <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider leading-tight">Gerar<br>QR Code</span>
                                     </div>
                                 </div>
-                                }
                             </div>
                         </div>
                     </div>
@@ -137,12 +138,12 @@
                             <div class="flex items-center justify-between w-full mt-auto">
                                 <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, -1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm active:scale-95 active:bg-black/15 ${qtd === 0 || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">-</button>
                                 <span class="text-xs font-bold text-center flex-1">${qtd > 0 ? `<span class="text-orange-600 text-base font-semibold">${qtd}</span>` : '-'}</span>
-                                <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, 1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm active:scale-95 active:bg-black/15 ${esg || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">+</button>
+Delta			                <button onclick="event.stopPropagation(); alterarQuantidade(${p.id}, 1)" class="w-7 h-7 rounded-md bg-black/5 hover:bg-black/10 font-bold text-sm active:scale-95 active:bg-black/15 ${esg || carrinhoBloqueado ? 'opacity-20 pointer-events-none' : ''}">+</button>
                             </div>
                         </div>
                         <div class="min-w-0 flex flex-col justify-between flex-1">
                             <h3 class="font-semibold text-slate-700 text-[14px] truncate leading-tight mb-0.5 text-left">${p.nome}</h3>
-max-w-xs		            <div class="flex items-center justify-between text-[13px] font-medium w-full"><span class="text-orange-600 font-semibold">R$ ${formatarMoeda(p.preco)}</span><div>E: <span class="${esg || p.estoque <= 10 ? 'text-rose-500 font-semibold' : 'text-orange-600 font-semibold'}">${p.estoque}</span></div></div>
+                            <div class="flex items-center justify-between text-[13px] font-medium w-full"><span class="text-orange-600 font-semibold">R$ ${formatarMoeda(p.preco)}</span><div>E: <span class="${esg || p.estoque <= 10 ? 'text-rose-500 font-semibold' : 'text-orange-600 font-semibold'}">${p.estoque}</span></div></div>
                         </div>
                     </div>`;
             });
@@ -178,7 +179,7 @@ max-w-xs		            <div class="flex items-center justify-between text-[13px] 
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
             pixChaveIdentificadora = stringQrCodeBase64Salva = ""; timestampCriacaoPix = 0;
             carrinhoBloqueado = false; renderizarProdutos(); resetarEstadoPagamento();
-            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:sticky lg:top-14 bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]";
+            document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:fixed lg:top-14 lg:right-[calc((100vw-1600px)/2+12px)] lg:left-auto lg:w-[calc((100%-(100vw-1600px))/4-12px)] xl:w-[385px] bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]";
             atualizarCarrinhoDOM(); 
         }
 
@@ -214,7 +215,7 @@ max-w-xs		            <div class="flex items-center justify-between text-[13px] 
                 lista.innerHTML = `<p class="text-slate-400 text-center py-4 text-xs italic">Nenhum produto selecionado...</p>`;
                 bloco.className = "space-y-4 pt-1 border-t opacity-40 pointer-events-none";
                 btnDin.disabled = btnPix.disabled = true; btnDin.classList.remove("opacity-100", "bg-white"); btnDin.classList.add("opacity-40", "bg-slate-100");
-               cabId.classList.add("hidden"); resetarEstadoPagamento();
+                cabId.classList.add("hidden"); resetarEstadoPagamento();
             } else {
                 bloco.className = "space-y-4 pt-1 border-t opacity-100 pointer-events-auto";
                 btnPix.disabled = false; btnDin.disabled = false;
@@ -286,7 +287,7 @@ max-w-xs		            <div class="flex items-center justify-between text-[13px] 
             if (Object.keys(carrinho).length === 0) return;
             formaPagamento = tipo; const btnPix = document.getElementById("btn-pix"), btnDin = document.getElementById("btn-dinheiro"), inp = document.getElementById("input-recebido");
             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
-            carrinhoBloqueado = true; renderizarProdutos(); atualizarCarrinhoDOM();
+max-w-xs            carrinhoBloqueado = true; renderizarProdutos(); atualizarCarrinhoDOM();
             btnDin.disabled = btnPix.disabled = false;
             btnDin.className = tipo === 'DINHEIRO' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO;
             btnPix.className = tipo === 'PIX' ? CSS_BTN_ATIVO : CSS_BTN_INATIVO;
@@ -300,7 +301,7 @@ max-w-xs		            <div class="flex items-center justify-between text-[13px] 
         function validarEstadoFinalizar() {
             if (modoResgateManual) return;
             const btn = document.getElementById("btn-finalizar"), rec = parseFloat(document.getElementById("input-recebido").value.replace(/\D/g, "")) / 100 || 0;
-  00	          btn.disabled = formaPagamento === 'PIX' ? !(pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) : !(Object.keys(carrinho).length > 0 && formaPagamento === 'DINHEIRO' && rec >= totalAtual);
+            btn.disabled = formaPagamento === 'PIX' ? !(pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) : !(Object.keys(carrinho).length > 0 && formaPagamento === 'DINHEIRO' && rec >= totalAtual);
             btn.className = btn.disabled ? CSS_FINALIZAR_DESABILITADO : CSS_FINALIZAR_HABILITADO;
         }
 
@@ -356,8 +357,8 @@ max-w-xs		            <div class="flex items-center justify-between text-[13px] 
         }
 
         function abrirOverlayCelular() { if (window.innerWidth < 1024 || modoResgateManual) { document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; } }
-        function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:sticky lg:top-14 bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]"; resetarEstadoPagamento(); } }
-        function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:sticky lg:top-14 bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true); }
+        function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:fixed lg:top-14 lg:right-[calc((100vw-1600px)/2+12px)] lg:left-auto lg:w-[calc((100%-(100vw-1600px))/4-12px)] xl:w-[385px] bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]"; resetarEstadoPagamento(); } }
+        function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:fixed lg:top-14 lg:right-[calc((100vw-1600px)/2+12px)] lg:left-auto lg:w-[calc((100%-(100vw-1600px))/4-12px)] xl:w-[385px] bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-[calc(100vh-65px)]"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true); }
         
         function resetSistemicoTotal(http = true) { 
             carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = []; 
@@ -393,9 +394,7 @@ max-w-xs		            <div class="flex items-center justify-between text-[13px] 
                 iniciado = true;
                 const touch = e.type === "touchstart" ? e.touches[0] : e;
                 const r = el.getBoundingClientRect();
-                
-                // Sempre converte para top/left absoluto no início do arrasto para o dedo responder de forma imediata
-                el.style.left = r.left + "px"; 
+                    el.style.left = r.left + "px"; 
                 el.style.top = r.top + "px";
                 el.style.bottom = "auto"; 
                 el.style.right = "auto";
@@ -430,7 +429,6 @@ max-w-xs		            <div class="flex items-center justify-between text-[13px] 
                 if (!iniciado) return;
                 iniciado = false;
 
-                // INVERSÃO DE ÂNCORA: Trava permanentemente o botão usando bottom/right para ignorar rolagens da tela
                 const r = el.getBoundingClientRect();
                 const distFundo = window.innerHeight - r.bottom;
                 const distDireita = window.innerWidth - r.right;
