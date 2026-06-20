@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -10,24 +10,25 @@
         .font-sistema { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        html, body { visibility: hidden; opacity: 0; background-color: #f8fafc; }
+        html, body { background-color: #f8fafc; height: 100%; overflow: hidden; }
         .scroll-celular-perfeito { touch-action: pan-y !important; }
     </style>
 </head>
-<body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800 select-none">
+<body class="bg-slate-50 font-sistema min-h-full flex flex-col antialiased text-slate-800 select-none">
 
-    <header id="barra-superior" class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
+    <header id="barra-superior" class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50 h-[45px] flex items-center justify-center flex-shrink-0">
         <h1 class="text-xl font-semibold tracking-wide">Festa Junina</h1>
     </header>
 
-    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
-        <section class="lg:col-span-3 space-y-2">
-            <div class="border-b border-slate-200 pb-1"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
+    <main class="flex-1 max-w-[1600px] w-full mx-auto p-3 grid grid-cols-1 lg:grid-cols-4 gap-4 items-start h-[calc(100vh-45px)] overflow-hidden">
+        
+        <section class="lg:col-span-3 space-y-2 h-full overflow-y-auto pr-1 no-scrollbar pb-24">
+            <div class="border-b border-slate-200 pb-1 sticky top-0 bg-slate-50 z-10"><h2 class="text-sm font-bold text-slate-600 uppercase tracking-wider">Produtos A - Z</h2></div>
             <div id="grid-produtos" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-7 gap-2"></div>
         </section>
 
-        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full">
-            <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-5 flex flex-col justify-between h-[85vh] lg:h-[calc(100vh-65px)] lg:sticky lg:top-14">
+        <section id="painel-fechamento" class="hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full lg:h-full">
+            <div id="card-checkout" class="bg-white w-full max-w-lg lg:max-w-none rounded-md shadow-2xl lg:shadow-md border border-slate-300 p-5 flex flex-col justify-between h-[85vh] lg:h-full">
                 <div class="space-y-4 flex-1 flex flex-col min-h-0">
                     <h3 id="titulo-checkout" class="text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200">PAGAMENTO</h3>
                     <div class="flex-1 flex flex-col min-h-0">
@@ -74,17 +75,17 @@
         </section>
     </main>
 
-    <div id="painel-logs-lab" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white p-3 rounded-xl shadow-2xl flex flex-col w-[360px] sm:w-[450px] h-40 border border-slate-700 transition-all duration-200 select-text touch-none">
-        <div class="flex justify-between items-center text-[11px] font-mono border-b border-slate-700 pb-1 text-slate-400 drag-handle cursor-move w-full">
-            <span>⚡ TERMINAL DE TESTES LAB (ARRASTÁVEL)</span>
+    <div id="painel-logs-lab" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white p-3 rounded-xl shadow-2xl flex flex-col w-[360px] sm:w-[450px] h-40 border border-slate-700 transition-all duration-200 select-text">
+        <div id="barra-titulo-drag" class="flex justify-between items-center text-[11px] font-mono border-b border-slate-700 pb-1 text-slate-400 cursor-move w-full select-none">
+            <span>⚡ TERMINAL DE TESTES LAB (ARRASTE AQUI)</span>
             <span id="status-automacao" class="text-amber-400 font-bold">● PARADO</span>
         </div>
-        <div id="caixa-texto-logs" class="flex-1 overflow-y-auto font-mono text-[11px] space-y-0.5 py-1 no-scrollbar scroll-celular-perfeito">
-            <p class="text-slate-500 italic">// Digite "start" no console abaixo para rodar o loop automático de 6s.</p>
+        <div id="caixa-texto-logs" class="flex-1 overflow-y-auto font-mono text-[11px] space-y-0.5 py-1 no-scrollbar scroll-celular-perfeito no-drag select-text">
+            <p class="text-slate-500 italic">// Digite "start" no console abaixo para rodar o loop automático de 3s.</p>
         </div>
-        <div class="mt-1 border-t border-slate-800 pt-1 flex items-center">
+        <div class="mt-1 border-t border-slate-800 pt-1 flex items-center no-drag">
             <span class="text-orange-500 font-bold font-mono text-xs mr-1">&gt;</span>
-            <input type="text" id="console-input" placeholder="Comandos: start, stop, velocidade [s], cenario [id], minimizar, limpar" class="w-full bg-transparent text-white font-mono text-xs focus:outline-none placeholder-slate-600">
+            <input type="text" id="console-input" placeholder="Comandos: start, stop, velocidade [s], cenario [id], minimizar, limpar" class="w-full bg-transparent text-white font-mono text-xs focus:outline-none placeholder-slate-600 select-text">
         </div>
     </div>
 
@@ -113,7 +114,7 @@
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0, carrinhoBloqueado = false;
 
         // VARIÁVEIS EXCLUSIVAS DO MÓDULO LAB
-        let labAutomacaoAtiva = false, labIntervaloLoop = null, labTempoSegundos = 6, labForçarProximoCenario = null, labPassarDiretoPendente = false;
+        let labAutomacaoAtiva = false, labIntervaloLoop = null, labTempoSegundos = 3, labForçarProximoCenario = null, labPassarDiretoPendente = false;
         let labMockInternetOnline = true, labFilaIdsMassaFake = ["999000000001", "999000000002", "999000000003", "999000000004", "999000000005"], promessaAlertaVirtual = null;
 
         const $ = id => document.getElementById(id);
@@ -197,9 +198,9 @@
             if (carrinhoBloqueado) return;
             const p = produtos.find(i => i.id == id); if (!p) return;
             const n = (carrinho[id] || 0) + d;
-            if (d > 0 && (carrinho[id] || 0) >= p.estoque) return;
+            if (d > 0 && (carrinho[id] || 0) >= parseInt(p.estoque)) return;
             if (n <= 0) delete carrinho[id]; else carrinho[id] = n;
-            renderizarProdutos(); tabularCarrinhoDOM();
+            renderizarProdutos(); atualizarCarrinhoDOM();
         }
 
         function removerItemDoCarrinhoCompleto(id) { if (!carrinhoBloqueado && carrinho[id]) { delete carrinho[id]; renderizarProdutos(); atualizarCarrinhoDOM(); } }
@@ -272,7 +273,6 @@
             if (cont) obj.contingencia = true; return JSON.stringify(obj);
         };
 
-        // ENVELOPE DO ALERTA SIMULADO DO ANDROID
         function lancarAlertaVirtualSimulado(msg, callbackOk) {
             $("simulador-alert-text").innerText = msg;
             $("simulador-alert-box").classList.remove("hidden");
@@ -284,9 +284,7 @@
             $("simulador-alert-box").classList.remove("flex");
             $("simulador-alert-box").classList.add("hidden");
             if (promessaAlertaVirtual) {
-                const cb = promessaAlertaVirtual;
-                promessaAlertaVirtual = null;
-                cb();
+                const cb = promessaAlertaVirtual; promessaAlertaVirtual = null; cb();
             }
         }
 
@@ -295,14 +293,12 @@
                 if(labAutomacaoAtiva) logLab("⚠️ Modo Redundância engatado pelo Software. Salvando na fila local.");
                 if (tipo === "CAIXA") aplicarDescontoEstoqueLocal();
                 const proc = extrairItensParaEnvio(itens); salvarNoCacheContingencia(id, forma, tipo, proc);
-                
                 if (labAutomacaoAtiva) {
                     lancarAlertaVirtualSimulado(construirMensagemFichas(proc), () => { resetSistemicoTotal(false); });
                 } else {
                     alert(construirMensagemFichas(proc)); resetSistemicoTotal(false);
                 }
             };
-
             if (labAutomacaoAtiva) { exec(); return true; }
             if (confirm(msg)) { exec(); return true; }
             reabrirVisualBotaoFinalizar(); return false;
@@ -437,11 +433,9 @@
         function resetSistemicoTotal(http = true) { 
             carrinhoBloqueado = modoResgateManual = modoBuscaAtivo = false; carrinho = {}; totalAtual = 0; cachePedidoOnlineOriginal = []; 
             $("titulo-checkout").innerText = "PAGAMENTO"; $("titulo-checkout").className = "text-base font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200"; 
-            
             const el = $("container-botao-flutuante");
             el.className = "fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex justify-center pointer-events-none touch-none whitespace-nowrap";
             Object.assign(el.style, { left: "50%", top: "auto", bottom: "16px", right: "auto" });
-            
             renderBotaoFlutuante("pointer-events-auto bg-orange-500 text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer select-none text-sm", `<div id="conteudo-flutuante-unico" class="text-base tracking-wide text-center py-1">Pedido R$ 0,00 - Revisar e Pagar</div>`); 
             resetarEstadoPagamento(); atualizarCarrinhoDOM(); renderizarProdutos(); if (http) setTimeout(() => carregarEstoqueReal(), 50);
         }
@@ -457,19 +451,19 @@
                 renderBotaoFlutuante("pointer-events-auto bg-rose-600 text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer select-none text-sm", `<span>Não encontrado</span>`); 
                 setTimeout(() => forçarFechamentoSistemico(), 2000); return; 
             } else if (lines.length === 0 && labAutomacaoAtiva) {
-                // AJUSTE: O robô agora puxa e injeta nomes 100% reais mapeados do seu cardápio ativo para não quebrar o Excel!
-                let p1 = produtos[0] ? produtos[0].nome : "Pastel de Carne";
-                let p2 = produtos[1] ? produtos[1].nome : "Quentão";
-                let s1 = produtos[0] ? produtos[0].sigla : "PAS";
-                let s2 = produtos[1] ? produtos[1].sigla : "QUE";
-                let pr1 = produtos[0] ? produtos[0].preco : 10;
-                let pr2 = produtos[1] ? produtos[1].preco : 8;
+                let validProds = produtos.filter(p => parseInt(p.estoque) > 5);
+                let p1 = validProds[0] ? validProds[0].nome : "Pastel de Carne";
+                let p2 = validProds[1] ? validProds[1].nome : "Quentão";
+                let s1 = validProds[0] ? validProds[0].sigla : "PAS";
+                let s2 = validProds[1] ? validProds[1].sigla : "QUE";
+                let pr1 = validProds[0] ? validProds[0].preco : 10;
+                let pr2 = validProds[1] ? validProds[1].preco : 8;
 
                 logLab(`📦 [MOCK ON] Vinculando itens reais do cardápio para o ID: ${id} (${p1} e ${p2})`);
                 lines.push({ ID_PAGAMENTO: id, PRODUTO: p1, QUANTIDADE: 2, PRECO: pr1, TOTAL: pr1 * 2, RETIRADA: "Pendente", SIGLA: s1 });
                 lines.push({ ID_PAGAMENTO: id, PRODUTO: p2, QUANTIDADE: 1, PRECO: pr2, TOTAL: pr2, RETIRADA: "Pendente", SIGLA: s2 });
             }
-            modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(id).trim(); cachePedidoOnlineOriginal = lines.map(l => ({ sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", produto: l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online", grandmother_id: parseInt(l.id_produto || l.ID || l.id || l.GRANDMOTHER_ID || 0), quantidade: parseInt(l.QUANTIDADE) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0 })); carrinhoBloqueado = true; renderizarProdutos(); $("titulo-checkout").innerText = "PAGAMENTO"; $("titulo-checkout").className = "text-sm font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; const cabId = $("id-pedido-cabecalho"); cabId.innerText = `ID: ${id}`; cabId.classList.remove("hidden"); const btn = $("btn-finalizar"); btn.disabled = false; btn.innerText = "Finalizar"; btn.className = CSS_FINALIZAR_HABILITADO; const lista = $("lista-carrinho"); lista.innerHTML = ""; let valCons = 0; lines.forEach(linha => { const tot = parseFloat(linha.TOTAL) || 0; valCons += tot; let ent = (linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente") === "retirado"; if (ent) { btn.disabled = true; btn.innerText = "Produto Entregue!"; btn.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; } lista.innerHTML += `<div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-200 shadow-sm font-sistema"><div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO || linha.produto}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(linha.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div><div class="text-right flex-shrink-0 pl-2"><p class="font-semibold text-slate-700 text-[16px]">R$ ${formatarMoeda(tot)}</p>${ent ? '<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>' : '<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>'}</div></div>`; }); $("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valCons)}`; totalAtual = valCons; if (window.innerWidth >= 1024) renderBotaoFlutuante(`bg-slate-800 ${CSS_BASE_FLUTUANTE} cursor-default`, `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${id}</div><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`, true); else abrirOverlayCelular(); }
+            modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(id).trim(); cachePedidoOnlineOriginal = lines.map(l => ({ sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", produto: l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online", grandmother_id: parseInt(l.id_produto || l.ID || l.id || l.GRANDMOTHER_ID || 0), grandmother_id: parseInt(l.id_produto || l.ID || l.id || l.GRANDMOTHER_ID || 0), quantidade: parseInt(l.QUANTIDADE) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0 })); carrinhoBloqueado = true; renderizarProdutos(); $("titulo-checkout").innerText = "PAGAMENTO"; $("titulo-checkout").className = "text-sm font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; const cabId = $("id-pedido-cabecalho"); cabId.innerText = `ID: ${id}`; cabId.classList.remove("hidden"); const btn = $("btn-finalizar"); btn.disabled = false; btn.innerText = "Finalizar"; btn.className = CSS_FINALIZAR_HABILITADO; const lista = $("lista-carrinho"); lista.innerHTML = ""; let valCons = 0; lines.forEach(linha => { const tot = parseFloat(linha.TOTAL) || 0; valCons += tot; let ent = (linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente") === "retirado"; if (ent) { btn.disabled = true; btn.innerText = "Produto Entregue!"; btn.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; } lista.innerHTML += `<div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-200 shadow-sm font-sistema"><div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO || linha.produto}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(linha.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div><div class="text-right flex-shrink-0 pl-2"><p class="font-semibold text-slate-700 text-[16px]">R$ ${formatarMoeda(tot)}</p>${ent ? '<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>' : '<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>'}</div></div>`; }); $("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valCons)}`; totalAtual = valCons; if (window.innerWidth >= 1024) renderBotaoFlutuante(`bg-slate-800 ${CSS_BASE_FLUTUANTE} cursor-default`, `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${id}</div><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`, true); else abrirOverlayCelular(); }
         async function executingBaixaPedidoEntregue() { try { await enviarVendaNuvem(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Produto Entregue!"); } catch (e) { exibirFalhaProcessamento(); } }
         function salvarNoCacheContingencia(id, forma, tipo, pronto) { let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; fila.push({ id_pagamento: id, pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), contingencia: true, itens: pronto }); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); }
         function iniciarMotorSincronizacaoOculto() { setInterval(async () => { let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; if (fila.length === 0 || !(await diagnosticarInternetEstavel())) return; try { const pacote = { id_pagamento: String(fila[0].id_pagamento), pagamento: String(fila[0].pagamento), tipo_venda: String(fila[0].tipo_venda), status_retirada: "retirado", total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado), transaction_amount: parseFloat(fila[0].transaction_amount), contingencia: true, itens: extrairItensParaEnvio(fila[0].itens) }; const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacote) }); if (r.ok) { fila.shift(); localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); } } catch (err) { console.error("Erro na sincronização.", err); } }, 30000); }
@@ -495,20 +489,12 @@
             el.addEventListener("touchstart", onStart, { passive: false }); window.addEventListener("touchmove", onMove, { passive: false }); window.addEventListener("touchend", onEnd);
         }
 
-        function logLab(msg, cor = "text-white") {
-            const caixa = $("caixa-texto-logs"); const d = new Date();
-            const ts = `[${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}]`;
-            caixa.innerHTML += `<p class="${cor}">${ts} ${msg}</p>`; caixa.scrollTop = caixa.scrollHeight;
-        }
-
+        // NOVO DRAGGABLE: RESTRITO EXCLUSIVAMENTE À BARRA DE TÍTULO SUPERIOR DO TERMINAL
         function configurarTerminalLabArrastavel() {
-            const el = $("painel-logs-lab"), input = $("console-input"), header = $("barra-superior");
+            const el = $("painel-logs-lab"), gatilho = $("barra-titulo-drag"), header = $("barra-superior");
             let iniciado = false, xAt = 0, yAt = 0, xIni = 0, yIni = 0;
 
-            input.addEventListener("keydown", (e) => { if (e.key === "Enter") { const cmd = input.value.trim().toLowerCase(); input.value = ""; processarComandoLab(cmd); } });
-
             const s = (e) => {
-                if (e.target.id === "console-input" || e.target.closest(".no-drag")) return;
                 iniciado = true; const touch = e.type === "touchstart" ? e.touches[0] : e; const r = el.getBoundingClientRect();
                 Object.assign(el.style, { left: r.left + "px", top: r.top + "px", bottom: "auto", right: "auto", transform: "none" });
                 xIni = touch.clientX - el.offsetLeft; yIni = touch.clientY - el.offsetTop;
@@ -516,40 +502,43 @@
             const m = (e) => {
                 if (!iniciado) return; e.preventDefault(); const touch = e.type === "touchmove" ? e.touches[0] : e;
                 xAt = touch.clientX - xIni; yAt = touch.clientY - yIni;
-                const lMax = window.innerWidth - 60, aMax = window.innerHeight - el.offsetHeight - 20, hLim = header ? header.offsetHeight : 48;
+                const lMax = window.innerWidth - el.offsetWidth - 10, aMax = window.innerHeight - el.offsetHeight - 10, hLim = header ? header.offsetHeight : 48;
                 el.style.left = Math.max(10, Math.min(xAt, lMax)) + "px"; el.style.top = Math.max(hLim, Math.min(yAt, aMax)) + "px";
             };
             const oEnd = () => { if (!iniciado) return; iniciado = false; const r = el.getBoundingClientRect(); Object.assign(el.style, { top: "auto", bottom: (window.innerHeight - r.bottom) + "px", left: "auto", right: (window.innerWidth - r.right) + "px" }); };
             
-            el.addEventListener("mousedown", s); window.addEventListener("mousemove", m); window.addEventListener("mouseup", oEnd);
-            el.addEventListener("touchstart", s, { passive: false }); window.addEventListener("touchmove", m, { passive: false }); window.addEventListener("touchend", oEnd);
+            gatilho.addEventListener("mousedown", s); window.addEventListener("mousemove", m); window.addEventListener("mouseup", oEnd);
+            gatilho.addEventListener("touchstart", s, { passive: false }); window.addEventListener("touchmove", m, { passive: false }); window.addEventListener("touchend", oEnd);
+            
+            // Tratamento de comandos do console input
+            $("console-input").addEventListener("keydown", (e) => { if (e.key === "Enter") { const cmd = $("console-input").value.trim().toLowerCase(); $("console-input").value = ""; processarComandoLab(cmd); } });
         }
 
         function processarComandoLab(cmd) {
             if (cmd === "start") {
                 if (labAutomacaoAtiva) return; labAutomacaoAtiva = true;
                 $("status-automacao").innerText = "● EM LOOP"; $("status-automacao").className = "text-green-400 font-bold animate-pulse";
-                logLab("🤖 Automação Lab engatada. Executando testes cruzados a cada 6s...", "text-green-400 font-bold");
+                logLab("🤖 Automação Lab ligada. Loop global de tomada de decisão a cada " + labTempoSegundos + "s...", "text-green-400 font-bold");
                 dispararProximoCicloLab();
             } else if (cmd === "stop") {
                 labAutomacaoAtiva = false; clearTimeout(labIntervaloLoop);
                 $("status-automacao").innerText = "● PARADO"; $("status-automacao").className = "text-amber-400 font-bold";
-                logLab("🛑 Loop de testes pausado de forma limpa.", "text-amber-400");
+                logLab("🛑 Loop de testes pausado pelo terminal.", "text-amber-400");
             } else if (cmd.startsWith("velocidade ")) {
                 let s = parseInt(cmd.replace("velocidade ", ""));
-                if (s > 0) { labTempoSegundos = s; logLab(`⏱️ Delay global estabelecido para: ${s} segundos.`); }
+                if (s > 0) { labTempoSegundos = s; logLab(`⏱️ Intervalo global alterado para: ${s} segundos.`); }
             } else if (cmd.startsWith("cenario ")) {
                 let idC = cmd.replace("cenario ", ""); labForçarProximoCenario = idC;
-                logLab(`🎯 Pipeline fixado para forçar cenário: "${idC.toUpperCase()}"`);
+                logLab(`🎯 Pipeline fixado para o cenário: "${idC.toUpperCase()}"`);
             } else if (cmd === "minimizar") {
                 const painel = $("painel-logs-lab");
                 if (painel.classList.contains("h-40")) {
                     painel.classList.remove("h-40"); painel.classList.add("h-6"); $("caixa-texto-logs").classList.add("hidden");
-                    painel.querySelector(".drag-handle").innerHTML = "<span>[+] LAB MINIMIZADO (Clique para restaurar)</span>";
+                    $("barra-titulo-drag").innerHTML = "<span>[+] LAB MINIMIZADO (Clique para restaurar)</span>";
                     painel.onclick = () => processarComandoLab("minimizar");
                 } else {
                     painel.classList.remove("h-6"); painel.classList.add("h-40"); $("caixa-texto-logs").classList.remove("hidden");
-                    painel.querySelector(".drag-handle").innerHTML = "<span>⚡ TERMINAL DE TESTES LAB (ARRASTÁVEL)</span><span id='status-automacao' class='text-green-400 font-bold'>● EM LOOP</span>";
+                    $("barra-titulo-drag").innerHTML = "<span>⚡ TERMINAL DE TESTES LAB (ARRASTE AQUI)</span><span id='status-automacao' class='text-green-400 font-bold'>● EM LOOP</span>";
                     painel.onclick = null;
                 }
             } else if (cmd === "limpar") { $("caixa-texto-logs").innerHTML = ""; }
@@ -569,13 +558,27 @@
 
             if (cenario.startsWith("dinheiro") || cenario.startsWith("pix")) {
                 let totalSorteado = Math.floor(Math.random() * 20) + 1;
-                logLab(`🛒 Alimentando carrinho: Sorteando ${totalSorteado} produtos aleatórios...`);
+                logLab(`🛒 Alimentando carrinho: Sorteando ${totalSorteado} unidades com estoque...`);
                 
+                // AJUSTE: Filtra os itens válidos e adiciona em 150ms protegendo contra estoques zerados
+                let itensValidosComEstoque = produtos.filter(p => parseInt(p.estoque) > 0);
+                if (itensValidosComEstoque.length === 0) {
+                    logLab("⚠️ Lab detectou estoque geral zerado na memória. Abortando ciclo.");
+                    await delayLab(3000); if(labAutomacaoAtiva) dispararProximoCicloLab(); return;
+                }
+
+                let loopInerciaProtecao = 0;
                 for(let k=0; k < totalSorteado; k++) {
-                    if (!labAutomacaoAtiva) return;
-                    let pSorteado = produtos[Math.floor(Math.random() * produtos.length)];
-                    if (pSorteado && pSorteado.estoque > (carrinho[pSorteado.id] || 0)) alterarQuantidade(pSorteado.id, 1);
-                    await delayLab(150); 
+                    if (!labAutomacaoAtiva || loopInerciaProtecao > 50) break;
+                    let pSorteado = itensValidosComEstoque[Math.floor(Math.random() * itensValidosComEstoque.length)];
+                    let noCarrinho = carrinho[pSorteado.id] || 0;
+                    
+                    if (pSorteado && parseInt(pSorteado.estoque) > noCarrinho) {
+                        alterarQuantidade(pSorteado.id, 1);
+                    } else {
+                        k--; loopInerciaProtecao++; // Tenta novamente com outro produto
+                    }
+                    await delayLab(150); // Velocidade acelerada de cliques nos produtos
                 }
 
                 if(Math.random() < 0.10) {
@@ -591,7 +594,7 @@
 
                     let campoRec = $("input-recebido"); let totalMaisTroco = (totalAtual + 50).toFixed(2);
                     campoRec.value = totalMaisTroco.replace('.', ','); tratarMascaraDinheiro(campoRec);
-                    logLab(`✍️ Input simulado de cédula: R$ ${totalMaisTroco}`); await delayLab(1000);
+                    logLab(`✍2 Input simulado de cédula: R$ ${totalMaisTroco}`); await delayLab(1000);
 
                     labMockInternetOnline = !cenario.includes("offline");
                     logLab(`🌐 Mock de Rede Injetado: ${labMockInternetOnline ? "ONLINE" : "OFFLINE"}`);
@@ -610,7 +613,8 @@
                         await delayLab(2000);
                         await processarCliqueFinalizar();
                     } else {
-                        await delayLab(7000);
+                        // Aguarda o tempo necessário para cobrir a checagem pendente simulada
+                        await delayLab(7500);
                     }
                 }
 
@@ -630,11 +634,11 @@
                 logLab("📦 Confirmando entrega de mercadoria física..."); await processarCliqueFinalizar();
             }
 
-            // AJUSTE: O robô agora aguarda os 6 segundos olhando fixamente para a caixa estilo Android antes de interagir
+            // Ritmo de tomada de decisão humana configurado dinamicamente via terminal (Padrão 3s)
             await delayLab(labTempoSegundos * 1000);
             if ($("simulador-alert-box").classList.contains("flex")) {
-                logLab("⏱️ Alerta Virtual Android detectado. Robô executará leitura humana por 6s antes de fechar.");
-                await delayLab(6000);
+                logLab(`⏱️ Alerta Virtual Android na tela. Robô aguardará o delay de ${labTempoSegundos}s para simular leitura.`);
+                await delayLab(labTempoSegundos * 1000);
                 fecharAlertaVirtualSimulado();
             }
 
