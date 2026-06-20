@@ -605,16 +605,22 @@
             logTerminal(`INICIALIZANDO MOTOR - COBERTURA: ${esc}`, "orange");
             
             if (esc === "TODOS") {
-            let cen = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"];
-            
-            // MISTURA OS CENÁRIOS ALEATORIAMENTE A CADA VEZ QUE VOCÊ CLICA EM START
-            cen.sort(() => Math.random() - 0.5);
-            
-            for (let c of cen) { if (!botExecutando) break; await executarCenarioEspecifico(c); await delay(obterDelayBot() + 1000); }
-            if (botExecutando) logTerminal("BATERIA COMPLETA!", "green");
-            pararBateriaTestes();
-            } else { await executarCenarioEspecifico(esc); pararBateriaTestes(); }
-        }
+                let cen = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"];
+                
+                // LOOP INFINITO: Só para quando apertar STOP ou der erro fatal.
+                while (botExecutando) {
+                    cen.sort(() => Math.random() - 0.5); // Embaralha a cada nova rodada
+                    for (let c of cen) { 
+                        if (!botExecutando) break; // Trava de segurança imediata
+                        await executarCenarioEspecifico(c); 
+                        await delay(obterDelayBot() + 1000); 
+                    }
+                }
+                pararBateriaTestes();
+            } else { 
+                await executarCenarioEspecifico(esc); 
+                pararBateriaTestes(); // Se escolher só um (como o 6), ele para depois de rodar 1 vez.
+            }
 
         async function executarCenarioEspecifico(c) {
             if (!botExecutando) return;
