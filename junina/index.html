@@ -81,9 +81,6 @@
     </div>
 
     <script>
-        // ==========================================
-        // 1. CONFIGURAÇÕES GERAIS
-        // ==========================================
         const CONFIG = {
             URL_LEITURA: "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d09b5dd598614a638c009a829b951576/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=vbv-n9UwnA0qzIyFrJyETr8qlFT3z1SHDNtdjycKB14",
             URL_MAE: "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/759aee309906488d8f6f525644e3cecd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=qFrqJyAmDgtjntRKYft-QDwgXvavXfjsU-tDNppEUbo",
@@ -100,25 +97,18 @@
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0, carrinhoBloqueado = false;
         let estaProcessando = false; 
 
-        const formatarMoeda = (v) => v.toFixed(2).replace('.', ',');
+        const formatarMoeda = (v) => (Number(v) || 0).toFixed(2).replace('.', ',');
         const liberarExibicaoSegura = () => { document.documentElement.style.visibility = document.body.style.visibility = "visible"; document.documentElement.style.opacity = document.body.style.opacity = "1"; };
         const renderBotaoFlutuante = (estilo, html, limpar = false) => { const bf = document.getElementById("caixa-flutuante-base"); bf.className = estilo; bf.innerHTML = html; bf.onclick = limpar ? null : abrirOverlayCelular; };
 
         window.addEventListener('DOMContentLoaded', () => {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(() => console.log('Service Worker registrado com sucesso!'))
-                    .catch(err => console.error('Erro ao registrar Service Worker:', err));
-            }
-
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
             const cache = localStorage.getItem("festa_junina_cardapio");
             if (cache) { produtos = JSON.parse(cache); renderizarProdutos(); }
             carregarEstoqueReal(); 
             configurarBotaoArrastavel();
             document.documentElement.style.visibility = document.body.style.visibility = "visible";
             document.documentElement.style.opacity = document.body.style.opacity = "1";
-
-            // Sincronizador Automático da Fila de Contingência
             setInterval(tentarSincronizarContingencia, 12000);
             window.addEventListener('online', tentarSincronizarContingencia);
             tentarSincronizarContingencia();
@@ -141,7 +131,7 @@
                     localStorage.setItem("festa_junina_cardapio", JSON.stringify(produtos)); renderizarProdutos();
                 }
                 if (id !== "" && combo && combo.pedido) processarResultadoBuscaPedido(combo.pedido, id);
-            } catch (e) { console.error("Falha ao ler dados.", e); if (id !== "") forçarFechamentoSistemico(); } finally { liberarExibicaoSegura(); }
+            } catch (e) { if (id !== "") forçarFechamentoSistemico(); } finally { liberarExibicaoSegura(); }
         }
 
         function renderizarProdutos() {
@@ -260,7 +250,7 @@
         };
 
         const gerarPayloadVenda = (id, forma, tipo = "CAIXA", pronto = null, isContingencia = false, gerarCode = false) => {
-            const obj = { 
+            return JSON.stringify({ 
                 id_pagamento: String(id || "").trim(), 
                 pagamento: String(forma || ""), 
                 tipo_venda: String(tipo || "CAIXA"), 
@@ -270,8 +260,7 @@
                 contingencia: !!isContingencia, 
                 gerar_code: !!gerarCode, 
                 itens: extrairItensParaEnvio(pronto) 
-            };
-            return JSON.stringify(obj);
+            });
         };
 
         async function tentarSincronizarContingencia() {
@@ -279,17 +268,13 @@
             if (fila.length === 0) return;
             const payload = fila[0];
             try {
-                const r = await fetch(CONFIG.URL_MAE, { 
-                    method: "POST", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify(payload) 
-                });
+                const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
                 if (r.ok) {
-                    fila.shift(); // Sincronizado, limpa do aparelho
+                    fila.shift();
                     localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila));
-                    setTimeout(tentarSincronizarContingencia, 2000); // Chama de novo se houver mais na fila
+                    setTimeout(tentarSincronizarContingencia, 2000);
                 }
-            } catch (e) { /* Silencioso, tenta na próxima rodada */ }
+            } catch (e) {}
         }
 
         async function processarCliqueFinalizar() {
@@ -302,7 +287,6 @@
                 
                 const net = await diagnosticarInternetEstavel();
                 
-                // MODO RESGATE DE PEDIDO ONLINE
                 if (modoResgateManual) {
                     if (!net) {
                         alert("Sistema Offline\nTente novamente");
@@ -310,7 +294,7 @@
                         return;
                     }
                     try {
-                        const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: generarPayloadVenda(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, false, false) });
+                        const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, false, false) });
                         if (!r.ok) throw new Error();
                         alert("Sistema Online\nPedido Entregue!");
                         resetSistemicoTotal(true);
@@ -321,7 +305,6 @@
                     return;
                 }
                 
-                // MODO CAIXA NORMAL
                 let idVenda = "";
                 if (formaPagamento === 'DINHEIRO') {
                     const d = new Date();
@@ -336,7 +319,6 @@
                 }
                 
                 let tempoDecorridoPix = Date.now() - timestampCriacaoPix;
-                // Altere o valor abaixo (29000) se quiser mudar o tempo de tolerância do PIX (em milissegundos)
                 let forcarContingenciaPix = (formaPagamento === 'PIX' && tempoDecorridoPix >= 29000);
                 let onlineFalhou = !net || forcarContingenciaPix;
                 
@@ -351,7 +333,7 @@
                         if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
                     }
                     try {
-                        const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: generarPayloadVenda(idVenda, formaPagamento, "CAIXA", null, false, false) });
+                        const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(idVenda, formaPagamento, "CAIXA", null, false, false) });
                         if (!r.ok) throw new Error();
                         aplicarDescontoEstoqueLocal();
                         alert(construirMensagemFichas(extrairItensParaEnvio(), "Sistema Online\nVenda Finalizada!"));
@@ -362,25 +344,21 @@
                     }
                 }
 
-                // FLUXO DE CONTINGÊNCIA UNIFICADA
                 if (onlineFalhou) {
                     if (confirm("Sistema Offline\nFinalizar venda?")) {
                         if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
-                        
-                        const itemsFichas = extrairItensParaEnvio();
+                        const itensFichas = extrairItensParaEnvio();
                         const payloadContingencia = { 
                             id_pagamento: idVenda, pagamento: formaPagamento, tipo_venda: "CAIXA", 
                             status_retirada: "retirado", total_pedido_consolidado: totalAtual, 
                             transaction_amount: totalAtual, contingencia: true, gerar_code: false, 
-                            itens: itemsFichas 
+                            itens: itensFichas 
                         };
-                        
                         let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia") || "[]");
                         fila.push(payloadContingencia);
                         localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila));
-                        
                         aplicarDescontoEstoqueLocal();
-                        alert(construirMensagemFichas(itemsFichas, "Sistema Offline\nVenda Finalizada!"));
+                        alert(construirMensagemFichas(itensFichas, "Sistema Offline\nVenda Finalizada!"));
                         resetSistemicoTotal(false);
                         tentarSincronizarContingencia();
                     } else {
@@ -426,80 +404,52 @@
         async function requisitarQrCodeReal() {
             if (!formaPagamento || formaPagamento !== 'PIX') return;
             const box = document.getElementById("box-qrcode"), btn = document.getElementById("btn-finalizar");
-            
             box.className = "w-28 h-28 bg-white border border-slate-300 text-[10px] font-bold text-slate-400 uppercase text-center flex flex-col items-center justify-center p-2 pointer-events-none";
             box.innerHTML = `<span>Processando...</span>`; 
             pixChaveIdentificadora = "mp_" + Date.now(); timestampCriacaoPix = Date.now();
-            
             btn.disabled = true; btn.innerText = "Processando..."; btn.className = CSS_FINALIZAR_DESABILITADO;
-            
             try {
-                const r = await fetch(CONFIG.URL_MAE, { 
-                    method: "POST", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX', 'CAIXA', null, false, true) 
-                }); 
+                const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX', 'CAIXA', null, false, true) }); 
                 const d = await r.json();
-                
                 if (d.id_mercado_pago === "BLOQUEADO" || (d.mensagem && d.mensagem !== "novo" && d.mensagem !== "processado")) {
                     box.className = "w-28 h-28 bg-slate-300 border border-slate-400 flex items-center justify-center text-center p-1 select-none pointer-events-none";
                     box.innerHTML = `<span class="text-[10px] font-bold text-slate-600 uppercase tracking-tight leading-tight">Pedido<br>Bloqueado</span>`;
                     resetarEstadoPagamento(); alert("Pedido online indisponível\nPedido não localizado"); return;
                 }
-                
                 if (d.id_mercado_pago) {
                     pixChaveIdentificadora = String(d.id_mercado_pago).trim(); 
                     stringQrCodeBase64Salva = d.qrcode_imagem || "";
-                    
                     let imgSrcSeguro = "";
                     if (stringQrCodeBase64Salva && stringQrCodeBase64Salva.startsWith('data:image')) {
                         imgSrcSeguro = stringQrCodeBase64Salva;
                     } else if (stringQrCodeBase64Salva) {
                         imgSrcSeguro = `data:image/png;base64,${stringQrCodeBase64Salva}`;
                     }
-
                     box.className = "w-28 h-28 bg-white flex items-center justify-center border border-slate-300";
-                    if(imgSrcSeguro !== "") {
-                        box.innerHTML = `<img src="${imgSrcSeguro}" class="w-full h-full object-contain">`; 
-                    } else {
-                        box.innerHTML = `<span class="text-rose-500 font-bold">Erro QR</span>`;
-                    }
-                    
-                    btn.innerText = "Finalizar";
-                    btn.disabled = false;
-                    btn.className = CSS_FINALIZAR_HABILITADO;
-                    
+                    if(imgSrcSeguro !== "") box.innerHTML = `<img src="${imgSrcSeguro}" class="w-full h-full object-contain">`; 
+                    else box.innerHTML = `<span class="text-rose-500 font-bold">Erro QR</span>`;
+                    btn.innerText = "Finalizar"; btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO;
                     iniciarMonitoramentoPixAutomatico();
                 } else throw new Error();
-            } catch (e) { 
-                console.error(e); alert("QR Code não foi gerado\nTente novamente"); resetarEstadoPagamento(); 
-            }
+            } catch (e) { alert("QR Code não foi gerado\nTente novamente"); resetarEstadoPagamento(); }
         }
 
         function iniciarMonitoramentoPixAutomatico() {
             if (intervaloPix) clearInterval(intervaloPix); 
             loopEmExecucao = false;
-            
             intervaloPix = setInterval(async () => {
                 if (loopEmExecucao || !pixChaveIdentificadora) return;
-                
                 if (Date.now() - timestampCriacaoPix > CONFIG.TIMEOUT_PIX_MS) { 
-                    clearInterval(intervaloPix); 
-                    alert("Tempo limite de pagamento esgotado"); 
-                    forçarFechamentoSistemico(); 
-                    return; 
+                    clearInterval(intervaloPix); alert("Tempo limite de pagamento esgotado"); forçarFechamentoSistemico(); return; 
                 }
-                
                 loopEmExecucao = true;
                 const pago = await consultarStatusMercadoPagoDireto();
-                
                 if (pago) { 
                     clearInterval(intervaloPix); 
                     if(modoBuscaAtivo === false) aplicarDescontoEstoqueLocal();
                     alert(construirMensagemFichas(extrairItensParaEnvio(), "Sistema Online\nVenda Finalizada!"));
                     resetSistemicoTotal(true);
                 }
-                
                 loopEmExecucao = false;
             }, CONFIG.INTERVALO_MONITORAMENTO_PIX_MS);
         }
@@ -507,22 +457,13 @@
         async function consultarStatusMercadoPagoDireto() {
             if (!pixChaveIdentificadora) return false;
             try {
-                const r = await fetch(CONFIG.URL_MAE, { 
-                    method: "POST", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX', 'CAIXA', null, false, false) 
-                });
-                if (r.ok) {
-                    const data = await r.json();
-                    return data.pago === true;
-                }
+                const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX', 'CAIXA', null, false, false) });
+                if (r.ok) { const data = await r.json(); return data.pago === true; }
                 return false;
-            } catch (erro) { 
-                return false; 
-            }
+            } catch (erro) { return false; }
         }
 
-        function abrirOverlayCelular() { if (window.innerWidth < 1024 || modoResgateManual) { document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; } }
+        function abrirOverlayCelular() { if (window.innerWidth < 1024 || modoResgateManual) document.getElementById("painel-fechamento").className = "fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm"; }
         function fecharOverlay() { if (modoResgateManual) forçarFechamentoSistemico(); else { carrinhoBloqueado = false; renderizarProdutos(); document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center lg:items-start justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; resetarEstadoPagamento(); } }
         function forçarFechamentoSistemico(e) { if(e) { e.stopPropagation(); e.preventDefault(); } if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } pixChaveIdentificadora = ""; document.getElementById("painel-fechamento").className = "hidden lg:flex fixed inset-0 lg:relative bg-black/75 lg:bg-transparent z-50 lg:z-0 items-center lg:items-start justify-center p-4 lg:p-0 backdrop-blur-sm lg:backdrop-blur-none w-full h-full"; document.getElementById("painel-fechamento").classList.add("hidden"); resetSistemicoTotal(true); }
         
@@ -552,15 +493,11 @@
                 if (e.target.id === "input-id-busca") return;
                 iniciado = true;
                 const touch = e.type === "touchstart" ? e.touches[0] : e;
-                
                 const rect = el.getBoundingClientRect();
-                
                 el.classList.remove("left-1/2", "-translate-x-1/2", "bottom-4");
-                
                 el.style.left = rect.left + "px";
                 el.style.bottom = (window.innerHeight - rect.bottom) + "px";
                 el.style.top = "auto"; 
-                
                 xIni = touch.clientX - rect.left;
                 yIni = touch.clientY + parseFloat(el.style.bottom); 
             };
@@ -569,26 +506,19 @@
                 if (!iniciado) return;
                 e.preventDefault(); 
                 const touch = e.type === "touchmove" ? e.touches[0] : e;
-                
                 let nL = touch.clientX - xIni;
                 let nB = yIni - touch.clientY;
-
                 const margemX = el.offsetWidth * 0.70; 
                 const lMin = -margemX; 
                 const lMax = window.innerWidth - (el.offsetWidth * 0.30); 
-
                 if (nL < lMin) nL = lMin;
                 if (nL > lMax) nL = lMax;
-
                 const aMax = window.innerHeight;
                 const hLim = header ? header.offsetHeight : 0;
-                
                 const bMin = 16;
                 const bMax = aMax - el.offsetHeight - hLim - 16;
-
                 if (nB < bMin) nB = bMin;
                 if (nB > bMax) nB = bMax;
-
                 el.style.left = nL + "px";
                 el.style.bottom = nB + "px";
             };
