@@ -81,10 +81,25 @@
     </div>
 
     <script>
-        const URL_LEITURA = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d09b5dd598614a638c009a829b951576/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=vbv-n9UwnA0qzIyFrJyETr8qlFT3z1SHDNtdjycKB14";
-        const URL_MÃE = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/759aee309906488d8f6f525644e3cecd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=qFrqJyAmDgtjntRKYft-QDwgXvavXfjsU-tDNppEUbo";
-        
-        const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-orange-500 bg-orange-50 text-orange-700 font-bold text-sm text-center shadow-sm transition-all", CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 shadow-sm transition-all", CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95", CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed", CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-between min-w-[240px] max-w-xs text-sm";
+        // ==========================================
+        // 1. CONFIGURAÇÕES GERAIS (Mantenha Atualizado)
+        // ==========================================
+        const CONFIG = {
+            URL_LEITURA: "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d09b5dd598614a638c009a829b951576/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=vbv-n9UwnA0qzIyFrJyETr8qlFT3z1SHDNtdjycKB14",
+            URL_MAE: "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/759aee309906488d8f6f525644e3cecd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=qFrqJyAmDgtjntRKYft-QDwgXvavXfjsU-tDNppEUbo",
+            TEMPO_SINCRONIZACAO_MS: 30000,
+            INTERVALO_MONITORAMENTO_PIX_MS: 6000,
+            TIMEOUT_PIX_MS: 600000
+        };
+
+        // ==========================================
+        // 2. INÍCIO DO CÓDIGO DE PRODUÇÃO
+        // ==========================================
+        const CSS_BTN_ATIVO = "py-2.5 rounded-md border border-orange-500 bg-orange-50 text-orange-700 font-bold text-sm text-center shadow-sm transition-all";
+        const CSS_BTN_INATIVO = "py-2.5 rounded-md border border-slate-300 font-semibold text-sm text-center bg-white text-slate-700 shadow-sm transition-all";
+        const CSS_FINALIZAR_HABILITADO = "w-full bg-orange-500 hover:bg-orange-600 text-white font-normal py-3.5 rounded-md text-center text-base shadow cursor-pointer transition-all transform active:scale-95";
+        const CSS_FINALIZAR_DESABILITADO = "w-full bg-slate-200 text-slate-400 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed";
+        const CSS_BASE_FLUTUANTE = "pointer-events-auto text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-between min-w-[240px] max-w-xs text-sm";
 
         let produtos = [], carrinho = {}, formaPagamento = null, totalAtual = 0, pixChaveIdentificadora = "", stringQrCodeBase64Salva = "", modoBuscaAtivo = false, modoResgateManual = false, cachePedidoOnlineOriginal = [], intervaloPix = null, loopEmExecucao = false, timestampCriacaoPix = 0, carrinhoBloqueado = false;
         
@@ -99,7 +114,8 @@
         window.addEventListener('DOMContentLoaded', () => {
             const cache = localStorage.getItem("festa_junina_cardapio");
             if (cache) { produtos = JSON.parse(cache); renderizarProdutos(); }
-            carregarEstoqueReal(); iniciarMotorSincronizacaoOculto();
+            carregarEstoqueReal(); 
+            iniciarMotorSincronizacaoOculto();
             configurarBotaoArrastavel();
         });
 
@@ -113,7 +129,7 @@
 
         async function carregarEstoqueReal(id = "") {
             try {
-                const r = await fetch(URL_LEITURA, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(id).trim() }) });
+                const r = await fetch(CONFIG.URL_LEITURA, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(id).trim() }) });
                 const combo = await r.json();
                 if (combo && combo.produto) { 
                     produtos = combo.produto.map(l => ({ id: parseInt(l.ID || l.id), sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : (l.sigla ? String(l.sigla).trim().toUpperCase() : "??"), nome: l.PRODUTO || l.produto, preco: parseFloat(l.PRECO || l.preco), estoque: parseInt(l.ATUAL || l.estoque_atual) }));
@@ -255,43 +271,37 @@
 
         function salvarNoCacheContingencia(id, forma, tipo, pronto) { 
             let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; 
-            // Trava de deduplicação na contingência
             if (!fila.some(i => i.id_pagamento === String(id).trim())) {
                 fila.push({ id_pagamento: String(id).trim(), pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual || 0), transaction_amount: parseFloat(totalAtual || 0), contingencia: true, itens: pronto }); 
                 localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); 
             }
         }
 
-        // --- SISTEMA REESTRUTURADO: Envia, Confirma e só então Limpa ---
         async function enviarVendaNuvem(id, forma, tipo = "CAIXA", pronto = null, msgExtra = null) {
             const itensProc = extrairItensParaEnvio(pronto);
             
-            // 1. Salva na caixa pendente proativamente (Seguro de vida dos dados)
             salvarNoCacheContingencia(id, forma, tipo, itensProc);
             
             try {
-                // 2. Tenta enviar para a nuvem
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(id, forma, tipo, pronto, true) });
+                const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(id, forma, tipo, pronto, true) });
                 if (!r.ok) throw new Error("Falha HTTP: " + r.status);
                 
-                // 3. Recebeu Confirmação do Servidor (OK)! Removemos a venda da contingência.
                 let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || [];
                 fila = fila.filter(i => i.id_pagamento !== String(id).trim());
                 localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila));
                 
-                // Fluxo normal de finalização visual
                 if(tipo === "CAIXA") aplicarDescontoEstoqueLocal();
                 
-                await delay(1000); // Aguarda leitura segura do banco
-                await carregarEstoqueReal(); 
-                alert(msgExtra || construirMensagemFichas(itensProc)); 
-                resetSistemicoTotal(true);
+                setTimeout(async () => {
+                    await carregarEstoqueReal(); 
+                    alert(msgExtra || construirMensagemFichas(itensProc)); 
+                    resetSistemicoTotal(true);
+                }, 100);
             } catch (e) { 
-                // 4. Erro de Servidor ou Rede: A venda FICARÁ no localStorage para o motor buscar depois.
                 console.warn("Retido em contingência local por instabilidade:", e);
-                if(tipo === "CAIXA") aplicarDescontoEstoqueLocal(); // Abate do visual para o operador não se perder
+                if(tipo === "CAIXA") aplicarDescontoEstoqueLocal();
                 alert("Rede Instável ou Servidor Ocupado.\nVenda salva no modo de contingência com segurança!");
-                resetSistemicoTotal(false); // False não tenta recarregar do banco agora
+                resetSistemicoTotal(false); 
             }
         }
 
@@ -309,7 +319,7 @@
         }
 
         async function processarCliqueFinalizar() {
-            if (estaProcessando) return; // TRAVA DE SEGURANÇA (Impede clique duplo ou atropelamento do bot)
+            if (estaProcessando) return; 
             estaProcessando = true;
 
             try {
@@ -326,7 +336,7 @@
                     const d = new Date();
                     let idDin = `6${String(d.getFullYear()).slice(-2)}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}${String(d.getSeconds()).padStart(2,'0')}${String(d.getMilliseconds()).padStart(3,'0').slice(0,2)}`;
         
-                    let lento = (botExecutando && document.getElementById("select-bot-cenario").value === "3");
+                    let lento = (typeof botExecutando !== 'undefined' && botExecutando && document.getElementById("select-bot-cenario") && document.getElementById("select-bot-cenario").value === "3");
                     if (!net || lento) {
                         tratarContingenciaOffline(idDin, "DINHEIRO", "CAIXA", null, lento ? "Sistema lento\nFinalizar venda em contingência?" : "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
                     } else { 
@@ -334,7 +344,8 @@
                     }
                 } else if (formaPagamento === 'PIX') {
                     if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) { alert("QR Code não foi gerado.\nNão é possível finalizar em contingência."); reabrirVisualBotaoFinalizar(); return; }
-                    let lentoPix = (botExecutando && document.getElementById("select-bot-cenario").value === "8");
+                    
+                    let lentoPix = (typeof botExecutando !== 'undefined' && botExecutando && document.getElementById("select-bot-cenario") && document.getElementById("select-bot-cenario").value === "8");
                     if (!net || lentoPix) {
                         tratarContingenciaOffline(pixChaveIdentificadora, "PIX", "CAIXA", extrairItensParaEnvio(), lentoPix ? "Sistema lento\nFinalizar venda?" : "Sistema offline\nFinalizar venda?", "Venda Finalizada!", true);
                     }
@@ -352,7 +363,7 @@
                     }
                 }
             } finally {
-                estaProcessando = false; // LIBERA A TRAVA AO FINAL DE TUDO (Sucesso ou Erro)
+                estaProcessando = false; 
             }
         }
 
@@ -394,7 +405,7 @@
             box.innerHTML = `<span>Carregando...</span>`; pixChaveIdentificadora = "mp_" + Date.now(); timestampCriacaoPix = Date.now();
             btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
+                const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
                 if (d.id_mercado_pago === "BLOQUEADO" || d.mensagem && d.mensagem !== "novo") {
                     box.className = "w-28 h-28 bg-slate-300 border border-slate-400 flex items-center justify-center text-center p-1 select-none pointer-events-none";
                     box.innerHTML = `<span class="text-[10px] font-bold text-slate-600 uppercase tracking-tight leading-tight">Pedido<br>Bloqueado</span>`;
@@ -414,20 +425,20 @@
             if (intervaloPix) clearInterval(intervaloPix); loopEmExecucao = false;
             intervaloPix = setInterval(async () => {
                 if (loopEmExecucao || !pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return;
-                if (Date.now() - timestampCriacaoPix > 600000) { clearInterval(intervaloPix); alert("Tempo limite esgotado"); forçarFechamentoSistemico(); return; }
+                if (Date.now() - timestampCriacaoPix > CONFIG.TIMEOUT_PIX_MS) { clearInterval(intervaloPix); alert("Tempo limite esgotado"); forçarFechamentoSistemico(); return; }
                 loopEmExecucao = true;
                 if (await consultarStatusMercadoPagoDireto()) { 
                     clearInterval(intervaloPix); 
                     await enviarVendaNuvem(pixChaveIdentificadora, 'PIX'); 
                 }
                 loopEmExecucao = false;
-            }, 6000);
+            }, CONFIG.INTERVALO_MONITORAMENTO_PIX_MS);
         }
 
         async function consultarStatusMercadoPagoDireto() {
             if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return false;
             try {
-                const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "CAIXA", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual) }) });
+                const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "CAIXA", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual) }) });
                 return r.ok && (await r.json()).pago === true;
             } catch (erro) { return false; }
         }
@@ -459,28 +470,27 @@
         // --- Motor de Sincronização Protegido ---
         function iniciarMotorSincronizacaoOculto() { 
             setInterval(async () => { 
-                if (estaProcessando) return; // Se o operador ou robô está finalizando venda, o motor fica quietinho.
+                if (estaProcessando) return; 
                 
                 let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; 
                 if (fila.length === 0 || !(await diagnosticarInternetEstavel())) return; 
                 
-                estaProcessando = true; // Sobe a trava: Motor trabalhando!
+                estaProcessando = true; 
                 try { 
                     const pacote = { id_pagamento: String(fila[0].id_pagamento), pagamento: String(fila[0].pagamento), tipo_venda: String(fila[0].tipo_venda), status_retirada: "retirado", total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado), transaction_amount: parseFloat(fila[0].transaction_amount), contingencia: true, itens: extrairItensParaEnvio(fila[0].itens) }; 
-                    const r = await fetch(URL_MÃE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacote) }); 
+                    const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacote) }); 
                     if (r.ok) { 
-                        fila.shift(); // Só remove da fila se o servidor retornar 200 OK
+                        fila.shift(); 
                         localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); 
                     } 
                 } catch (err) { 
                     console.error("Erro na sincronização oculta.", err); 
                 } finally {
-                    estaProcessando = false; // Desce a trava: Motor terminou.
+                    estaProcessando = false; 
                 }
-            }, 30000); 
+            }, CONFIG.TEMPO_SINCRONIZACAO_MS); 
         }
 
-        // TRAVA DE MOVIMENTO - BOTÃO FLUTUANTE
         function configurarBotaoArrastavel() {
             const el = document.getElementById("container-botao-flutuante");
             const header = document.getElementById("barra-superior");
@@ -779,8 +789,6 @@
             
             let idBuscaOficial = "160829952160";
 
-            // NOTA: Em todo cenário em que o robô clicar para finalizar, ele usará o 'await'
-            // para que a trava (estaProcessando) faça o robô esperar respeitosamente a nuvem.
             switch(c) {
                 case "1":
                     logTerminal("--- CENÁRIO 1: Dinheiro Normal ---", "orange");
@@ -789,7 +797,7 @@
                     await delay(obterDelayBot()); abrirOverlayCelular(); await delay(obterDelayBot()); selecionarPagamento('DINHEIRO'); await delay(obterDelayBot());
                     let vRec = String((Math.ceil(totalAtual / 10) * 10) * 100); await emularDigitacaoInput("input-recebido", vRec); tratarMascaraDinheiro(document.getElementById("input-recebido")); await delay(obterDelayBot());
                     logTerminal("Enviando venda (ID 16 dígitos)...", "orange");
-                    await processarCliqueFinalizar(); // <- Agora o robô aguarda o processo terminar integralmente
+                    await processarCliqueFinalizar();
                     await delay(obterDelayBot() + 2000);
                     break;
 
@@ -923,5 +931,5 @@
             logTerminal(`Cenário ${c} concluído.`, "green");
         }
     </script>
-</body>
+    </body>
 </html>
