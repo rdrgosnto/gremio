@@ -255,7 +255,8 @@
             return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
         };
 
-        const gerarPayloadVenda = (id, forma, tipo = "CAIXA", pronto = null, cont = true) => {
+        // --- ALTERAÇÃO AQUI: Parâmetro gerarCode inserido no final ---
+        const gerarPayloadVenda = (id, forma, tipo = "CAIXA", pronto = null, cont = true, gerarCode = false) => {
             const obj = { 
                 id_pagamento: String(id || "").trim(), 
                 pagamento: String(forma || ""), 
@@ -264,6 +265,7 @@
                 total_pedido_consolidado: parseFloat(totalAtual || 0), 
                 transaction_amount: parseFloat(totalAtual || 0), 
                 contingencia: !!cont, 
+                gerar_code: gerarCode, // O campo que fará o Power Automate "passar reto"
                 itens: extrairItensParaEnvio(pronto) 
             };
             return JSON.stringify(obj);
@@ -272,7 +274,7 @@
         function salvarNoCacheContingencia(id, forma, tipo, pronto) { 
             let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || []; 
             if (!fila.some(i => i.id_pagamento === String(id).trim())) {
-                fila.push({ id_pagamento: String(id).trim(), pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual || 0), transaction_amount: parseFloat(totalAtual || 0), contingencia: true, itens: pronto }); 
+                fila.push({ id_pagamento: String(id).trim(), pagamento: forma, tipo_venda: tipo, status_retirada: "retirado", total_pedido_consolidado: parseFloat(totalAtual || 0), transaction_amount: parseFloat(totalAtual || 0), contingencia: true, gerar_code: false, itens: pronto }); 
                 localStorage.setItem("festa_junina_contingencia", JSON.stringify(fila)); 
             }
         }
@@ -283,7 +285,8 @@
             salvarNoCacheContingencia(id, forma, tipo, itensProc);
             
             try {
-                const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(id, forma, tipo, pronto, true) });
+                // Aqui gerarCode = false, pois é finalização
+                const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(id, forma, tipo, pronto, true, false) });
                 if (!r.ok) throw new Error("Falha HTTP: " + r.status);
                 
                 let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia")) || [];
@@ -404,21 +407,49 @@
             box.className = "w-28 h-28 bg-white border border-slate-300 text-[10px] font-bold text-slate-400 uppercase text-center flex flex-col items-center justify-center p-2 pointer-events-none";
             box.innerHTML = `<span>Carregando...</span>`; pixChaveIdentificadora = "mp_" + Date.now(); timestampCriacaoPix = Date.now();
             btn.disabled = true; btn.className = CSS_FINALIZAR_DESABILITADO;
+            
             try {
-                const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX') }); const d = await r.json();
-                if (d.id_mercado_pago === "BLOQUEADO" || d.mensagem && d.mensagem !== "novo") {
+                // --- ALTERAÇÃO AQUI: gerarCode = true enviado para o Power Automate ---
+                const r = await fetch(CONFIG.URL_MAE, { 
+                    method: "POST", 
+                    headers: { "Content-Type": "application/json" }, 
+                    body: gerarPayloadVenda(pixChaveIdentificadora, 'PIX', 'CAIXA', null, false, true) 
+                }); 
+                const d = await r.json();
+                
+                if (d.id_mercado_pago === "BLOQUEADO" || d.mensagem && d.mensagem !== "novo" && d.mensagem !== "processado") {
                     box.className = "w-28 h-28 bg-slate-300 border border-slate-400 flex items-center justify-center text-center p-1 select-none pointer-events-none";
                     box.innerHTML = `<span class="text-[10px] font-bold text-slate-600 uppercase tracking-tight leading-tight">Pedido<br>Bloqueado</span>`;
                     resetarEstadoPagamento(); alert(d.mensagem || "Pedido online indisponível."); return;
                 }
+                
                 if (d.id_mercado_pago) {
-                    pixChaveIdentificadora = String(d.id_mercado_pago).trim(); stringQrCodeBase64Salva = d.qrcode_imagem;
+                    pixChaveIdentificadora = String(d.id_mercado_pago).trim(); 
+                    stringQrCodeBase64Salva = d.qrcode_imagem || "";
+                    
+                    // Tratamento seguro para imagem: se já vier com "data:image", usa direto, senão adiciona o prefixo.
+                    let imgSrcSeguro = "";
+                    if (stringQrCodeBase64Salva && stringQrCodeBase64Salva.startsWith('data:image')) {
+                        imgSrcSeguro = stringQrCodeBase64Salva;
+                    } else if (stringQrCodeBase64Salva) {
+                        imgSrcSeguro = `data:image/png;base64,${stringQrCodeBase64Salva}`;
+                    }
+
+                    // --- ALTERAÇÃO AQUI: Renderiza o Base64 tratado ---
                     box.className = "w-28 h-28 bg-white flex items-center justify-center border border-slate-300";
-                    box.innerHTML = `<img src="data:image/jpeg;base64,${stringQrCodeBase64Salva}" class="w-full h-full object-contain">`; btn.innerText = "Finalizar";
+                    if(imgSrcSeguro !== "") {
+                        box.innerHTML = `<img src="${imgSrcSeguro}" class="w-full h-full object-contain">`; 
+                        console.log("QR Code renderizado com sucesso no DOM!");
+                    } else {
+                        box.innerHTML = `<span class="text-rose-500 font-bold">Erro QR</span>`;
+                        console.warn("Power Automate retornou o campo qrcode_imagem vazio ou null.");
+                    }
+                    
+                    btn.innerText = "Finalizar";
                     setTimeout(() => { if (formaPagamento === 'PIX' && pixChaveIdentificadora !== "" && !pixChaveIdentificadora.startsWith("mp_")) { btn.disabled = false; btn.className = CSS_FINALIZAR_HABILITADO; } }, 12000);
                     iniciarMonitoramentoPixAutomatico();
                 } else throw new Error();
-            } catch (e) { alert("Falha ao gerar QR Code"); resetarEstadoPagamento(); }
+            } catch (e) { console.error(e); alert("Falha ao gerar QR Code. Tente novamente."); resetarEstadoPagamento(); }
         }
 
         function iniciarMonitoramentoPixAutomatico() {
@@ -438,7 +469,7 @@
         async function consultarStatusMercadoPagoDireto() {
             if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return false;
             try {
-                const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "CAIXA", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual) }) });
+                const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_pagamento: String(pixChaveIdentificadora).trim(), pagamento: "PIX", tipo_venda: "CAIXA", total_pedido_consolidado: parseFloat(totalAtual), transaction_amount: parseFloat(totalAtual), gerar_code: false }) });
                 return r.ok && (await r.json()).pago === true;
             } catch (erro) { return false; }
         }
@@ -477,7 +508,7 @@
                 
                 estaProcessando = true; 
                 try { 
-                    const pacote = { id_pagamento: String(fila[0].id_pagamento), pagamento: String(fila[0].pagamento), tipo_venda: String(fila[0].tipo_venda), status_retirada: "retirado", total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado), transaction_amount: parseFloat(fila[0].transaction_amount), contingencia: true, itens: extrairItensParaEnvio(fila[0].itens) }; 
+                    const pacote = { id_pagamento: String(fila[0].id_pagamento), pagamento: String(fila[0].pagamento), tipo_venda: String(fila[0].tipo_venda), status_retirada: "retirado", total_pedido_consolidado: parseFloat(fila[0].total_pedido_consolidado), transaction_amount: parseFloat(fila[0].transaction_amount), contingencia: true, gerar_code: false, itens: extrairItensParaEnvio(fila[0].itens) }; 
                     const r = await fetch(CONFIG.URL_MAE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pacote) }); 
                     if (r.ok) { 
                         fila.shift(); 
