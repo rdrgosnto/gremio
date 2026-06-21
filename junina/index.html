@@ -246,7 +246,7 @@
 
         const extrairItensParaEnvio = (pronto = null) => {
             if (pronto) return pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.id_produto || i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) }));
-            return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
+            return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
         };
 
         const gerarPayloadVenda = (id, forma, tipo = "CAIXA", pronto = null, isContingencia = false, gerarCode = false) => {
@@ -291,6 +291,7 @@
                     if (!net) {
                         alert("Sistema Offline\nTente novamente");
                         reabrirVisualBotaoFinalizar();
+                        estaProcessando = false;
                         return;
                     }
                     try {
@@ -301,6 +302,7 @@
                     } catch (e) {
                         alert("Sistema Offline\nTente novamente");
                         reabrirVisualBotaoFinalizar();
+                        estaProcessando = false;
                     }
                     return;
                 }
@@ -313,6 +315,7 @@
                     if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) { 
                         alert("QR Code não foi gerado\nTente novamente"); 
                         reabrirVisualBotaoFinalizar(); 
+                        estaProcessando = false;
                         return; 
                     }
                     idVenda = pixChaveIdentificadora;
@@ -328,6 +331,7 @@
                         if (!pago) { 
                             alert("Pagamento Pendente\nTente novamente"); 
                             reabrirVisualBotaoFinalizar(); 
+                            estaProcessando = false;
                             return; 
                         }
                         if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
@@ -363,10 +367,12 @@
                         tentarSincronizarContingencia();
                     } else {
                         reabrirVisualBotaoFinalizar();
+                        estaProcessando = false;
                     }
                 }
-            } finally {
-                estaProcessando = false; 
+            } catch (e) {
+                reabrirVisualBotaoFinalizar();
+                estaProcessando = false;
             }
         }
 
