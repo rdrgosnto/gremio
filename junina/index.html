@@ -336,8 +336,8 @@
                 }
                 
                 let tempoDecorridoPix = Date.now() - timestampCriacaoPix;
-                // Altere o valor abaixo (25000) se quiser mudar o tempo de tolerância do PIX (em milissegundos)
-                let forcarContingenciaPix = (formaPagamento === 'PIX' && tempoDecorridoPix >= 25000);
+                // Altere o valor abaixo (29000) se quiser mudar o tempo de tolerância do PIX (em milissegundos)
+                let forcarContingenciaPix = (formaPagamento === 'PIX' && tempoDecorridoPix >= 29000);
                 let onlineFalhou = !net || forcarContingenciaPix;
                 
                 if (net && !forcarContingenciaPix) {
