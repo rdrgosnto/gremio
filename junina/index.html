@@ -320,7 +320,7 @@
                     let idDin = `6${String(d.getFullYear()).slice(-2)}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}${String(d.getSeconds()).padStart(2,'0')}${String(d.getMilliseconds()).padStart(3,'0').slice(0,2)}`;
         
                     if (!net) {
-                        await forcarContingenciaNuvem(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline.\nTentar forçar venda em contingência?");
+                        await forcarContingenciaNuvem(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline.\nFinalizar venda?");
                     } else { 
                         await enviarVendaNuvem(idDin, "DINHEIRO", "CAIXA", null, null, false); 
                     }
@@ -335,7 +335,7 @@
                     
                     if (!net || tempoDecorrido >= 59000) { 
                         if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
-                        await forcarContingenciaNuvem(pixChaveIdentificadora, "PIX", "CAIXA", null, "Forçar aprovação desta venda PIX?\n(O cliente já pagou?)"); 
+                        await forcarContingenciaNuvem(pixChaveIdentificadora, "PIX", "CAIXA", null, "Finalizar venda?"); 
                     } else { 
                         // Verificação manual imediata se clicou antes dos 59s
                         const pago = await consultarStatusMercadoPagoDireto();
@@ -345,7 +345,7 @@
                             alert(construirMensagemFichas(extrairItensParaEnvio()));
                             resetSistemicoTotal(true);
                         } else { 
-                            alert("Pagamento Pendente no Mercado Pago.\nAguarde ou tente novamente."); 
+                            alert("Pagamento Pendente.\nTente novamente."); 
                             reabrirVisualBotaoFinalizar(); 
                         } 
                     }
