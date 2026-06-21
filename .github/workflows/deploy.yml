@@ -20,5 +20,5 @@ jobs:
       - name: Publicar no GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: junina
+          folder: . # MUDADO AQUI: Publica o repositório inteiro preservando as pastas
           branch: gh-pages
