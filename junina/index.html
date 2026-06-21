@@ -246,7 +246,7 @@
 
         const extrairItensParaEnvio = (pronto = null) => {
             if (pronto) return pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.id_produto || i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) }));
-            return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
+            return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
         };
 
         const gerarPayloadVenda = (id, forma, tipo = "CAIXA", pronto = null, isContingencia = false, gerarCode = false) => {
@@ -281,10 +281,10 @@
             if (estaProcessando) return; 
             estaProcessando = true;
 
+            const btn = document.getElementById("btn-finalizar"); 
+            btn.disabled = true; btn.innerText = "Processando..."; btn.className = CSS_FINALIZAR_DESABILITADO;
+
             try {
-                const btn = document.getElementById("btn-finalizar"); 
-                btn.disabled = true; btn.innerText = "Processando..."; btn.className = CSS_FINALIZAR_DESABILITADO;
-                
                 const net = await diagnosticarInternetEstavel();
                 
                 if (modoResgateManual) {
