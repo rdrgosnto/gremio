@@ -281,15 +281,15 @@
                     resetSistemicoTotal(true);
                 }, 100);
             } catch (e) { 
-                console.error("Erro na comunicação.", e);
-                alert("Falha de comunicação com o servidor.\nTente novamente.");
+                console.error("Erro na comunicação com a nuvem:", e);
+                alert("Falha de comunicação com o servidor.\nVerifique sua internet ou tente novamente.");
                 reabrirVisualBotaoFinalizar();
             }
         }
 
         async function forcarContingenciaNuvem(id, forma, tipo, itens, msg) {
             if (confirm(msg)) {
-                await enviarVendaNuvem(id, forma, tipo, itens, "Venda finalizada!", true);
+                await enviarVendaNuvem(id, forma, tipo, itens, "Venda finalizada forçadamente!", true);
             } else {
                 reabrirVisualBotaoFinalizar();
             }
@@ -307,7 +307,7 @@
                 
                 if (modoResgateManual) {
                     if (!net) {
-                        alert("Sistema offline.");
+                        alert("Sistema offline.\nNão é possível dar baixa no pedido online.");
                         reabrirVisualBotaoFinalizar();
                     } else {
                         await enviarVendaNuvem(pixChaveIdentificadora, "PIX", "ONLINE", cachePedidoOnlineOriginal, "Produto Entregue!", false); 
@@ -320,13 +320,13 @@
                     let idDin = `6${String(d.getFullYear()).slice(-2)}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}${String(d.getSeconds()).padStart(2,'0')}${String(d.getMilliseconds()).padStart(3,'0').slice(0,2)}`;
         
                     if (!net) {
-                        await forcarContingenciaNuvem(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline.\nFinalizar venda?");
+                        await forcarContingenciaNuvem(idDin, "DINHEIRO", "CAIXA", null, "Sistema offline.\nTentar forçar venda em contingência?");
                     } else { 
                         await enviarVendaNuvem(idDin, "DINHEIRO", "CAIXA", null, null, false); 
                     }
                 } else if (formaPagamento === 'PIX') {
                     if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) { 
-                        alert("QR Code não gerado."); 
+                        alert("QR Code não foi gerado.\nNão é possível finalizar."); 
                         reabrirVisualBotaoFinalizar(); 
                         return; 
                     }
@@ -335,7 +335,7 @@
                     
                     if (!net || tempoDecorrido >= 59000) { 
                         if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
-                        await forcarContingenciaNuvem(pixChaveIdentificadora, "PIX", "CAIXA", null, "Finalizar venda?"); 
+                        await forcarContingenciaNuvem(pixChaveIdentificadora, "PIX", "CAIXA", null, "Forçar aprovação desta venda PIX?\n(O cliente já pagou?)"); 
                     } else { 
                         // Verificação manual imediata se clicou antes dos 59s
                         const pago = await consultarStatusMercadoPagoDireto();
@@ -345,7 +345,7 @@
                             alert(construirMensagemFichas(extrairItensParaEnvio()));
                             resetSistemicoTotal(true);
                         } else { 
-                            alert("Pagamento Pendente."); 
+                            alert("Pagamento Pendente no Mercado Pago.\nAguarde ou tente novamente."); 
                             reabrirVisualBotaoFinalizar(); 
                         } 
                     }
@@ -444,7 +444,7 @@
             loopEmExecucao = false;
             
             intervaloPix = setInterval(async () => {
-                if (loopEmExecucao || !pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return;
+                if (loopEmExecucao || !pixChaveIdentificadora) return;
                 
                 if (Date.now() - timestampCriacaoPix > CONFIG.TIMEOUT_PIX_MS) { 
                     clearInterval(intervaloPix); 
@@ -468,7 +468,7 @@
         }
 
         async function consultarStatusMercadoPagoDireto() {
-            if (!pixChaveIdentificadora || pixChaveIdentificadora.startsWith("mp_")) return false;
+            if (!pixChaveIdentificadora) return false;
             try {
                 const r = await fetch(CONFIG.URL_MAE, { 
                     method: "POST", 
