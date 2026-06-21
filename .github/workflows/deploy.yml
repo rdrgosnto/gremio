@@ -14,8 +14,8 @@ jobs:
 
       - name: Injetar as URLs Secretas no HTML
         run: |
-          sed -i "s#URL_MAE:.*#URL_MAE: \"${{ secrets.URL_MAE }}\",#g" junina/index.html
-          sed -i "s#URL_LEITURA:.*#URL_LEITURA: \"${{ secrets.URL_LEITURA }}\",#g" junina/index.html
+          sed -i 's#placeholder_url_mae#${{ secrets.URL_MAE }}#g' junina/index.html
+          sed -i 's#placeholder_url_leitura#${{ secrets.URL_LEITURA }}#g' junina/index.html
 
       - name: Publicar no GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
