@@ -81,9 +81,7 @@
     </div>
 
     <script>
-        // ==========================================
-        // 1. CONFIGURAÇÕES GERAIS
-        // ==========================================
+   
         const CONFIG = {
             URL_LEITURA: "placeholder_url_leitura",
             URL_MAE: "placeholder_url_mae",
@@ -335,9 +333,9 @@
                     
                     if (!net || tempoDecorrido >= 59000) { 
                         if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
-                        await forcarContingenciaNuvem(pixChaveIdentificadora, "PIX", "CAIXA", null, "Finalizar venda?"); 
+                        await forcarContingenciaNuvem(pixChaveIdentificadora, "PIX", "CAIXA", null, "Sistema offline.\nFinalizar venda?"); 
                     } else { 
-                        // Verificação manual imediata se clicou antes dos 59s
+  
                         const pago = await consultarStatusMercadoPagoDireto();
                         if (pago) { 
                             if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; } 
@@ -507,13 +505,69 @@
         function processarResultadoBuscaPedido(linhas, id) { const lines = linhas.filter(l => String(l.ID_PAGAMENTO).trim() === String(id).trim()); if (lines.length === 0) { renderBotaoFlutuante("pointer-events-auto bg-rose-600 text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-shadow duration-300 flex items-center justify-center min-w-[240px] max-w-xs cursor-pointer select-none text-sm", `<span>Não encontrado</span>`); setTimeout(() => forçarFechamentoSistemico(), 2000); return; } modoResgateManual = true; modoBuscaAtivo = false; pixChaveIdentificadora = String(id).trim(); cachePedidoOnlineOriginal = lines.map(l => ({ sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : "PRE", produto: l.PRODUTO ? String(l.PRODUTO).trim() : "Produto Online", grandmother_id: parseInt(l.id_produto || l.ID || l.id || l.GRANDMOTHER_ID || 0), quantidade: parseInt(l.QUANTIDADE) || 1, preco: parseFloat(l.PRECO) || 0, total: parseFloat(l.TOTAL) || 0 })); carrinhoBloqueado = true; renderizarProdutos(); document.getElementById("titulo-checkout").innerText = "PAGAMENTO"; document.getElementById("titulo-checkout").className = "text-sm font-semibold text-slate-700 text-center uppercase tracking-wider border-b pb-2 transition-colors duration-200"; document.getElementById("bloco-inferior-pagamento").className = "hidden pointer-events-none"; const cabId = document.getElementById("id-pedido-cabecalho"); cabId.innerText = `ID: ${id}`; cabId.classList.remove("hidden"); const btn = document.getElementById("btn-finalizar"); btn.disabled = false; btn.innerText = "Finalizar"; btn.className = CSS_FINALIZAR_HABILITADO; const lista = document.getElementById("lista-carrinho"); lista.innerHTML = ""; let valCons = 0; lines.forEach(linha => { const tot = parseFloat(linha.TOTAL) || 0; valCons += tot; let ent = (linha.RETIRADA ? String(linha.RETIRADA).trim().toLowerCase() : "pendente") === "retirado"; if (ent) { btn.disabled = true; btn.innerText = "Produto Entregue!"; btn.className = "w-full bg-slate-300 text-slate-500 font-normal py-3.5 rounded-md text-center text-base cursor-not-allowed"; } lista.innerHTML += `<div class="flex justify-between items-center bg-white p-[6px] rounded-md border border-slate-200 shadow-sm font-sistema"><div class="max-w-[70%] min-w-0"><p class="font-semibold text-slate-700 truncate text-[14px]">${linha.PRODUTO || linha.produto}</p><p class="text-[12px] text-slate-400 mt-0.5">${parseInt(linha.QUANTIDADE) || 1}x R$ ${formatarMoeda(parseFloat(linha.PRECO) || 0)}</p></div><div class="text-right flex-shrink-0 pl-2"><p class="font-semibold text-slate-700 text-[16px]">R$ ${formatarMoeda(tot)}</p>${ent ? '<span class="text-rose-500 font-bold text-[12px] block mt-0.5">[ENTREGUE]</span>' : '<span class="text-amber-600 font-bold text-[12px] block mt-0.5">[PENDENTE]</span>'}</div></div>`; }); document.getElementById("valor-pedido-txt").innerText = `R$ ${formatarMoeda(valCons)}`; totalAtual = valCons; if (window.innerWidth >= 1024) renderBotaoFlutuante(`bg-slate-800 ${CSS_BASE_FLUTUANTE} cursor-default`, `<div class="text-left font-medium text-sm select-none whitespace-nowrap">ID do Pagamento:</div><div class="font-medium text-sm select-none truncate px-2 text-center flex-1">${id}</div><div onclick="forçarFechamentoSistemico(event)" class="text-sm font-medium text-white/60 hover:text-white cursor-pointer select-none whitespace-nowrap transition-colors text-right">Sair</div>`, true); else abrirOverlayCelular(); }
 
         function configurarBotaoArrastavel() {
-            const el = document.getElementById("container-botao-flutuante"), header = document.getElementById("barra-superior");
-            let iniciado = false, xAt = 0, yAt = 0, xIni = 0, yIni = 0;
-            const onStart = (e) => { if (e.target.id === "input-id-busca") return; iniciado = true; const touch = e.type === "touchstart" ? e.touches[0] : e; if (!el.style.left || el.style.left.includes("%")) { const r = el.getBoundingClientRect(); el.style.left = r.left + "px"; el.style.bottom = "auto"; el.style.top = r.top + "px"; el.classList.remove("left-1/2", "-translate-x-1/2"); } xIni = touch.clientX - el.offsetLeft; yIni = touch.clientY - el.offsetTop; };
-            const onMove = (e) => { if (!iniciado) return; e.preventDefault(); const touch = e.type === "touchmove" ? e.touches[0] : e; let nL = touch.clientX - xIni, nT = touch.clientY - yIni; const lMax = window.innerWidth - el.offsetWidth - 16, aMax = window.innerHeight - el.offsetHeight - 16, hLim = header ? header.offsetHeight + 16 : 64; if (nL < 16) nL = 16; if (nL > lMax) nL = lMax; if (nT < hLim) nT = hLim; if (nT > aMax) nT = aMax; el.style.left = nL + "px"; el.style.top = nT + "px"; };
+            const el = document.getElementById("container-botao-flutuante");
+            const header = document.getElementById("barra-superior");
+            let iniciado = false, xIni = 0, yIni = 0;
+
+            const onStart = (e) => {
+                if (e.target.id === "input-id-busca") return;
+                iniciado = true;
+                const touch = e.type === "touchstart" ? e.touches[0] : e;
+                
+                const rect = el.getBoundingClientRect();
+                
+                el.classList.remove("left-1/2", "-translate-x-1/2", "bottom-4");
+                
+                el.style.left = rect.left + "px";
+
+                el.style.bottom = (window.innerHeight - rect.bottom) + "px";
+                el.style.top = "auto"; // Garante que top não interfira
+                
+                xIni = touch.clientX - rect.left;
+
+                yIni = touch.clientY + parseFloat(el.style.bottom); 
+            };
+
+            const onMove = (e) => {
+                if (!iniciado) return;
+                e.preventDefault(); // Impede rolagem enquanto arrasta
+                const touch = e.type === "touchmove" ? e.touches[0] : e;
+                
+                let nL = touch.clientX - xIni;
+
+                let nB = yIni - touch.clientY;
+
+                const margemX = el.offsetWidth * 0.70; 
+
+                const lMin = -margemX; 
+
+                const lMax = window.innerWidth - (el.offsetWidth * 0.30); 
+
+                if (nL < lMin) nL = lMin;
+                if (nL > lMax) nL = lMax;
+
+                const aMax = window.innerHeight;
+                const hLim = header ? header.offsetHeight : 0;
+                
+                const bMin = 16;
+
+                const bMax = aMax - el.offsetHeight - hLim - 16;
+
+                if (nB < bMin) nB = bMin;
+                if (nB > bMax) nB = bMax;
+
+                el.style.left = nL + "px";
+                el.style.bottom = nB + "px";
+            };
+
             const onEnd = () => iniciado = false;
-            el.addEventListener("mousedown", onStart); window.addEventListener("mousemove", onMove); window.addEventListener("mouseup", onEnd);
-            el.addEventListener("touchstart", onStart, { passive: false }); window.addEventListener("touchmove", onMove, { passive: false }); window.addEventListener("touchend", onEnd);
+
+            el.addEventListener("mousedown", onStart); 
+            window.addEventListener("mousemove", onMove, { passive: false }); 
+            window.addEventListener("mouseup", onEnd);
+            el.addEventListener("touchstart", onStart, { passive: false }); 
+            window.addEventListener("touchmove", onMove, { passive: false }); 
+            window.addEventListener("touchend", onEnd);
         }
     </script>
 </body>
