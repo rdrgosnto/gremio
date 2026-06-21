@@ -103,6 +103,13 @@
         const renderBotaoFlutuante = (estilo, html, limpar = false) => { const bf = document.getElementById("caixa-flutuante-base"); bf.className = estilo; bf.innerHTML = html; bf.onclick = limpar ? null : abrirOverlayCelular; };
 
         window.addEventListener('DOMContentLoaded', () => {
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(() => console.log('Service Worker registrado com sucesso!'))
+                    .catch(err => console.error('Erro ao registrar Service Worker:', err));
+            }
+
             const cache = localStorage.getItem("festa_junina_cardapio");
             if (cache) { produtos = JSON.parse(cache); renderizarProdutos(); }
             carregarEstoqueReal(); 
