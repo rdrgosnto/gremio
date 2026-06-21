@@ -12,15 +12,30 @@ jobs:
       - name: Inspecionar o código
         uses: actions/checkout@v4
 
-      - name: Injetar as URLs Secretas no HTML via Node
+      - name: Injetar as URLs Secretas nos HTMLs via Node
         run: |
           node -e '
             const fs = require("fs");
-            const caminho = "junina/index.html";
-            let html = fs.readFileSync(caminho, "utf8");
-            html = html.replace("placeholder_url_mae", "${{ secrets.URL_MAE }}");
-            html = html.replace("placeholder_url_leitura", "${{ secrets.URL_LEITURA }}");
-            fs.writeFileSync(caminho, html, "utf8");
+            
+            // 1. Atualiza o index.html da Raiz (Sistema Principal com os fluxos novos)
+            const caminhoRaiz = "index.html";
+            if (fs.existsSync(caminhoRaiz)) {
+              let htmlRaiz = fs.readFileSync(caminhoRaiz, "utf8");
+              htmlRaiz = htmlRaiz.replace("placeholder_gerar_pix", "${{ secrets.URL_GERAR_PIX }}");
+              htmlRaiz = htmlRaiz.replace("placeholder_validar_pagamento", "${{ secrets.URL_VALIDAR_PAGAMENTO }}");
+              fs.writeFileSync(caminhoRaiz, htmlRaiz, "utf8");
+              console.log("URLs do Fluxo Novo (Pix/Validação) injetadas na Raiz.");
+            }
+            
+            // 2. Atualiza o index.html da subpasta (Festa Junina - Continua isolado)
+            const caminhoJunina = "junina/index.html";
+            if (fs.existsSync(caminhoJunina)) {
+              let htmlJunina = fs.readFileSync(caminhoJunina, "utf8");
+              htmlJunina = htmlJunina.replace("placeholder_url_mae", "${{ secrets.URL_MAE }}");
+              htmlJunina = htmlJunina.replace("placeholder_url_leitura", "${{ secrets.URL_LEITURA }}");
+              fs.writeFileSync(caminhoJunina, htmlJunina, "utf8");
+              console.log("URLs da Festa Junina injetadas com sucesso.");
+            }
           '
 
       - name: Publicar no GitHub Pages
