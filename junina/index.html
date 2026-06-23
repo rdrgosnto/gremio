@@ -107,9 +107,6 @@
         const liberarExibicaoSegura = () => { document.documentElement.style.visibility = document.body.style.visibility = "visible"; document.documentElement.style.opacity = document.body.style.opacity = "1"; };
         const renderBotaoFlutuante = (estilo, html, limpar = false) => { const bf = document.getElementById("caixa-flutuante-base"); bf.className = estilo; bf.innerHTML = html; bf.onclick = limpar ? null : abrirOverlayCelular; };
 
-        // ==========================================
-        // ENGENHARIA DO LOGIN ULTRA-MINIMALISTA (NOVO)
-        // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
             if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
             
@@ -134,9 +131,8 @@
             let v = input.value.replace(/\D/g, "");
             if (v.length > 11) v = v.substring(0, 11);
             
-            // Auto envio disparado exatamente quando atinge 11 dígitos puros
             if (v.length === 11) {
-                input.blur(); // fecha o teclado mobile
+                input.blur(); 
                 executarLoginOperadorSilencioso(v, input);
                 return;
             }
@@ -148,7 +144,6 @@
         }
 
         async function executarLoginOperadorSilencioso(cpfLimpo, input) {
-            // Estiliza a pílula para o estado de processamento
             input.disabled = true;
             input.value = "";
             input.placeholder = "processando...";
@@ -164,7 +159,7 @@
                 if (!r.ok) throw new Error();
                 const resposta = await r.json();
 
-                if (resposta && resposta.login && answer = resposta.login.length > 0) {
+                if (resposta && resposta.login && resposta.login.length > 0) {
                     const operador = resposta.login[0];
                     const status = String(operador.STATUS || "").trim().toUpperCase();
 
@@ -188,8 +183,7 @@
 
         function exibirMensagemTemporariaBarra(input, mensagem) {
             input.placeholder = mensagem;
-            input.classList.add("bg-rose-600"); // Dá um feedback sutil de erro mudando a cor da pílula
-            
+            input.classList.add("bg-rose-600");
             setTimeout(() => {
                 input.disabled = false;
                 input.classList.remove("bg-rose-600");
@@ -198,7 +192,6 @@
                 input.focus();
             }, 2500);
         }
-        // ==========================================
 
         async function diagnosticarInternetEstavel() {
             if (!navigator.onLine) return false;
@@ -332,7 +325,7 @@
 
         const extrairItensParaEnvio = (pronto = null) => {
             if (pronto) return pronto.map(i => ({ sigla: String(i.sigla || i.SIGLA || "??").trim().toUpperCase(), produto: String(i.produto || i.PRODUTO).trim(), grandmother_id: parseInt(i.id_produto || i.grandmother_id || i.GRANDMOTHER_ID || i.ID || i.id || 0), quantidade: parseInt(i.quantidade || i.QUANTIDADE || 1), preco: parseFloat(i.preco || i.PRECO || 0), total: parseFloat(i.total || i.TOTAL || 0) }));
-            return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
+            return Object.keys(carrinho).map(id => { const p = produtos.find(i => i.id == id); return { sigla: p.sigla, produto: p.nome, grandmother_id: parseInt(p.id), quantidade: parseInt(carrinho[id]), preco: parseFloat(p.preco), total: parseFloat(p.preco * carrinho[id]) }; });
         };
 
         const gerarPayloadVenda = (id, forma, tipo = "CAIXA", pronto = null, isContingencia = false, gerarCode = false) => {
