@@ -16,10 +16,8 @@
 </head>
 <body class="bg-slate-50 font-sistema min-h-screen flex flex-col antialiased text-slate-800 select-none">
 
-    <div id="overlay-login" class="fixed inset-0 bg-orange-600/80 backdrop-blur-md z-[100] flex flex-col items-center justify-center p-4">
-        <div class="w-full max-w-xs relative">
-            <input type="text" id="input-cpf-login" inputmode="numeric" placeholder="insira o cpf" maxlength="14" oninput="tratarMascaraEAutoEnvioCpf(this)" class="w-full bg-orange-500 text-white font-semibold h-12 px-6 rounded-full shadow-lg text-center text-base focus:outline-none tracking-widest select-text placeholder:text-white/60 placeholder:tracking-normal placeholder:font-semibold transition-all">
-        </div>
+    <div id="overlay-login" class="fixed inset-0 bg-orange-600/80 backdrop-blur-md z-[100] flex items-end justify-center pb-4">
+        <input type="text" id="input-cpf-login" inputmode="numeric" placeholder="insira o cpf" maxlength="11" oninput="tratarMascaraEAutoEnvioCpf(this)" class="bg-orange-500 text-white font-semibold h-10 px-6 rounded-full shadow-lg transition-all min-w-[240px] max-w-xs w-full text-center text-sm focus:outline-none tracking-widest select-text placeholder:text-white/80 placeholder:tracking-normal">
     </div>
 
     <header id="barra-superior" class="bg-orange-500 text-white text-center py-2 shadow-sm sticky top-0 z-50">
@@ -128,21 +126,21 @@
         });
 
         function tratarMascaraEAutoEnvioCpf(input) {
-    let v = input.value.replace(/\D/g, "");
-    if (v.length > 11) v = v.substring(0, 11);
-    
-    input.value = v; // Mantém apenas os números na pílula de digitação
-    
-    if (v.length === 11) {
-        input.blur(); 
-        executarLoginOperadorSilencioso(v, input);
-    }
-}
+            let v = input.value.replace(/\D/g, "");
+            if (v.length > 11) v = v.substring(0, 11);
+            
+            input.value = v;
+            
+            if (v.length === 11) {
+                input.blur(); 
+                executarLoginOperadorSilencioso(v, input);
+            }
+        }
 
         async function executarLoginOperadorSilencioso(cpfLimpo, input) {
             input.disabled = true;
-            input.value = "";
             input.placeholder = "processando...";
+            input.value = "";
             input.classList.remove("tracking-widest");
 
             try {
@@ -161,6 +159,7 @@
 
                     if (status === "ATIVO") {
                         localStorage.setItem("festa_junina_operador_logado", "true");
+                        localStorage.setItem("festa_junina_operador_cpf", cpfLimpo);
                         if (resposta.produto) {
                             produtos = resposta.produto.map(l => ({ id: parseInt(l.ID || l.id), sigla: l.SIGLA ? String(l.SIGLA).trim().toUpperCase() : (l.sigla ? String(l.sigla).trim().toUpperCase() : "??"), nome: l.PRODUTO || l.produto, preco: parseFloat(l.PRECO || l.preco), estoque: parseInt(l.ATUAL || l.estoque_atual) }));
                             localStorage.setItem("festa_junina_cardapio", JSON.stringify(produtos)); renderizarProdutos();
@@ -179,10 +178,12 @@
 
         function exibirMensagemTemporariaBarra(input, mensagem) {
             input.placeholder = mensagem;
+            input.classList.remove("bg-orange-500");
             input.classList.add("bg-rose-600");
             setTimeout(() => {
                 input.disabled = false;
                 input.classList.remove("bg-rose-600");
+                input.classList.add("bg-orange-500");
                 input.placeholder = "insira o cpf";
                 input.classList.add("tracking-widest");
                 input.focus();
@@ -329,6 +330,7 @@
                 id_pagamento: String(id || "").trim(), 
                 pagamento: String(forma || ""), 
                 tipo_venda: String(tipo || "CAIXA"), 
+                cpf_operador: localStorage.getItem("festa_junina_operador_cpf") || "",
                 status_retirada: "retirado", 
                 total_pedido_consolidado: parseFloat(totalAtual || 0), 
                 transaction_amount: parseFloat(totalAtual || 0), 
@@ -429,6 +431,7 @@
                         const itensFichas = extrairItensParaEnvio();
                         const payloadContingencia = { 
                             id_pagamento: idVenda, pagamento: formaPagamento, tipo_venda: "CAIXA", 
+                            cpf_operador: localStorage.getItem("festa_junina_operador_cpf") || "",
                             status_retirada: "retirado", total_pedido_consolidado: totalAtual, 
                             transaction_amount: totalAtual, contingencia: true, gerar_code: false, 
                             itens: itensFichas 
