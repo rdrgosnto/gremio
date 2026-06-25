@@ -176,8 +176,8 @@
             }
         }
 
-        function exibirMensagemTemporariaBarra(input, mensagem) {
-            input.placeholder = mensagem;
+        function exibirMensagemTemporariaBarra(input, message) {
+            input.placeholder = message;
             input.classList.remove("bg-orange-500");
             input.classList.add("bg-rose-600");
             setTimeout(() => {
@@ -430,10 +430,15 @@
                         if (intervaloPix) { clearInterval(intervaloPix); intervaloPix = null; }
                         const itensFichas = extrairItensParaEnvio();
                         const payloadContingencia = { 
-                            id_pagamento: idVenda, pagamento: formaPagamento, tipo_venda: "CAIXA", 
+                            id_pagamento: idVenda, 
+                            pagamento: formaPagamento, 
+                            tipo_venda: "CAIXA", 
                             cpf_operador: localStorage.getItem("festa_junina_operador_cpf") || "",
-                            status_retirada: "retirado", total_pedido_consolidado: totalAtual, 
-                            transaction_amount: totalAtual, contingencia: true, gerar_code: false, 
+                            status_retirada: "retirado", 
+                            total_pedido_consolidado: totalAtual, 
+                            transaction_amount: totalAtual, 
+                            contingencia: true, 
+                            gerar_code: false, 
                             itens: itensFichas 
                         };
                         let fila = JSON.parse(localStorage.getItem("festa_junina_contingencia") || "[]");
