@@ -7,7 +7,6 @@
     
     <script>
         const CONFIG = {
-
             encerrar_agora: false, 
             
             data_fim: "2026-06-26T23:59:59", // Formato: ANO-MES-DIA THORA:MIN:SEG
@@ -22,7 +21,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     
     <style>
-
         * { box-sizing: border-box; margin: 0; padding: 0; transition: all 0.2s; }
         body { font-family: 'Poppins', sans-serif; min-height: 100dvh; color: #4a3b32; display: flex; justify-content: center; align-items: center; padding: 60px 18px 25px; background: #e65100 linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%) 0 0/40px 40px; }
         body::before { content: ''; background: inherit; background-position: 20px 20px; position: absolute; inset: 0; z-index: -1; }
@@ -222,11 +220,6 @@
             // Verifica se tem convidado repetido
             if (setConvidados.size !== cpfsConvidados.length) {
                 return alert("⚠️ Atenção: Você não pode colocar o MESMO CPF em mais de um ingresso. Cada convidado precisa ter um CPF único.");
-            }
-            
-            // Verifica se o convidado repete o comprador
-            if (cpfsConvidados.includes(cpfCompradorNum)) {
-                return alert("⚠️ Atenção: O CPF do Comprador não pode ser repetido nos ingressos de convidados.");
             }
 
             btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...`;
