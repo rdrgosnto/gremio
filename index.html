@@ -9,8 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s; }
-        body { font-family: 'Poppins', sans-serif; min-height: 100dvh; color: #4a3b32; display: flex; justify-content: center; align-items: center; padding: 25px 18px; background: #e65100 linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%) 0 0/40px 40px; }
+        
+        /* Ajuste no padding do body (60px no topo) para acomodar a barra fixa laranja */
+        body { font-family: 'Poppins', sans-serif; min-height: 100dvh; color: #4a3b32; display: flex; justify-content: center; align-items: center; padding: 60px 18px 25px 18px; background: #e65100 linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%) 0 0/40px 40px; }
         body::before { content: ''; background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%) 20px 20px/40px 40px; position: absolute; top:0; left:0; right:0; bottom:0; z-index:-1; }
+        
+        /* =========================================
+           BARRA SUPERIOR FIXA
+        ========================================= */
+        #top-bar { position: fixed; top: 0; left: 0; width: 100%; background-color: #ff8c00; color: #ffffff; text-align: center; padding: 12px 0; font-weight: 600; font-size: 15px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        
         .container { width: 100%; max-width: 360px; background-color: #fffdf7; padding: 26px 20px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35); text-align: center; border: 3px dashed #d84315; }
         h1 { font-family: 'Amatic SC', cursive, sans-serif !important; font-weight: 700 !important; font-size: 52px; letter-spacing: 2px; color: #bf360c; margin: 2px 0 6px 0; line-height: 1; }
         label { font-weight: 500; margin-top: 14px; display: block; text-align: left; font-size: 13.5px; color: #4a3b32; }
@@ -42,25 +50,45 @@
         .msg-confirmacao h2 { font-size: 38px; margin: 8px 0; font-weight: 700; }
         .msg-confirmacao p { font-size: 28px; margin: 4px 0; font-weight: 700; }
         .icon-grande { font-size: 60px; display: block; margin-bottom: 6px; color: #2e7d32; }
-        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .popup-conteudo { position: relative; max-width: 75vw; max-height: 75vh; }
-        .popup-imagem { max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 8px; display: block; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        
+        /* =========================================
+           POPUP DE AVISO (COM O BOTÃO GITHUB)
+        ========================================= */
+        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
+        .popup-conteudo { position: relative; max-width: 90vw; max-height: 85vh; display: flex; flex-direction: column; align-items: center; }
+        
+        .btn-github-timer { background-color: #f6f8fa; border: 1px solid rgba(27, 31, 36, 0.15); border-radius: 6px; color: #24292f; cursor: pointer; font-weight: 600; font-size: 14px; padding: 10px 20px; margin-bottom: 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04); transition: 0.2s; width: 100%; max-width: 300px; text-align: center; }
+        .btn-github-timer:hover { background-color: #f3f4f6; border-color: rgba(27, 31, 36, 0.15); }
+        
+        .popup-imagem { max-width: 100%; max-height: 65vh; object-fit: contain; border-radius: 8px; display: block; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .btn-fechar-popup { display: none; position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background-color: #616161; color: #ffffff; border: none; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-        .btn-x-popup { display: none; position: absolute; top: -12px; right: -12px; width: 30px; height: 30px; background-color: #ff1744; color: #ffffff; border: 2px solid #ffffff; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; line-height: 26px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 10000; }
+        .btn-x-popup { display: none; position: absolute; top: 40px; right: -12px; width: 30px; height: 30px; background-color: #ff1744; color: #ffffff; border: 2px solid #ffffff; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; line-height: 26px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 10000; }
+        
         .pagamento-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 5000; justify-content: center; align-items: center; padding: 20px; }
         .pagamento-overlay-texto { color: #ffffff; font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; text-align: center; max-width: 320px; line-height: 1.5; }
         .sessao-bloqueada { opacity: 0.35 !important; filter: grayscale(100%) !important; pointer-events: none !important; }
     </style>
 </head>
 <body>
+    
+    <div id="top-bar">
+        vendas encerram em <span class="cronometro-urgencia">00:00:00</span>
+    </div>
+
     <div class="popup-overlay" id="popupOverlay">
         <div class="popup-conteudo">
+            <button class="btn-github-timer" onclick="fecharPopup()">
+                vendas encerram em <span class="cronometro-urgencia">00:00:00</span>
+            </button>
+            
             <button class="btn-x-popup" id="btnXPopup" onclick="fecharPopup()">X</button>
             <img src="aviso.jpg" alt="Aviso Importante" class="popup-imagem">
             <button class="btn-fechar-popup" id="btnFecharPopup" onclick="fecharPopup()">Fechar mensagem</button>
         </div>
     </div>
+    
     <div class="pagamento-overlay" id="pagamentoOverlay"><div class="pagamento-overlay-texto" id="txtOverlay"></div></div>
+    
     <div class="container">
         <h1>Festa Junina</h1>
         <form id="sessao-formulario" onsubmit="processarEnvioFormulario(event)">
@@ -84,7 +112,41 @@
             <div id="status-verificacao" class="status-msg"></div>
         </div>
     </div>
+    
     <script>
+        // ==========================================
+        // CRONÔMETRO GLOBAL DE URGÊNCIA (Até 23:59:59)
+        // ==========================================
+        function iniciarCronometroDiario() {
+            function atualizar() {
+                const agora = new Date();
+                const fimDoDia = new Date();
+                fimDoDia.setHours(23, 59, 59, 999);
+                
+                let diferenca = fimDoDia - agora;
+                if (diferenca < 0) diferenca = 0;
+                
+                const horas = Math.floor((diferenca / (1000 * 60 * 60)) % 24);
+                const minutos = Math.floor((diferenca / 1000 / 60) % 60);
+                const segundos = Math.floor((diferenca / 1000) % 60);
+                
+                const tempoFormatado = 
+                    String(horas).padStart(2, '0') + ':' + 
+                    String(minutos).padStart(2, '0') + ':' + 
+                    String(segundos).padStart(2, '0');
+                
+                document.querySelectorAll('.cronometro-urgencia').forEach(el => {
+                    el.textContent = tempoFormatado;
+                });
+            }
+            atualizar();
+            setInterval(atualizar, 1000);
+        }
+        iniciarCronometroDiario(); // Dispara assim que a página carrega
+
+        // ==========================================
+        // LÓGICA DO SISTEMA ORIGINAL
+        // ==========================================
         const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/40a14e00ea6d43bfbdd13cdb6e832837/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=NITqrM_QRoVsNvxqZYSSxDvnZsbVFLVPDTXqP2Q9tjo";
         const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d9d6210c5c284e4f8508436dafdb9301/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=P4Y5Lv3OMh9b6yDftV1JosH1Fq3YXtpHxMUNviEZAuU";
         let idPagamentoAtual = null, intervaloPix = null, loopEmExecucao = false, cronometroRegressivo = null;
@@ -204,12 +266,13 @@
                         document.getElementById("txtOverlay").innerText = "Não se esqueça de clicar no botão abaixo ao finalizar o seu pagamento.";
                         ov.style.display = "flex"; bV.style.zIndex = "6000"; setTimeout(() => { ov.style.display = "none"; bV.style.zIndex = "1"; }, 5000);
                     }
-                    iniciarCronometro(); iniciarMonitoramentoPixAutomatico();
+                    iniciarCronometroPix(); iniciarMonitoramentoPixAutomatico();
                 } else { alert("Erro ao processar. Tente novamente."); btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; }
             } catch (err) { alert("Erro de conexão com o servidor."); btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; }
         }
 
-        function iniciarCronometro() {
+        // Alterei o nome desta função para não confundir com o relógio principal do modal
+        function iniciarCronometroPix() {
             let tRest = 600; const elT = document.getElementById('timer-expiracao');
             cronometroRegressivo = setInterval(() => {
                 let m = String(Math.floor(tRest / 60)).padStart(2, '0'), s = String(tRest % 60).padStart(2, '0');
