@@ -4,97 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grêmio | Ingressos Festa Junina</title>
+    
+    <!-- ======================================================================= -->
+    <!-- ⚙️ PAINEL DE CONTROLE (FÁCIL MANUTENÇÃO)                                -->
+    <!-- ======================================================================= -->
+    <script>
+        const CONFIG = {
+            // 1. Quer encerrar as vendas IMEDIATAMENTE? Mude de false para true.
+            encerrar_agora: false, 
+            
+            // 2. Data e hora para encerrar as vendas automaticamente
+            data_fim: "2026-06-26T23:59:59", // Formato: ANO-MES-DIA THORA:MIN:SEG
+            
+            // 3. Nomes dos arquivos de imagem do aviso
+            img_abertas: "aviso.jpg",
+            img_encerradas: "aviso2.jpg"
+        };
+    </script>
+    <!-- ======================================================================= -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s; }
+        /* CSS Otimizado e Agrupado */
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: all 0.2s; }
+        body { font-family: 'Poppins', sans-serif; min-height: 100dvh; color: #4a3b32; display: flex; justify-content: center; align-items: center; padding: 60px 18px 25px; background: #e65100 linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%) 0 0/40px 40px; }
+        body::before { content: ''; background: inherit; background-position: 20px 20px; position: absolute; inset: 0; z-index: -1; }
         
-        body { font-family: 'Poppins', sans-serif; min-height: 100dvh; color: #4a3b32; display: flex; justify-content: center; align-items: center; padding: 60px 18px 25px 18px; background: #e65100 linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%) 0 0/40px 40px; }
-        body::before { content: ''; background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%) 20px 20px/40px 40px; position: absolute; top:0; left:0; right:0; bottom:0; z-index:-1; }
-        
-        /* =========================================
-           BARRA SUPERIOR FIXA
-        ========================================= */
-        #top-bar { position: fixed; top: 0; left: 0; width: 100%; background-color: #e65100; color: #ffffff; text-align: center; padding: 12px 0; font-weight: 600; font-size: 15px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: background-color 0.5s; }
-        
-        .container { width: 100%; max-width: 360px; background-color: #fffdf7; padding: 26px 20px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35); text-align: center; border: 3px dashed #d84315; transition: all 0.5s; }
-        h1 { font-family: 'Amatic SC', cursive, sans-serif !important; font-weight: 700 !important; font-size: 52px; letter-spacing: 2px; color: #bf360c; margin: 2px 0 6px 0; line-height: 1; }
-        label { font-weight: 500; margin-top: 14px; display: block; text-align: left; font-size: 13.5px; color: #4a3b32; }
+        #top-bar { position: fixed; top: 0; left: 0; width: 100%; background: #e65100; color: #fff; text-align: center; padding: 12px 0; font-weight: 600; font-size: 15px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .container { width: 100%; max-width: 360px; background: #fffdf7; padding: 26px 20px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.35); text-align: center; border: 3px dashed #d84315; }
+        h1 { font: 700 52px 'Amatic SC', sans-serif; letter-spacing: 2px; color: #bf360c; margin: 2px 0 6px; line-height: 1; }
+        label { font-weight: 500; margin-top: 14px; display: block; text-align: left; font-size: 13.5px; }
         .form-group { position: relative; display: flex; flex-direction: column; }
         .input-icon { position: absolute; left: 14px; bottom: 10px; color: #bcaaa4; font-size: 14px; z-index: 2; }
-        .has-icon input, .has-icon select { padding-left: 38px !important; }
-        input, select { width: 100%; padding: 8px 11px; border-radius: 8px; border: 2px dashed #bcaaa4; font-size: 13px; background-color: #fff; outline: none; margin-top: 5px; font-family: 'Poppins', sans-serif; color: #4a3b32; }
-        input:focus, select:focus { border-color: #e65100 !important; box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.15); }
-        .input-erro { border: 2px solid #ff1744 !important; background-color: #fff5f5; }
-        .input-sucesso { border: 2px solid #2e7d32 !important; background-color: #f1f8e9; }
-        .msg-erro-cpf { color: #ff1744; font-size: 11px; display: block; text-align: left; margin-top: 2px; }
+        input, select { width: 100%; padding: 8px 11px; border-radius: 8px; border: 2px dashed #bcaaa4; font: 13px 'Poppins', sans-serif; color: #4a3b32; outline: none; margin-top: 5px; }
+        .has-icon input, .has-icon select { padding-left: 38px; }
+        input:focus, select:focus { border-color: #e65100; box-shadow: 0 0 0 3px rgba(230,81,0,0.15); }
+        .input-erro { border: 2px solid #ff1744 !important; background: #fff5f5; }
+        .input-sucesso { border: 2px solid #2e7d32 !important; background: #f1f8e9; }
+        .msg-erro-cpf { color: #ff1744; font-size: 11px; text-align: left; display: block; margin-top: 2px; }
+        
         .ingresso-extra { background: #fdf2e9; padding: 10px; border-radius: 8px; margin-top: 14px; border: 1px solid #ebba95; text-align: left; }
-        .ingresso-extra label { margin-top: 10px; }
-        .ingresso-extra label:first-child { margin-top: 0; }
-        .btn-principal { margin-top: 12px; width: 100%; padding: 11px; border-radius: 8px; font-size: 15px; font-weight: 600; background-color: #e65100; color: white; cursor: pointer; border: none; box-shadow: 0 4px 0 #b33600; font-family: 'Poppins', sans-serif; }
+        .ingresso-extra label { margin-top: 10px; } .ingresso-extra label:first-child { margin-top: 0; }
+        
+        .btn-principal { margin-top: 12px; width: 100%; padding: 11px; border-radius: 8px; font: 600 15px 'Poppins', sans-serif; background: #e65100; color: #fff; border: none; box-shadow: 0 4px 0 #b33600; cursor: pointer; }
         .btn-principal:active:not(:disabled) { box-shadow: 0 1px 0 #b33600; transform: translateY(3px); }
-        .btn-principal:disabled { background-color: #bcaaa4 !important; box-shadow: 0 4px 0 #8d6e63 !important; cursor: not-allowed; }
-        .btn-validar { position: relative; background-color: #1565c0 !important; box-shadow: 0 4px 0 #0d47a1 !important; margin-top: 14px; z-index: 1; font-weight: 600; }
-        .btn-validar:active:not(:disabled) { box-shadow: 0 1px 0 #0d47a1 !important; transform: translateY(3px); }
-        .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font-size: 12px; font-weight: 600; background-color: #616161; color: white; border: none; border-radius: 6px; cursor: pointer; }
-        .qr-container { display: none; margin-top: 10px; padding: 14px; border: 1px solid #eee; border-radius: 10px; background-color: #fff; }
+        .btn-principal:disabled { background: #bcaaa4; box-shadow: 0 4px 0 #8d6e63; cursor: not-allowed; }
+        .btn-validar { background: #1565c0; box-shadow: 0 4px 0 #0d47a1; margin-top: 14px; z-index: 1; }
+        .btn-validar:active:not(:disabled) { box-shadow: 0 1px 0 #0d47a1; }
+        .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font: 600 12px 'Poppins', sans-serif; background: #616161; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+        
+        .qr-container { display: none; margin-top: 10px; padding: 14px; border: 1px solid #eee; border-radius: 10px; background: #fff; }
         .qr-container img { width: 100%; max-width: 150px; display: inline-block; }
         .valor { font-weight: bold; color: #bf360c; margin-top: 8px; font-size: 1.1em; }
-        .pix-box { margin-top: 10px; padding: 8px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
-        .pix-codigo-input { font-family: 'JetBrains Mono', monospace; font-size: 11px; width: 100%; text-align: center; border: 1px solid #ccc; padding: 6px; border-radius: 4px; color: #4a3b32; background: #fff; }
-        .status-msg { margin-top: 10px; font-size: 13px; font-weight: bold; color: #bf360c; line-height: 1.4; }
-        .texto-expiracao { display: none; color: #ff1744; font-size: 12px; font-weight: 600; margin: 10px 0 5px 0; }
-        .msg-confirmacao { font-family: 'Amatic SC', cursive, sans-serif !important; color: #2e7d32; line-height: 1.1; }
-        .msg-confirmacao h2 { font-size: 38px; margin: 8px 0; font-weight: 700; }
-        .msg-confirmacao p { font-size: 28px; margin: 4px 0; font-weight: 700; }
-        .icon-grande { font-size: 60px; display: block; margin-bottom: 6px; color: #2e7d32; }
+        .pix-box { margin-top: 10px; padding: 8px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; }
+        .pix-codigo-input { font: 11px 'JetBrains Mono', monospace; width: 100%; text-align: center; border: 1px solid #ccc; padding: 6px; border-radius: 4px; background: #fff; }
+        .status-msg { margin-top: 10px; font: bold 13px 'Poppins'; color: #bf360c; line-height: 1.4; }
+        .texto-expiracao { display: none; color: #ff1744; font-weight: 600; font-size: 12px; margin: 10px 0 5px; }
+        .msg-confirmacao { font: 700 28px 'Amatic SC', sans-serif; color: #2e7d32; line-height: 1.1; }
+        .msg-confirmacao h2 { font-size: 38px; margin: 8px 0; }
+        .icon-grande { font-size: 60px; display: block; margin-bottom: 6px; }
         
-        /* =========================================
-           POPUP DE AVISO
-        ========================================= */
-        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
+        /* Modais & Popups */
+        .popup-overlay, .pagamento-overlay { position: fixed; inset: 0; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.8); z-index: 9999; padding: 20px; }
+        .pagamento-overlay { display: none; background: rgba(0,0,0,0.85); z-index: 5000; }
         .popup-conteudo { position: relative; max-width: 90vw; max-height: 85vh; display: flex; flex-direction: column; align-items: center; }
+        .btn-timer-popup, .btn-fechar-popup { background: rgba(97,97,97,0.9); color: #fff; border: none; border-radius: 6px; font: 600 14px 'Poppins', sans-serif; padding: 10px 20px; cursor: pointer; }
+        .btn-timer-popup { margin-bottom: 12px; width: 100%; max-width: 300px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .btn-fechar-popup { display: none; position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); font-size: 13px; white-space: nowrap; }
+        .btn-timer-popup:hover, .btn-fechar-popup:hover { background: #616161; }
+        .popup-imagem { max-width: 100%; max-height: 65vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .btn-x-popup { display: none; position: absolute; top: 40px; right: -12px; width: 30px; height: 30px; background: #ff1744; color: #fff; border: 2px solid #fff; border-radius: 50%; font: bold 14px 'Poppins'; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 10000; }
+        .pagamento-overlay-texto { color: #fff; font: 600 16px 'Poppins'; text-align: center; max-width: 320px; line-height: 1.5; }
+        .sessao-bloqueada { opacity: 0.35 !important; filter: grayscale(100%) !important; pointer-events: none !important; }
         
-        .btn-timer-popup { background-color: rgba(97, 97, 97, 0.9); border: none; border-radius: 6px; color: #ffffff; cursor: pointer; font-weight: 600; font-size: 14px; padding: 10px 20px; margin-bottom: 12px; font-family: 'Poppins', sans-serif; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: background-color 0.5s; width: 100%; max-width: 300px; text-align: center; }
-        .btn-timer-popup:hover { background-color: rgba(97, 97, 97, 1); }
-        
-        .popup-imagem { max-width: 100%; max-height: 65vh; object-fit: contain; border-radius: 8px; display: block; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        
-        .btn-fechar-popup { display: none; position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background-color: rgba(97, 97, 97, 0.9); color: #ffffff; border: none; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: 0.2s; }
-        .btn-fechar-popup:hover { background-color: rgba(97, 97, 97, 1); }
-
-        .btn-x-popup { display: none; position: absolute; top: 40px; right: -12px; width: 30px; height: 30px; background-color: #ff1744; color: #ffffff; border: 2px solid #ffffff; border-radius: 50%; font-size: 14px; font-weight: bold; cursor: pointer; line-height: 26px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 10000; }
-        
-        .pagamento-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 5000; justify-content: center; align-items: center; padding: 20px; }
-        .pagamento-overlay-texto { color: #ffffff; font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600; text-align: center; max-width: 320px; line-height: 1.5; }
-        
-        /* =========================================
-           ESTADOS QUANDO AS VENDAS ENCERRAREM
-        ========================================= */
-        body.vendas-encerradas #top-bar { background-color: #616161; }
-        body.vendas-encerradas .btn-timer-popup { background-color: #424242; pointer-events: none; }
-        body.vendas-encerradas .container {
-            opacity: 0.4;
-            filter: grayscale(100%);
-            pointer-events: none; /* Bloqueia todos os cliques, digitações e botões */
-        }
+        /* ================== ESTADOS: VENDAS ENCERRADAS ================== */
+        body.vendas-encerradas #top-bar { background: #616161; }
+        body.vendas-encerradas .btn-timer-popup { background: #424242; pointer-events: none; }
+        body.vendas-encerradas .container { opacity: 0.4; filter: grayscale(100%); pointer-events: none; }
     </style>
 </head>
 <body>
     
-    <!-- BARRA SUPERIOR FIXA -->
     <div id="top-bar">
-        <span class="texto-urgencia">vendas encerram em</span> <span class="cronometro-urgencia">00:00:00</span>
+        <span class="txt-urgencia">vendas encerram em</span> <span class="crono-urgencia">00:00:00</span>
     </div>
 
-    <!-- POPUP DE AVISO -->
     <div class="popup-overlay" id="popupOverlay">
         <div class="popup-conteudo">
             <button class="btn-timer-popup" id="btnTimerPopup" onclick="fecharPopup()">
-                <span class="texto-urgencia">vendas encerram em</span> <span class="cronometro-urgencia">00:00:00</span>
+                <span class="txt-urgencia">vendas encerram em</span> <span class="crono-urgencia">00:00:00</span>
             </button>
-            
             <button class="btn-x-popup" id="btnXPopup" onclick="fecharPopup()">X</button>
             <img src="aviso.jpg" id="imagem-aviso" alt="Aviso Importante" class="popup-imagem">
             <button class="btn-fechar-popup" id="btnFecharPopup" onclick="fecharPopup()">Fechar mensagem</button>
@@ -105,14 +106,17 @@
     
     <div class="container" id="container-principal">
         <h1>Festa Junina</h1>
-        <form id="sessao-formulario" onsubmit="processarEnvioFormulario(event)">
+        <form id="sessao-formulario" onsubmit="processarFormulario(event)">
             <div class="form-group has-icon"><label>Nome do Comprador</label><i class="fa-solid fa-user input-icon"></i><input id="comprador" required placeholder="Escreva seu nome aqui..."></div>
             <div class="form-group has-icon"><label>CPF do Comprador</label><i class="fa-solid fa-id-card input-icon"></i><input id="cpf-comprador" required class="cpf-validar" placeholder="000.000.000-00"></div>
             <div class="form-group has-icon"><label>Telefone</label><i class="fa-solid fa-phone input-icon"></i><input id="telefone" required placeholder="(00) 00000-0000"></div>
-            <div class="form-group has-icon"><label>Quantidade de ingressos</label><i class="fa-solid fa-users input-icon"></i><select id="quantidade"><option value="1">1 ingresso</option><option value="2">2 ingressos</option><option value="3">3 ingressos</option></select></div>
+            <div class="form-group has-icon"><label>Quantidade de ingressos</label><i class="fa-solid fa-users input-icon"></i>
+                <select id="quantidade"><option value="1">1 ingresso</option><option value="2">2 ingressos</option><option value="3">3 ingressos</option></select>
+            </div>
             <div id="campos-extras"></div>
             <button type="submit" id="btn-gerar" class="btn-principal"><i class="fa-solid fa-qrcode"></i> Gerar QR Code</button>
         </form>
+        
         <div class="texto-expiracao" id="timer-expiracao">O código a seguir expira em 10:00.</div>
         <div class="qr-container" id="sessao-qr">
             <div id="carregando-qr" class="status-msg"><i class="fa-solid fa-circle-notch fa-spin"></i> Processando...</div>
@@ -128,253 +132,139 @@
     </div>
     
     <script>
-        // =========================================================================
-        // ⚙️ PAINEL DE CONTROLE DAS VENDAS (FÁCIL MANUTENÇÃO)
-        // =========================================================================
-        
-        // 1. Quer encerrar as vendas IMEDIATAMENTE? Mude de false para true.
-        const ENCERRAR_VENDAS_AGORA = false; 
-        
-        // 2. Data e hora para encerrar as vendas automaticamente (Formato: ANO-MES-DIA THORA:MIN:SEG)
-        const DATA_FIM_DAS_VENDAS = "2026-06-26T23:59:59";
-        
-        // 3. Imagens do Popup
-        const IMAGEM_VENDAS_ABERTAS = "aviso.jpg";
-        const IMAGEM_VENDAS_ENCERRADAS = "aviso2.jpg";
-        
-        // =========================================================================
-
-        function iniciarControleDeVendas() {
-            function atualizar() {
-                const agora = new Date();
-                const dataFim = new Date(DATA_FIM_DAS_VENDAS);
-                let diferenca = dataFim - agora;
-                
-                // Verifica se deve encerrar o form
-                if (ENCERRAR_VENDAS_AGORA || diferenca <= 0) {
-                    ativarModoVendasEncerradas();
-                    return; // Para o loop do cronômetro
-                }
-                
-                // Se ainda está rolando, atualiza o cronômetro
-                const horas = Math.floor((diferenca / (1000 * 60 * 60)) % 24);
-                const minutos = Math.floor((diferenca / 1000 / 60) % 60);
-                const segundos = Math.floor((diferenca / 1000) % 60);
-                
-                const tempoFormatado = 
-                    String(horas).padStart(2, '0') + ':' + 
-                    String(minutos).padStart(2, '0') + ':' + 
-                    String(segundos).padStart(2, '0');
-                
-                document.querySelectorAll('.cronometro-urgencia').forEach(el => {
-                    el.textContent = tempoFormatado;
-                });
+        // --- 1. LÓGICA DE URGÊNCIA E ENCERRAMENTO ---
+        function verificarVendas() {
+            const dataFim = new Date(CONFIG.data_fim), agora = new Date();
+            let dif = dataFim - agora;
+            
+            if (CONFIG.encerrar_agora || dif <= 0) {
+                document.body.classList.add('vendas-encerradas');
+                document.querySelectorAll('.txt-urgencia').forEach(el => el.textContent = "vendas encerradas");
+                document.querySelectorAll('.crono-urgencia').forEach(el => el.style.display = "none");
+                document.getElementById('imagem-aviso').src = CONFIG.img_encerradas;
+                document.getElementById('popupOverlay').style.display = 'flex';
+                document.getElementById('btnTimerPopup').removeAttribute('onclick');
+                return;
             }
             
-            atualizar();
-            if (!document.body.classList.contains('vendas-encerradas')) {
-                setInterval(atualizar, 1000);
-            }
+            const h = String(Math.floor((dif / 3600000) % 24)).padStart(2, '0');
+            const m = String(Math.floor((dif / 60000) % 60)).padStart(2, '0');
+            const s = String(Math.floor((dif / 1000) % 60)).padStart(2, '0');
+            
+            document.querySelectorAll('.crono-urgencia').forEach(el => el.textContent = `${h}:${m}:${s}`);
+            setTimeout(verificarVendas, 1000);
         }
+        verificarVendas();
 
-        function ativarModoVendasEncerradas() {
-            // Adiciona classe no body que muda as cores via CSS
-            document.body.classList.add('vendas-encerradas');
-            
-            // Troca os textos e esconde o relógio numérico
-            document.querySelectorAll('.texto-urgencia').forEach(el => el.textContent = "vendas encerradas");
-            document.querySelectorAll('.cronometro-urgencia').forEach(el => el.style.display = "none");
-            
-            // Troca a imagem principal do aviso
-            document.getElementById('imagem-aviso').src = IMAGEM_VENDAS_ENCERRADAS;
-            
-            // Força o popup a aparecer caso o usuário já tivesse fechado
-            document.getElementById('popupOverlay').style.display = 'flex';
-            
-            // Remove as funções de fechar (para que a pessoa leia o aviso ou, se fechar, veja o form bloqueado)
-            document.getElementById('btnTimerPopup').removeAttribute('onclick');
-        }
+        // --- 2. LÓGICA DO SISTEMA DE INGRESSOS ---
+        const URL_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/40a14e00ea6d43bfbdd13cdb6e832837/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=NITqrM_QRoVsNvxqZYSSxDvnZsbVFLVPDTXqP2Q9tjo", URL_VAL = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d9d6210c5c284e4f8508436dafdb9301/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=P4Y5Lv3OMh9b6yDftV1JosH1Fq3YXtpHxMUNviEZAuU";
+        let idPag = null, intPix = null, cronoPix = null, selectQ = document.getElementById("quantidade");
 
-        iniciarControleDeVendas(); // Dispara a verificação e cronômetro ao carregar
-
-        // ==========================================
-        // LÓGICA ORIGINAL DO SISTEMA E DO POPUP
-        // ==========================================
-        
-        const URL_GERAR_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/40a14e00ea6d43bfbdd13cdb6e832837/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=NITqrM_QRoVsNvxqZYSSxDvnZsbVFLVPDTXqP2Q9tjo";
-        const URL_VALIDAR_PAGAMENTO = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d9d6210c5c284e4f8508436dafdb9301/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=P4Y5Lv3OMh9b6yDftV1JosH1Fq3YXtpHxMUNviEZAuU";
-        let idPagamentoAtual = null, intervaloPix = null, loopEmExecucao = false, cronometroRegressivo = null;
-        const selectQtde = document.getElementById("quantidade"), camposExtras = document.getElementById("campos-extras");
-
-        // Mostra botões de fechar do popup após 3 segundos
         setTimeout(() => { document.getElementById('btnFecharPopup').style.display = document.getElementById('btnXPopup').style.display = 'block'; }, 3000);
         function fecharPopup() { document.getElementById('popupOverlay').style.display = 'none'; }
         
-        function formatarNomeProprio(n) {
-            if (!n) return "";
-            let nomeSemAcento = n.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-            let palavras = nomeSemAcento.toLowerCase().split(/\s+/);
-            const conectores = ["da", "das", "de", "do", "dos", "e"];
-            let palavrasFormatadas = palavras.map(palavra => {
-                if (conectores.includes(palavra)) return palavra;
-                return palavra.charAt(0).toUpperCase() + palavra.slice(1);
-            });
-            return palavrasFormatadas.join(' ');
-        }
+        function formatarNome(n) { return n ? n.normalize('NFD').replace(/[\u0300-\u036f]/g,"").toLowerCase().split(/\s+/).map(p => ["da","das","de","do","dos","e"].includes(p) ? p : p.charAt(0).toUpperCase()+p.slice(1)).join(' ') : ""; }
+        document.getElementById('comprador').addEventListener('blur', e => { if(e.target.value.trim()) e.target.value = formatarNome(e.target.value); });
+
+        function maskCpf(e) { let v = e.target.value.replace(/\D/g,"").slice(0,11); e.target.value = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").replace(/(\d{3})(\d{3})(\d{1,3})$/, "$1.$2.$3").replace(/(\d{3})(\d{1,3})$/, "$1.$2"); }
+        function maskTel(e) { let v = e.target.value.replace(/\D/g,"").slice(0,11); e.target.value = v.length > 10 ? v.replace(/^(\d{2})(\d{5})(\d{4})/, "($1) $2-$3") : v.length > 6 ? v.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3") : v.length > 2 ? v.replace(/^(\d{2})(\d{0,5})/, "($1) $2") : v.length > 0 ? v.replace(/^(\d{0,2})/, "($1") : ""; }
         
-        document.getElementById('comprador').addEventListener('blur', e => { if (e.target.value.trim()) e.target.value = formatarNomeProprio(e.target.value); });
-
-        function aplicarMascaras() {
-            document.querySelectorAll(".cpf-validar").forEach(el => {
-                el.oninput = e => {
-                    let v = e.target.value.replace(/\D/g, "").slice(0, 11);
-                    e.target.value = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").replace(/(\d{3})(\d{3})(\d{1,3})$/, "$1.$2.$3").replace(/(\d{3})(\d{1,3})$/, "$1.$2");
-                };
-                el.onblur = validateCPFBlur;
-            });
-            if(document.getElementById("telefone")) {
-                document.getElementById("telefone").oninput = e => {
-                    let v = e.target.value.replace(/\D/g, "").slice(0, 11);
-                    e.target.value = v.length > 10 ? v.replace(/^(\d{2})(\d{5})(\d{4})/, "($1) $2-$3") : v.length > 6 ? v.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3") : v.length > 2 ? v.replace(/^(\d{2})(\d{0,5})/, "($1) $2") : v.length > 0 ? v.replace(/^(\d{0,2})/, "($1") : "";
-                };
-            }
-        }
-
-        function validarCPF(c) {
+        function valCpf(c) {
             c = c.replace(/[^\d]+/g, '');
-            if (!c || c.length != 11 || /^(\d)\1{10}$/.test(c)) return false;
-            let calc = t => Array.from(c.slice(0, t)).reduce((acc, curr, idx) => acc + parseInt(curr) * ((t + 1) - idx), 0) * 10 % 11 % 10;
+            if(!c || c.length!=11 || /^(\d)\1{10}$/.test(c)) return false;
+            let calc = t => Array.from(c.slice(0,t)).reduce((a, b, i) => a + parseInt(b) * ((t+1)-i), 0) * 10 % 11 % 10;
             return calc(9) === parseInt(c.charAt(9)) && calc(10) === parseInt(c.charAt(10));
         }
 
-        function validateCPFBlur(e) {
+        function checkCpf(e) {
             const v = e.target.value, ex = e.target.nextElementSibling;
-            if (ex?.classList.contains('msg-erro-cpf')) ex.remove();
+            if(ex?.classList.contains('msg-erro-cpf')) ex.remove();
             e.target.classList.remove("input-erro", "input-sucesso");
-            if (v.length > 0) {
-                if (validarCPF(v)) e.target.classList.add("input-sucesso");
-                else { e.target.classList.add("input-erro"); const s = document.createElement("span"); s.className = "msg-erro-cpf"; s.innerText = "CPF Inválido"; e.target.after(s); }
+            if(v.length > 0) {
+                if(valCpf(v)) e.target.classList.add("input-sucesso");
+                else { e.target.classList.add("input-erro"); e.target.insertAdjacentHTML('afterend', '<span class="msg-erro-cpf">CPF Inválido</span>'); }
             }
         }
 
-        selectQtde.onchange = () => {
-            camposExtras.innerHTML = Array.from({length: parseInt(selectQtde.value)}, (_, i) => `
-                <div class="ingresso-extra">
-                    <div style="font-weight:700; color:#bf360c; margin-bottom:5px; font-size:13px; text-transform:uppercase;">
-                        <i class="fa-solid fa-ticket"></i> Ingresso ${i+1}
-                    </div>
-                    <label>Nome no Ingresso</label>
-                    <input class="nome-ing" required placeholder="Nome do convidado" onblur="if(this.value.trim()) this.value = formatarNomeProprio(this.value)">
-                    <label>CPF Convidado</label>
-                    <input class="cpf-ing cpf-validar" required placeholder="000.000.000-00">
-                </div>
-            `).join('');
-            aplicarMascaras();
-        };
-        selectQtde.dispatchEvent(new Event('change'));
+        function bindMasks() {
+            document.querySelectorAll(".cpf-validar").forEach(el => { el.oninput = maskCpf; el.onblur = checkCpf; });
+            if(document.getElementById("telefone")) document.getElementById("telefone").oninput = maskTel;
+        }
 
-        async function processarEnvioFormulario(e) {
+        selectQ.onchange = () => {
+            document.getElementById("campos-extras").innerHTML = Array.from({length: selectQ.value}, (_, i) => `
+                <div class="ingresso-extra"><div style="font-weight:700;color:#bf360c;margin-bottom:5px;font-size:13px;"><i class="fa-solid fa-ticket"></i> Ingresso ${i+1}</div>
+                <label>Nome no Ingresso</label><input class="nome-ing" required placeholder="Nome do convidado" onblur="if(this.value.trim()) this.value=formatarNome(this.value)">
+                <label>CPF Convidado</label><input class="cpf-ing cpf-validar" required placeholder="000.000.000-00"></div>
+            `).join(''); bindMasks();
+        }; selectQ.dispatchEvent(new Event('change'));
+
+        async function processarFormulario(e) {
             e.preventDefault();
-            const btn = document.getElementById("btn-gerar"), comp = document.getElementById("comprador").value.trim(), cpfC = document.getElementById("cpf-comprador").value.trim(), tel = document.getElementById("telefone").value.trim();
-            if (!comp || !validarCPF(cpfC) || tel.length < 14) { alert("Preencha os dados corretamente"); document.getElementById("cpf-comprador").classList.add("input-erro"); return; }
-            
+            const btn = document.getElementById("btn-gerar"), comp = document.getElementById("comprador").value.trim(), cpf = document.getElementById("cpf-comprador").value.trim(), tel = document.getElementById("telefone").value.trim();
             const inN = document.querySelectorAll(".nome-ing"), inC = document.querySelectorAll(".cpf-ing");
-            if (Array.from(inC).some((input, i) => !inN[i].value.trim() || !validarCPF(input.value.trim()))) { alert("Preencha os dados corretamente"); return; }
             
-            const cpfsConvidados = Array.from(inC).map(i => i.value.trim());
-            if (new Set(cpfsConvidados).size !== cpfsConvidados.length) { alert("Atenção: Existem CPFs duplicados nos campos de ingressos!"); return; }
-            if (cpfsConvidados.filter(cpf => cpf === cpfC).length > 1) { alert("Atenção: O CPF do Comprador não pode ser repetido nos ingressos!"); return; }
+            if(!comp || !valCpf(cpf) || tel.length<14 || Array.from(inC).some((el, i) => !inN[i].value.trim() || !valCpf(el.value.trim()))) return alert("Preencha os dados corretamente");
+            const cpfs = Array.from(inC).map(i => i.value.trim());
+            if(new Set(cpfs).size !== cpfs.length) return alert("Existem CPFs duplicados!");
+            if(cpfs.filter(c => c === cpf).length > 1) return alert("O CPF do Comprador não pode ser repetido nos ingressos!");
 
             btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...`;
             try {
-                const r = await fetch(URL_GERAR_PIX, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ "COMPRADOR": comp, "CPF_COMPRADOR": cpfC, "TELEFONE": tel, "QUANTIDADE": selectQtde.value, "INGRESSOS": Array.from(inC).map((input, i) => ({"NOME_INGRESSO": inN[i].value.trim(), "CPF_INGRESSO": input.value.trim()})) }) });
-                if (r.ok) {
-                    const d = await r.json();
-                    if (d.status === "bloqueado") {
-                        alert("⚠️ BLOQUEIO: " + d.mensagem);
-                        const idxBloqueados = d.variavel.split(',').map(i => i.trim()).filter(Boolean);
-                        
-                        const compradorInput = document.getElementById("cpf-comprador");
-                        if (compradorInput.nextElementSibling?.classList.contains('msg-erro-cpf')) compradorInput.nextElementSibling.remove();
-                        
-                        document.querySelectorAll(".cpf-ing").forEach((input, index) => {
-                            if (input.nextElementSibling?.classList.contains('msg-erro-cpf')) input.nextElementSibling.remove();
-                            if (idxBloqueados.includes(String(index))) {
-                                input.classList.remove("input-sucesso"); input.classList.add("input-erro");
-                                const s = document.createElement("span"); s.className = "msg-erro-cpf"; s.innerText = "Limite de compra atingido para o CPF informado"; input.after(s);
-                            }
-                        });
-                        btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; return;
-                    }
-                    idPagamentoAtual = d.pagamento_id || d.id || d.id_pagamento || "";
+                const res = await fetch(URL_PIX, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({COMPRADOR: comp, CPF_COMPRADOR: cpf, TELEFONE: tel, QUANTIDADE: selectQ.value, INGRESSOS: Array.from(inC).map((el, i) => ({NOME_INGRESSO: inN[i].value.trim(), CPF_INGRESSO: el.value.trim()}))}) });
+                if(res.ok) {
+                    const d = await res.json();
+                    if(d.status === "bloqueado") { alert("⚠️ " + d.mensagem); btn.disabled=false; btn.innerHTML=`<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; return; }
+                    idPag = d.pagamento_id || d.id;
                     document.getElementById("img-qr").src = `data:image/png;base64,${d.pix_qr_code_base64}`;
                     document.getElementById("pix-codigo").value = d.pix_copia_cola;
-                    document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(d.variavel).toFixed(2).replace('.', ',')}`;
+                    document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(d.variavel).toFixed(2).replace('.',',')}`;
                     document.getElementById("sessao-formulario").style.display = "none";
                     document.getElementById("timer-expiracao").style.display = "block";
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
-
-                    if (!((d.status === "pending" || d.status === "pendente") && d.mensagem === "recuperado")) {
-                        const ov = document.getElementById("pagamentoOverlay"), bV = document.getElementById("btn-validar");
-                        document.getElementById("txtOverlay").innerText = "Não se esqueça de clicar no botão abaixo ao finalizar o seu pagamento.";
-                        ov.style.display = "flex"; bV.style.zIndex = "6000"; setTimeout(() => { ov.style.display = "none"; bV.style.zIndex = "1"; }, 5000);
-                    }
-                    iniciarCronometroPix(); iniciarMonitoramentoPixAutomatico();
-                } else { alert("Erro ao processar. Tente novamente."); btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; }
-            } catch (err) { alert("Erro de conexão com o servidor."); btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; }
+                    startPixTimer(); monitorarPagamento();
+                } else throw new Error();
+            } catch(e) { alert("Erro ao processar."); btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; }
         }
 
-        function iniciarCronometroPix() {
-            let tRest = 600; const elT = document.getElementById('timer-expiracao');
-            cronometroRegressivo = setInterval(() => {
-                let m = String(Math.floor(tRest / 60)).padStart(2, '0'), s = String(tRest % 60).padStart(2, '0');
-                elT.innerText = `O código a seguir expira em ${m}:${s}.`;
-                if (--tRest < 0) { clearInterval(cronometroRegressivo); ejecutarFluxoTimeoutEstrito(); }
+        function startPixTimer() {
+            let t = 600; const el = document.getElementById('timer-expiracao');
+            cronoPix = setInterval(() => {
+                el.innerText = `O código a seguir expira em ${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}.`;
+                if(--t < 0) { clearInterval(cronoPix); timeoutEstrito(); }
             }, 1000);
         }
 
-        function copiarPix() {
-            const p = document.getElementById("pix-codigo"); p.select(); navigator.clipboard.writeText(p.value);
-            document.getElementById("btn-copiar").innerText = "Copiado!";
-            setTimeout(() => { document.getElementById("btn-copiar").innerHTML = `<i class="fa-solid fa-copy"></i> Copiar Código Pix`; }, 2000);
-        }
+        function copiarPix() { document.getElementById("pix-codigo").select(); document.execCommand('copy'); document.getElementById("btn-copiar").innerText="Copiado!"; setTimeout(()=>document.getElementById("btn-copiar").innerHTML=`<i class="fa-solid fa-copy"></i> Copiar Código Pix`, 2000); }
 
-        function iniciarMonitoramentoPixAutomatico() {
-            if (intervaloPix) clearInterval(intervaloPix); loopEmExecucao = false;
-            intervaloPix = setInterval(async () => {
-                if (loopEmExecucao) return; loopEmExecucao = true;
-                if (await efetuarChamadaValidacaoAPI()) { clearInterval(intervaloPix); aplicarLayoutSucessoDefinitivo(); }
-                loopEmExecucao = false;
-            }, 6000);
-        }
-
-        async function efetuarChamadaValidacaoAPI() {
-            try { return (await (await fetch(URL_VALIDAR_PAGAMENTO, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ "id": String(idPagamentoAtual).trim() }) })).text()).includes("Sucesso"); } catch (e) { return false; }
+        async function validarApi() { try { return (await(await fetch(URL_VAL, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id:String(idPag)})})).text()).includes("Sucesso"); } catch(e){return false;} }
+        
+        function monitorarPagamento() {
+            if(intPix) clearInterval(intPix);
+            intPix = setInterval(async () => { if(await validarApi()) sucessoDefinitivo(); }, 6000);
         }
 
         document.getElementById("btn-validar").onclick = async () => {
-            if (intervaloPix) clearInterval(intervaloPix);
-            const btn = document.getElementById("btn-validar"), msg = document.getElementById("status-verificacao");
-            btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Verificando...`;
-            if (await efetuarChamadaValidacaoAPI()) aplicarLayoutSucessoDefinitivo();
-            else { msg.innerHTML = `<span class="icon-grande" style="font-size:50px; color:#bf360c; margin-bottom:5px;">❌</span><br>Ainda não encontramos o seu Pix.<br>Espera um tiquinho e tenta de novo!`; btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Verificar Pagamento`; iniciarMonitoramentoPixAutomatico(); }
+            if(intPix) clearInterval(intPix);
+            const btn = document.getElementById("btn-validar"); btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Verificando...`;
+            if(await validarApi()) sucessoDefinitivo();
+            else { document.getElementById("status-verificacao").innerHTML=`<span class="icon-grande" style="color:#bf360c">❌</span>Ainda não encontramos o seu Pix.`; btn.disabled=false; btn.innerHTML=`<i class="fa-solid fa-circle-check"></i> Verificar Pagamento`; monitorarPagamento(); }
         };
 
-        function aplicarLayoutSucessoDefinitivo() {
-            clearInterval(cronometroRegressivo); clearInterval(intervaloPix);
+        function sucessoDefinitivo() {
+            clearInterval(cronoPix); clearInterval(intPix);
             document.getElementById("timer-expiracao").style.display = "none";
             document.getElementById("sessao-qr").innerHTML = `<div class="msg-confirmacao"><span class="icon-grande">✅</span><h2>PAGAMENTO CONFIRMADO!</h2><p>ETA TREM BÃO!</p><p>NOS ENCONTRAMOS NA FESTA!</p></div>`;
         }
 
-        function ejecutarFluxoTimeoutEstrito() {
-            if (intervaloPix) clearInterval(intervaloPix);
-            const ov = document.getElementById("pagamentoOverlay"), txtO = document.getElementById("txtOverlay");
-            document.getElementById('timer-expiracao').innerText = "Tempo Limite"; document.getElementById('status-verificacao').innerHTML = ""; 
-            document.getElementById('sessao-qr').classList.add("sessao-bloqueada"); document.getElementById('btn-copiar').disabled = document.getElementById('btn-validar').disabled = true;
-            let cRedir = 9; ov.style.display = "flex"; ov.style.zIndex = "20000"; 
-            const loopRedir = setInterval(() => { txtO.innerHTML = `Tempo Limite Excedido!<br><span style='font-size:15px; font-weight:400; opacity:0.8;'>Redirecionando em ${cRedir--}s...</span>`; if (cRedir < 0) { clearInterval(loopRedir); window.location.reload(); } }, 1000);
+        function timeoutEstrito() {
+            clearInterval(intPix); document.getElementById('timer-expiracao').innerText = "Tempo Limite";
+            document.getElementById('sessao-qr').classList.add("sessao-bloqueada");
+            const ov = document.getElementById("pagamentoOverlay"), txt = document.getElementById("txtOverlay");
+            ov.style.display="flex"; ov.style.zIndex="20000"; let c=9;
+            setInterval(() => { txt.innerHTML = `Tempo Limite Excedido!<br><span style='font-size:15px;opacity:0.8'>Redirecionando em ${c--}s...</span>`; if(c<0) location.reload(); }, 1000);
         }
     </script>
 </body>
