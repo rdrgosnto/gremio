@@ -5,18 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grêmio | Ingressos Festa Junina</title>
     
-    <!-- ======================================================================= -->
-    <!-- ⚙️ PAINEL DE CONTROLE (FÁCIL MANUTENÇÃO)                                -->
-    <!-- ======================================================================= -->
     <script>
         const CONFIG = {
-            // 1. Quer encerrar as vendas IMEDIATAMENTE? Mude de false para true.
+
             encerrar_agora: false, 
             
-            // 2. Data e hora para encerrar as vendas automaticamente
             data_fim: "2026-06-26T23:59:59", // Formato: ANO-MES-DIA THORA:MIN:SEG
             
-            // 3. Nomes dos arquivos de imagem do aviso
             img_abertas: "aviso.jpg",
             img_encerradas: "aviso2.jpg"
         };
@@ -27,7 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     
     <style>
-        /* CSS Otimizado e Agrupado */
+
         * { box-sizing: border-box; margin: 0; padding: 0; transition: all 0.2s; }
         body { font-family: 'Poppins', sans-serif; min-height: 100dvh; color: #4a3b32; display: flex; justify-content: center; align-items: center; padding: 60px 18px 25px; background: #e65100 linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.1) 75%) 0 0/40px 40px; }
         body::before { content: ''; background: inherit; background-position: 20px 20px; position: absolute; inset: 0; z-index: -1; }
@@ -66,7 +61,6 @@
         .msg-confirmacao h2 { font-size: 38px; margin: 8px 0; }
         .icon-grande { font-size: 60px; display: block; margin-bottom: 6px; }
         
-        /* Modais & Popups */
         .popup-overlay, .pagamento-overlay { position: fixed; inset: 0; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.8); z-index: 9999; padding: 20px; }
         .pagamento-overlay { display: none; background: rgba(0,0,0,0.85); z-index: 5000; }
         .popup-conteudo { position: relative; max-width: 90vw; max-height: 85vh; display: flex; flex-direction: column; align-items: center; }
@@ -132,7 +126,7 @@
     </div>
     
     <script>
-        // --- 1. LÓGICA DE URGÊNCIA E ENCERRAMENTO ---
+
         function verificarVendas() {
             const dataFim = new Date(CONFIG.data_fim), agora = new Date();
             let dif = dataFim - agora;
@@ -156,7 +150,6 @@
         }
         verificarVendas();
 
-        // --- 2. LÓGICA DO SISTEMA DE INGRESSOS ---
         const URL_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/40a14e00ea6d43bfbdd13cdb6e832837/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=NITqrM_QRoVsNvxqZYSSxDvnZsbVFLVPDTXqP2Q9tjo", URL_VAL = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d9d6210c5c284e4f8508436dafdb9301/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=P4Y5Lv3OMh9b6yDftV1JosH1Fq3YXtpHxMUNviEZAuU";
         let idPag = null, intPix = null, cronoPix = null, selectQ = document.getElementById("quantidade");
 
@@ -201,17 +194,50 @@
 
         async function processarFormulario(e) {
             e.preventDefault();
-            const btn = document.getElementById("btn-gerar"), comp = document.getElementById("comprador").value.trim(), cpf = document.getElementById("cpf-comprador").value.trim(), tel = document.getElementById("telefone").value.trim();
-            const inN = document.querySelectorAll(".nome-ing"), inC = document.querySelectorAll(".cpf-ing");
+            const btn = document.getElementById("btn-gerar");
+            const comp = document.getElementById("comprador").value.trim();
+            const cpfOriginal = document.getElementById("cpf-comprador").value;
+            const cpfCompradorNum = cpfOriginal.replace(/\D/g, ""); // Apenas os números
+            const tel = document.getElementById("telefone").value.trim();
             
-            if(!comp || !valCpf(cpf) || tel.length<14 || Array.from(inC).some((el, i) => !inN[i].value.trim() || !valCpf(el.value.trim()))) return alert("Preencha os dados corretamente");
-            const cpfs = Array.from(inC).map(i => i.value.trim());
-            if(new Set(cpfs).size !== cpfs.length) return alert("Existem CPFs duplicados!");
-            if(cpfs.filter(c => c === cpf).length > 1) return alert("O CPF do Comprador não pode ser repetido nos ingressos!");
+            const inN = document.querySelectorAll(".nome-ing");
+            const inC = document.querySelectorAll(".cpf-ing");
+            
+            if(!comp || !valCpf(cpfCompradorNum) || tel.length < 14) {
+                return alert("Preencha os dados do comprador corretamente.");
+            }
+            
+            // Valida campos de ingresso individualmente
+            for (let i = 0; i < inC.length; i++) {
+                let cpfIngressoNum = inC[i].value.replace(/\D/g, "");
+                if (!inN[i].value.trim() || !valCpf(cpfIngressoNum)) {
+                    return alert(`Preencha os dados do Ingresso ${i+1} corretamente.`);
+                }
+            }
+            
+            // BLOQUEIO DE CPFs DUPLICADOS (Limpa máscaras e compara apenas os números)
+            const cpfsConvidados = Array.from(inC).map(input => input.value.replace(/\D/g, ""));
+            const setConvidados = new Set(cpfsConvidados);
+            
+            // Verifica se tem convidado repetido
+            if (setConvidados.size !== cpfsConvidados.length) {
+                return alert("⚠️ Atenção: Você não pode colocar o MESMO CPF em mais de um ingresso. Cada convidado precisa ter um CPF único.");
+            }
+            
+            // Verifica se o convidado repete o comprador
+            if (cpfsConvidados.includes(cpfCompradorNum)) {
+                return alert("⚠️ Atenção: O CPF do Comprador não pode ser repetido nos ingressos de convidados.");
+            }
 
             btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...`;
             try {
-                const res = await fetch(URL_PIX, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({COMPRADOR: comp, CPF_COMPRADOR: cpf, TELEFONE: tel, QUANTIDADE: selectQ.value, INGRESSOS: Array.from(inC).map((el, i) => ({NOME_INGRESSO: inN[i].value.trim(), CPF_INGRESSO: el.value.trim()}))}) });
+                const res = await fetch(URL_PIX, { 
+                    method: "POST", headers: {"Content-Type": "application/json"}, 
+                    body: JSON.stringify({
+                        COMPRADOR: comp, CPF_COMPRADOR: cpfOriginal, TELEFONE: tel, QUANTIDADE: selectQ.value, 
+                        INGRESSOS: Array.from(inC).map((el, i) => ({NOME_INGRESSO: inN[i].value.trim(), CPF_INGRESSO: el.value.trim()}))
+                    }) 
+                });
                 if(res.ok) {
                     const d = await res.json();
                     if(d.status === "bloqueado") { alert("⚠️ " + d.mensagem); btn.disabled=false; btn.innerHTML=`<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; return; }
