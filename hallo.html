@@ -9,7 +9,7 @@
         const CONFIG = {
             encerrar_agora: true, 
             
-            data_fim: "2026-06-26T23:59:59", // Formato: ANO-MES-DIA THORA:MIN:SEG
+            data_fim: "2026-10-30T23:59:59", // Formato: ANO-MES-DIA THORA:MIN:SEG
             
             img_abertas: "aviso.jpg",
             img_encerradas: "aviso2.jpg"
@@ -148,7 +148,7 @@
         }
         verificarVendas();
 
-        const URL_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6b5aca8cd55f4f31a6144e6239ac468a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=moQdujZizJdIDTigwEytcDvtJR39uaQQy83riRWFZvQ", URL_VAL = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d9d6210c5c284e4f8508436dafdb9301/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=P4Y5Lv3OMh9b6yDftV1JosH1Fq3YXtpHxMUNviEZAuU";
+        const URL_PIX = "placeholder_gerar_pix", URL_VAL = "placeholder_validar_pagamento";
         let idPag = null, intPix = null, cronoPix = null, selectQ = document.getElementById("quantidade");
 
         setTimeout(() => { document.getElementById('btnFecharPopup').style.display = document.getElementById('btnXPopup').style.display = 'block'; }, 3000);
