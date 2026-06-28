@@ -139,11 +139,25 @@
                 return;
             }
             
+            const dias = Math.floor(dif / (1000 * 60 * 60 * 24));
             const h = String(Math.floor((dif / 3600000) % 24)).padStart(2, '0');
             const m = String(Math.floor((dif / 60000) % 60)).padStart(2, '0');
             const s = String(Math.floor((dif / 1000) % 60)).padStart(2, '0');
             
-            document.querySelectorAll('.crono-urgencia').forEach(el => el.textContent = `${h}:${m}:${s}`);
+            if (dias > 0) {
+                document.querySelectorAll('.txt-urgencia').forEach(el => el.textContent = "vendas encerram em");
+                document.querySelectorAll('.crono-urgencia').forEach(el => {
+                    el.style.display = "inline";
+                    el.textContent = `${dias} ${dias === 1 ? 'dia' : 'dias'} e ${h}:${m}:${s}`;
+                });
+            } else {
+                document.querySelectorAll('.txt-urgencia').forEach(el => el.textContent = "vendas encerram em");
+                document.querySelectorAll('.crono-urgencia').forEach(el => {
+                    el.style.display = "inline";
+                    el.textContent = `${h}:${m}:${s}`;
+                });
+            }
+            
             setTimeout(verificarVendas, 1000);
         }
         verificarVendas();
