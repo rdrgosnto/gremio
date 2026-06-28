@@ -116,7 +116,7 @@
             <div class="valor" id="exibir-total">Total: Calculando...</div>
             <div class="pix-box">
                 <input id="pix-codigo" class="pix-codigo-input" readonly onclick="this.select()">
-                <button type="button" class="btn-copiar" id="btn-copiar" onclick="copiarPix()"><i class="fa-solid fa-copy"></i> Copiar Código Pix</button>
+                <button type="button" class="btn-copiar" id="btn-copiar" onclick="copyPix()"><i class="fa-solid fa-copy"></i> Copiar Código Pix</button>
             </div>
             <button id="btn-validar" class="btn-principal btn-validar"><i class="fa-solid fa-circle-check"></i> Verificar Pagamento</button>
             <div id="status-verificacao" class="status-msg"></div>
@@ -139,24 +139,21 @@
                 return;
             }
             
-            const dias = Math.floor(dif / (1000 * 60 * 60 * 24));
-            const h = String(Math.floor((dif / 3600000) % 24)).padStart(2, '0');
-            const m = String(Math.floor((dif / 60000) % 60)).padStart(2, '0');
-            const s = String(Math.floor((dif / 1000) % 60)).padStart(2, '0');
+            const totalHoras = Math.floor(dif / 3600000);
             
-            if (dias > 0) {
-                document.querySelectorAll('.txt-urgencia').forEach(el => el.textContent = "vendas encerram em");
-                document.querySelectorAll('.crono-urgencia').forEach(el => {
-                    el.style.display = "inline";
-                    el.textContent = `${dias} ${dias === 1 ? 'dia' : 'dias'} e ${h}:${m}:${s}`;
-                });
-            } else {
-                document.querySelectorAll('.txt-urgencia').forEach(el => el.textContent = "vendas encerram em");
-                document.querySelectorAll('.crono-urgencia').forEach(el => {
-                    el.style.display = "inline";
+            document.querySelectorAll('.crono-urgencia').forEach(el => {
+                el.style.display = "inline";
+                
+                if (totalHoras > 96) {
+                    const dias = Math.floor(dif / (1000 * 60 * 60 * 24));
+                    el.textContent = `${dias} ${dias === 1 ? 'dia' : 'dias'}`;
+                } else {
+                    const h = String(totalHoras).padStart(2, '0');
+                    const m = String(Math.floor((dif / 60000) % 60)).padStart(2, '0');
+                    const s = String(Math.floor((dif / 1000) % 60)).padStart(2, '0');
                     el.textContent = `${h}:${m}:${s}`;
-                });
-            }
+                }
+            });
             
             setTimeout(verificarVendas, 1000);
         }
@@ -209,7 +206,7 @@
             const btn = document.getElementById("btn-gerar");
             const comp = document.getElementById("comprador").value.trim();
             const cpfOriginal = document.getElementById("cpf-comprador").value;
-            const cpfCompradorNum = cpfOriginal.replace(/\D/g, ""); // Apenas os números
+            const cpfCompradorNum = cpfOriginal.replace(/\D/g, "");
             const tel = document.getElementById("telefone").value.trim();
             
             const inN = document.querySelectorAll(".nome-ing");
@@ -219,7 +216,6 @@
                 return alert("Preencha os dados do comprador corretamente.");
             }
             
-            // Valida campos de ingresso individualmente
             for (let i = 0; i < inC.length; i++) {
                 let cpfIngressoNum = inC[i].value.replace(/\D/g, "");
                 if (!inN[i].value.trim() || !valCpf(cpfIngressoNum)) {
@@ -227,11 +223,9 @@
                 }
             }
             
-            // BLOQUEIO DE CPFs DUPLICADOS (Limpa máscaras e compara apenas os números)
             const cpfsConvidados = Array.from(inC).map(input => input.value.replace(/\D/g, ""));
             const setConvidados = new Set(cpfsConvidados);
             
-            // Verifica se tem convidado repetido
             if (setConvidados.size !== cpfsConvidados.length) {
                 return alert("⚠️ Atenção: Você não pode colocar o MESMO CPF em mais de um ingresso. Cada convidado precisa ter um CPF único.");
             }
