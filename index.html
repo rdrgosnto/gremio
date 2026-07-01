@@ -130,7 +130,7 @@
     
     <script>
         // =======================================================================
-        <!-- 2. ESTRUTURA DE INICIALIZAÇÃO E RECONSTRUÇÃO DE ESTADOS (PERSISTÊNCIA) -->
+        <!-- 2. INICIALIZAÇÃO, MONITOR DE HISTÓRICO E REDIRECIONAMENTO DE ABAS      -->
         // =======================================================================
         const URL_PIX = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6b5aca8cd55f4f31a6144e6239ac468a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=moQdujZizJdIDTigwEytcDvtJR39uaQQy83riRWFZvQ", URL_VAL = "https://default264c851fa4e743cf86bcd7b10dca85.78.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d9d6210c5c284e4f8508436dafdb9301/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=P4Y5Lv3OMh9b6yDftV1JosH1Fq3YXtpHxMUNviEZAuU";
         let idPag = null, intPix = null, cronoPix = null, selectQ = document.getElementById("quantidade");
@@ -139,52 +139,65 @@
             verificarVendas();
             setTimeout(() => { document.getElementById('btnFecharPopup').style.display = document.getElementById('btnXPopup').style.display = 'block'; }, 3000);
             
-            // Verificação de Estados Salvos (Cenário de recarregamento em background)
+            // Registra o estado inicial limpo do histórico de navegação
+            if (!history.state) {
+                history.replaceState({etapa: 'formulario'}, '');
+            }
+
             const statusPagamento = localStorage.getItem('statusPagamentoFinal');
             const dadosPixSalvos = localStorage.getItem('dadosIdentificacaoPix');
-            const travaBotaoAte = localStorage.getItem('travaTempoBotaoGerar');
 
-            // 1. Se já tinha chegado no ETA TREM BÃO, força a permanência estática na tela de Sucesso
+            // 1. Se já deu sucesso (ETA TREM BÃO), renderiza e trava nela estaticamente
             if (statusPagamento === 'pago') {
-                document.getElementById("sessao-formulario").style.display = "none";
-                document.getElementById("timer-expiracao").style.display = "none";
-                document.getElementById("sessao-qr").style.display = "block";
-                sucessoDefinitivo();
+                exibirLayoutSucessoEstatico();
                 return; 
             }
 
-            // 2. Se existia um QR Code ativo na sessão, reconstrói exatamente a tela do QR Code (sem atualizar)
+            // 2. F5 / Recarregamento forçado em background: reconstrói a tela do QR Code ativa
             if (dadosPixSalvos) {
-                const d = JSON.parse(dadosPixSalvos);
-                idPag = d.pagamento_id || d.id;
-                
-                document.getElementById("img-qr").src = `data:image/png;base64,${d.pix_qr_code_base64}`;
-                document.getElementById("pix-codigo").value = d.pix_copia_cola;
-                document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(d.variavel).toFixed(2).replace('.',',')}`;
-                
-                document.getElementById("sessao-formulario").style.display = "none";
-                document.getElementById("timer-expiracao").style.display = "block";
-                document.getElementById("sessao-qr").style.display = "block";
-                document.getElementById("carregando-qr").style.display = "none";
-                document.getElementById("img-qr").style.display = "inline-block";
-                
-                // Retoma os contadores de tempo onde pararam
                 const tempoRestante = Math.round((localStorage.getItem('tempoExpiracaoPixAbsoluto') - Date.now()) / 1000);
                 if (tempoRestante > 0) {
-                    startPixTimer(tempoRestante);
-                    monitorarPagamento();
+                    history.pushState({etapa: 'qrcode'}, ''); // Garante que o botão voltar continue mapeado
+                    montarTelaQrCode(JSON.parse(dadosPixSalvos), tempoRestante);
+                    return;
                 } else {
-                    timeoutEstrito();
+                    localStorage.removeItem('dadosIdentificacaoPix');
+                    localStorage.removeItem('tempoExpiracaoPixAbsoluto');
                 }
             }
 
-            // 3. Controle dos 59 segundos do botão Gerar (Apenas se já clicou com sucesso uma vez)
+            // 3. Aplica a trava de 59 segundos no botão Gerar caso o F5 ocorra na tela do formulário
+            checarEFAplicarTravaBotao();
+        });
+
+        // Intercepta a ação voluntária de clicar em "Voltar" no navegador ou celular
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.etapa === 'formulario') {
+                // Se ele voltou voluntariamente do ETA TREM BÃO, limpa o sucesso para ele reatar novas compras livremente
+                if (localStorage.getItem('statusPagamentoFinal') === 'pago') {
+                    localStorage.removeItem('statusPagamentoFinal');
+                }
+                
+                // Para os loops de segundo plano e abre o formulário limpo
+                clearInterval(cronoPix);
+                clearInterval(intPix);
+                document.getElementById("sessao-qr").style.display = "none";
+                document.getElementById("timer-expiracao").style.display = "none";
+                document.getElementById("sessao-formulario").style.display = "block";
+                document.getElementById("sessao-formulario").reset();
+                selectQ.dispatchEvent(new Event('change'));
+                
+                checarEFAplicarTravaBotao();
+            }
+        });
+
+        function checarEFAplicarTravaBotao() {
+            const travaBotaoAte = localStorage.getItem('travaTempoBotaoGerar');
             if (travaBotaoAte) {
                 const segundosRestantes = Math.round((travaBotaoAte - Date.now()) / 1000);
                 if (segundosRestantes > 0) {
                     const btnGerar = document.getElementById("btn-gerar");
-                    btnGerar.disabled = true; // Botão fica cinza e desativado sem mudar nenhum texto
-                    
+                    btnGerar.disabled = true; // Fica cinza sem alterar nenhum caractere de texto
                     setTimeout(() => {
                         btnGerar.disabled = false;
                         localStorage.removeItem('travaTempoBotaoGerar');
@@ -193,7 +206,7 @@
                     localStorage.removeItem('travaTempoBotaoGerar');
                 }
             }
-        });
+        }
 
         function fecharPopup() { document.getElementById('popupOverlay').style.display = 'none'; }
 
@@ -273,7 +286,7 @@
         }; selectQ.dispatchEvent(new Event('change'));
 
         // =======================================================================
-        <!-- 4. PARTE 2: LÓGICA DO BOTÃO GERAR QR CODE E CONTROLE DOS 59 SEGUNDOS -->
+        <!-- 4. PARTE 2: ENVIO E TRAVA DE CONTROLE DOS 59 SEGUNDOS (SESSÃO)      -->
         // =======================================================================
         async function processarFormulario(e) {
             e.preventDefault();
@@ -317,37 +330,44 @@
                     const d = await res.json();
                     if(d.status === "bloqueado") { alert("⚠️ " + d.mensagem); btn.disabled=false; btn.innerHTML=`<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; return; }
                     
-                    // Ativa a Trava de Sessão de 59 segundos para o botão gerar ficar indisponível (Apenas no sucesso)
+                    // Aplica e marca na memória o carimbo de expiração do botão (59 segundos)
                     const momentoExpiracaoBotao = Date.now() + (CONFIG.tempo_trava_botao * 1000);
                     localStorage.setItem('travaTempoBotaoGerar', momentoExpiracaoBotao);
                     
-                    // =======================================================================
-                    <!-- 5. PARTE 3: CRIAÇÃO DO QR CODE PIX E SALVAMENTO DE DADOS (PERSISTÊNCIA) -->
-                    // =======================================================================
-                    idPag = d.pagamento_id || d.id;
-                    
-                    // Guarda o objeto completo do Pix e calcula o momento exato do timeout absoluto
+                    // Salva os dados brutos para persistência de F5 por 10 minutos
                     localStorage.setItem('dadosIdentificacaoPix', JSON.stringify(d));
                     localStorage.setItem('tempoExpiracaoPixAbsoluto', Date.now() + (CONFIG.tempo_expiracao_pix * 1000));
                     
-                    document.getElementById("img-qr").src = `data:image/png;base64,${d.pix_qr_code_base64}`;
-                    document.getElementById("pix-codigo").value = d.pix_copia_cola;
-                    document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(d.variavel).toFixed(2).replace('.',',')}`;
+                    // Empurra a nova rota no histórico para ativar a independência do botão voltar
+                    history.pushState({etapa: 'qrcode'}, '');
                     
-                    document.getElementById("sessao-formulario").style.display = "none";
-                    document.getElementById("timer-expiracao").style.display = "block";
-                    document.getElementById("sessao-qr").style.display = "block";
-                    document.getElementById("carregando-qr").style.display = "none";
-                    document.getElementById("img-qr").style.display = "inline-block";
-                    
-                    startPixTimer(CONFIG.tempo_expiracao_pix); 
-                    monitorarPagamento();
+                    btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`;
+                    montarTelaQrCode(d, CONFIG.tempo_expiracao_pix);
                 } else throw new Error();
             } catch(e) { alert("Erro ao processar."); btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; }
         }
 
         // =======================================================================
-        <!-- 6. PARTE 4: TEMPORIZADORES E MONITORAMENTO AUTOMÁTICO DO PIX         -->
+        <!-- 5. PARTE 3: CRIAÇÃO DO QR CODE PIX E EXIBIÇÃO EM TELA                -->
+        // =======================================================================
+        function montarTelaQrCode(dados, tempoSegundos) {
+            idPag = dados.pagamento_id || dados.id;
+            document.getElementById("img-qr").src = `data:image/png;base64,${dados.pix_qr_code_base64}`;
+            document.getElementById("pix-codigo").value = dados.pix_copia_cola;
+            document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(dados.variavel).toFixed(2).replace('.',',')}`;
+            
+            document.getElementById("sessao-formulario").style.display = "none";
+            document.getElementById("timer-expiracao").style.display = "block";
+            document.getElementById("sessao-qr").style.display = "block";
+            document.getElementById("carregando-qr").style.display = "none";
+            document.getElementById("img-qr").style.display = "inline-block";
+            
+            startPixTimer(tempoSegundos); 
+            monitorarPagamento();
+        }
+
+        // =======================================================================
+        <!-- 6. PARTE 4: TEMPORIZADORES E MONITORAMENTO DO STATUS DO PIX          -->
         // =======================================================================
         function startPixTimer(tempoInicial) {
             let t = tempoInicial; const el = document.getElementById('timer-expiracao');
@@ -380,11 +400,18 @@
         function sucessoDefinitivo() {
             clearInterval(cronoPix); clearInterval(intPix);
             
-            // Registra que a transação está paga na memória para travar o recarregamento aqui
+            // Grava o marco definitivo de pago na memória
             localStorage.setItem('statusPagamentoFinal', 'pago');
-            localStorage.removeItem('dadosIdentificacaoPix'); // Limpa o rascunho temporário do QR Code
-            
+            localStorage.removeItem('dadosIdentificacaoPix'); // Remove o cache temporário de rascunho
+            localStorage.removeItem('tempoExpiracaoPixAbsoluto');
+
+            exibirLayoutSucessoEstatico();
+        }
+
+        function exibirLayoutSucessoEstatico() {
+            document.getElementById("sessao-formulario").style.display = "none";
             document.getElementById("timer-expiracao").style.display = "none";
+            document.getElementById("sessao-qr").style.display = "block";
             document.getElementById("sessao-qr").innerHTML = `<div class="msg-confirmacao"><span class="icon-grande">✅</span><h2>PAGAMENTO CONFIRMADO!</h2><p>ETA TREM BÃO!</p><p>NOS ENCONTRAMOS NA FESTA!</p></div>`;
         }
 
