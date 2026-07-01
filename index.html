@@ -5,14 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grêmio | Ingressos Festa Junina</title>
     
+    <!-- ======================================================================= -->
+    <!-- 1. BLOCO DE CONFIGURAÇÃO E MANUTENÇÃO                                   -->
+    <!-- ======================================================================= -->
     <script>
         const CONFIG = {
             encerrar_agora: false, 
-            
             data_fim: "2026-10-30T23:59:59", // Formato: ANO-MES-DIA THORA:MIN:SEG
-            
             img_abertas: "aviso.jpg",
-            img_encerradas: "aviso2.jpg"
+            img_encerradas: "aviso2.jpg",
+            
+            // Configurações de Tempo e Segurança (em segundos)
+            tempo_trava_botao: 59,          // Tempo que o botão gerar fica cinza após sucesso
+            tempo_expiracao_pix: 600,       // Tempo de expiração do QR Code (10 minutos)
+            intervalo_monitoramento: 6      // Intervalo de checagem automática do Pix
         };
     </script>
     <!-- ======================================================================= -->
@@ -43,7 +49,7 @@
         
         .btn-principal { margin-top: 12px; width: 100%; padding: 11px; border-radius: 8px; font: 600 15px 'Poppins', sans-serif; background: #e65100; color: #fff; border: none; box-shadow: 0 4px 0 #b33600; cursor: pointer; }
         .btn-principal:active:not(:disabled) { box-shadow: 0 1px 0 #b33600; transform: translateY(3px); }
-        .btn-principal:disabled { background: #bcaaa4; box-shadow: 0 4px 0 #8d6e63; cursor: not-allowed; }
+        .btn-principal:disabled { background: #bcaaa4; box-shadow: 0 4px 0 #8d6e63; cursor: not-allowed; opacity: 0.6; }
         .btn-validar { background: #1565c0; box-shadow: 0 4px 0 #0d47a1; margin-top: 14px; z-index: 1; }
         .btn-validar:active:not(:disabled) { box-shadow: 0 1px 0 #0d47a1; }
         .btn-copiar { margin-top: 8px; width: 100%; padding: 8px; font: 600 12px 'Poppins', sans-serif; background: #616161; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
@@ -71,7 +77,6 @@
         .pagamento-overlay-texto { color: #fff; font: 600 16px 'Poppins'; text-align: center; max-width: 320px; line-height: 1.5; }
         .sessao-bloqueada { opacity: 0.35 !important; filter: grayscale(100%) !important; pointer-events: none !important; }
         
-        /* ================== ESTADOS: VENDAS ENCERRADAS ================== */
         body.vendas-encerradas #top-bar { background: #616161; }
         body.vendas-encerradas .btn-timer-popup { background: #424242; pointer-events: none; }
         body.vendas-encerradas .container { opacity: 0.4; filter: grayscale(100%); pointer-events: none; }
@@ -124,6 +129,73 @@
     </div>
     
     <script>
+        // =======================================================================
+        <!-- 2. ESTRUTURA DE INICIALIZAÇÃO E RECONSTRUÇÃO DE ESTADOS (PERSISTÊNCIA) -->
+        // =======================================================================
+        const URL_PIX = "placeholder_gerar_pix", URL_VAL = "placeholder_validar_pagamento";
+        let idPag = null, intPix = null, cronoPix = null, selectQ = document.getElementById("quantidade");
+
+        window.addEventListener('DOMContentLoaded', () => {
+            verificarVendas();
+            setTimeout(() => { document.getElementById('btnFecharPopup').style.display = document.getElementById('btnXPopup').style.display = 'block'; }, 3000);
+            
+            // Verificação de Estados Salvos (Cenário de recarregamento em background)
+            const statusPagamento = localStorage.getItem('statusPagamentoFinal');
+            const dadosPixSalvos = localStorage.getItem('dadosIdentificacaoPix');
+            const travaBotaoAte = localStorage.getItem('travaTempoBotaoGerar');
+
+            // 1. Se já tinha chegado no ETA TREM BÃO, força a permanência estática na tela de Sucesso
+            if (statusPagamento === 'pago') {
+                document.getElementById("sessao-formulario").style.display = "none";
+                document.getElementById("timer-expiracao").style.display = "none";
+                document.getElementById("sessao-qr").style.display = "block";
+                sucessoDefinitivo();
+                return; 
+            }
+
+            // 2. Se existia um QR Code ativo na sessão, reconstrói exatamente a tela do QR Code (sem atualizar)
+            if (dadosPixSalvos) {
+                const d = JSON.parse(dadosPixSalvos);
+                idPag = d.pagamento_id || d.id;
+                
+                document.getElementById("img-qr").src = `data:image/png;base64,${d.pix_qr_code_base64}`;
+                document.getElementById("pix-codigo").value = d.pix_copia_cola;
+                document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(d.variavel).toFixed(2).replace('.',',')}`;
+                
+                document.getElementById("sessao-formulario").style.display = "none";
+                document.getElementById("timer-expiracao").style.display = "block";
+                document.getElementById("sessao-qr").style.display = "block";
+                document.getElementById("carregando-qr").style.display = "none";
+                document.getElementById("img-qr").style.display = "inline-block";
+                
+                // Retoma os contadores de tempo onde pararam
+                const tempoRestante = Math.round((localStorage.getItem('tempoExpiracaoPixAbsoluto') - Date.now()) / 1000);
+                if (tempoRestante > 0) {
+                    startPixTimer(tempoRestante);
+                    monitorarPagamento();
+                } else {
+                    timeoutEstrito();
+                }
+            }
+
+            // 3. Controle dos 59 segundos do botão Gerar (Apenas se já clicou com sucesso uma vez)
+            if (travaBotaoAte) {
+                const segundosRestantes = Math.round((travaBotaoAte - Date.now()) / 1000);
+                if (segundosRestantes > 0) {
+                    const btnGerar = document.getElementById("btn-gerar");
+                    btnGerar.disabled = true; // Botão fica cinza e desativado sem mudar nenhum texto
+                    
+                    setTimeout(() => {
+                        btnGerar.disabled = false;
+                        localStorage.removeItem('travaTempoBotaoGerar');
+                    }, segundosRestantes * 1000);
+                } else {
+                    localStorage.removeItem('travaTempoBotaoGerar');
+                }
+            }
+        });
+
+        function fecharPopup() { document.getElementById('popupOverlay').style.display = 'none'; }
 
         function verificarVendas() {
             const dataFim = new Date(CONFIG.data_fim), agora = new Date();
@@ -157,14 +229,10 @@
             
             setTimeout(verificarVendas, 1000);
         }
-        verificarVendas();
 
-        const URL_PIX = "placeholder_gerar_pix", URL_VAL = "placeholder_validar_pagamento";
-        let idPag = null, intPix = null, cronoPix = null, selectQ = document.getElementById("quantidade");
-
-        setTimeout(() => { document.getElementById('btnFecharPopup').style.display = document.getElementById('btnXPopup').style.display = 'block'; }, 3000);
-        function fecharPopup() { document.getElementById('popupOverlay').style.display = 'none'; }
-        
+        // =======================================================================
+        <!-- 3. PARTE 1: MECÂNICA DO FORMULÁRIO, MÁSCARAS E VALIDAÇÕES            -->
+        // =======================================================================
         function formatarNome(n) { return n ? n.normalize('NFD').replace(/[\u0300-\u036f]/g,"").toLowerCase().split(/\s+/).map(p => ["da","das","de","do","dos","e"].includes(p) ? p : p.charAt(0).toUpperCase()+p.slice(1)).join(' ') : ""; }
         document.getElementById('comprador').addEventListener('blur', e => { if(e.target.value.trim()) e.target.value = formatarNome(e.target.value); });
 
@@ -178,6 +246,10 @@
             return calc(9) === parseInt(c.charAt(9)) && calc(10) === parseInt(c.charAt(10));
         }
 
+        document.getElementById("telefone").oninput = maskTel;
+        document.getElementById("cpf-comprador").oninput = maskCpf;
+        document.getElementById("cpf-comprador").onblur = checkCpf;
+
         function checkCpf(e) {
             const v = e.target.value, ex = e.target.nextElementSibling;
             if(ex?.classList.contains('msg-erro-cpf')) ex.remove();
@@ -190,7 +262,6 @@
 
         function bindMasks() {
             document.querySelectorAll(".cpf-validar").forEach(el => { el.oninput = maskCpf; el.onblur = checkCpf; });
-            if(document.getElementById("telefone")) document.getElementById("telefone").oninput = maskTel;
         }
 
         selectQ.onchange = () => {
@@ -201,6 +272,9 @@
             `).join(''); bindMasks();
         }; selectQ.dispatchEvent(new Event('change'));
 
+        // =======================================================================
+        <!-- 4. PARTE 2: LÓGICA DO BOTÃO GERAR QR CODE E CONTROLE DOS 59 SEGUNDOS -->
+        // =======================================================================
         async function processarFormulario(e) {
             e.preventDefault();
             const btn = document.getElementById("btn-gerar");
@@ -242,35 +316,55 @@
                 if(res.ok) {
                     const d = await res.json();
                     if(d.status === "bloqueado") { alert("⚠️ " + d.mensagem); btn.disabled=false; btn.innerHTML=`<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; return; }
+                    
+                    // Ativa a Trava de Sessão de 59 segundos para o botão gerar ficar indisponível (Apenas no sucesso)
+                    const momentoExpiracaoBotao = Date.now() + (CONFIG.tempo_trava_botao * 1000);
+                    localStorage.setItem('travaTempoBotaoGerar', momentoExpiracaoBotao);
+                    
+                    // =======================================================================
+                    <!-- 5. PARTE 3: CRIAÇÃO DO QR CODE PIX E SALVAMENTO DE DADOS (PERSISTÊNCIA) -->
+                    // =======================================================================
                     idPag = d.pagamento_id || d.id;
+                    
+                    // Guarda o objeto completo do Pix e calcula o momento exato do timeout absoluto
+                    localStorage.setItem('dadosIdentificacaoPix', JSON.stringify(d));
+                    localStorage.setItem('tempoExpiracaoPixAbsoluto', Date.now() + (CONFIG.tempo_expiracao_pix * 1000));
+                    
                     document.getElementById("img-qr").src = `data:image/png;base64,${d.pix_qr_code_base64}`;
                     document.getElementById("pix-codigo").value = d.pix_copia_cola;
                     document.getElementById("exibir-total").innerText = `Total: R$ ${parseFloat(d.variavel).toFixed(2).replace('.',',')}`;
+                    
                     document.getElementById("sessao-formulario").style.display = "none";
                     document.getElementById("timer-expiracao").style.display = "block";
                     document.getElementById("sessao-qr").style.display = "block";
                     document.getElementById("carregando-qr").style.display = "none";
                     document.getElementById("img-qr").style.display = "inline-block";
-                    startPixTimer(); monitorarPagamento();
+                    
+                    startPixTimer(CONFIG.tempo_expiracao_pix); 
+                    monitorarPagamento();
                 } else throw new Error();
             } catch(e) { alert("Erro ao processar."); btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-qrcode"></i> Gerar QR Code`; }
         }
 
-        function startPixTimer() {
-            let t = 600; const el = document.getElementById('timer-expiracao');
+        // =======================================================================
+        <!-- 6. PARTE 4: TEMPORIZADORES E MONITORAMENTO AUTOMÁTICO DO PIX         -->
+        // =======================================================================
+        function startPixTimer(tempoInicial) {
+            let t = tempoInicial; const el = document.getElementById('timer-expiracao');
+            if(cronoPix) clearInterval(cronoPix);
             cronoPix = setInterval(() => {
                 el.innerText = `O código a seguir expira em ${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}.`;
                 if(--t < 0) { clearInterval(cronoPix); timeoutEstrito(); }
             }, 1000);
         }
 
-        function copiarPix() { document.getElementById("pix-codigo").select(); document.execCommand('copy'); document.getElementById("btn-copiar").innerText="Copiado!"; setTimeout(()=>document.getElementById("btn-copiar").innerHTML=`<i class="fa-solid fa-copy"></i> Copiar Código Pix`, 2000); }
+        function copyPix() { document.getElementById("pix-codigo").select(); document.execCommand('copy'); document.getElementById("btn-copiar").innerText="Copiado!"; setTimeout(()=>document.getElementById("btn-copiar").innerHTML=`<i class="fa-solid fa-copy"></i> Copiar Código Pix`, 2000); }
 
         async function validarApi() { try { return (await(await fetch(URL_VAL, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id:String(idPag)})})).text()).includes("Sucesso"); } catch(e){return false;} }
         
         function monitorarPagamento() {
             if(intPix) clearInterval(intPix);
-            intPix = setInterval(async () => { if(await validarApi()) sucessoDefinitivo(); }, 6000);
+            intPix = setInterval(async () => { if(await validarApi()) sucessoDefinitivo(); }, CONFIG.intervalo_monitoramento * 1000);
         }
 
         document.getElementById("btn-validar").onclick = async () => {
@@ -280,18 +374,29 @@
             else { document.getElementById("status-verificacao").innerHTML=`<span class="icon-grande" style="color:#bf360c">❌</span>Ainda não encontramos o seu Pix.`; btn.disabled=false; btn.innerHTML=`<i class="fa-solid fa-circle-check"></i> Verificar Pagamento`; monitorarPagamento(); }
         };
 
+        // =======================================================================
+        <!-- 7. PARTE 5: TELA ETA TREM BÃO (ESTADO FINAL SEGURO)                  -->
+        // =======================================================================
         function sucessoDefinitivo() {
             clearInterval(cronoPix); clearInterval(intPix);
+            
+            // Registra que a transação está paga na memória para travar o recarregamento aqui
+            localStorage.setItem('statusPagamentoFinal', 'pago');
+            localStorage.removeItem('dadosIdentificacaoPix'); // Limpa o rascunho temporário do QR Code
+            
             document.getElementById("timer-expiracao").style.display = "none";
             document.getElementById("sessao-qr").innerHTML = `<div class="msg-confirmacao"><span class="icon-grande">✅</span><h2>PAGAMENTO CONFIRMADO!</h2><p>ETA TREM BÃO!</p><p>NOS ENCONTRAMOS NA FESTA!</p></div>`;
         }
 
         function timeoutEstrito() {
-            clearInterval(intPix); document.getElementById('timer-expiracao').innerText = "Tempo Limite";
+            clearInterval(intPix); 
+            localStorage.removeItem('dadosIdentificacaoPix');
+            localStorage.removeItem('tempoExpiracaoPixAbsoluto');
+            document.getElementById('timer-expiracao').innerText = "Tempo Limite";
             document.getElementById('sessao-qr').classList.add("sessao-bloqueada");
             const ov = document.getElementById("pagamentoOverlay"), txt = document.getElementById("txtOverlay");
             ov.style.display="flex"; ov.style.zIndex="20000"; let c=9;
-            setInterval(() => { txt.innerHTML = `Tempo Limite Excedido!<br><span style='font-size:15px;opacity:0.8'>Redirecionando em ${c--}s...</span>`; if(c<0) location.reload(); }, 1000);
+            setInterval(() => { txt.innerHTML = `Tempo Limite Excedido!<br><span style='font-size:15px;opacity:0.8'>Redirecionando em ${c--}s...</span>`; if(c<0) { localStorage.clear(); location.reload(); } }, 1000);
         }
     </script>
 </body>
