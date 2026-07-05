@@ -1,4 +1,4 @@
-name: Deploy Festa Junina
+name: Deploy Festa Hallo
 
 on:
   push:
@@ -27,14 +27,14 @@ jobs:
               console.log("URLs do Fluxo Novo (Pix/Validação) injetadas na Raiz.");
             }
             
-            // 2. Atualiza o index.html da subpasta (Festa Junina - Continua isolado)
-            const caminhoJunina = "junina/index.html";
-            if (fs.existsSync(caminhoJunina)) {
-              let htmlJunina = fs.readFileSync(caminhoJunina, "utf8");
-              htmlJunina = htmlJunina.replace("placeholder_url_mae", "${{ secrets.URL_MAE }}");
-              htmlJunina = htmlJunina.replace("placeholder_url_leitura", "${{ secrets.URL_LEITURA }}");
-              fs.writeFileSync(caminhoJunina, htmlJunina, "utf8");
-              console.log("URLs da Festa Junina injetadas com sucesso.");
+            // 2. Atualiza o index.html da subpasta (Festa Hallo)
+            const caminhoHallo = "hallo/index.html";
+            if (fs.existsSync(caminhoHallo)) {
+              let htmlHallo = fs.readFileSync(caminhoHallo, "utf8");
+              htmlHallo = htmlHallo.replace("placeholder_url_mae", "${{ secrets.URL_MAE }}");
+              htmlHallo = htmlHallo.replace("placeholder_url_leitura", "${{ secrets.URL_LEITURA }}");
+              fs.writeFileSync(caminhoHallo, htmlHallo, "utf8");
+              console.log("URLs da Festa Hallo injetadas com sucesso.");
             }
           '
 
